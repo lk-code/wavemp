@@ -152,8 +152,76 @@ Requirements: .NET 10 SDK, Node.js 24, Docker.
 ```bash
 git clone https://github.com/lk-code/wavemp.git
 cd wavemp
+cp .env.example .env    # then set DB_PASSWORD
 docker compose -f docker-compose.dev.yml up --build
 ```
+
+This builds the image from source and starts WaveMP on `http://localhost:8080`. Media files go into `./media`. If port 8080 or 5432 is already in use on your machine, set `WAVEMP_PORT` or `DB_PORT` in `.env`.
+
+### Project layout
+
+| Path | Content |
+|---|---|
+| `source/WaveMP.Service` | ASP.NET Core host (REST API, serves the web app) |
+| `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, migrations) |
+| `source/WaveMP.Web` | Vue 3 web app |
+| `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright) |
+
+### Local development
+
+Start only the database, then the service and the web app:
+
+```bash
+docker compose -f docker-compose.dev.yml up -d wavemp-db
+dotnet tool restore
+dotnet user-secrets set DB_PASSWORD "<your DB_PASSWORD>" --project source/WaveMP.Service
+dotnet run --project source/WaveMP.Service        # http://localhost:5080
+
+cd source/WaveMP.Web
+npm install
+npm run dev                                       # http://localhost:5173, proxies /api to the service
+```
+
+If you set `DB_PORT` in `.env`, also set it for the service: `dotnet user-secrets set DB_PORT <port> --project source/WaveMP.Service`.
+
+The service applies database migrations on start. To add a migration:
+
+```bash
+dotnet ef migrations add <Name> --project source/WaveMP.Data
+dotnet format
+```
+
+### API client
+
+The OpenAPI document is the only contract between server and clients. Building `WaveMP.Service` writes it to `source/WaveMP.Service/openapi.json`; at runtime it is served at `/openapi/v1.json`. The web app uses a client generated from it with [Kiota](https://learn.microsoft.com/openapi/kiota/):
+
+```bash
+cd source/WaveMP.Web
+npm run generate:api
+```
+
+Commit the updated `openapi.json` and the generated client together with API changes.
+
+### Tests
+
+```bash
+# Unit and integration tests (integration tests need the dev database)
+docker compose -f docker-compose.dev.yml up -d wavemp-db
+dotnet test
+
+# Web app checks
+cd source/WaveMP.Web
+npm run lint && npm run type-check && npm run format:check
+
+# E2E tests against a running instance
+docker compose -f docker-compose.dev.yml up --build -d
+cd tests/WaveMP.E2E
+npm install
+npx playwright install chromium
+npm test                                          # E2E_BASE_URL defaults to http://localhost:8080
+```
+
+The integration tests use their own database `wavemp_tests` and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
 
 ## License
 
