@@ -24,6 +24,8 @@ coverage*/
 # Node / Vue
 node_modules/
 dist/
+# Built web app, copied into the service during the Docker build
+source/WaveMP.Service/wwwroot/
 *.local
 npm-debug.log*
 yarn-error.log*
