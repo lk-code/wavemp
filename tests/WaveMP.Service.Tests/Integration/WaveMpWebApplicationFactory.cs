@@ -21,6 +21,8 @@ public sealed class WaveMpWebApplicationFactory : WebApplicationFactory<Program>
             Dictionary<string, string?> settings = new()
             {
                 ["DB_NAME"] = Environment.GetEnvironmentVariable("DB_NAME") ?? TestDatabaseName,
+                // The dev database listens on 127.0.0.1 only; "localhost" would try IPv6 first and wait for timeouts.
+                ["DB_HOST"] = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1",
             };
 
             foreach (string key in (string[])["DB_PASSWORD", "DB_PORT"])
