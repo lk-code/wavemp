@@ -1,0 +1,36 @@
+services:
+  wavemp:
+    image: ghcr.io/lk-code/wavemp:latest
+    container_name: wavemp
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: wavemp-db
+      DB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
+    volumes:
+      - wavemp-data:/data
+      - /path/to/your/media:/media
+    depends_on:
+      wavemp-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  wavemp-db:
+    image: postgres:18
+    container_name: wavemp-db
+    environment:
+      POSTGRES_USER: wavemp
+      POSTGRES_DB: wavemp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
+    volumes:
+      - wavemp-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wavemp -d wavemp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  wavemp-data:
+  wavemp-db:

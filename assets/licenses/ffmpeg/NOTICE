@@ -1,0 +1,16 @@
+This image contains FFmpeg (https://ffmpeg.org), installed from the Alpine Linux
+package repository (package "ffmpeg"). WaveMP runs ffmpeg and ffprobe as separate
+processes and does not link against the FFmpeg libraries.
+
+FFmpeg is licensed under the GNU LGPL version 2.1 or later. The Alpine build
+enables GPL components and is therefore licensed under the GNU GPL version 2 or
+later (Alpine license metadata: "GPL-2.0-or-later AND LGPL-2.1-or-later").
+
+Files in this directory:
+- COPYING.GPLv2, COPYING.LGPLv2.1, LICENSE.md: license texts from the FFmpeg
+  source repository
+- VERSION: exact version and build configuration of the installed ffmpeg
+
+The corresponding source code is available from the FFmpeg project
+(https://ffmpeg.org/download.html) and from the Alpine Linux aports repository
+(https://gitlab.alpinelinux.org/alpine/aports, package "community/ffmpeg").

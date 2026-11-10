@@ -1,0 +1,44 @@
+# Development setup: builds WaveMP from source.
+#   docker compose -f docker-compose.dev.yml up --build
+# Database only (for dotnet run and the integration tests):
+#   docker compose -f docker-compose.dev.yml up -d wavemp-db
+name: wavemp-dev
+
+services:
+  wavemp:
+    build: .
+    image: wavemp:dev
+    # Set WAVEMP_PORT in .env if 8080 is already in use on your machine.
+    ports:
+      - "${WAVEMP_PORT:-8080}:8080"
+    environment:
+      DB_HOST: wavemp-db
+      DB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
+    volumes:
+      - wavemp-data:/data
+      - ./media:/media
+    depends_on:
+      wavemp-db:
+        condition: service_healthy
+
+  wavemp-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: wavemp
+      POSTGRES_DB: wavemp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
+    # Published on localhost only, so that dotnet run and the integration tests can connect.
+    # Set DB_PORT in .env if 5432 is already in use on your machine.
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - wavemp-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wavemp -d wavemp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  wavemp-data:
+  wavemp-db:
