@@ -19,6 +19,7 @@ public static class ServiceProviderExtensions
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger(typeof(ServiceProviderExtensions));
 
+        // On an empty database EF Core logs a failed query for the not yet existing history table. This is expected.
         IEnumerable<string> pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync(cancellationToken);
         string[] pending = [.. pendingMigrations];
 
@@ -31,7 +32,7 @@ public static class ServiceProviderExtensions
         logger.LogInformation(
             "Applying {MigrationCount} database migration(s): {Migrations}",
             pending.Length,
-            pending);
+            string.Join(", ", pending));
         await dbContext.Database.MigrateAsync(cancellationToken);
         logger.LogInformation("Database migrations applied");
     }
