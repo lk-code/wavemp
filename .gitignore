@@ -1,0 +1,44 @@
+# Local only
+ROADMAP.md
+.env
+.env.*
+!.env.example
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.rsuser
+.vs/
+TestResults/
+*.trx
+coverage*/
+
+# Rider / VS Code
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Node / Vue
+node_modules/
+dist/
+*.local
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Docker / runtime data
+data/
+media/
+
+# OS
+.DS_Store
+Thumbs.db
