@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/source/">
+    <Project Path="source/WaveMP.Data/WaveMP.Data.csproj" />
+    <Project Path="source/WaveMP.Service/WaveMP.Service.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WaveMP.Data.Tests/WaveMP.Data.Tests.csproj" />
+    <Project Path="tests/WaveMP.Service.Tests/WaveMP.Service.Tests.csproj" />
+  </Folder>
+</Solution>
