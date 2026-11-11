@@ -255,6 +255,25 @@ describe('AudioEngine', () => {
         expect(s.events.error).toHaveBeenCalledOnce()
     })
 
+    it('stays paused when paused while the audio context resumes', async () => {
+        s = setup(true)
+        let resume: () => void = () => undefined
+        s.context!.resume.mockImplementationOnce(
+            () =>
+                new Promise<void>((resolve) => {
+                    resume = resolve
+                }),
+        )
+        s.engine.load({ url: '/a', gain: 1 })
+
+        const playing = s.engine.play()
+        s.engine.pause()
+        resume()
+        await playing
+
+        expect(s.decks[0]!.play).not.toHaveBeenCalled()
+    })
+
     it('routes both decks through their gains into the master with Web Audio', async () => {
         s = setup(true)
         s.engine.setVolume(0.3)

@@ -85,6 +85,8 @@ export class AudioEngine {
     private master: GainNode | null = null
     private analyserNode: AnalyserNode | null = null
     private graphReady = false
+    /** Whether the last request was play; a pause while the context resumes cancels it. */
+    private wantsPlay = false
     private volume = 1
     private handover: number | null = null
 
@@ -160,9 +162,14 @@ export class AudioEngine {
     }
 
     async play(): Promise<void> {
+        this.wantsPlay = true
         this.ensureGraph()
         if (this.context?.state === 'suspended') {
             await this.context.resume().catch(() => undefined)
+            // Paused or stopped while the context resumed: stay paused.
+            if (!this.wantsPlay) {
+                return
+            }
         }
 
         try {
@@ -176,12 +183,14 @@ export class AudioEngine {
     }
 
     pause(): void {
+        this.wantsPlay = false
         this.cancelHandover()
         this.deck.audio.pause()
     }
 
     /** Stops and unloads both decks. */
     stop(): void {
+        this.wantsPlay = false
         this.cancelHandover()
         this.prepare(null)
         this.unload(this.deck)

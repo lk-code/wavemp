@@ -136,7 +136,10 @@ export const usePlayerStore = defineStore('player', () => {
                 }
             },
             waiting: () => {
-                loading.value = true
+                // Only a playing track waits for data; a paused one does not load.
+                if (playback.value === 'playing') {
+                    loading.value = true
+                }
             },
             ended: onEnded,
             advanced: onAdvanced,
@@ -407,6 +410,11 @@ export const usePlayerStore = defineStore('player', () => {
         engine?.pause()
         if (playback.value === 'playing') {
             playback.value = 'paused'
+        }
+        // A loaded track that waited for data stops waiting; one that is still being requested
+        // shows loading until startCurrent has it.
+        if (loaded) {
+            loading.value = false
         }
     }
 

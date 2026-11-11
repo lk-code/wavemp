@@ -235,6 +235,20 @@ describe('player store', () => {
         expect(player.state.playback).toBe('playing')
     })
 
+    it('stops waiting for data when paused and ignores waiting while paused', async () => {
+        const player = usePlayerStore()
+        player.playTracks(abc, 0)
+        await flushPromises()
+
+        engine.events.waiting?.()
+        expect(player.state.loading).toBe(true)
+        player.pause()
+        expect(player.state).toMatchObject({ playback: 'paused', loading: false })
+
+        engine.events.waiting?.()
+        expect(player.state.loading).toBe(false)
+    })
+
     it('skips tracks that need transcoding with a notice', async () => {
         vi.mocked(getPlayback).mockImplementation((id) =>
             Promise.resolve(
