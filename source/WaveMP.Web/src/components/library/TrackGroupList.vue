@@ -161,7 +161,7 @@ function openMenu(rowId: string, x: number, y: number): void {
                 <span
                     v-if="row.track.hasVideo"
                     data-part="badge"
-                    :data-state="row.track.hasAudio ? 'has-video' : 'video-only'"
+                    :data-state="trackRowState(row.track).join(' ')"
                     :title="row.track.hasAudio ? t('list.hasVideo') : t('list.videoOnly')"
                 >
                     <BaseIcon name="has-video" />

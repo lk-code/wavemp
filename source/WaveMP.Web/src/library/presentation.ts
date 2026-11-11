@@ -25,13 +25,16 @@ export function durationSeconds(milliseconds: number | null | undefined): number
         : null
 }
 
-/** data-state tokens of the row of a track: a video next to the audio, or only a video. */
+/**
+ * data-state tokens of the row and the video badge of a track: "has-video" for every track with a
+ * video, additionally "video-only" if it has no audio.
+ */
 export function trackRowState(track: Pick<Track, 'hasAudio' | 'hasVideo'>): string[] {
     if (!track.hasVideo) {
         return []
     }
 
-    return track.hasAudio ? ['has-video'] : ['video-only']
+    return track.hasAudio ? ['has-video'] : ['has-video', 'video-only']
 }
 
 /** Message key of how a track can be played: audio and video, audio only or video only. */

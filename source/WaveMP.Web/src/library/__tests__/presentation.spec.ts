@@ -33,7 +33,10 @@ describe('trackRowState and mediaKey', () => {
     it('mark videos next to audio and videos only', () => {
         expect(trackRowState({ hasAudio: true, hasVideo: false })).toEqual([])
         expect(trackRowState({ hasAudio: true, hasVideo: true })).toEqual(['has-video'])
-        expect(trackRowState({ hasAudio: false, hasVideo: true })).toEqual(['video-only'])
+        expect(trackRowState({ hasAudio: false, hasVideo: true })).toEqual([
+            'has-video',
+            'video-only',
+        ])
         expect(mediaKey({ hasAudio: true, hasVideo: true })).toBe('track.media.audioAndVideo')
         expect(mediaKey({ hasAudio: true, hasVideo: false })).toBe('track.media.audio')
         expect(mediaKey({ hasAudio: false, hasVideo: true })).toBe('track.media.video')

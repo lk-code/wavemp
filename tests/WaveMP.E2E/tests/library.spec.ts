@@ -58,6 +58,7 @@ test('shows the songs grouped by album with covers and video badges', async ({ p
 
     const videoOnly = row(page, 'Video Only')
     await expect(videoOnly).toHaveAttribute('data-state', /\bvideo-only\b/)
+    await expect(videoOnly).toHaveAttribute('data-state', /\bhas-video\b/)
     await expect(
         group(page, 'Unknown album').filter({
             has: page.locator("[data-part='list-row']", { hasText: 'Video Only' }),

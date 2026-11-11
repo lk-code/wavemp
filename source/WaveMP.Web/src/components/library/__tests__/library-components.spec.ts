@@ -108,7 +108,10 @@ describe('TrackGroupList', () => {
         ])
         expect(rows[1]!.attributes('data-state')).toBe('has-video')
         expect(rows[1]!.get('[data-part="badge"]').attributes('data-state')).toBe('has-video')
-        expect(rows[2]!.attributes('data-state')).toBe('video-only')
+        expect(rows[2]!.attributes('data-state')).toBe('has-video video-only')
+        expect(rows[2]!.get('[data-part="badge"]').attributes('data-state')).toBe(
+            'has-video video-only',
+        )
         expect(rows[2]!.get('[data-part="badge"] [data-part="label"]').text()).toBe('Video only')
         wrapper.unmount()
     })
