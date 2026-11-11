@@ -189,14 +189,14 @@ test('expands and collapses the tree and navigates to a section', async ({ page 
     await expect(page).toHaveURL(/\/library\/albums$/)
     await expect(album).toHaveAttribute('aria-current', 'page')
     await expect(part(page, 'view')).toHaveAttribute('data-section', 'albums')
-    await expect(part(page, 'empty-state')).toBeVisible()
+    await expect(part(page, 'tile-list')).toBeVisible()
 })
 
-test('shows the songs grouped by album with placeholder content', async ({ page }) => {
+test('shows the songs of the library grouped by album', async ({ page }) => {
     await page.goto('/library/songs')
 
-    await expect(part(page, 'placeholder-notice')).toBeVisible()
-    await expect(part(page, 'list')).toHaveAttribute('data-state', 'placeholder')
+    await expect(part(page, 'placeholder-notice')).toHaveCount(0)
+    await expect(part(page, 'list')).not.toHaveAttribute('data-state', 'placeholder')
     const columns = part(page, 'list-column')
     await expect(columns).toHaveCount(4)
     expect(
@@ -206,20 +206,18 @@ test('shows the songs grouped by album with placeholder content', async ({ page 
     ).toEqual(['number', 'title', 'duration', 'artist'])
 
     const group = part(page, 'list-group').first()
-    await expect(group.locator("[data-part='list-group-header']")).toHaveText(
-        'Placeholder Album 1',
-    )
+    await expect(group.locator("[data-part='list-group-header']")).toHaveText('E2E Album')
     await expect(group.locator("[data-part='cover']")).toBeVisible()
     await expect(group.locator("[data-part='meta-item']")).toHaveCount(4)
-    await expect(group.locator("[data-part='meta-item'][data-field='year']")).toContainText('2006')
+    await expect(group.locator("[data-part='meta-item'][data-field='year']")).toContainText('2026')
 
     const rows = group.locator("[data-part='list-row']")
-    await expect(rows.first().locator("[data-column='duration']")).toHaveText('3:45')
-    await rows.nth(1).click()
-    await expect(rows.nth(1)).toHaveAttribute('aria-selected', 'true')
+    await expect(rows.first().locator("[data-column='duration']")).toHaveText('0:02')
+    await rows.first().click()
+    await expect(rows.first()).toHaveAttribute('aria-selected', 'true')
     await page.keyboard.press('ArrowDown')
-    await expect(rows.nth(2)).toHaveAttribute('aria-selected', 'true')
-    await expect(rows.nth(1)).toHaveAttribute('aria-selected', 'false')
+    await expect(rows.nth(1)).toHaveAttribute('aria-selected', 'true')
+    await expect(rows.first()).toHaveAttribute('aria-selected', 'false')
 })
 
 test('operates volume and mute while nothing plays', async ({ page }) => {

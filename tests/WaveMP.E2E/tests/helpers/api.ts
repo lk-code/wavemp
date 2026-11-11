@@ -119,3 +119,27 @@ export async function updateLibrarySettings(
 export async function resetLibrarySettings(request: APIRequestContext): Promise<void> {
     await updateLibrarySettings(request, { scanIntervalMinutes: 360 })
 }
+
+// Library
+
+/**
+ * Scans the media folder and waits until the scan has finished. A scan that is already running
+ * (e.g. the periodic one) counts as well.
+ */
+export async function scanLibrary(request: APIRequestContext): Promise<void> {
+    await waitForIdleScan(request)
+    const response = await request.post('/api/v1/scans', {
+        headers: authorization(await adminToken(request)),
+    })
+    expect([202, 409]).toContain(response.status())
+    await waitForIdleScan(request)
+}
+
+/** Titles of all tracks of the library, in the default order. */
+export async function listTrackTitles(request: APIRequestContext): Promise<string[]> {
+    const response = await request.get('/api/v1/tracks?limit=100', {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    return ((await response.json()).items as { title: string }[]).map((track) => track.title)
+}

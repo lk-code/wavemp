@@ -41,10 +41,10 @@ test('selects a profile and remembers it', async ({ page }) => {
     await expect(page).toHaveURL(/\/library\/songs$/)
     await expect(profileButton(page)).toBeVisible()
     await profileButton(page).click()
-    await expect(page.locator("[data-part='context-menu'] [data-part='menu-item']")).toHaveText([
-        'Settings',
-        'Switch profile',
-    ])
+    // Only the open menu: the menus of the songs and of the sort options are in the page as well.
+    await expect(
+        page.locator("[data-part='context-menu']:popover-open [data-part='menu-item']"),
+    ).toHaveText(['Settings', 'Switch profile'])
     await page.keyboard.press('Escape')
 
     // Profiles without the role admin never reach the profile administration.
@@ -87,9 +87,9 @@ test('keeps the language per profile', async ({ page }) => {
 
     await page.goto('/library/songs')
     await expect(page.locator("[data-part='list-column'][data-column='title']")).toHaveText('Titel')
-    await expect(page.locator("[data-part='list-group-header']").first()).toHaveText(
-        'Platzhalter-Album 1',
-    )
+    await expect(
+        page.locator("[data-part='meta-item'][data-field='year'] > [data-part='label']").first(),
+    ).toHaveText('Jahr')
     await expect(page.locator("[data-part='volume'] [role='slider']")).toHaveAttribute(
         'aria-valuetext',
         /^80\s%$/u,
