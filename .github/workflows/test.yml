@@ -77,7 +77,8 @@ jobs:
       - name: Check formatting
         run: dotnet format WaveMP.slnx --verify-no-changes --no-restore
 
-      # The media tests and the scan create their test files with ffmpeg and read them with ffprobe.
+      # The media tests and the scan create their test files with ffmpeg and read them with ffprobe;
+      # the cache scales covers to WebP with ffmpeg, so its build must contain libwebp.
       # Static binaries from a pinned image instead of apt, so the job does not depend on the Ubuntu
       # package mirror (an unreachable mirror let apt hang until the job timeout). FFMPEG_PATH tells
       # the tests where to find them.
@@ -92,6 +93,7 @@ jobs:
           docker rm "$container"
           echo "FFMPEG_PATH=$RUNNER_TEMP/ffmpeg" >> "$GITHUB_ENV"
           "$RUNNER_TEMP/ffmpeg/ffprobe" -hide_banner -version
+          "$RUNNER_TEMP/ffmpeg/ffmpeg" -hide_banner -encoders | grep -q libwebp
 
       - name: Unit tests
         run: dotnet test WaveMP.slnx --no-build --filter "TestCategory!=Integration"
