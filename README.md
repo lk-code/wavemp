@@ -15,6 +15,7 @@ WaveMP brings back the glossy, glassy look of the classic desktop media players 
 ## Features
 
 - **Your library, your files.** WaveMP scans a folder and organizes your music. It reads tags first and falls back to your folder structure.
+- **Tag editor.** Admins correct title, artist, album, album artist, year, track and disc number and genre right in WaveMP. Changes are written into the audio file, never into videos, and the previous tags are kept in the database.
 - **Music and music videos together.** Switch seamlessly between the audio track, its music video, its cover and a visualization.
 - **Profiles.** Pick your profile, no login required. Each profile has its own playlists and history.
 - **Playlists, queue, shuffle and repeat.**
@@ -50,6 +51,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
     volumes:
       - wavemp-data:/data
+      # Append :ro to keep WaveMP from changing your files; the metadata editor is then off.
       - /path/to/your/media:/media
     depends_on:
       wavemp-db:
@@ -124,9 +126,9 @@ WaveMP falls back to software transcoding when no hardware acceleration is avail
 
 ### Media folder access
 
-- Mount the folder **read-only** (`/path/to/your/media:/media:ro`) if WaveMP should never change your files.
-- Mount it **writable** if you want to edit tags from within WaveMP. Changes are only written to audio files, never to videos.
-- The container runs as user `1654` (`app`); your files and folders must be readable for it.
+- Mount the folder **read-only** (`/path/to/your/media:/media:ro`) if WaveMP should never change your files. The metadata editor then shows its fields greyed out with a hint.
+- Mount it **writable** if you want to edit tags from within WaveMP. Changes are only written to audio files, never to videos, and file names stay as they are.
+- The container runs as user `1654` (`app`); your files and folders must be readable for it. To edit tags, the audio files must also be writable for it, for example through a group with write permission that you add to the container with `group_add` in the compose file. No rescan is needed after changing the mount or the permissions: the editor checks the file each time it opens.
 
 ## Organizing Your Media
 
@@ -178,8 +180,9 @@ A number at the start of a file name is only a track number inside an album fold
 4. **Choose your language** under **Settings** in the profile menu. It is stored with the profile and applies on all devices; before a profile is selected, WaveMP uses the language of the browser (English or German, otherwise English).
 5. **Scan your library.** As admin, open **Administration > Library**: **Scan now** starts a scan of your media folder, shows its progress and then its result (files found, added, updated and removed, tracks, albums and artists, and files with problems). Below are the history of scans and the settings: how often the library is scanned, whether the media folder is watched for changes, the file extensions of audio, video and pictures and the names of album covers. **Administration > Jobs** lists all background jobs with their last and next run and runs them on demand.
 6. **Browse your library.** **Library** in the sidebar (the drawer behind the menu button on smartphones) has the sections **Recently Added** (newest first), **Artist**, **Album**, **Songs** (grouped by album with cover), **Genre** and **Year**. Albums, artists, genres and years open their own page; the details of a song (cover, artist, album, length, audio and video) open from its context menu: right click, the context menu key or a long press on touch screens. Admins also see all files of a song there, with their technical details.
-7. **Search.** Type into the search field at the top: WaveMP searches artists, albums and songs while you type, and small typos are fine. **Show all** opens the full list filtered by your text. On the desktop, the sort button next to the search sorts the current list; sort order and search text are part of the address, so you can bookmark or share them.
-8. **Play.** Build playlists and switch between cover, video and visualization while playing.
+7. **Edit metadata.** As admin, choose **Edit metadata** on the page of a song or in its context menu. Change title, artist, album, album artist, year, track and disc number or genre and save: WaveMP writes the changes into the audio file the song plays, keeps the previous tags in the database and reads the song again, so the library shows the new values at once. An empty field removes the value from the tags; WaveMP then takes it from the folder and file name again. Songs with a video only and files that cannot be written show the editor greyed out with a hint.
+8. **Search.** Type into the search field at the top: WaveMP searches artists, albums and songs while you type, and small typos are fine. **Show all** opens the full list filtered by your text. On the desktop, the sort button next to the search sorts the current list; sort order and search text are part of the address, so you can bookmark or share them.
+9. **Play.** Build playlists and switch between cover, video and visualization while playing.
 
 Profiles are not protected yet: everyone who can open WaveMP can select any profile, including the admin profile. An optional PIN is planned. Do not expose WaveMP to the internet without protection, for example a reverse proxy with authentication or a VPN.
 
@@ -212,8 +215,8 @@ This builds the image from source and starts WaveMP on `http://localhost:8080`. 
 | `source/WaveMP.Core.Users` | User profiles, sessions and user settings |
 | `source/WaveMP.Core.Settings` | Server settings, stored as JSON per group (for example the library settings) |
 | `source/WaveMP.Core.Jobs` | Background jobs with Quartz.NET (in memory) and their run history |
-| `source/WaveMP.Core.Metadata` | Tags (TagLib#), technical information (ffprobe) and metadata from folder and file names |
-| `source/WaveMP.Core.Scanning` | Library scan, grouping of files, the scan job and the file watcher |
+| `source/WaveMP.Core.Metadata` | Reading and writing tags (TagLib#), technical information (ffprobe) and metadata from folder and file names |
+| `source/WaveMP.Core.Scanning` | Library scan, grouping of files, the scan job, the file watcher and the metadata editor |
 | `source/WaveMP.Core.Library` | Library queries: artists, albums, tracks, genres, years, the search and the covers |
 | `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, entities, repositories, migrations) |
 | `source/WaveMP.Web` | Vue 3 web app |
@@ -282,6 +285,8 @@ Admins start a scan with `POST /api/v1/scans`; the answer is `202 Accepted` with
 
 The library is available to every session: `GET /api/v1/artists`, `/api/v1/albums` and `/api/v1/tracks` with their items (`/{id}`), the albums of an artist (`/api/v1/artists/{id}/albums`), the tracks of an album (`/api/v1/albums/{id}/tracks`) and the lists of genres and years (`/api/v1/genres`, `/api/v1/years`). Lists are sorted with `sort` and `direction` (the defaults are documented per operation) and filtered with `q` (fault-tolerant search text), `artistId`, `albumId`, `genre`, `year`, `hasAudio` and `hasVideo` where they apply. Tracks tell with `hasAudio`, `hasVideo` and `hasCover` what they offer. `GET /api/v1/search?q=` returns the best artists, albums and tracks at once (`limit` up to 50 per group); it finds texts that contain the search text or are similar to it, using the PostgreSQL extension `pg_trgm`, which the database migration creates. `GET /api/v1/albums/{id}/cover` and `/api/v1/tracks/{id}/cover` return the original picture (JPEG, PNG, WebP, GIF or BMP): by default the album cover (a picture such as `cover.jpg` in the album folder) before the cover of the track (a picture with its base name or embedded in its file), each falling back to the other and finally to the cover of another track of the album. Admins list all files of a track with `GET /api/v1/tracks/{id}/files`. Missing items get `404` with `artist.not_found`, `album.not_found`, `track.not_found` or `cover.not_found`.
 
+Admins edit the metadata of a track with `GET` and `PATCH /api/v1/tracks/{id}/metadata`. `GET` returns the values the editor shows (the tags of the audio file, completed from the library), its `status` (`Editable`, `NoAudio` or `NotWritable`) and the `audioFilePath` it writes. `PATCH` writes `title`, `artist`, `album`, `albumArtist`, `year`, `trackNumber`, `discNumber` and `genre` into the tags of the audio file the track plays: members that are missing stay unchanged, `null` or an empty text removes the value. The previous tags are saved in the database first, and the answer holds the values after the track was read again. A track with a video only gets `409` (`track.no_audio`), an audio file that cannot be written `409` (`track.not_writable`).
+
 ### Tests
 
 Run the commands from the repository root:
@@ -310,7 +315,7 @@ The E2E tests first select the built-in admin profile once (project `setup`) and
 
 If you set `WAVEMP_PORT` in `.env`, point the E2E tests at it, for example `E2E_BASE_URL=http://localhost:8081 npm test`. `npm run test:unit` runs the unit tests of the web app (Vitest), including checks that every text comes from the translation files and that `THEMING.md` matches the code.
 
-`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version. They scan the media folder of the running instance before the tests (project `setup`) and need the test media of `tests/WaveMP.E2E/scripts/generate-media.sh` in it (see [Local development](#local-development)): the library tests browse and search exactly these songs. With `E2E_EXPECTED_TRACKS=4` they also check the number of songs, as the CI does.
+`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version. They scan the media folder of the running instance before the tests (project `setup`) and need the test media of `tests/WaveMP.E2E/scripts/generate-media.sh` in it (see [Local development](#local-development)): the library tests browse and search exactly these songs. With `E2E_EXPECTED_TRACKS=4` they also check the number of songs, as the CI does. The test of the metadata editor writes genre and year of "Loose Song" and removes them again afterwards, so the media folder must be writable for the container (`generate-media.sh` makes the files it creates writable for everyone).
 
 ### License check
 
