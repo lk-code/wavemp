@@ -17,6 +17,7 @@ WaveMP ist ein selbst gehosteter Media Player für Musik und Musikvideos, ausgel
 | Hintergrundjobs | Quartz.NET (In-Memory), Laufverlauf in eigener Tabelle |
 | Visualisierung | butterchurn (Milkdrop-Presets), eigene WebGL-Styles |
 | Auslieferung | Docker-Image (GHCR + Docker Hub), docker compose |
+| Laufzeit-Image | Alpine mit ffmpeg und `icu-libs` (volle Globalisierung, keine Invariant-Globalization) |
 | CI | GitHub Actions |
 
 ## Repository-Struktur
@@ -31,6 +32,7 @@ WaveMP ist ein selbst gehosteter Media Player für Musik und Musikvideos, ausgel
 /tests
   WaveMP.<Projekt>.Tests/      Unit-Tests, ein Testprojekt pro Quellprojekt
   WaveMP.E2E/                  End-to-End-Tests
+  WaveMP.Testing/              Gemeinsame Test-Helfer (kein Testprojekt), z. B. Testmedien-Erzeugung
 WaveMP.slnx                    Solution
 Dockerfile
 docker-compose.yml
@@ -68,6 +70,7 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur, we
 - API-Zugriffe laufen ausschließlich über einen mit Microsoft Kiota aus dem OpenAPI-Dokument generierten Client, nie direkt per `fetch` in Komponenten. Der generierte Code wird nicht von Hand bearbeitet.
 - **Mehrsprachigkeit:** Alle UI-Texte laufen über vue-i18n (eine JSON-Datei pro Sprache, Weblate-kompatibel). Sprachen: Englisch (Standard) und Deutsch. Die Sprache wird pro Benutzer gespeichert. Keine festen Texte in Komponenten.
 - **Keine Texte im Backend:** i18n findet nur in den Clients statt. Die API liefert keine anzeigbaren Texte, sondern stabile, maschinenlesbare Codes (z. B. `code: "track.not_writable"` in den Problem Details, Statuswerte als Enums). Die Clients übersetzen diese Codes. Exception- und Log-Meldungen sind interne Texte auf Englisch und werden nie in der UI angezeigt. Alle Codes stehen als Enum bzw. Konstanten im OpenAPI-Dokument.
+- Validierungsfehler liefern pro Feld nur Codes (z. B. `required`, `max_length`, `invalid_format`) plus ggf. Parameter (z. B. `max: 100`), keine Standardmeldungen von ASP.NET Core.
 
 ### API-Design
 - REST, ressourcenorientiert, Substantive im Plural: `/api/v1/tracks`, `/api/v1/albums/{id}/tracks`.
@@ -80,6 +83,7 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur, we
 - Das OpenAPI-Dokument muss deshalb vollständig und generatorfreundlich sein: eindeutige `operationId`s, benannte Schemas, korrekt beschriebene Response-Typen und Statuscodes, Enums als benannte Typen.
 - DTOs liegen im `.Service`-Projekt und werden nicht mit den Entities aus `.Data` vermischt.
 - Medien-Streaming unterstützt HTTP-Range-Requests; transcodierte Inhalte laufen über HLS.
+- Medien-URLs (Audio, Video, HLS, Cover, falls geschützt) werden als kurzlebige, signierte URLs ausgegeben (Ablaufzeit + Signatur, an Titel und Benutzer gebunden), da `<audio>`, `<video>`, Casting-Geräte und Player keinen Token-Header mitsenden.
 - Authentifizierung ist von Anfang an tokenbasiert, obwohl es keinen Login gibt: Die Auswahl eines Profils erzeugt ein Token. Native Clients nutzen das später genauso.
 - Die Web-App darf nichts voraussetzen, was die API nicht bereitstellt.
 
@@ -106,6 +110,7 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur, we
 - Nur Abhängigkeiten mit MIT-kompatiblen Lizenzen (MIT, BSD, Apache-2.0, ISC, MPL-2.0, LGPL bei dynamischer Einbindung). **Keine GPL- oder AGPL-Abhängigkeiten** in NuGet oder npm.
 - Vor dem Hinzufügen eines Pakets die Lizenz prüfen und in der Commit-Beschreibung nennen.
 - ffmpeg wird als externer Prozess aufgerufen, nie gelinkt. Der Lizenzhinweis wird mit dem Image ausgeliefert.
+- Fremde Docker-Images in Dockerfile und CI werden per Digest gepinnt (`image@sha256:...`), nicht nur per Tag.
 - **Testmedien** (Audio, Video, Cover) werden nicht aus fremden Quellen übernommen, sondern zur Testlaufzeit synthetisch mit ffmpeg erzeugt (Sinustöne, Testbilder, generierte Cover, Tags per `-metadata`). Dateinamen und Ordnerstrukturen legen die Tests selbst an. Ausnahmen nur mit Medien unter CC0 und mit Herkunftsangabe in `/tests/assets/LICENSES.md`.
 
 ## Git
