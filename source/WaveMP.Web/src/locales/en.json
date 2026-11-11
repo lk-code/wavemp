@@ -315,6 +315,7 @@
       "label": "Administration",
       "library": "Library",
       "jobs": "Jobs",
+      "cache": "Cache",
       "profiles": "Profiles"
     }
   },
@@ -407,7 +408,8 @@
     "runNow": "Run now",
     "runNowNamed": "Run {name} now",
     "names": {
-      "libraryScan": "Library scan"
+      "libraryScan": "Library scan",
+      "coverCache": "Prepare covers"
     },
     "lastRun": "Last run {date}",
     "duration": "took {duration}",
@@ -415,9 +417,43 @@
     "never": "Not run yet",
     "schedule": "Every {minutes} minutes",
     "manualOnly": "Runs only when started",
+    "afterScan": "Runs after scans",
     "alreadyRunning": "This job is already running.",
     "loadError": "The jobs could not be loaded.",
     "runError": "The job could not be started."
+  },
+  "adminCache": {
+    "title": "Cache",
+    "usageTitle": "Usage",
+    "usageLabel": "Used space of the cache",
+    "usage": "{size} of {limit} used",
+    "hint": "Holds scaled covers. Everything in it is created again when it is needed.",
+    "stats": {
+      "label": "Contents of the cache",
+      "covers": "Covers",
+      "transcodes": "Transcoded media",
+      "entries": "Files"
+    },
+    "unavailable": "The cache folder cannot be written, so covers are shown unscaled. Check the volume /data.",
+    "clear": "Clear cache",
+    "clearDialog": {
+      "title": "Clear cache",
+      "text": "Remove all files of the cache? Covers are created again the next time they are shown.",
+      "confirm": "Clear"
+    },
+    "cleared": "The cache is empty.",
+    "clearError": "The cache could not be cleared.",
+    "loadError": "The cache could not be loaded.",
+    "settingsTitle": "Settings",
+    "maxSize": "Maximum size",
+    "maxSizeHint": "When the cache grows larger, the files used least recently are removed.",
+    "save": "Save",
+    "saved": "The settings are saved.",
+    "saveError": "The settings could not be saved.",
+    "settingsLoadError": "The settings could not be loaded.",
+    "errors": {
+      "maxSize": "Choose a size between 100 MB and 1 TB."
+    }
   },
   "jobRuns": {
     "statuses": {
@@ -431,7 +467,8 @@
     "triggers": {
       "schedule": "Scheduled",
       "manual": "Manual",
-      "fileWatcher": "File watcher"
+      "fileWatcher": "File watcher",
+      "libraryScan": "After a scan"
     },
     "errors": {
       "jobFailed": "The run failed. Details are in the server log.",
@@ -439,7 +476,9 @@
       "mediaFolderNotFound": "The media folder does not exist. Check the volume of the container.",
       "mediaFolderUnreadable": "The media folder cannot be read. Check its permissions.",
       "mediaFolderEmpty": "The media folder is empty, so nothing was removed. Check that it is mounted.",
-      "probeUnavailable": "ffprobe is not available on the server."
+      "probeUnavailable": "ffprobe is not available on the server.",
+      "ffmpegUnavailable": "ffmpeg is not available on the server.",
+      "cacheFolderUnwritable": "The cache folder cannot be written. Check the volume /data."
     }
   },
   "track": {

@@ -6,6 +6,7 @@ import {
     durationSeconds,
     errorLabelKey,
     jobNameKey,
+    jobScheduleKey,
     statusPresentation,
 } from '@/admin/presentation'
 import BaseButton from '@/components/base/BaseButton.vue'
@@ -90,7 +91,7 @@ function dateTime(date: Date): string {
                     <span v-if="job.intervalMinutes" data-part="label">{{
                         t('adminJobs.schedule', { minutes: format.number(job.intervalMinutes) })
                     }}</span>
-                    <span v-else data-part="label">{{ t('adminJobs.manualOnly') }}</span>
+                    <span v-else data-part="label">{{ t(jobScheduleKey(job.id)) }}</span>
                 </span>
                 <span v-if="errorLabelKey(job.lastRun?.errorCode)" data-part="label">{{
                     t(errorLabelKey(job.lastRun?.errorCode) ?? '')

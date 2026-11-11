@@ -32,7 +32,7 @@ describe('buildBreadcrumb', () => {
     })
 
     it('shows the pages of the administration below the administration', () => {
-        for (const page of ['admin-library', 'admin-jobs', 'admin-users']) {
+        for (const page of ['admin-library', 'admin-jobs', 'admin-cache', 'admin-users']) {
             const crumbs = buildBreadcrumb({ name: page, params: {} })
             expect(crumbs.map((c) => c.id)).toEqual(['music', 'admin', page])
             expect(crumbs[1]).toEqual({
@@ -44,6 +44,7 @@ describe('buildBreadcrumb', () => {
 
         expect(pageTitleKey({ name: 'admin-library', params: {} })).toBe('adminLibrary.title')
         expect(pageTitleKey({ name: 'admin-jobs', params: {} })).toBe('adminJobs.title')
+        expect(pageTitleKey({ name: 'admin-cache', params: {} })).toBe('adminCache.title')
     })
 
     it('never links the current page', () => {

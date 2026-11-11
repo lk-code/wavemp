@@ -155,6 +155,10 @@
         --_icon: var(--wmp-icon-admin-jobs);
     }
 
+    [data-icon='admin-cache'] {
+        --_icon: var(--wmp-icon-admin-cache);
+    }
+
     [data-icon='album'] {
         --_icon: var(--wmp-icon-album);
     }

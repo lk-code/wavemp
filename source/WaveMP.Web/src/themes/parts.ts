@@ -162,6 +162,10 @@ export const parts = [
     'job-name',
     'job-meta',
     'job-actions',
+    'cache-usage',
+    'meter',
+    'meter-track',
+    'meter-fill',
 
     // Base components
     'button',

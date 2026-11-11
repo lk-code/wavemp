@@ -64,6 +64,7 @@ const icons: Record<IconStyle, string[]> = {
         'film-strip',
         'folder-open',
         'gear-six',
+        'hard-drives',
         'image',
         'info',
         'microphone-stage',

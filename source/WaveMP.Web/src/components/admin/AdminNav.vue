@@ -18,6 +18,7 @@ const route = useRoute()
 const items: readonly AdminNavItem[] = [
     { id: 'admin-library', labelKey: 'admin.nav.library', icon: 'admin-library' },
     { id: 'admin-jobs', labelKey: 'admin.nav.jobs', icon: 'admin-jobs' },
+    { id: 'admin-cache', labelKey: 'admin.nav.cache', icon: 'admin-cache' },
     { id: 'admin-users', labelKey: 'admin.nav.profiles', icon: 'manage-profiles' },
 ]
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
     activityOf,
+    cacheLimitOptions,
     durationSeconds,
     errorLabelKey,
     formatList,
@@ -8,11 +9,13 @@ import {
     isActive,
     issueLabelKey,
     jobNameKey,
+    jobScheduleKey,
     parseList,
     phaseLabelKey,
     progressRatio,
     statusPresentation,
     triggerLabelKey,
+    usageRatio,
 } from '../presentation'
 
 describe('presentation of the administration', () => {
@@ -69,6 +72,32 @@ describe('presentation of the administration', () => {
         expect(phaseLabelKey('CleaningUp')).toBe('adminLibrary.phases.cleaningUp')
         expect(jobNameKey('library-scan')).toBe('adminJobs.names.libraryScan')
         expect(jobNameKey('unknown')).toBeNull()
+    })
+
+    it('translates the codes of the cache', () => {
+        expect(triggerLabelKey('LibraryScan')).toBe('jobRuns.triggers.libraryScan')
+        expect(errorLabelKey('cache.ffmpeg_unavailable')).toBe('jobRuns.errors.ffmpegUnavailable')
+        expect(errorLabelKey('cache.folder_unwritable')).toBe(
+            'jobRuns.errors.cacheFolderUnwritable',
+        )
+        expect(jobNameKey('cover-cache')).toBe('adminJobs.names.coverCache')
+        expect(jobScheduleKey('cover-cache')).toBe('adminJobs.afterScan')
+        expect(jobScheduleKey('library-scan')).toBe('adminJobs.manualOnly')
+        expect(jobScheduleKey(null)).toBe('adminJobs.manualOnly')
+    })
+
+    it('offers size limits of the cache the server accepts, in ascending order', () => {
+        expect(cacheLimitOptions).toEqual([...cacheLimitOptions].sort((a, b) => a - b))
+        expect(cacheLimitOptions.every((value) => value >= 100 && value <= 1_000_000)).toBe(true)
+        expect(cacheLimitOptions).toContain(2000)
+    })
+
+    it('computes the share of the limit the cache uses', () => {
+        expect(usageRatio(500, 2000)).toBe(0.25)
+        expect(usageRatio(3000, 2000)).toBe(1)
+        expect(usageRatio(0, 2000)).toBe(0)
+        expect(usageRatio(500, 0)).toBe(0)
+        expect(usageRatio(null, undefined)).toBe(0)
     })
 
     it('converts durations to seconds', () => {

@@ -5,8 +5,9 @@
 import '@/styles/dev.css'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Job, Scan, ScanIssue } from '@/api/generated/models'
+import type { CacheUsage, Job, Scan, ScanIssue } from '@/api/generated/models'
 import AdminNav from '@/components/admin/AdminNav.vue'
+import CacheUsagePanel from '@/components/admin/CacheUsage.vue'
 import JobList from '@/components/admin/JobList.vue'
 import ScanHistory from '@/components/admin/ScanHistory.vue'
 import ScanIssues from '@/components/admin/ScanIssues.vue'
@@ -19,6 +20,7 @@ import BaseColorPicker from '@/components/base/BaseColorPicker.vue'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
+import BaseMeter from '@/components/base/BaseMeter.vue'
 import BaseProgress from '@/components/base/BaseProgress.vue'
 import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
 import BaseSearchField from '@/components/base/BaseSearchField.vue'
@@ -369,6 +371,30 @@ const sampleRunningJob: Job[] = [
         lastRun: { ...sampleIdleJob[0]!.lastRun, status: 'Running', durationMilliseconds: null },
     },
 ]
+const sampleCoverJob: Job[] = [
+    {
+        id: 'cover-cache',
+        state: 'Idle',
+        lastRun: {
+            id: 'covers',
+            jobId: 'cover-cache',
+            status: 'Failed',
+            trigger: 'LibraryScan',
+            queuedAt: sampleTime,
+            startedAt: sampleTime,
+            durationMilliseconds: 1_200,
+            errorCode: 'cache.ffmpeg_unavailable',
+        },
+    },
+]
+const sampleCacheUsage: CacheUsage = {
+    isAvailable: true,
+    sizeBytes: 1_240_000_000,
+    entryCount: 5_321,
+    maxSizeBytes: 2_000_000_000,
+    covers: { sizeBytes: 1_240_000_000, entryCount: 5_321 },
+    transcodes: { sizeBytes: 0, entryCount: 0 },
+}
 </script>
 
 <template>
@@ -676,6 +702,14 @@ const sampleRunningJob: Job[] = [
             <div data-part="view" data-view="admin-jobs">
                 <JobList :jobs="sampleIdleJob" />
                 <JobList :jobs="sampleRunningJob" />
+                <JobList :jobs="sampleCoverJob" />
+            </div>
+            <div data-part="view" data-view="admin-cache">
+                <section data-part="section" data-item="usage">
+                    <h2 data-part="section-title">{{ t('adminCache.usageTitle') }}</h2>
+                    <CacheUsagePanel :usage="sampleCacheUsage" />
+                    <BaseMeter :label="t('adminCache.usageLabel')" :value="0.95" />
+                </section>
             </div>
         </section>
 

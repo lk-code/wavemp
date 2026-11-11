@@ -90,6 +90,7 @@ describe('createRoutes', () => {
         for (const [path, name] of [
             ['/admin/library', 'admin-library'],
             ['/admin/jobs', 'admin-jobs'],
+            ['/admin/cache', 'admin-cache'],
             ['/admin/users', 'admin-users'],
         ]) {
             const route = await resolve(path!)

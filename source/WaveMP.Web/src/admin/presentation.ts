@@ -1,5 +1,6 @@
 // Presentation of the administration: message keys of the codes of the API, the tokens of badges and
-// states, the intervals of the library scan and the lists of the settings form. Pure functions only.
+// states, the intervals of the library scan, the lists of the settings form and the size limits of
+// the cache. Pure functions only.
 
 import type { ScanProgress } from '@/api/generated/models'
 
@@ -24,6 +25,29 @@ export const intervalOptions: readonly IntervalOption[] = [
 
 /** Message key of an interval that is not offered, with the placeholder minutes. */
 export const customIntervalKey = 'adminLibrary.intervals.custom'
+
+/**
+ * Size limits offered for the cache in megabytes (1 MB = 1,000,000 bytes, like the shown sizes);
+ * the server accepts 100 to 1,000,000.
+ */
+export const cacheLimitOptions: readonly number[] = [
+    500, 1000, 2000, 5000, 10_000, 20_000, 50_000, 100_000,
+]
+
+/** Bytes of a megabyte of the cache settings. */
+export const bytesPerMegabyte = 1_000_000
+
+/** Share of the limit the cache uses, between 0 and 1; 0 without a limit. */
+export function usageRatio(
+    sizeBytes: number | null | undefined,
+    maxSizeBytes: number | null | undefined,
+): number {
+    if (!sizeBytes || !maxSizeBytes || maxSizeBytes <= 0) {
+        return 0
+    }
+
+    return clamp(sizeBytes / maxSizeBytes)
+}
 
 /** Splits a list typed by the user at commas, semicolons and line breaks; empty entries are dropped. */
 export function parseList(text: string): string[] {
@@ -110,6 +134,7 @@ const triggers: Record<string, Labeled> = {
     Schedule: { labelKey: 'jobRuns.triggers.schedule' },
     Manual: { labelKey: 'jobRuns.triggers.manual' },
     FileWatcher: { labelKey: 'jobRuns.triggers.fileWatcher' },
+    LibraryScan: { labelKey: 'jobRuns.triggers.libraryScan' },
 }
 
 /** Message key of what started a run. */
@@ -124,6 +149,8 @@ const errors: Record<string, Labeled> = {
     'scan.media_folder_unreadable': { labelKey: 'jobRuns.errors.mediaFolderUnreadable' },
     'scan.media_folder_empty': { labelKey: 'jobRuns.errors.mediaFolderEmpty' },
     'scan.probe_unavailable': { labelKey: 'jobRuns.errors.probeUnavailable' },
+    'cache.ffmpeg_unavailable': { labelKey: 'jobRuns.errors.ffmpegUnavailable' },
+    'cache.folder_unwritable': { labelKey: 'jobRuns.errors.cacheFolderUnwritable' },
 }
 
 /** Message key of the error code of a run; unknown codes are shown as a general failure. */
@@ -169,13 +196,27 @@ export function scanStateLabelKey(activity: Activity): string {
     return scanStates[activity].labelKey
 }
 
-const jobNames: Record<string, Labeled> = {
-    'library-scan': { labelKey: 'adminJobs.names.libraryScan' },
+interface JobPresentation extends Labeled {
+    /** Message key of when a job without schedule runs. */
+    readonly scheduleKey: string
+}
+
+const jobNames: Record<string, JobPresentation> = {
+    'library-scan': {
+        labelKey: 'adminJobs.names.libraryScan',
+        scheduleKey: 'adminJobs.manualOnly',
+    },
+    'cover-cache': { labelKey: 'adminJobs.names.coverCache', scheduleKey: 'adminJobs.afterScan' },
 }
 
 /** Message key of the name of a job; unknown jobs are shown with their id. */
 export function jobNameKey(id: string | null | undefined): string | null {
     return jobNames[id ?? '']?.labelKey ?? null
+}
+
+/** Message key of when a job without a schedule runs, e.g. after scans or only when started. */
+export function jobScheduleKey(id: string | null | undefined): string {
+    return jobNames[id ?? '']?.scheduleKey ?? 'adminJobs.manualOnly'
 }
 
 /** Duration in seconds of a run that took the given milliseconds. */

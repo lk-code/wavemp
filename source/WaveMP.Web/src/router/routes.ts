@@ -4,6 +4,7 @@ import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
 import ProfileSelectView from '@/views/ProfileSelectView.vue'
 import SettingsView from '@/views/SettingsView.vue'
+import AdminCacheView from '@/views/admin/AdminCacheView.vue'
 import AdminJobsView from '@/views/admin/AdminJobsView.vue'
 import AdminLibraryView from '@/views/admin/AdminLibraryView.vue'
 import AdminUsersView from '@/views/admin/AdminUsersView.vue'
@@ -137,6 +138,12 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             path: '/admin/jobs',
             name: 'admin-jobs',
             component: AdminJobsView,
+            meta: { admin: true },
+        },
+        {
+            path: '/admin/cache',
+            name: 'admin-cache',
+            component: AdminCacheView,
             meta: { admin: true },
         },
         {

@@ -21,6 +21,7 @@ export interface RouteInfo {
 const adminPageTitles = {
     'admin-library': 'adminLibrary.title',
     'admin-jobs': 'adminJobs.title',
+    'admin-cache': 'adminCache.title',
     'admin-users': 'adminUsers.title',
 } as const
 
@@ -84,6 +85,7 @@ export function buildBreadcrumb(route: RouteInfo, detailTitle?: string | null): 
             break
         case 'admin-library':
         case 'admin-jobs':
+        case 'admin-cache':
         case 'admin-users':
             crumbs.push({ id: 'admin', labelKey: 'admin.title', to: { name: 'admin' } })
             crumbs.push({ id: route.name, labelKey: adminPageTitles[route.name] })

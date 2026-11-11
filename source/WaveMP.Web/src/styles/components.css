@@ -867,6 +867,51 @@
         }
     }
 
+    /* Meter: a level within a range (e.g. the used space of the cache), drawn like a progress bar. */
+    [data-part='meter'] {
+        min-inline-size: 6rem;
+    }
+
+    [data-part='meter-track'] {
+        position: relative;
+        block-size: var(--wmp-progress-height);
+        overflow: hidden;
+        border-radius: var(--wmp-radius-round);
+        background: var(--wmp-progress-track-background);
+    }
+
+    [data-part='meter-fill'] {
+        inline-size: calc(var(--wmp-meter-value, 0) * 100%);
+        block-size: 100%;
+        border-radius: inherit;
+        background: var(--wmp-progress-fill-background);
+        transition: inline-size 0.3s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        [data-part='meter-fill'] {
+            transition: none;
+        }
+    }
+
+    [data-part='cache-usage'] {
+        display: grid;
+        gap: var(--wmp-space-m);
+        min-inline-size: 0;
+        padding: var(--wmp-space-m);
+        border: 1px solid var(--wmp-color-border);
+        border-radius: var(--wmp-radius-m);
+        background: var(--wmp-color-surface);
+    }
+
+    [data-part='cache-usage'] > [data-part='label'] {
+        overflow-wrap: anywhere;
+    }
+
+    [data-part='cache-usage'] > [data-part='button'] {
+        justify-self: start;
+    }
+
     [data-part='stat-list'] {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));

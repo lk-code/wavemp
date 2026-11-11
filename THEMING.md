@@ -181,7 +181,7 @@ Example of a desktop layout with the sidebar on the right:
 | `user-name` | `span` | `user-info` | Name of the profile |
 | `user-meta` | `span` | `user-info` | Role and built-in state as `badge` with a visible `label`, and the creation date as `label` |
 | `user-actions` | `div` | `user-item` | Buttons to edit and delete the profile |
-| `admin-nav` | `nav` | `view` | Navigation between the pages of the administration (library, jobs, profiles) |
+| `admin-nav` | `nav` | `view` | Navigation between the pages of the administration (library, jobs, cache, profiles) |
 | `admin-nav-item` | `a` (`aria-current`) | `admin-nav` | Page of the administration with `icon` and `label` |
 | `section` | `section` (`aria-labelledby`) | `view` | Part of a page with a `section-title` |
 | `section-title` | `h2` | `section` | Title of the section |
@@ -206,6 +206,10 @@ Example of a desktop layout with the sidebar on the right:
 | `job-name` | `span` | `job-info` | Name of the job |
 | `job-meta` | `span` | `job-info` | Status `badge` of the last run with a visible `label`, and last run, next run and schedule as `label`s |
 | `job-actions` | `div` | `job-item` | Button that runs the job now |
+| `cache-usage` | `div` | `section` | Used space of the cache: a `meter`, the used space and the limit as `label`, a `stat-list` with the areas and the number of files, a hint as `label` and the button that clears the cache |
+| `meter` | `div` (`role="meter"`) | `cache-usage`, any | Level within a range, for example the used space of the cache; the share is `--wmp-meter-value`. It uses the variables of `progress` |
+| `meter-track` | `div` | `meter` | Background of the meter |
+| `meter-fill` | `div` | `meter-track` | Filled part of the meter |
 | `button` | `button` | any | Generic button, see `data-variant` in [States](#states) |
 | `icon` | `span` (`aria-hidden`) | any | Icon wrapper with the slot in `data-icon`, see [Icons](#icons) |
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
@@ -290,7 +294,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
-| `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate) |
+| `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate), `meter` (`aria-valuenow` from 0 to 100) |
 | `:disabled` | buttons and inputs |
 | `:checked` | `checkbox` |
 | `[open]` | `dialog`, `disclosure` |
@@ -305,13 +309,13 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `now-playing`, `playlists`, `settings`, `admin-library`, `admin-jobs`, `admin-users`, `not-found` |
+| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `now-playing`, `playlists`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-users`, `not-found` |
 | `data-kind` | `tile` | `album`, `artist`, `genre`, `year` |
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media` |
 | `data-field` | `field` (metadata editor) | `title`, `artist`, `album`, `album-artist`, `year`, `number`, `disc`, `genre` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `button` in `detail-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist` and, for admins, `edit-metadata`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`), the job (`library-scan`) or the section of the search and of an artist (`artists`, `albums`, `tracks`) and of a song (`files`), or the action of a detail page (`edit-metadata`) |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `button` in `detail-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist` and, for admins, `edit-metadata`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`), the job (`library-scan`, `cover-cache`) or the section of the search and of an artist (`artists`, `albums`, `tracks`), of a song (`files`) and of the cache page (`usage`, `settings`), or the action of a detail page (`edit-metadata`) |
 
 ## Variables
 
@@ -380,8 +384,8 @@ The background of `avatar` is the color of the profile, `--wmp-profile-color` (s
 |---|---|---|
 | `--wmp-image-logo` | `url('/brand/logo.svg') center / contain no-repeat` | `logo-image` |
 | `--wmp-image-cover-placeholder` | `var(--wmp-color-surface-raised)` | `cover` without image |
-| `--wmp-progress-track-background` | `var(--wmp-color-border)` | `progress-track` |
-| `--wmp-progress-fill-background` | `var(--wmp-color-accent)` | `progress-fill` |
+| `--wmp-progress-track-background` | `var(--wmp-color-border)` | `progress-track`, `meter-track` |
+| `--wmp-progress-fill-background` | `var(--wmp-color-accent)` | `progress-fill`, `meter-fill` |
 | `--wmp-image-default-button` | `var(--wmp-color-surface)` | Buttons with `data-variant="default"` |
 | `--wmp-image-default-button-hover` | `var(--wmp-color-hover)` | |
 | `--wmp-image-default-button-active` | `var(--wmp-color-selection)` | Also `aria-pressed="true"` |
@@ -474,7 +478,7 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-avatar-size` | `2rem` | Size of `avatar` |
 | `--wmp-avatar-size-l` | `6rem` | Size of `avatar` in `profile-tile` |
 | `--wmp-swatch-size` | `2rem` | Size of `color-swatch` |
-| `--wmp-progress-height` | `0.5rem` | Height of `progress-track` |
+| `--wmp-progress-height` | `0.5rem` | Height of `progress-track` and `meter-track` |
 
 On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list`.
 
@@ -491,6 +495,7 @@ The app sets these variables on single elements. Themes can read them, but never
 | `--wmp-profile-color` | `avatar` | Color of the profile as `#rrggbb` |
 | `--wmp-swatch-color` | `color-swatch` | Color of the swatch as `#rrggbb` |
 | `--wmp-progress-value` | `progress` | Share of the work done between 0 and 1 (0 while indeterminate) |
+| `--wmp-meter-value` | `meter` | Share of the range between 0 and 1 |
 
 ## Icons
 
@@ -542,6 +547,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `cover-placeholder` | `--wmp-icon-cover-placeholder` | `/icons/phosphor/fill/music-notes-fill.svg` | Content |
 | `admin-library` | `--wmp-icon-admin-library` | `/icons/phosphor/regular/folder-open.svg` | Content (administration) |
 | `admin-jobs` | `--wmp-icon-admin-jobs` | `/icons/phosphor/regular/clock-clockwise.svg` | Content (administration) |
+| `admin-cache` | `--wmp-icon-admin-cache` | `/icons/phosphor/regular/hard-drives.svg` | Content (administration) |
 | `album` | `--wmp-icon-album` | `/icons/phosphor/fill/vinyl-record-fill.svg` | Content (library: tiles and pages without a cover) |
 | `artist` | `--wmp-icon-artist` | `/icons/phosphor/fill/microphone-stage-fill.svg` | Content (library: tiles and pages without a cover) |
 | `genre` | `--wmp-icon-genre` | `/icons/phosphor/fill/guitar-fill.svg` | Content (library: tiles and pages without a cover) |
@@ -620,3 +626,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
     - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item` (`menu-item` already carried it, now it is documented), the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.
     - Additions without a version change: the library with tiles (`tile-list`, `tile-item`, `tile`, `tile-title`, `tile-subtitle`, attribute `data-kind`), detail pages (`detail-header`, `detail-info`, `detail-title`, `data-view` `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`) and the search (`data-view="library-search"`), the part `cover-image`, the button `load-more` with the state `loading`, the files of a song for admins (`file-list`, `file-item`, `file-path`, `file-meta` and their states), the state `video-only` of `list-row` and `badge` (in addition to `has-video`, which keeps its meaning), `aria-busy` on `view`, `menuitemradio` entries with `aria-checked` in the sort options, further values of `data-field` and `data-item` (also on `section`), `link` in `meta-value`, `view` and `section`, the icon slots `album`, `artist`, `genre`, `year`, `go-to-album` and `go-to-artist` and the variables `--wmp-cover-size-l` and `--wmp-tile-width`. The sort button `sort` is active where a list can be sorted.
     - Additions without a version change: the metadata editor of a song for admins in a `dialog` (`detail-actions` with the `button` `edit-metadata`, `field-row`, `form-note`, `data-field` on its `field`s, the menu entry `edit-metadata` in the menu of a song). Disabled inputs (`input:disabled`) are greyed out by the base; an open `dialog` fits the screen and scrolls its `dialog-body`.
+    - Additions without a version change: the cache page of the administration (`cache-usage`, `data-view="admin-cache"`, the entry `admin-cache` of `admin-nav`, further values of `data-item`) with the base component `meter` (`meter-track`, `meter-fill`, `role="meter"` with `aria-valuenow`), which uses the variables of `progress`, the runtime variable `--wmp-meter-value` and the icon slot `admin-cache`.

@@ -315,6 +315,7 @@
       "label": "Administration",
       "library": "Bibliothek",
       "jobs": "Jobs",
+      "cache": "Cache",
       "profiles": "Profile"
     }
   },
@@ -407,7 +408,8 @@
     "runNow": "Jetzt ausführen",
     "runNowNamed": "{name} jetzt ausführen",
     "names": {
-      "libraryScan": "Bibliotheks-Scan"
+      "libraryScan": "Bibliotheks-Scan",
+      "coverCache": "Cover vorbereiten"
     },
     "lastRun": "Zuletzt {date}",
     "duration": "Dauer {duration}",
@@ -415,9 +417,43 @@
     "never": "Noch nicht gelaufen",
     "schedule": "Alle {minutes} Minuten",
     "manualOnly": "Läuft nur auf Anforderung",
+    "afterScan": "Läuft nach Scans",
     "alreadyRunning": "Dieser Job läuft bereits.",
     "loadError": "Die Jobs konnten nicht geladen werden.",
     "runError": "Der Job konnte nicht gestartet werden."
+  },
+  "adminCache": {
+    "title": "Cache",
+    "usageTitle": "Belegung",
+    "usageLabel": "Belegter Platz des Caches",
+    "usage": "{size} von {limit} belegt",
+    "hint": "Enthält verkleinerte Cover. Alles darin wird bei Bedarf neu erstellt.",
+    "stats": {
+      "label": "Inhalt des Caches",
+      "covers": "Cover",
+      "transcodes": "Transcodierte Medien",
+      "entries": "Dateien"
+    },
+    "unavailable": "In den Cache-Ordner kann nicht geschrieben werden, daher werden Cover unverkleinert angezeigt. Prüfe das Volume /data.",
+    "clear": "Cache leeren",
+    "clearDialog": {
+      "title": "Cache leeren",
+      "text": "Alle Dateien des Caches entfernen? Cover werden beim nächsten Anzeigen neu erstellt.",
+      "confirm": "Leeren"
+    },
+    "cleared": "Der Cache ist leer.",
+    "clearError": "Der Cache konnte nicht geleert werden.",
+    "loadError": "Der Cache konnte nicht geladen werden.",
+    "settingsTitle": "Einstellungen",
+    "maxSize": "Maximale Größe",
+    "maxSizeHint": "Wird der Cache größer, werden die am längsten nicht genutzten Dateien entfernt.",
+    "save": "Speichern",
+    "saved": "Die Einstellungen sind gespeichert.",
+    "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
+    "settingsLoadError": "Die Einstellungen konnten nicht geladen werden.",
+    "errors": {
+      "maxSize": "Wähle eine Größe zwischen 100 MB und 1 TB."
+    }
   },
   "jobRuns": {
     "statuses": {
@@ -431,7 +467,8 @@
     "triggers": {
       "schedule": "Geplant",
       "manual": "Manuell",
-      "fileWatcher": "Ordnerüberwachung"
+      "fileWatcher": "Ordnerüberwachung",
+      "libraryScan": "Nach einem Scan"
     },
     "errors": {
       "jobFailed": "Der Lauf ist fehlgeschlagen. Details stehen im Server-Log.",
@@ -439,7 +476,9 @@
       "mediaFolderNotFound": "Der Medienordner existiert nicht. Prüfe das Volume des Containers.",
       "mediaFolderUnreadable": "Der Medienordner kann nicht gelesen werden. Prüfe seine Berechtigungen.",
       "mediaFolderEmpty": "Der Medienordner ist leer, deshalb wurde nichts entfernt. Prüfe, ob er eingebunden ist.",
-      "probeUnavailable": "ffprobe ist auf dem Server nicht verfügbar."
+      "probeUnavailable": "ffprobe ist auf dem Server nicht verfügbar.",
+      "ffmpegUnavailable": "ffmpeg ist auf dem Server nicht verfügbar.",
+      "cacheFolderUnwritable": "In den Cache-Ordner kann nicht geschrieben werden. Prüfe das Volume /data."
     }
   },
   "track": {

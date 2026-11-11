@@ -30,12 +30,14 @@ describe('AdminNav', () => {
         const nav = wrapper.get('nav[data-part="admin-nav"]')
         expect(nav.attributes('aria-label')).toBe('Administration')
         const items = wrapper.findAll('[data-part="admin-nav-item"]')
-        expect(items.map((item) => item.text())).toEqual(['Library', 'Jobs', 'Profiles'])
+        expect(items.map((item) => item.text())).toEqual(['Library', 'Jobs', 'Cache', 'Profiles'])
         expect(items.map((item) => item.attributes('href'))).toEqual([
             '/admin/library',
             '/admin/jobs',
+            '/admin/cache',
             '/admin/users',
         ])
+        expect(items.map((item) => item.attributes('data-item'))).toContain('admin-cache')
         expect(items[1]!.attributes('aria-current')).toBe('page')
         expect(items[1]!.attributes('data-state')).toBe('active')
         expect(items[0]!.attributes('aria-current')).toBeUndefined()
@@ -199,6 +201,20 @@ describe('JobList', () => {
         await item.get('button').trigger('click')
 
         expect(wrapper.emitted('run')).toEqual([['library-scan']])
+    })
+
+    it('says when a job without schedule runs', async () => {
+        const jobs: Job[] = [
+            { id: 'cover-cache', state: 'Idle', intervalMinutes: null, lastRun: null },
+            { id: 'library-scan', state: 'Idle', intervalMinutes: null, lastRun: null },
+        ]
+
+        const wrapper = await mountWithRouter(JobList, { jobs })
+
+        const items = wrapper.findAll('[data-part="job-item"]')
+        expect(items[0]!.get('[data-part="job-name"]').text()).toBe('Prepare covers')
+        expect(items[0]!.get('[data-part="job-meta"]').text()).toContain('Runs after scans')
+        expect(items[1]!.get('[data-part="job-meta"]').text()).toContain('Runs only when started')
     })
 
     it('blocks a job that is running', async () => {
