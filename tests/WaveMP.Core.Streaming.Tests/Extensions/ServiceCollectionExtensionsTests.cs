@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using WaveMP.Core.Metadata.Files;
 using WaveMP.Core.Streaming.Extensions;
+using WaveMP.Core.Streaming.Histories;
 using WaveMP.Core.Streaming.Options;
 using WaveMP.Core.Streaming.Signatures;
 using WaveMP.Core.Streaming.Sources;
@@ -26,6 +27,7 @@ public class ServiceCollectionExtensionsTests
         using IServiceScope scope = provider.CreateScope();
 
         scope.ServiceProvider.GetRequiredService<IStreamService>().Should().NotBeNull();
+        scope.ServiceProvider.GetRequiredService<IPlayHistoryService>().Should().NotBeNull();
         scope.ServiceProvider.GetRequiredService<IMediaUrlIssuer>().Should().NotBeNull();
         scope.ServiceProvider.GetRequiredService<IMediaUrlSigner>().Should().NotBeNull();
         scope.ServiceProvider.GetRequiredService<MediaUrlKeyStore>().Should().NotBeNull();

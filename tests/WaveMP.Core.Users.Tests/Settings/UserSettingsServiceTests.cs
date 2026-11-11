@@ -59,6 +59,43 @@ public class UserSettingsServiceTests
     }
 
     [Test]
+    public async Task UpdateAsync_WithReplayGain_SavesItAndKeepsTheLanguage()
+    {
+        User user = Given(Language.De);
+
+        UserSettings? result = await _service.UpdateAsync(
+            user.Id,
+            new UpdateUserSettingsCommand(ReplayGain: ReplayGainMode.Album));
+
+        result!.ReplayGain.Should().Be(ReplayGainMode.Album);
+        result.Language.Should().Be(Language.De);
+        await _users.Received(1).UpdateAsync(user, Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task UpdateAsync_WithoutReplayGain_KeepsIt()
+    {
+        User user = Given(Language.En);
+        user.Settings!.ReplayGain = ReplayGainMode.Track;
+
+        UserSettings? result = await _service.UpdateAsync(user.Id, new UpdateUserSettingsCommand(Language.De));
+
+        result!.ReplayGain.Should().Be(ReplayGainMode.Track);
+    }
+
+    [Test]
+    public async Task GetAsync_UserWithoutSettings_ReturnsTheDefaults()
+    {
+        User user = Given(Language.En);
+        user.Settings = null;
+
+        UserSettings? result = await _service.GetAsync(user.Id);
+
+        result!.Language.Should().Be(Language.En);
+        result.ReplayGain.Should().Be(ReplayGainMode.Off);
+    }
+
+    [Test]
     public async Task UpdateAsync_WithUnknownUser_ReturnsNull()
     {
         UserSettings? result = await _service.UpdateAsync(Guid.NewGuid(), new UpdateUserSettingsCommand(Language.De));

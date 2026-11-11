@@ -28,6 +28,11 @@ internal sealed class UserSettingsService(IUserRepository users) : IUserSettings
             settings.Language = language;
         }
 
+        if (command.ReplayGain is { } replayGain)
+        {
+            settings.ReplayGain = replayGain;
+        }
+
         await users.UpdateAsync(user, cancellationToken);
         return settings;
     }
