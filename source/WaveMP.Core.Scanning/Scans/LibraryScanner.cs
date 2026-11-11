@@ -21,11 +21,13 @@ namespace WaveMP.Core.Scanning.Scans;
 /// library, reads new and changed files in parallel, writes every changed folder at once, removes folders that are
 /// gone and finally updates album covers, removes artists and albums without tracks and counts the library.
 /// A full scan that finds no files at all while the library has files fails and changes nothing, so an unmounted
-/// media folder never empties the library.
+/// media folder never empties the library. Reading and writing a folder and the clean-up hold the
+/// <see cref="LibraryWriteLock"/>, so other writers wait at most for one folder.
 /// </summary>
 internal sealed class LibraryScanner(
     ILibraryScanRepository library,
     LibraryWriter writer,
+    LibraryWriteLock writeLock,
     IMediaMetadataReader reader,
     IMediaProber prober,
     ISettingsSnapshot<LibrarySettings> settings,
@@ -49,6 +51,80 @@ internal sealed class LibraryScanner(
         {
             progress.Complete(runId);
         }
+    }
+
+    public async Task<bool> RefreshFolderAsync(
+        string directoryPath,
+        IReadOnlyCollection<string> changedFiles,
+        CancellationToken cancellationToken = default)
+    {
+        string directory = ScanScope.Normalize(directoryPath);
+        string root = mediaLibrary.Value.RootPath;
+        ScanOptions scanOptions = options.Value;
+        LibrarySettings librarySettings = settings.Current;
+        IssueCollector issues = new(scanOptions.MaxIssuesPerScan);
+
+        using IDisposable _ = await writeLock.AcquireAsync(cancellationToken);
+        if (!Directory.Exists(root))
+        {
+            logger.LogWarning("The media folder {MediaFolder} does not exist; nothing was read again", root);
+            return false;
+        }
+
+        DiscoveredDirectory? discovered = MediaFolderWalker.WalkFolder(
+            root,
+            directory,
+            new MediaKindClassifier(librarySettings),
+            scanOptions.MaxPathBytes,
+            path => issues.Add(path, ScanIssueCode.PathTooLong),
+            cancellationToken);
+        if (discovered is null)
+        {
+            logger.LogWarning("The folder {Folder} does not exist; nothing was read again", directory);
+            return false;
+        }
+
+        IReadOnlyList<MediaFileSnapshot> stored = await library.GetFolderSnapshotsAsync(directory, cancellationToken);
+        ScanPlan plan = ScanPlanner.Plan(
+            [discovered],
+            stored,
+            ScannerVersions.Metadata,
+            changedFiles.ToHashSet(StringComparer.Ordinal));
+        if (plan.ChangedDirectories is not [DirectoryPlan changed])
+        {
+            return false;
+        }
+
+        IReadOnlyDictionary<string, MediaFileMetadata> read = await ReadAsync(
+            root,
+            changed.FilesToRead,
+            scanOptions.MetadataParallelism,
+            issues,
+            null,
+            cancellationToken);
+        FolderWriteResult written = await writer.WriteFolderAsync(
+            changed,
+            read,
+            timeProvider.GetUtcNow(),
+            cancellationToken);
+        await library.DeleteOrphansAsync(cancellationToken);
+        await writer.UpdateAlbumCoversAsync(librarySettings.AlbumCoverNames, cancellationToken);
+
+        foreach (ScanIssue issue in issues.Listed)
+        {
+            logger.LogWarning("The file {File} has a problem: {Issue}", issue.Path, issue.Code);
+        }
+
+        logger.LogInformation(
+            "Folder {Folder} read again: {FilesRead} files read, {FilesRemoved} removed; {TracksAdded} tracks added, "
+            + "{TracksUpdated} updated, {TracksRemoved} removed",
+            directory,
+            changed.FilesToRead.Count,
+            changed.Removed,
+            written.TracksAdded,
+            written.TracksUpdated,
+            written.TracksRemoved);
+        return true;
     }
 
     private async Task<ScanResult> RunAsync(ScanScope scope, CancellationToken cancellationToken)
@@ -104,17 +180,32 @@ internal sealed class LibraryScanner(
         int tracksRemoved = 0;
         foreach (DirectoryPlan directory in plan.ChangedDirectories)
         {
-            IReadOnlyDictionary<string, MediaFileMetadata> read = await ReadAsync(
-                root,
-                directory.FilesToRead,
-                scanOptions.MetadataParallelism,
-                issues,
-                cancellationToken);
-            FolderWriteResult written = await writer.WriteFolderAsync(
-                directory,
-                read,
-                timeProvider.GetUtcNow(),
-                cancellationToken);
+            FolderWriteResult written;
+            using (await writeLock.AcquireAsync(cancellationToken))
+            {
+                IReadOnlyDictionary<string, MediaFileMetadata> read;
+                try
+                {
+                    read = await ReadAsync(
+                        root,
+                        directory.FilesToRead,
+                        scanOptions.MetadataParallelism,
+                        issues,
+                        progress,
+                        cancellationToken);
+                }
+                catch (ProbeUnavailableException exception)
+                {
+                    throw new JobFailedException(JobErrorCode.ProbeUnavailable, exception.Message, exception);
+                }
+
+                written = await writer.WriteFolderAsync(
+                    directory,
+                    read,
+                    timeProvider.GetUtcNow(),
+                    cancellationToken);
+            }
+
             tracksAdded += written.TracksAdded;
             tracksUpdated += written.TracksUpdated;
             tracksRemoved += written.TracksRemoved;
@@ -122,19 +213,24 @@ internal sealed class LibraryScanner(
         }
 
         progress.CleaningUp();
-        (int _, int deletedTracks) = await library.DeleteDirectoriesAsync(plan.DeletedDirectories, cancellationToken);
-        tracksRemoved += deletedTracks;
-
         bool changed = plan.ChangedDirectories.Count > 0 || plan.DeletedDirectories.Count > 0;
-        if (changed)
+        using (await writeLock.AcquireAsync(cancellationToken))
         {
-            await library.DeleteOrphansAsync(cancellationToken);
-        }
+            (int _, int deletedTracks) = await library.DeleteDirectoriesAsync(
+                plan.DeletedDirectories,
+                cancellationToken);
+            tracksRemoved += deletedTracks;
 
-        // A full scan always updates the album covers, so changed cover names apply without changed files.
-        if (changed || scope.IsFull)
-        {
-            await writer.UpdateAlbumCoversAsync(librarySettings.AlbumCoverNames, cancellationToken);
+            if (changed)
+            {
+                await library.DeleteOrphansAsync(cancellationToken);
+            }
+
+            // A full scan always updates the album covers, so changed cover names apply without changed files.
+            if (changed || scope.IsFull)
+            {
+                await writer.UpdateAlbumCoversAsync(librarySettings.AlbumCoverNames, cancellationToken);
+            }
         }
 
         LibraryTotals totals = await library.CountLibraryAsync(cancellationToken);
@@ -192,11 +288,17 @@ internal sealed class LibraryScanner(
         }
     }
 
+    /// <summary>
+    /// Reads the files in parallel. Problems of files are collected; <paramref name="progressTracker"/> (the progress
+    /// of a scan run) learns about every file read.
+    /// </summary>
+    /// <exception cref="ProbeUnavailableException">ffprobe cannot be started.</exception>
     private async Task<IReadOnlyDictionary<string, MediaFileMetadata>> ReadAsync(
         string root,
         IReadOnlyList<DiscoveredFile> files,
         int parallelism,
         IssueCollector issues,
+        IScanProgressTracker? progressTracker,
         CancellationToken cancellationToken)
     {
         ConcurrentDictionary<string, MediaFileMetadata> read = new(StringComparer.Ordinal);
@@ -206,30 +308,23 @@ internal sealed class LibraryScanner(
             CancellationToken = cancellationToken,
         };
 
-        try
+        await Parallel.ForEachAsync(files, parallelOptions, async (file, token) =>
         {
-            await Parallel.ForEachAsync(files, parallelOptions, async (file, token) =>
+            string path = Path.Combine(root, MediaFolderWalker.ToSystemPath(file.RelativePath));
+            MediaFileMetadata metadata = await reader.ReadAsync(path, file.Kind, token);
+            if (metadata.Issue is { } issue)
             {
-                string path = Path.Combine(root, MediaFolderWalker.ToSystemPath(file.RelativePath));
-                MediaFileMetadata metadata = await reader.ReadAsync(path, file.Kind, token);
-                if (metadata.Issue is { } issue)
+                issues.Add(file.RelativePath, issue switch
                 {
-                    issues.Add(file.RelativePath, issue switch
-                    {
-                        MediaFileIssue.TagsUnreadable => ScanIssueCode.TagsUnreadable,
-                        MediaFileIssue.ProbeFailed => ScanIssueCode.ProbeFailed,
-                        _ => ScanIssueCode.FileUnreadable,
-                    });
-                }
+                    MediaFileIssue.TagsUnreadable => ScanIssueCode.TagsUnreadable,
+                    MediaFileIssue.ProbeFailed => ScanIssueCode.ProbeFailed,
+                    _ => ScanIssueCode.FileUnreadable,
+                });
+            }
 
-                read[file.RelativePath] = metadata;
-                progress.FileRead();
-            });
-        }
-        catch (ProbeUnavailableException exception)
-        {
-            throw new JobFailedException(JobErrorCode.ProbeUnavailable, exception.Message, exception);
-        }
+            read[file.RelativePath] = metadata;
+            progressTracker?.FileRead();
+        });
 
         return read;
     }

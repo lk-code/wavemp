@@ -76,6 +76,21 @@ public class PlanTests
     }
 
     [Test]
+    public void Plan_FileKnownToBeChanged_IsReadAgainWithTheSameSizeAndTime()
+    {
+        ScanPlan plan = ScanPlanner.Plan(
+            [Directory("A", File("A/edited.mp3"), File("A/same.mp3"))],
+            [Stored("A/edited.mp3"), Stored("A/same.mp3")],
+            1,
+            new HashSet<string>(["A/edited.mp3", "B/other.mp3"], StringComparer.Ordinal));
+
+        DirectoryPlan directory = plan.ChangedDirectories.Should().ContainSingle().Subject;
+        directory.FilesToRead.Select(file => file.RelativePath).Should().Equal("A/edited.mp3");
+        (directory.Added, directory.Updated, directory.Removed).Should().Be((0, 1, 0));
+        plan.FilesUnchanged.Should().Be(1);
+    }
+
+    [Test]
     public void Plan_StoredFolderMissingOnDisk_IsDeleted()
     {
         ScanPlan plan = ScanPlanner.Plan(

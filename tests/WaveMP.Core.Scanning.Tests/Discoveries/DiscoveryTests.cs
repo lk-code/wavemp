@@ -125,6 +125,70 @@ public class DiscoveryTests
             .Should().BeEmpty();
     }
 
+    [Test]
+    public void WalkFolder_Folder_ListsItsFilesWithoutSubfolders()
+    {
+        using TemporaryDirectory directory = new();
+        Touch(directory, "Artist/Album/01 Song.mp3");
+        Touch(directory, "Artist/Album/cover.jpg");
+        Touch(directory, "Artist/Album/CD2/01 Other.mp3");
+        Touch(directory, "Artist/Album Two/01 Third.mp3");
+
+        DiscoveredDirectory? result = WalkFolder(directory, "Artist/Album");
+
+        result.Should().NotBeNull();
+        result!.RelativePath.Should().Be("Artist/Album");
+        result.Files.Select(file => file.RelativePath)
+            .Should().Equal("Artist/Album/01 Song.mp3", "Artist/Album/cover.jpg");
+    }
+
+    [Test]
+    public void WalkFolder_MediaFolder_ListsTheFilesOfTheRootOnly()
+    {
+        using TemporaryDirectory directory = new();
+        Touch(directory, "Loose.mp3");
+        Touch(directory, "Artist/Song.mp3");
+
+        DiscoveredDirectory? result = WalkFolder(directory, string.Empty);
+
+        result!.RelativePath.Should().BeEmpty();
+        result.Files.Select(file => file.RelativePath).Should().Equal("Loose.mp3");
+    }
+
+    [TestCase("Gone")]
+    [TestCase("Artist/.hidden")]
+    [TestCase("Artist/@eaDir")]
+    public void WalkFolder_MissingOrIgnoredFolder_ReturnsNull(string folder)
+    {
+        using TemporaryDirectory directory = new();
+        Touch(directory, "Artist/.hidden/Song.mp3");
+        Touch(directory, "Artist/@eaDir/Song.mp3");
+
+        WalkFolder(directory, folder).Should().BeNull();
+    }
+
+    [Test]
+    public void WalkFolder_EmptyFolder_ReturnsItWithoutFiles()
+    {
+        using TemporaryDirectory directory = new();
+        directory.CreateDirectory("Artist/Empty");
+
+        DiscoveredDirectory? result = WalkFolder(directory, "Artist/Empty");
+
+        result!.Files.Should().BeEmpty();
+    }
+
+    private static DiscoveredDirectory? WalkFolder(TemporaryDirectory directory, string folder)
+    {
+        return MediaFolderWalker.WalkFolder(
+            directory.Path,
+            folder,
+            new MediaKindClassifier(new LibrarySettings()),
+            2000,
+            _ => { },
+            CancellationToken.None);
+    }
+
     private static void Touch(TemporaryDirectory directory, string relativePath)
     {
         string path = directory.Combine(relativePath);

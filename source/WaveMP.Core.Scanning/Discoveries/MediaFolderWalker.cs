@@ -4,8 +4,9 @@ using WaveMP.Data.Entities;
 namespace WaveMP.Core.Scanning.Discoveries;
 
 /// <summary>
-/// Walks a folder of the media folder and all its subfolders and lists their media files, folder by folder. Ignored
-/// names are skipped, inaccessible entries too. Links to folders are not followed (no cycles); links to files are.
+/// Walks a folder of the media folder and all its subfolders, or a single folder, and lists their media files, folder
+/// by folder. Ignored names are skipped, inaccessible entries too. Links to folders are not followed (no cycles);
+/// links to files are.
 /// </summary>
 public static class MediaFolderWalker
 {
@@ -29,6 +30,40 @@ public static class MediaFolderWalker
         MediaKindClassifier classifier,
         int maxPathBytes,
         Action<string> pathTooLong,
+        CancellationToken cancellationToken)
+    {
+        return WalkFrom(rootPath, startDirectory, classifier, maxPathBytes, pathTooLong, true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Lists the media files of one folder, without its subfolders. Returns <c>null</c> if the folder does not exist,
+    /// is ignored or is a link to a folder (the walk of its parent would not follow it either).
+    /// </summary>
+    /// <param name="rootPath">Absolute path of the media folder.</param>
+    /// <param name="directory">Relative path of the folder; empty for the media folder itself.</param>
+    /// <param name="classifier">Decides which files are media files.</param>
+    /// <param name="maxPathBytes">Longest relative path in UTF-8 bytes.</param>
+    /// <param name="pathTooLong">Called with the relative path of every file that is skipped for its length.</param>
+    /// <param name="cancellationToken">Stops the walk.</param>
+    public static DiscoveredDirectory? WalkFolder(
+        string rootPath,
+        string directory,
+        MediaKindClassifier classifier,
+        int maxPathBytes,
+        Action<string> pathTooLong,
+        CancellationToken cancellationToken)
+    {
+        return WalkFrom(rootPath, directory, classifier, maxPathBytes, pathTooLong, false, cancellationToken)
+            .FirstOrDefault();
+    }
+
+    private static IEnumerable<DiscoveredDirectory> WalkFrom(
+        string rootPath,
+        string startDirectory,
+        MediaKindClassifier classifier,
+        int maxPathBytes,
+        Action<string> pathTooLong,
+        bool recursive,
         CancellationToken cancellationToken)
     {
         if (IgnoredNames.IsIgnoredPath(startDirectory))
@@ -61,7 +96,7 @@ public static class MediaFolderWalker
                 string entryPath = relativePath.Length == 0 ? entry.Name : relativePath + "/" + entry.Name;
                 if (entry is DirectoryInfo subdirectory)
                 {
-                    if (subdirectory.LinkTarget is null)
+                    if (recursive && subdirectory.LinkTarget is null)
                     {
                         subdirectories.Add((subdirectory, entryPath));
                     }

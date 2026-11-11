@@ -8,6 +8,7 @@ using WaveMP.Core.Metadata.Extensions;
 using WaveMP.Core.Scanning.Extensions;
 using WaveMP.Core.Scanning.Plans;
 using WaveMP.Core.Scanning.Scans;
+using WaveMP.Core.Scanning.Writers;
 using WaveMP.Core.Settings.Extensions;
 using WaveMP.Data;
 using WaveMP.Data.Entities;
@@ -438,6 +439,157 @@ public class LibraryScannerTests
         result.Statistics.TracksTotal.Should().Be(2);
     }
 
+    [Test]
+    public async Task RefreshFolderAsync_ChangedFile_UpdatesTheTrack()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3", tags: new TestTags { Title = "Before", Genre = "Rock" });
+        await ScanAsync();
+
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", new TestTags { Title = "After", Genre = "Jazz" });
+        bool changed = await RefreshAsync("Band/Album");
+
+        changed.Should().BeTrue();
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        Track track = await LoadTrackAsync(db, "01 - ONE");
+        (track.Title, track.Genre).Should().Be(("After", "Jazz"));
+        track.Files.Single().Tags.Title.Should().Be("After");
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_FileWithTheSameSizeAndTime_IsReadAgainOnlyIfNamed()
+    {
+        string path = "Band/Album/01 - One.mp3";
+        await AudioAsync(path, tags: new TestTags { Title = "Before" });
+        DateTime modified = File.GetLastWriteTimeUtc(_media.Combine(path));
+        await ScanAsync();
+
+        // Tags written in place may keep the size (padding) and, on coarse file systems, the change time.
+        await AudioAsync(path, tags: new TestTags { Title = "Behind" });
+        File.SetLastWriteTimeUtc(_media.Combine(path), modified);
+        bool unnamed = await RefreshAsync("Band/Album");
+        bool named = await RefreshAsync("Band/Album", path);
+
+        (unnamed, named).Should().Be((false, true));
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        (await LoadTrackAsync(db, "01 - ONE")).Title.Should().Be("Behind");
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_LeavesOtherFoldersAndSubfoldersAlone()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3", tags: new TestTags { Title = "One" });
+        await AudioAsync("Band/Album/CD2/01 - Two.mp3", tags: new TestTags { Title = "Two" });
+        await AudioAsync("Other/01 - Three.mp3", tags: new TestTags { Title = "Three" });
+        await ScanAsync();
+
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", new TestTags { Title = "One changed" });
+        await ChangeAudioAsync("Band/Album/CD2/01 - Two.mp3", new TestTags { Title = "Two changed" });
+        await ChangeAudioAsync("Other/01 - Three.mp3", new TestTags { Title = "Three changed" });
+        await AudioAsync("Other/02 - New.mp3");
+        await RefreshAsync("Band/Album");
+
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        (await db.Tracks.OrderBy(track => track.Title).Select(track => track.Title).ToListAsync())
+            .Should().Equal("One changed", "Three", "Two");
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_MediaFolder_ReadsTheFilesOfTheRoot()
+    {
+        await AudioAsync("Loose.mp3", tags: new TestTags { Title = "Loose" });
+        await ScanAsync();
+
+        await ChangeAudioAsync("Loose.mp3", new TestTags { Title = "Loose changed" });
+        bool changed = await RefreshAsync(string.Empty);
+
+        changed.Should().BeTrue();
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        (await LoadTrackAsync(db, "LOOSE")).Title.Should().Be("Loose changed");
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_NewAlbum_RemovesTheOldAlbumAndSetsTheAlbumCover()
+    {
+        await AudioAsync("Band/Record/01 - One.mp3", tags: new TestTags { Artist = "Band", Album = "Old Name" });
+        await ImageAsync("Band/Record/cover.jpg", 100, 100);
+        await ScanAsync();
+
+        await ChangeAudioAsync(
+            "Band/Record/01 - One.mp3",
+            new TestTags { Artist = "Other Band", Album = "New Name" });
+        await RefreshAsync("Band/Record");
+
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        Album album = await db.Albums
+            .Include(item => item.AlbumArtist)
+            .Include(item => item.Covers).ThenInclude(cover => cover.MediaFile)
+            .SingleAsync();
+        album.Title.Should().Be("New Name");
+        album.AlbumArtist!.Name.Should().Be("Other Band");
+        album.Covers.Should().ContainSingle().Which.MediaFile!.FileName.Should().Be("cover.jpg");
+        (await db.Artists.Select(artist => artist.Name).ToListAsync()).Should().Equal("Other Band");
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_MissingFolder_ChangesNothing()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3");
+        await ScanAsync();
+        Directory.Delete(_media.Combine("Band/Album"), recursive: true);
+
+        bool changed = await RefreshAsync("Band/Album");
+
+        changed.Should().BeFalse();
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        (await db.Tracks.CountAsync()).Should().Be(1);
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_UnchangedFolder_ReturnsFalse()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3");
+        await ScanAsync();
+
+        (await RefreshAsync("Band/Album")).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_WhileTheLockIsHeld_Waits()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3", tags: new TestTags { Title = "Before" });
+        await ScanAsync();
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", new TestTags { Title = "After" });
+        LibraryWriteLock writeLock = _services.GetRequiredService<LibraryWriteLock>();
+
+        Task<bool> refresh;
+        using (await writeLock.AcquireAsync())
+        {
+            refresh = RefreshAsync("Band/Album");
+            await Task.Delay(200);
+            refresh.IsCompleted.Should().BeFalse();
+        }
+
+        (await refresh.WaitAsync(TimeSpan.FromSeconds(30))).Should().BeTrue();
+    }
+
+    [Test]
+    public async Task RefreshFolderAsync_DuringAScan_DoesNotChangeItsProgress()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3", tags: new TestTags { Title = "Before" });
+        await ScanAsync();
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", new TestTags { Title = "After" });
+        IScanProgressTracker progress = _services.GetRequiredService<IScanProgressTracker>();
+        var runId = Guid.NewGuid();
+        progress.Start(runId);
+        progress.Planned(3, 7);
+        ScanProgress before = progress.Get(runId)!;
+
+        (await RefreshAsync("Band/Album")).Should().BeTrue();
+
+        progress.Get(runId).Should().Be(before);
+        progress.Complete(runId);
+    }
+
     private static (string Title, string? Artist, string? Album, int? Track, int? Disc) Describe(
         IEnumerable<Track> tracks,
         string directory,
@@ -486,6 +638,22 @@ public class LibraryScannerTests
         await using AsyncServiceScope serviceScope = (services ?? _services).CreateAsyncScope();
         ILibraryScanner scanner = serviceScope.ServiceProvider.GetRequiredService<ILibraryScanner>();
         return await scanner.ScanAsync(scope ?? ScanScope.Full, Guid.NewGuid());
+    }
+
+    private async Task<bool> RefreshAsync(string folder, params string[] changedFiles)
+    {
+        await using AsyncServiceScope serviceScope = _services.CreateAsyncScope();
+        ILibraryScanner scanner = serviceScope.ServiceProvider.GetRequiredService<ILibraryScanner>();
+        return await scanner.RefreshFolderAsync(folder, changedFiles);
+    }
+
+    /// <summary>
+    /// Writes the file again with other tags and a later change time, so a scan sees the change for sure.
+    /// </summary>
+    private async Task ChangeAudioAsync(string relativePath, TestTags tags)
+    {
+        await AudioAsync(relativePath, tags: tags);
+        File.SetLastWriteTimeUtc(_media.Combine(relativePath), DateTime.UtcNow.AddMinutes(1));
     }
 
     private Task AudioAsync(

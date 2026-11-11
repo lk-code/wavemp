@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddOptions<ScanOptions>().BindConfiguration(ScanOptions.SectionName);
 
         services.AddSingleton<IScanProgressTracker, ScanProgressTracker>();
+        services.AddSingleton<LibraryWriteLock>();
         services.AddScoped<LibraryWriter>();
         services.AddScoped<ILibraryScanner, LibraryScanner>();
         services.AddScoped<IScanService, ScanService>();
