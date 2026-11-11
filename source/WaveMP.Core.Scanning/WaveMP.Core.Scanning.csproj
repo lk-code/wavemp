@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WaveMP.Core.Scanning.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WaveMP.Core.Jobs\WaveMP.Core.Jobs.csproj" />
+    <ProjectReference Include="..\WaveMP.Core.Metadata\WaveMP.Core.Metadata.csproj" />
+    <ProjectReference Include="..\WaveMP.Core.Settings\WaveMP.Core.Settings.csproj" />
+    <ProjectReference Include="..\WaveMP.Data\WaveMP.Data.csproj" />
+  </ItemGroup>
+
+</Project>

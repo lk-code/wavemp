@@ -86,22 +86,23 @@ internal sealed class LibraryScanRepository(WaveMpDbContext dbContext) : ILibrar
         }
     }
 
-    public async Task DeleteDirectoriesAsync(
+    public async Task<(int Files, int Tracks)> DeleteDirectoriesAsync(
         IReadOnlyCollection<string> directories,
         CancellationToken cancellationToken = default)
     {
         if (directories.Count == 0)
         {
-            return;
+            return (0, 0);
         }
 
         string[] paths = [.. directories];
-        await dbContext.MediaFiles
+        int files = await dbContext.MediaFiles
             .Where(file => paths.Contains(file.DirectoryPath))
             .ExecuteDeleteAsync(cancellationToken);
-        await dbContext.Tracks
+        int tracks = await dbContext.Tracks
             .Where(track => paths.Contains(track.DirectoryPath))
             .ExecuteDeleteAsync(cancellationToken);
+        return (files, tracks);
     }
 
     public async Task<IReadOnlyList<AlbumFolder>> GetAlbumFoldersAsync(CancellationToken cancellationToken = default)

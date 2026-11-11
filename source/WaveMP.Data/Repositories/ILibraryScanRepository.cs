@@ -50,9 +50,12 @@ public interface ILibraryScanRepository
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes the files and tracks of folders that no longer exist (not their subfolders).
+    /// Deletes the files and tracks of folders that no longer exist (not their subfolders). Returns the number of
+    /// deleted files and tracks.
     /// </summary>
-    Task DeleteDirectoriesAsync(IReadOnlyCollection<string> directories, CancellationToken cancellationToken = default);
+    Task<(int Files, int Tracks)> DeleteDirectoriesAsync(
+        IReadOnlyCollection<string> directories,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The folders that contain tracks of an album.
