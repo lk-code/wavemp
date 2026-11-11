@@ -56,6 +56,10 @@ export const iconSlots = {
     'cover-placeholder': { file: fill('music-notes'), area: 'content' },
     'admin-library': { file: regular('folder-open'), area: 'content' },
     'admin-jobs': { file: regular('clock-clockwise'), area: 'content' },
+    album: { file: regular('vinyl-record'), area: 'content' },
+    artist: { file: regular('microphone-stage'), area: 'content' },
+    genre: { file: regular('guitar'), area: 'content' },
+    year: { file: regular('calendar-blank'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },

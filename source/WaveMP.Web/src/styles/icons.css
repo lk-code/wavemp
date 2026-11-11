@@ -155,6 +155,22 @@
         --_icon: var(--wmp-icon-admin-jobs);
     }
 
+    [data-icon='album'] {
+        --_icon: var(--wmp-icon-album);
+    }
+
+    [data-icon='artist'] {
+        --_icon: var(--wmp-icon-artist);
+    }
+
+    [data-icon='genre'] {
+        --_icon: var(--wmp-icon-genre);
+    }
+
+    [data-icon='year'] {
+        --_icon: var(--wmp-icon-year);
+    }
+
     [data-icon='shuffle'] {
         --_icon: var(--wmp-icon-shuffle);
     }
