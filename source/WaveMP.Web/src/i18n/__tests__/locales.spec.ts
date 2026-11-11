@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { LanguageObject } from '@/api/generated/models'
 import { createWaveMpI18n, setLocale } from '../index'
 import { browserLocales, defaultLocale, resolveLocale, supportedLocales } from '../locales'
 
@@ -6,6 +7,10 @@ describe('resolveLocale', () => {
     it('supports English and German with English as default', () => {
         expect(supportedLocales).toEqual(['en', 'de'])
         expect(defaultLocale).toBe('en')
+    })
+
+    it('are exactly the languages of the API', () => {
+        expect([...supportedLocales].sort()).toEqual(Object.values(LanguageObject).sort())
     })
 
     it('matches exact tags case-insensitively', () => {

@@ -1,0 +1,114 @@
+/*
+ * Profile selection: a page of its own without the app shell, shown before a profile is selected.
+ * Mobile first: the tiles wrap into as many columns as fit, two on a phone.
+ */
+@layer wavemp.components {
+    [data-part='profile-select'] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: center;
+        justify-items: center;
+        gap: var(--wmp-space-xl);
+        min-block-size: 100dvh;
+        padding: max(var(--wmp-space-xl), env(safe-area-inset-top))
+            max(var(--wmp-space-l), env(safe-area-inset-right))
+            max(var(--wmp-space-xl), env(safe-area-inset-bottom))
+            max(var(--wmp-space-l), env(safe-area-inset-left));
+        background: var(--wmp-profile-select-background);
+        color: var(--wmp-profile-select-color);
+        text-align: center;
+    }
+
+    [data-part='profile-select'] > [data-part='logo'] {
+        font-size: var(--wmp-font-size-l);
+    }
+
+    [data-part='profile-select'] > [data-part='logo'] > [data-part='logo-image'] {
+        inline-size: 2.5rem;
+        block-size: 2.5rem;
+    }
+
+    [data-part='profile-select-title'] {
+        font-size: var(--wmp-font-size-xl);
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
+    [data-part='profile-select-hint'] {
+        max-inline-size: 30rem;
+        font-size: var(--wmp-font-size-s);
+        opacity: 0.8;
+    }
+
+    [data-part='profile-select'] > [data-part='alert'] {
+        max-inline-size: 30rem;
+    }
+
+    [data-part='profile-select'] > [data-part='empty-state'] {
+        color: inherit;
+    }
+
+    [data-part='profile-select'] [data-part='empty-state-title'] {
+        color: inherit;
+    }
+
+    [data-part='profile-list'] {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(7rem, 9rem));
+        justify-content: center;
+        gap: var(--wmp-space-l);
+        inline-size: min(100%, 48rem);
+    }
+
+    [data-part='profile-item'] {
+        display: grid;
+    }
+
+    [data-part='profile-tile'] {
+        --_avatar-size: var(--wmp-avatar-size-l);
+
+        position: relative;
+        display: grid;
+        justify-items: center;
+        align-content: start;
+        gap: var(--wmp-space-s);
+        min-inline-size: 0;
+        padding: var(--wmp-space-s);
+        border: 0;
+        border-radius: var(--wmp-radius-l);
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    [data-part='profile-tile'] > [data-part='label'] {
+        max-inline-size: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    [data-part='profile-tile']:is(:hover, :focus-visible):not(:disabled) > [data-part='avatar'] {
+        outline: 3px solid var(--wmp-color-focus);
+        outline-offset: 2px;
+    }
+
+    [data-part='profile-tile'][data-state~='current'] > [data-part='avatar'] {
+        outline: 3px solid var(--wmp-color-accent);
+        outline-offset: 2px;
+    }
+
+    /* The built-in admin steps back as soon as there are other profiles. */
+    [data-part='profile-tile'][data-state~='secondary'] {
+        opacity: var(--wmp-profile-secondary-opacity);
+    }
+
+    [data-part='profile-tile'][data-state~='secondary']:is(:hover, :focus-visible) {
+        opacity: 1;
+    }
+
+    [data-part='profile-tile']:disabled {
+        cursor: progress;
+    }
+}

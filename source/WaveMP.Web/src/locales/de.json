@@ -141,7 +141,9 @@
       "states": "Weitere Zustände",
       "parts": "Parts",
       "icons": "Icon-Slots",
-      "previews": "Layouts"
+      "previews": "Layouts",
+      "profiles": "Profilauswahl",
+      "alerts": "Meldungen"
     },
     "samples": {
       "button": "Button",
@@ -157,7 +159,18 @@
       "openContextMenu": "Kontextmenü öffnen",
       "contextMenuArea": "Hier rechtsklicken",
       "slider": "Schieberegler {value}",
-      "sliderDisabled": "Gesperrter Schieberegler"
+      "sliderDisabled": "Gesperrter Schieberegler",
+      "profileName": "Alex Morgan",
+      "profileInitials": "AM",
+      "secondProfileName": "Sam Lee",
+      "secondProfileInitials": "SL",
+      "adminName": "Admin",
+      "adminInitials": "A",
+      "firstStart": "Erster Start",
+      "loadError": "Profile konnten nicht geladen werden",
+      "alertError": "Etwas ist schiefgelaufen.",
+      "alertSuccess": "Die Änderungen sind gespeichert.",
+      "alertInfo": "Änderungen gelten sofort."
     },
     "transportStates": {
       "idle": "Leerlauf",
@@ -179,5 +192,16 @@
       "mobile": "Mobil",
       "desktop": "Desktop"
     }
+  },
+  "profiles": {
+    "title": "Wer hört zu?",
+    "list": "Profile",
+    "builtIn": "Integriertes Admin-Profil",
+    "firstStartHint": "Wähle das Admin-Profil, um weitere Profile anzulegen.",
+    "loadErrorTitle": "Profile konnten nicht geladen werden",
+    "loadErrorText": "Prüfe, ob der Server läuft, und versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "selectError": "Das Profil konnte nicht ausgewählt werden. Bitte versuche es erneut.",
+    "profileGone": "Dieses Profil existiert nicht mehr."
   }
 }

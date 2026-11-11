@@ -3,6 +3,7 @@ import LibraryView from '@/views/LibraryView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
+import ProfileSelectView from '@/views/ProfileSelectView.vue'
 import {
     defaultLibrarySection,
     librarySectionPattern,
@@ -13,8 +14,12 @@ declare module 'vue-router' {
     interface RouteMeta {
         /** Main tab (and bottom navigation item) of the page. */
         tab?: MainTab
-        /** Rendered without the app shell (internal pages). */
+        /** Rendered without the app shell (profile selection, internal pages). */
         bare?: boolean
+        /** Reachable without a selected profile. */
+        public?: boolean
+        /** Only for profiles with the role admin. */
+        admin?: boolean
     }
 }
 
@@ -28,7 +33,7 @@ export const devRoutes: RouteRecordRaw[] = import.meta.env.DEV
               path: '/dev/components',
               name: 'dev-components',
               component: () => import('@/views/dev/DevComponentsView.vue'),
-              meta: { bare: true },
+              meta: { bare: true, public: true },
           },
       ]
     : []
@@ -43,6 +48,12 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
     return [
         // The start page follows in step 11; until then the library opens.
         { path: '/', redirect: librarySongs },
+        {
+            path: '/profiles',
+            name: 'profiles',
+            component: ProfileSelectView,
+            meta: { bare: true, public: true },
+        },
         {
             path: '/now-playing',
             name: 'now-playing',

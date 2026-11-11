@@ -525,6 +525,56 @@
         --wmp-icon-size: var(--wmp-icon-size-s);
     }
 
+    /* --- Avatar and alert ---------------------------------------------------------------- */
+
+    /* Initials on the color of the profile; containers set the size with --_avatar-size. */
+    [data-part='avatar'] {
+        display: inline-grid;
+        place-items: center;
+        flex: none;
+        inline-size: var(--_avatar-size, var(--wmp-avatar-size));
+        block-size: var(--_avatar-size, var(--wmp-avatar-size));
+        overflow: hidden;
+        border-radius: var(--wmp-radius-m);
+        background: var(--wmp-profile-color, var(--wmp-color-accent));
+        color: var(--wmp-avatar-color);
+        font-size: calc(var(--_avatar-size, var(--wmp-avatar-size)) * 0.42);
+        font-weight: var(--wmp-font-weight-bold);
+        line-height: 1;
+        user-select: none;
+    }
+
+    [data-part='avatar-initials'] {
+        white-space: nowrap;
+    }
+
+    [data-part='alert'] {
+        --_alert-color: var(--wmp-color-accent);
+
+        display: flex;
+        align-items: flex-start;
+        gap: var(--wmp-space-s);
+        padding: var(--wmp-space-s) var(--wmp-space-m);
+        border: 1px solid color-mix(in srgb, var(--_alert-color), transparent 55%);
+        border-radius: var(--wmp-radius-s);
+        background: color-mix(in srgb, var(--_alert-color), var(--wmp-color-surface) 90%);
+        color: var(--wmp-color-text);
+        font-size: var(--wmp-font-size-s);
+        text-align: start;
+    }
+
+    [data-part='alert'][data-state~='error'] {
+        --_alert-color: var(--wmp-color-danger);
+    }
+
+    [data-part='alert'][data-state~='success'] {
+        --_alert-color: var(--wmp-color-success);
+    }
+
+    [data-part='alert'] > [data-part='icon'] {
+        color: var(--_alert-color);
+    }
+
     /* --- Cover --------------------------------------------------------------------------- */
 
     [data-part='cover'] {

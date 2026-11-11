@@ -15,7 +15,13 @@ const repositoryRoot = path.resolve(sourceDirectory, '../../..')
 const webAssets = path.join(repositoryRoot, 'assets', 'web')
 const stylesDirectory = path.join(sourceDirectory, 'styles')
 
-const runtimeVariables = ['--wmp-slider-value', '--wmp-tree-level', '--wmp-menu-x', '--wmp-menu-y']
+const runtimeVariables = [
+    '--wmp-slider-value',
+    '--wmp-tree-level',
+    '--wmp-menu-x',
+    '--wmp-menu-y',
+    '--wmp-profile-color',
+]
 
 function read(file: string): string {
     return readFileSync(file, 'utf8')

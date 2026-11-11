@@ -5,6 +5,7 @@
 import '@/styles/dev.css'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
@@ -17,6 +18,8 @@ import BaseTextField from '@/components/base/BaseTextField.vue'
 import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
 import AlbumGroupList from '@/components/library/AlbumGroupList.vue'
+import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
+import type { ProfileTileData } from '@/components/profiles/ProfileTile.vue'
 import AppBottomNav from '@/components/shell/AppBottomNav.vue'
 import AppHeader from '@/components/shell/AppHeader.vue'
 import AppSidebar from '@/components/shell/AppSidebar.vue'
@@ -170,6 +173,32 @@ const transports = computed(() => [
 ])
 
 const libraryLocation = { name: 'library-section', params: { section: 'songs' } }
+
+// Profiles (fixtures; the colors are part of the palette of the server)
+const adminProfile = computed<ProfileTileData>(() => ({
+    id: 'admin',
+    name: t('dev.samples.adminName'),
+    initials: t('dev.samples.adminInitials'),
+    color: '#1f6fd6',
+    isBuiltIn: true,
+}))
+const sampleProfiles = computed<ProfileTileData[]>(() => [
+    {
+        id: 'first',
+        name: t('dev.samples.profileName'),
+        initials: t('dev.samples.profileInitials'),
+        color: '#2e7d32',
+        isBuiltIn: false,
+    },
+    {
+        id: 'second',
+        name: t('dev.samples.secondProfileName'),
+        initials: t('dev.samples.secondProfileInitials'),
+        color: '#c2185b',
+        isBuiltIn: false,
+    },
+    adminProfile.value,
+])
 </script>
 
 <template>
@@ -336,6 +365,37 @@ const libraryLocation = { name: 'library-section', params: { section: 'songs' } 
                 :items="menuItems"
                 :label="t('dev.samples.openContextMenu')"
             />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.alerts') }}</h2>
+            <div data-part="dev-samples">
+                <BaseAlert tone="error" :message="t('dev.samples.alertError')" />
+                <BaseAlert tone="success" :message="t('dev.samples.alertSuccess')" />
+                <BaseAlert tone="info" :message="t('dev.samples.alertInfo')" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.profiles') }}</h2>
+            <div data-part="dev-sample">
+                <ProfileSelect
+                    :profiles="sampleProfiles"
+                    state="ready"
+                    current-id="first"
+                    :error="t('profiles.selectError')"
+                />
+            </div>
+            <div data-part="dev-samples">
+                <div data-part="dev-sample">
+                    <p data-part="dev-sample-title">{{ t('dev.samples.firstStart') }}</p>
+                    <ProfileSelect :profiles="[adminProfile]" state="ready" />
+                </div>
+                <div data-part="dev-sample">
+                    <p data-part="dev-sample-title">{{ t('dev.samples.loadError') }}</p>
+                    <ProfileSelect :profiles="[]" state="error" />
+                </div>
+            </div>
         </section>
 
         <section data-part="dev-section">

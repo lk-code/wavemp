@@ -43,6 +43,12 @@
         --wmp-dialog-background: var(--wmp-color-surface);
         --wmp-menu-color: var(--wmp-color-text);
         --wmp-menu-background: var(--wmp-color-surface);
+        --wmp-profile-select-color: var(--wmp-color-text);
+        --wmp-profile-select-background: var(--wmp-color-surface-raised);
+
+        /* Profiles */
+        --wmp-avatar-color: #ffffff;
+        --wmp-profile-secondary-opacity: 0.55;
 
         /* Graphics (values of the background shorthand) */
         --wmp-image-logo: url('/brand/logo.svg') center / contain no-repeat;
@@ -174,6 +180,8 @@
         --wmp-list-row-height: 2rem;
         --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr);
         --wmp-list-group-info-width: 11rem;
+        --wmp-avatar-size: 2rem;
+        --wmp-avatar-size-l: 6rem;
     }
 
     /* Document defaults */

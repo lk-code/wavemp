@@ -96,6 +96,11 @@
         max-inline-size: 18rem;
     }
 
+    /* Samples of full pages keep their content height. */
+    [data-part='dev-sample'] > [data-part='profile-select'] {
+        min-block-size: 0;
+    }
+
     [data-part='dev-part-list'] {
         display: flex;
         flex-wrap: wrap;

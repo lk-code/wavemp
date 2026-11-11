@@ -78,7 +78,7 @@ Example of a desktop layout with the sidebar on the right:
 | `app` | `div` | | Grid of all main areas |
 | `header` | `header` | `app` | Top bar |
 | `btn-menu` | `button` (`aria-expanded`, `aria-controls`) | `header` | Opens the sidebar as drawer (mobile) |
-| `logo` | `span` | `header` | App logo with `logo-image` and `label` |
+| `logo` | `span` | `header`, `profile-select` | App logo with `logo-image` and `label` |
 | `logo-image` | `span` | `logo` | Graphic of the logo (`--wmp-image-logo`) |
 | `nav-history` | `div` (`role="group"`) | `header` | Back and forward buttons |
 | `btn-back` | `button` | `nav-history` | Back in the history |
@@ -109,7 +109,7 @@ Example of a desktop layout with the sidebar on the right:
 | `content-title` | `h1` | `content` | Title of the page |
 | `view` | `div` | `content` | Page, see `data-view` in [States](#states) |
 | `placeholder-notice` | `p` (`role="note"`) | `view` | Notice that the content is a placeholder |
-| `empty-state` | `div` | `view`, `stage` | Message for empty content |
+| `empty-state` | `div` | `view`, `stage`, `profile-select` | Message for empty content, or that something could not be loaded |
 | `empty-state-title` | `p` | `empty-state` | Title of the message |
 | `empty-state-text` | `p` | `empty-state` | Text of the message |
 | `link` | `a` | `empty-state` | Text link in the content |
@@ -149,6 +149,14 @@ Example of a desktop layout with the sidebar on the right:
 | `btn-collapse` | `button` | `transport` | Closes the full-screen player (mobile) |
 | `bottom-nav` | `nav` | `app` | Main navigation at the bottom (mobile) |
 | `bottom-nav-item` | `a` (`aria-current`) | `bottom-nav` | Entry with `icon` and `label` |
+| `profile-select` | `main` | `body` (without `app`) | Profile selection, shown before a profile is selected; with `logo`, title, `profile-list` and, on the first start, a hint |
+| `profile-select-title` | `h1` | `profile-select` | Title of the profile selection |
+| `profile-select-hint` | `p` (`role="note"`) | `profile-select` | Hint on the first start, when only the built-in admin profile exists |
+| `profile-list` | `ul` | `profile-select` | Profiles to select |
+| `profile-item` | `li` | `profile-list` | One profile |
+| `profile-tile` | `button` | `profile-item` | Selects the profile; `avatar` and `label` (name) |
+| `avatar` | `span` (`aria-hidden`) | `profile-tile`, any | Initials on the color of the profile (`--wmp-profile-color`) |
+| `avatar-initials` | `span` | `avatar` | Initials of the profile |
 | `button` | `button` | any | Generic button, see `data-variant` in [States](#states) |
 | `icon` | `span` (`aria-hidden`) | any | Icon wrapper with the slot in `data-icon`, see [Icons](#icons) |
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
@@ -168,6 +176,7 @@ Example of a desktop layout with the sidebar on the right:
 | `context-menu` | `div` (`role="menu"`, `popover`) | any | Context menu, shown in the top layer |
 | `menu-item` | `button` (`role="menuitem"`) | `context-menu` | Entry with `icon` and `label` |
 | `menu-separator` | `hr` | `context-menu` | Separator between entries |
+| `alert` | `div` (`role="alert"` for errors, otherwise `role="status"`) | any | Message with `icon` and `label` |
 
 The internal component overview (`/dev/components`) uses its own parts starting with `dev-`. They are not part of the theme API.
 
@@ -198,12 +207,17 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `search` | `empty` or `filled` |
 | `context-menu` | `open` or `closed` |
 | `badge` | the kind of hint, for example `has-video` |
+| `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
+| `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
+| `alert` | `error`, `success` or `info` |
 
 ### ARIA attributes and native states
 
 | Attribute or state | Parts |
 |---|---|
 | `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item` |
+| `aria-current="true"` | `profile-tile` of the current profile |
+| `aria-busy="true"` | `profile-select` while a profile is being selected |
 | `aria-expanded` | `tree-item`, `btn-menu`, `now-playing-mini` (mobile) |
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
@@ -275,6 +289,17 @@ Text color and background of each area.
 | `--wmp-dialog-background` | `var(--wmp-color-surface)` |
 | `--wmp-menu-color` | `var(--wmp-color-text)` |
 | `--wmp-menu-background` | `var(--wmp-color-surface)` |
+| `--wmp-profile-select-color` | `var(--wmp-color-text)` |
+| `--wmp-profile-select-background` | `var(--wmp-color-surface-raised)` |
+
+### Profiles
+
+| Variable | Default | Used for |
+|---|---|---|
+| `--wmp-avatar-color` | `#ffffff` | Text color of the initials on `avatar` |
+| `--wmp-profile-secondary-opacity` | `0.55` | Opacity of the built-in admin `profile-tile` with the state `secondary` |
+
+The background of `avatar` is the color of the profile, `--wmp-profile-color` (see [Runtime variables](#runtime-variables)). The app sets it on the `avatar` element itself, so themes use it in rules for `[data-part='avatar']`, for example `background: linear-gradient(rgb(255 255 255 / 40%), transparent 55%), var(--wmp-profile-color);`. A variable on `:root` that refers to it would not work.
 
 ### Graphics
 
@@ -369,6 +394,8 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-list-row-height` | `2rem` | Minimum height of `list-row` |
 | `--wmp-list-columns` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)` | `grid-template-columns` of `list-header` and `list-row` |
 | `--wmp-list-group-info-width` | `11rem` | Width of `list-group-info` (desktop) |
+| `--wmp-avatar-size` | `2rem` | Size of `avatar` |
+| `--wmp-avatar-size-l` | `6rem` | Size of `avatar` in `profile-tile` |
 
 On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size` and `--wmp-field-height` on `app`, and its own `--wmp-list-columns` on `list`.
 
@@ -382,6 +409,7 @@ The app sets these variables on single elements. Themes can read them, but never
 | `--wmp-tree-level` | `tree-item` | Level of the node, starting at 1 |
 | `--wmp-menu-x` | `context-menu` | Horizontal position in pixels |
 | `--wmp-menu-y` | `context-menu` | Vertical position in pixels |
+| `--wmp-profile-color` | `avatar` | Color of the profile as `#rrggbb` |
 
 ## Icons
 
@@ -494,3 +522,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 ### Changelog
 
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
+    - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the base component `alert`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size` and `--wmp-avatar-size-l` and the runtime variable `--wmp-profile-color`.

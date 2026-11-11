@@ -23,9 +23,8 @@ export interface LocaleTarget {
 }
 
 /**
- * Switches the language of the web app and of the document.
- * Prepared for step 4: after selecting a profile, the app calls this with the language stored
- * for the user. Until then, the browser language applies.
+ * Switches the language of the web app and of the document. useLocaleSync calls it with the
+ * language of the selected profile, or with the browser language before a profile is selected.
  */
 export function setLocale(
     composer: LocaleTarget,

@@ -41,6 +41,20 @@ describe('createRoutes', () => {
         expect((await resolve('/playlists')).meta.tab).toBe('playlists')
     })
 
+    it('shows the profile selection without the shell and without a profile', async () => {
+        const route = await resolve('/profiles')
+
+        expect(route.name).toBe('profiles')
+        expect(route.meta.bare).toBe(true)
+        expect(route.meta.public).toBe(true)
+    })
+
+    it('protects the pages of the app', async () => {
+        for (const path of ['/now-playing', '/library/songs', '/playlists', '/unknown']) {
+            expect((await resolve(path)).meta.public, path).toBeUndefined()
+        }
+    })
+
     it('shows unknown pages and sections as not found', async () => {
         expect((await resolve('/library/unknown')).name).toBe('not-found')
         expect((await resolve('/some/client/route')).name).toBe('not-found')
@@ -58,6 +72,7 @@ describe('createRoutes', () => {
 
         expect(route.name).toBe('dev-components')
         expect(route.meta.bare).toBe(true)
+        expect(route.meta.public).toBe(true)
         expect(createRoutes(devRoutes).at(-1)?.name).toBe('not-found')
     })
 })

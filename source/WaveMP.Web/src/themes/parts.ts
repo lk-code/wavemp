@@ -96,6 +96,16 @@ export const parts = [
     'bottom-nav',
     'bottom-nav-item',
 
+    // Profile selection
+    'profile-select',
+    'profile-select-title',
+    'profile-select-hint',
+    'profile-list',
+    'profile-item',
+    'profile-tile',
+    'avatar',
+    'avatar-initials',
+
     // Base components
     'button',
     'icon',
@@ -116,6 +126,7 @@ export const parts = [
     'context-menu',
     'menu-item',
     'menu-separator',
+    'alert',
 ] as const
 
 export type PartName = (typeof parts)[number]
