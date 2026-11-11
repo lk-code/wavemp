@@ -59,6 +59,10 @@ describe('AdminUsersView', () => {
     it('lists the profiles with role, built-in state and actions', async () => {
         const { wrapper } = await mountView()
 
+        expect(wrapper.get('[data-part="admin-nav-item"][aria-current="page"]').text()).toBe(
+            'Profiles',
+        )
+
         expect(wrapper.get('[data-part="view"]').attributes('data-view')).toBe('admin-users')
         const items = wrapper.findAll('[data-part="user-item"]')
         expect(items.map((item) => item.get('[data-part="user-name"]').text())).toEqual([

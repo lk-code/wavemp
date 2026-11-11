@@ -5,12 +5,21 @@
 import '@/styles/dev.css'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { Job, Scan, ScanIssue } from '@/api/generated/models'
+import AdminNav from '@/components/admin/AdminNav.vue'
+import JobList from '@/components/admin/JobList.vue'
+import ScanHistory from '@/components/admin/ScanHistory.vue'
+import ScanIssues from '@/components/admin/ScanIssues.vue'
+import ScanPanel from '@/components/admin/ScanPanel.vue'
+import ScanSummary from '@/components/admin/ScanSummary.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
+import BaseCheckbox from '@/components/base/BaseCheckbox.vue'
 import BaseColorPicker from '@/components/base/BaseColorPicker.vue'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
+import BaseProgress from '@/components/base/BaseProgress.vue'
 import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
 import BaseSearchField from '@/components/base/BaseSearchField.vue'
 import BaseSelect from '@/components/base/BaseSelect.vue'
@@ -222,6 +231,110 @@ const sampleUsers = computed<UserListItem[]>(() =>
         createdAt: new Date(Date.UTC(2026, 10, 1 + index)),
     })),
 )
+
+// Administration (fixtures of the scan and the jobs)
+const checkboxOn = ref(true)
+const checkboxOff = ref(false)
+const sampleTime = new Date(Date.UTC(2026, 10, 11, 9, 30))
+const sampleIssues: ScanIssue[] = [
+    { path: 'Artist/Album/03 Broken.mp3', code: 'file.probe_failed' },
+    { path: 'Artist/Album/04 Locked.flac', code: 'file.tags_unreadable' },
+]
+const sampleProcessing: Scan = {
+    id: 'processing',
+    status: 'Running',
+    trigger: 'Manual',
+    queuedAt: sampleTime,
+    startedAt: sampleTime,
+    progress: {
+        phase: 'Processing',
+        directoriesFound: 42,
+        filesFound: 512,
+        directoriesToProcess: 6,
+        directoriesProcessed: 2,
+        filesToRead: 40,
+        filesRead: 17,
+    },
+    issues: [],
+}
+const sampleDiscovering: Scan = {
+    ...sampleProcessing,
+    id: 'discovering',
+    progress: { ...sampleProcessing.progress, phase: 'Discovering' },
+}
+const sampleFinished: Scan = {
+    id: 'finished',
+    status: 'Succeeded',
+    trigger: 'Schedule',
+    queuedAt: sampleTime,
+    startedAt: sampleTime,
+    finishedAt: new Date(sampleTime.getTime() + 83_000),
+    durationMilliseconds: 83_000,
+    isPartial: false,
+    statistics: {
+        directoriesScanned: 42,
+        directoriesChanged: 3,
+        filesFound: 512,
+        filesAdded: 12,
+        filesUpdated: 3,
+        filesRemoved: 1,
+        filesUnchanged: 496,
+        filesFailed: 2,
+        tracksAdded: 6,
+        tracksUpdated: 2,
+        tracksRemoved: 1,
+        tracksTotal: 230,
+        albumsTotal: 21,
+        artistsTotal: 14,
+    },
+    issues: sampleIssues,
+}
+const sampleHistory: Scan[] = [
+    sampleFinished,
+    {
+        ...sampleFinished,
+        id: 'partial',
+        trigger: 'FileWatcher',
+        isPartial: true,
+        issues: [],
+    },
+    {
+        id: 'failed',
+        status: 'Failed',
+        trigger: 'Manual',
+        queuedAt: sampleTime,
+        startedAt: sampleTime,
+        finishedAt: sampleTime,
+        durationMilliseconds: 120,
+        errorCode: 'scan.media_folder_empty',
+        issues: [],
+    },
+    { id: 'interrupted', status: 'Interrupted', trigger: 'Schedule', queuedAt: sampleTime },
+]
+const sampleIdleJob: Job[] = [
+    {
+        id: 'library-scan',
+        state: 'Idle',
+        intervalMinutes: 360,
+        nextRunAt: new Date(sampleTime.getTime() + 6 * 3_600_000),
+        lastRun: {
+            id: 'last',
+            jobId: 'library-scan',
+            status: 'Succeeded',
+            trigger: 'Schedule',
+            queuedAt: sampleTime,
+            startedAt: sampleTime,
+            durationMilliseconds: 83_000,
+        },
+    },
+]
+const sampleRunningJob: Job[] = [
+    {
+        ...sampleIdleJob[0],
+        state: 'Running',
+        lastRun: { ...sampleIdleJob[0]!.lastRun, status: 'Running', durationMilliseconds: null },
+    },
+]
 </script>
 
 <template>
@@ -402,6 +515,46 @@ const sampleUsers = computed<UserListItem[]>(() =>
                     <BaseButton variant="primary" icon="add" :label="t('adminUsers.add')" />
                 </div>
                 <UserList :users="sampleUsers" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.administration') }}</h2>
+            <div data-part="view" data-view="admin-library">
+                <AdminNav />
+                <section data-part="section">
+                    <h2 data-part="section-title">{{ t('adminLibrary.scanTitle') }}</h2>
+                    <ScanPanel :scan="null" activity="idle" />
+                    <ScanPanel :scan="sampleDiscovering" activity="running" />
+                    <ScanPanel :scan="sampleProcessing" activity="running" />
+                    <ScanSummary :scan="sampleFinished" />
+                    <ScanIssues :issues="sampleIssues" :failed="3" open />
+                </section>
+                <section data-part="section">
+                    <h2 data-part="section-title">{{ t('adminLibrary.historyTitle') }}</h2>
+                    <ScanHistory :scans="sampleHistory" has-more />
+                </section>
+                <section data-part="section">
+                    <h2 data-part="section-title">{{ t('adminLibrary.settingsTitle') }}</h2>
+                    <form data-part="form" @submit.prevent>
+                        <BaseCheckbox
+                            v-model="checkboxOn"
+                            :label="t('adminLibrary.fileWatcher')"
+                            :hint="t('adminLibrary.fileWatcherHint')"
+                        />
+                        <BaseCheckbox
+                            v-model="checkboxOff"
+                            :label="t('dev.samples.textField')"
+                            :error="t('dev.samples.error')"
+                        />
+                        <BaseProgress :label="t('adminLibrary.progressLabel')" :value="0.4" />
+                        <BaseProgress :label="t('adminLibrary.progressLabel')" />
+                    </form>
+                </section>
+            </div>
+            <div data-part="view" data-view="admin-jobs">
+                <JobList :jobs="sampleIdleJob" />
+                <JobList :jobs="sampleRunningJob" />
             </div>
         </section>
 

@@ -15,6 +15,13 @@ export interface RouteInfo {
     readonly params: Readonly<Record<string, string | string[] | undefined>>
 }
 
+/** Message keys of the titles of the admin pages. */
+const adminPageTitles = {
+    'admin-library': 'adminLibrary.title',
+    'admin-jobs': 'adminJobs.title',
+    'admin-users': 'adminUsers.title',
+} as const
+
 export function buildBreadcrumb(route: RouteInfo): Crumb[] {
     const crumbs: Crumb[] = [{ id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } }]
 
@@ -36,8 +43,11 @@ export function buildBreadcrumb(route: RouteInfo): Crumb[] {
         case 'settings':
             crumbs.push({ id: 'settings', labelKey: 'settings.title' })
             break
+        case 'admin-library':
+        case 'admin-jobs':
         case 'admin-users':
-            crumbs.push({ id: 'admin-users', labelKey: 'adminUsers.title' })
+            crumbs.push({ id: 'admin', labelKey: 'admin.title', to: { name: 'admin' } })
+            crumbs.push({ id: route.name, labelKey: adminPageTitles[route.name] })
             break
         case 'not-found':
             crumbs.push({ id: 'not-found', labelKey: 'notFound.title' })

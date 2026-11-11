@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BaseAlert from '../BaseAlert.vue'
+import BaseCheckbox from '../BaseCheckbox.vue'
+import BaseProgress from '../BaseProgress.vue'
 import BaseSelect from '../BaseSelect.vue'
 import BaseTextField from '../BaseTextField.vue'
 
@@ -93,5 +95,64 @@ describe('BaseAlert', () => {
         expect(error.get('[data-part="label"]').text()).toBe('Failed')
         expect(info.get('[data-part="alert"]').attributes('role')).toBe('status')
         expect(info.get('[data-part="alert"]').attributes('data-state')).toBe('info')
+    })
+})
+
+describe('BaseCheckbox', () => {
+    it('renders a checkbox field and binds the checked state', async () => {
+        const wrapper = mount(BaseCheckbox, {
+            props: { label: 'Watch', modelValue: false, hint: 'Help' },
+        })
+
+        const field = wrapper.get('[data-part="field"]')
+        expect(field.attributes('data-variant')).toBe('checkbox')
+        expect(field.get('[data-part="label"]').text()).toBe('Watch')
+        const input = field.get('input[type="checkbox"][data-part="checkbox"]')
+        expect(input.attributes('aria-describedby')).toBe(
+            field.get('[data-part="field-hint"]').attributes('id'),
+        )
+
+        await input.setValue(true)
+
+        expect(wrapper.emitted('update:modelValue')).toEqual([[true]])
+    })
+
+    it('marks an error', () => {
+        const wrapper = mount(BaseCheckbox, { props: { label: 'Watch', error: 'Wrong' } })
+
+        expect(wrapper.get('[data-part="field"]').attributes('data-state')).toBe('invalid')
+        expect(wrapper.get('input').attributes('aria-invalid')).toBe('true')
+    })
+})
+
+describe('BaseProgress', () => {
+    it('shows the share done as value and runtime variable', () => {
+        const wrapper = mount(BaseProgress, {
+            props: { label: 'Progress', value: 0.25, valueText: '1 of 4' },
+        })
+
+        const progress = wrapper.get('[data-part="progress"]')
+        expect(progress.attributes('role')).toBe('progressbar')
+        expect(progress.attributes('aria-label')).toBe('Progress')
+        expect(progress.attributes('aria-valuenow')).toBe('25')
+        expect(progress.attributes('aria-valuetext')).toBe('1 of 4')
+        expect(progress.attributes('data-state')).toBeUndefined()
+        expect(progress.attributes('style')).toContain('--wmp-progress-value: 0.25')
+        expect(
+            progress.find('[data-part="progress-track"] > [data-part="progress-fill"]').exists(),
+        ).toBe(true)
+    })
+
+    it('is indeterminate without a value and keeps values between 0 and 1', () => {
+        const indeterminate = mount(BaseProgress, { props: { label: 'Progress' } })
+        const tooMuch = mount(BaseProgress, { props: { label: 'Progress', value: 3 } })
+
+        expect(indeterminate.get('[data-part="progress"]').attributes('data-state')).toBe(
+            'indeterminate',
+        )
+        expect(
+            indeterminate.get('[data-part="progress"]').attributes('aria-valuenow'),
+        ).toBeUndefined()
+        expect(tooMuch.get('[data-part="progress"]').attributes('aria-valuenow')).toBe('100')
     })
 })

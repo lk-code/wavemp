@@ -147,6 +147,14 @@
         --_icon: var(--wmp-icon-cover-placeholder);
     }
 
+    [data-icon='admin-library'] {
+        --_icon: var(--wmp-icon-admin-library);
+    }
+
+    [data-icon='admin-jobs'] {
+        --_icon: var(--wmp-icon-admin-jobs);
+    }
+
     [data-icon='shuffle'] {
         --_icon: var(--wmp-icon-shuffle);
     }
@@ -213,6 +221,18 @@
 
     [data-icon='manage-profiles'] {
         --_icon: var(--wmp-icon-manage-profiles);
+    }
+
+    [data-icon='administration'] {
+        --_icon: var(--wmp-icon-administration);
+    }
+
+    [data-icon='scan'] {
+        --_icon: var(--wmp-icon-scan);
+    }
+
+    [data-icon='run-job'] {
+        --_icon: var(--wmp-icon-run-job);
     }
 
     [data-icon='edit'] {

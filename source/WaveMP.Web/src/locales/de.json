@@ -145,7 +145,8 @@
       "profiles": "Profilauswahl",
       "alerts": "Meldungen",
       "forms": "Formulare",
-      "admin": "Profilverwaltung"
+      "admin": "Profilverwaltung",
+      "administration": "Administration"
     },
     "samples": {
       "button": "Button",
@@ -217,7 +218,7 @@
     "open": "Profil: {name}",
     "settings": "Einstellungen",
     "switchProfile": "Profil wechseln",
-    "manageProfiles": "Profile verwalten"
+    "administration": "Administration"
   },
   "settings": {
     "title": "Einstellungen",
@@ -277,6 +278,139 @@
       "title": "Profil löschen",
       "text": "Das Profil {name} löschen? Das kann nicht rückgängig gemacht werden.",
       "confirm": "Löschen"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "label": "Administration",
+      "library": "Bibliothek",
+      "jobs": "Jobs",
+      "profiles": "Profile"
+    }
+  },
+  "adminLibrary": {
+    "title": "Bibliothek",
+    "scanTitle": "Scan",
+    "scanNow": "Jetzt scannen",
+    "scanHint": "Findet neue, geänderte und gelöschte Dateien im Medienordner.",
+    "states": {
+      "idle": "Bereit",
+      "queued": "Wartet auf den Start",
+      "running": "Scannt"
+    },
+    "phases": {
+      "discovering": "Sucht Dateien",
+      "processing": "Liest Dateien",
+      "cleaningUp": "Schließt ab"
+    },
+    "progressLabel": "Fortschritt des Scans",
+    "progress": "{done} von {total} Dateien",
+    "progressFolders": "{done} von {total} Ordnern",
+    "found": "{files} Dateien in {folders} Ordnern",
+    "lastResult": "Letzter Scan",
+    "noScanYet": "Die Bibliothek wurde noch nicht gescannt.",
+    "started": "Gestartet {date}",
+    "stats": {
+      "label": "Ergebnis des Scans",
+      "filesFound": "Dateien gefunden",
+      "filesAdded": "Hinzugefügt",
+      "filesUpdated": "Aktualisiert",
+      "filesRemoved": "Entfernt",
+      "filesUnchanged": "Unverändert",
+      "filesFailed": "Mit Problemen",
+      "tracksTotal": "Titel",
+      "albumsTotal": "Alben",
+      "artistsTotal": "Interpreten",
+      "duration": "Dauer"
+    },
+    "issuesSummary": "{count} Dateien mit Problemen",
+    "issuesListed": "Die ersten {count} sind aufgeführt.",
+    "issues": {
+      "fileUnreadable": "Nicht lesbar",
+      "tagsUnreadable": "Tags nicht lesbar",
+      "probeFailed": "Keine Medieninformationen",
+      "pathTooLong": "Pfad zu lang, übersprungen"
+    },
+    "historyTitle": "Verlauf",
+    "history": "Scans",
+    "showMore": "Mehr anzeigen",
+    "noHistory": "Noch keine Scans.",
+    "partial": "Geänderte Ordner",
+    "changes": "{added} hinzugefügt, {updated} aktualisiert, {removed} entfernt",
+    "alreadyRunning": "Es läuft bereits ein Scan.",
+    "startError": "Der Scan konnte nicht gestartet werden.",
+    "loadError": "Die Scans konnten nicht geladen werden.",
+    "settingsTitle": "Einstellungen",
+    "interval": "Bibliothek scannen",
+    "intervals": {
+      "every15Minutes": "Alle 15 Minuten",
+      "every30Minutes": "Alle 30 Minuten",
+      "everyHour": "Jede Stunde",
+      "every3Hours": "Alle 3 Stunden",
+      "every6Hours": "Alle 6 Stunden",
+      "every12Hours": "Alle 12 Stunden",
+      "everyDay": "Jeden Tag",
+      "custom": "Alle {minutes} Minuten"
+    },
+    "intervalHint": "Der regelmäßige Scan läuft immer, auch mit der Ordnerüberwachung.",
+    "fileWatcher": "Medienordner auf Änderungen überwachen",
+    "fileWatcherHint": "Findet Änderungen innerhalb von Sekunden. Auf Netzlaufwerken unzuverlässig, deshalb bleibt der regelmäßige Scan aktiv.",
+    "audioExtensions": "Endungen von Audiodateien",
+    "videoExtensions": "Endungen von Videodateien",
+    "imageExtensions": "Endungen von Bildern",
+    "albumCoverNames": "Namen von Album-Covern",
+    "listHint": "Einträge mit Kommas trennen. Gilt ab dem nächsten Scan.",
+    "coverNamesHint": "Dateinamen ohne Endung, die wichtigsten zuerst. Gilt ab dem nächsten Scan.",
+    "save": "Speichern",
+    "saved": "Die Einstellungen sind gespeichert.",
+    "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
+    "settingsLoadError": "Die Einstellungen konnten nicht geladen werden.",
+    "errors": {
+      "interval": "Wähle ein Intervall zwischen 15 Minuten und 24 Stunden.",
+      "extensions": "Pro Endung 1 bis 10 Buchstaben oder Ziffern, höchstens 50 Endungen. Eine Endung darf nur in einer Liste stehen, und es muss Audio- oder Videoendungen geben.",
+      "coverNames": "Höchstens 50 Namen ohne Schrägstriche."
+    }
+  },
+  "adminJobs": {
+    "title": "Jobs",
+    "list": "Hintergrundjobs",
+    "runNow": "Jetzt ausführen",
+    "runNowNamed": "{name} jetzt ausführen",
+    "names": {
+      "libraryScan": "Bibliotheks-Scan"
+    },
+    "lastRun": "Zuletzt {date}",
+    "duration": "Dauer {duration}",
+    "nextRun": "Nächster Lauf {date}",
+    "never": "Noch nicht gelaufen",
+    "schedule": "Alle {minutes} Minuten",
+    "manualOnly": "Läuft nur auf Anforderung",
+    "alreadyRunning": "Dieser Job läuft bereits.",
+    "loadError": "Die Jobs konnten nicht geladen werden.",
+    "runError": "Der Job konnte nicht gestartet werden."
+  },
+  "jobRuns": {
+    "statuses": {
+      "queued": "Wartet",
+      "running": "Läuft",
+      "succeeded": "Erfolgreich",
+      "failed": "Fehlgeschlagen",
+      "canceled": "Abgebrochen",
+      "interrupted": "Unterbrochen"
+    },
+    "triggers": {
+      "schedule": "Geplant",
+      "manual": "Manuell",
+      "fileWatcher": "Ordnerüberwachung"
+    },
+    "errors": {
+      "jobFailed": "Der Lauf ist fehlgeschlagen. Details stehen im Server-Log.",
+      "jobInterrupted": "Der Lauf wurde unterbrochen, weil der Server beendet wurde.",
+      "mediaFolderNotFound": "Der Medienordner existiert nicht. Prüfe das Volume des Containers.",
+      "mediaFolderUnreadable": "Der Medienordner kann nicht gelesen werden. Prüfe seine Berechtigungen.",
+      "mediaFolderEmpty": "Der Medienordner ist leer, deshalb wurde nichts entfernt. Prüfe, ob er eingebunden ist.",
+      "probeUnavailable": "ffprobe ist auf dem Server nicht verfügbar."
     }
   }
 }

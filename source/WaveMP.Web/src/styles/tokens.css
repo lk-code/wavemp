@@ -53,6 +53,8 @@
         /* Graphics (values of the background shorthand) */
         --wmp-image-logo: url('/brand/logo.svg') center / contain no-repeat;
         --wmp-image-cover-placeholder: var(--wmp-color-surface-raised);
+        --wmp-progress-track-background: var(--wmp-color-border);
+        --wmp-progress-fill-background: var(--wmp-color-accent);
         --wmp-image-default-button: var(--wmp-color-surface);
         --wmp-image-default-button-hover: var(--wmp-color-hover);
         --wmp-image-default-button-active: var(--wmp-color-selection);
@@ -117,6 +119,8 @@
         --wmp-icon-has-video: url('/icons/phosphor/regular/video-camera.svg');
         --wmp-icon-info: url('/icons/phosphor/regular/info.svg');
         --wmp-icon-cover-placeholder: url('/icons/phosphor/fill/music-notes-fill.svg');
+        --wmp-icon-admin-library: url('/icons/phosphor/regular/folder-open.svg');
+        --wmp-icon-admin-jobs: url('/icons/phosphor/regular/clock-clockwise.svg');
         --wmp-icon-shuffle: url('/icons/phosphor/fill/shuffle-fill.svg');
         --wmp-icon-repeat: url('/icons/phosphor/fill/repeat-fill.svg');
         --wmp-icon-repeat-one: url('/icons/phosphor/fill/repeat-once-fill.svg');
@@ -134,6 +138,9 @@
         --wmp-icon-profile: url('/icons/phosphor/regular/user-circle.svg');
         --wmp-icon-switch-profile: url('/icons/phosphor/regular/user-switch.svg');
         --wmp-icon-manage-profiles: url('/icons/phosphor/regular/users.svg');
+        --wmp-icon-administration: url('/icons/phosphor/regular/wrench.svg');
+        --wmp-icon-scan: url('/icons/phosphor/regular/arrows-clockwise.svg');
+        --wmp-icon-run-job: url('/icons/phosphor/regular/play.svg');
         --wmp-icon-edit: url('/icons/phosphor/regular/pencil-simple.svg');
         --wmp-icon-delete: url('/icons/phosphor/regular/trash.svg');
         --wmp-icon-add: url('/icons/phosphor/regular/plus.svg');
@@ -185,6 +192,7 @@
         --wmp-avatar-size: 2rem;
         --wmp-avatar-size-l: 6rem;
         --wmp-swatch-size: 2rem;
+        --wmp-progress-height: 0.5rem;
     }
 
     /* Document defaults */

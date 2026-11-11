@@ -145,7 +145,8 @@
       "profiles": "Profile selection",
       "alerts": "Messages",
       "forms": "Forms",
-      "admin": "Profile administration"
+      "admin": "Profile administration",
+      "administration": "Administration"
     },
     "samples": {
       "button": "Button",
@@ -217,7 +218,7 @@
     "open": "Profile: {name}",
     "settings": "Settings",
     "switchProfile": "Switch profile",
-    "manageProfiles": "Manage profiles"
+    "administration": "Administration"
   },
   "settings": {
     "title": "Settings",
@@ -277,6 +278,139 @@
       "title": "Delete profile",
       "text": "Delete the profile {name}? This cannot be undone.",
       "confirm": "Delete"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "nav": {
+      "label": "Administration",
+      "library": "Library",
+      "jobs": "Jobs",
+      "profiles": "Profiles"
+    }
+  },
+  "adminLibrary": {
+    "title": "Library",
+    "scanTitle": "Scan",
+    "scanNow": "Scan now",
+    "scanHint": "Finds new, changed and deleted files in the media folder.",
+    "states": {
+      "idle": "Idle",
+      "queued": "Waiting to start",
+      "running": "Scanning"
+    },
+    "phases": {
+      "discovering": "Looking for files",
+      "processing": "Reading files",
+      "cleaningUp": "Finishing"
+    },
+    "progressLabel": "Progress of the scan",
+    "progress": "{done} of {total} files",
+    "progressFolders": "{done} of {total} folders",
+    "found": "{files} files in {folders} folders",
+    "lastResult": "Last scan",
+    "noScanYet": "The library has not been scanned yet.",
+    "started": "Started {date}",
+    "stats": {
+      "label": "Result of the scan",
+      "filesFound": "Files found",
+      "filesAdded": "Added",
+      "filesUpdated": "Updated",
+      "filesRemoved": "Removed",
+      "filesUnchanged": "Unchanged",
+      "filesFailed": "With problems",
+      "tracksTotal": "Tracks",
+      "albumsTotal": "Albums",
+      "artistsTotal": "Artists",
+      "duration": "Duration"
+    },
+    "issuesSummary": "{count} files with problems",
+    "issuesListed": "The first {count} are listed.",
+    "issues": {
+      "fileUnreadable": "Cannot be read",
+      "tagsUnreadable": "Tags cannot be read",
+      "probeFailed": "No media information",
+      "pathTooLong": "Path too long, skipped"
+    },
+    "historyTitle": "History",
+    "history": "Scans",
+    "showMore": "Show more",
+    "noHistory": "No scans yet.",
+    "partial": "Changed folders",
+    "changes": "{added} added, {updated} updated, {removed} removed",
+    "alreadyRunning": "A scan is already running.",
+    "startError": "The scan could not be started.",
+    "loadError": "The scans could not be loaded.",
+    "settingsTitle": "Settings",
+    "interval": "Scan the library",
+    "intervals": {
+      "every15Minutes": "Every 15 minutes",
+      "every30Minutes": "Every 30 minutes",
+      "everyHour": "Every hour",
+      "every3Hours": "Every 3 hours",
+      "every6Hours": "Every 6 hours",
+      "every12Hours": "Every 12 hours",
+      "everyDay": "Every day",
+      "custom": "Every {minutes} minutes"
+    },
+    "intervalHint": "The periodic scan always runs, also with the file watcher.",
+    "fileWatcher": "Watch the media folder for changes",
+    "fileWatcherHint": "Finds changes within seconds. Not reliable on network shares, so the periodic scan stays active.",
+    "audioExtensions": "Audio file extensions",
+    "videoExtensions": "Video file extensions",
+    "imageExtensions": "Picture file extensions",
+    "albumCoverNames": "Names of album covers",
+    "listHint": "Separate the entries with commas. Applies with the next scan.",
+    "coverNamesHint": "File names without extension, the most important first. Applies with the next scan.",
+    "save": "Save",
+    "saved": "The settings are saved.",
+    "saveError": "The settings could not be saved.",
+    "settingsLoadError": "The settings could not be loaded.",
+    "errors": {
+      "interval": "Choose an interval between 15 minutes and 24 hours.",
+      "extensions": "Use 1 to 10 letters or digits per extension and at most 50 of them. An extension may only be in one list, and there must be audio or video extensions.",
+      "coverNames": "Use at most 50 names without slashes."
+    }
+  },
+  "adminJobs": {
+    "title": "Jobs",
+    "list": "Background jobs",
+    "runNow": "Run now",
+    "runNowNamed": "Run {name} now",
+    "names": {
+      "libraryScan": "Library scan"
+    },
+    "lastRun": "Last run {date}",
+    "duration": "took {duration}",
+    "nextRun": "Next run {date}",
+    "never": "Not run yet",
+    "schedule": "Every {minutes} minutes",
+    "manualOnly": "Runs only when started",
+    "alreadyRunning": "This job is already running.",
+    "loadError": "The jobs could not be loaded.",
+    "runError": "The job could not be started."
+  },
+  "jobRuns": {
+    "statuses": {
+      "queued": "Queued",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "canceled": "Canceled",
+      "interrupted": "Interrupted"
+    },
+    "triggers": {
+      "schedule": "Scheduled",
+      "manual": "Manual",
+      "fileWatcher": "File watcher"
+    },
+    "errors": {
+      "jobFailed": "The run failed. Details are in the server log.",
+      "jobInterrupted": "The run was interrupted because the server stopped.",
+      "mediaFolderNotFound": "The media folder does not exist. Check the volume of the container.",
+      "mediaFolderUnreadable": "The media folder cannot be read. Check its permissions.",
+      "mediaFolderEmpty": "The media folder is empty, so nothing was removed. Check that it is mounted.",
+      "probeUnavailable": "ffprobe is not available on the server."
     }
   }
 }

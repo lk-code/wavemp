@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isUnauthorized, problemCodeOf, statusOf } from '../problems'
+import { isUnauthorized, problemCodeOf, statusOf, fieldErrorsOf } from '../problems'
 
 describe('problemCodeOf', () => {
     it('returns known problem codes', () => {
@@ -38,5 +38,26 @@ describe('isUnauthorized', () => {
     it('ignores other errors', () => {
         expect(isUnauthorized({ responseStatusCode: 403, code: 'auth.forbidden' })).toBe(false)
         expect(isUnauthorized(new TypeError('Failed to fetch'))).toBe(false)
+    })
+})
+
+describe('fieldErrorsOf', () => {
+    it('returns the fields of a validation problem by their JSON names', () => {
+        const error = {
+            code: 'request.invalid',
+            errors: {
+                additionalData: {
+                    scanIntervalMinutes: ['Out of range'],
+                    '$.audioExtensions': ['x'],
+                },
+            },
+        }
+
+        expect(fieldErrorsOf(error)).toEqual(['scanIntervalMinutes', 'audioExtensions'])
+    })
+
+    it('returns nothing for other errors', () => {
+        expect(fieldErrorsOf(new Error('offline'))).toEqual([])
+        expect(fieldErrorsOf(undefined)).toEqual([])
     })
 })

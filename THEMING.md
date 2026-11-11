@@ -129,7 +129,7 @@ Example of a desktop layout with the sidebar on the right:
 | `list-group-rows` | `div` (`role="presentation"`) | `list-group` | Rows of the group |
 | `list-row` | `div` (`role="row"`, `aria-selected`) | `list-group-rows` | Row of a track |
 | `list-cell` | `span` (`role="gridcell"`) | `list-row` | Cell of a row |
-| `badge` | `span` | `list-cell`, `user-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role with a visible `label` |
+| `badge` | `span` | `list-cell`, `user-meta`, `scan-status`, `run-item`, `run-meta`, `job-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role, in `scan-status`, `run-item`, `run-meta` and `job-meta` a state, each with a visible `label` |
 | `transport` | `section` | `app` | Transport bar; mini player and full-screen player on mobile |
 | `seek` | `div` | `transport` | Progress bar with a `slider` |
 | `now-playing-mini` | `button` | `transport` | Cover and title of the current track; opens Now Playing (desktop) or the full-screen player (mobile) |
@@ -166,6 +166,31 @@ Example of a desktop layout with the sidebar on the right:
 | `user-name` | `span` | `user-info` | Name of the profile |
 | `user-meta` | `span` | `user-info` | Role and built-in state as `badge` with a visible `label`, and the creation date as `label` |
 | `user-actions` | `div` | `user-item` | Buttons to edit and delete the profile |
+| `admin-nav` | `nav` | `view` | Navigation between the pages of the administration (library, jobs, profiles) |
+| `admin-nav-item` | `a` (`aria-current`) | `admin-nav` | Page of the administration with `icon` and `label` |
+| `section` | `section` (`aria-labelledby`) | `view` | Part of a page with a `section-title` |
+| `section-title` | `h2` | `section` | Title of the section |
+| `scan-status` | `div` | `section` | State of the library scan: `badge` with a visible `label`, while running the phase as `label`, a `progress` and its value as `label`, and the button that starts a scan |
+| `progress` | `div` (`role="progressbar"`) | `scan-status`, any | Progress bar; the share done is `--wmp-progress-value` |
+| `progress-track` | `div` | `progress` | Background of the bar |
+| `progress-fill` | `div` | `progress-track` | Done part of the bar |
+| `stat-list` | `dl` | `section` | Statistics of a scan |
+| `stat-item` | `div` | `stat-list` | One statistic: `label` (`dt`) and `stat-value` |
+| `stat-value` | `dd` | `stat-item` | Number of the statistic |
+| `run-list` | `ul` | `section` | Earlier runs, for example the history of scans |
+| `run-item` | `li` | `run-list` | One run with a status `badge` with a visible `label`, its time as `label` and `run-meta` |
+| `run-meta` | `span`, or `div` above the statistics | `run-item`, `section` | Details of a run as `label`s: trigger, duration, changes, error; above the statistics also the status `badge` |
+| `issue-list` | `ul` | `disclosure` | Files with problems |
+| `issue-item` | `li` | `issue-list` | One file with `issue-path` and the problem as `label` |
+| `issue-path` | `span` | `issue-item` | Path of the file relative to the media folder |
+| `disclosure` | `details` | `section`, any | Content that opens on demand |
+| `disclosure-summary` | `summary` | `disclosure` | Always visible line of a `disclosure` with `label` and optionally `field-hint` |
+| `job-list` | `ul` | `view` | Background jobs |
+| `job-item` | `li` | `job-list` | One job with `job-info` and `job-actions` |
+| `job-info` | `div` | `job-item` | Name, details and the error of the last run as `label` |
+| `job-name` | `span` | `job-info` | Name of the job |
+| `job-meta` | `span` | `job-info` | Status `badge` of the last run with a visible `label`, and last run, next run and schedule as `label`s |
+| `job-actions` | `div` | `job-item` | Button that runs the job now |
 | `button` | `button` | any | Generic button, see `data-variant` in [States](#states) |
 | `icon` | `span` (`aria-hidden`) | any | Icon wrapper with the slot in `data-icon`, see [Icons](#icons) |
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
@@ -175,7 +200,8 @@ Example of a desktop layout with the sidebar on the right:
 | `slider-track` | `div` | `slider` | Track of the slider |
 | `slider-fill` | `div` | `slider-track` | Filled part of the track |
 | `slider-thumb` | `div` (`role="slider"`) | `slider` | Knob, focusable |
-| `field` | `label`, or `div` around a `color-picker` | `form`, any | Text field or selection with `label`, `input`, `select` or `color-picker`, and optionally `field-hint` and `field-error` |
+| `field` | `label`, or `div` around a `color-picker` | `form`, any | Text field or selection with `label`, `input`, `select` or `color-picker`, and optionally `field-hint` and `field-error`; with `data-variant="checkbox"` a `checkbox` before its `label` |
+| `checkbox` | `input type="checkbox"` (`:checked`) | `field` | Checkbox of a field with `data-variant="checkbox"` |
 | `form` | `form` | `view`, `dialog-body` | Form with fields |
 | `select` | `select` (`aria-invalid`) | `field` | Selection list |
 | `field-hint` | `span` | `field` | Help text of the field |
@@ -221,18 +247,22 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `server-status` | `checking`, `healthy`, `degraded`, `unhealthy` or `unreachable` |
 | `search` | `empty` or `filled` |
 | `context-menu` | `open` or `closed` |
-| `badge` | the kind of hint, for example `has-video`; in `user-meta` `admin` or `user`, and `built-in` |
+| `badge` | the kind of hint, for example `has-video`; in `user-meta` `admin` or `user`, and `built-in`; in `scan-status` `idle`, `queued` or `running`; in `run-item`, `run-meta` and `job-meta` the status of the run: `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
 | `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
 | `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
 | `alert` | `error`, `success` or `info` |
 | `field` | `invalid` while the field has an error |
 | `user-item` | `built-in` for the built-in admin profile |
+| `admin-nav-item` | `active` for the current page |
+| `scan-status`, `job-item` | `idle`, `queued` or `running` |
+| `run-item` | `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
+| `progress` | `indeterminate` while the share done is unknown |
 
 ### ARIA attributes and native states
 
 | Attribute or state | Parts |
 |---|---|
-| `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item` |
+| `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item`, `admin-nav-item` |
 | `aria-current="true"` | `profile-tile` of the current profile |
 | `aria-busy="true"` | `profile-select` while a profile is being selected |
 | `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
@@ -241,9 +271,10 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
-| `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb` |
+| `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate) |
 | `:disabled` | buttons and inputs |
-| `[open]` | `dialog` |
+| `:checked` | `checkbox` |
+| `[open]` | `dialog`, `disclosure` |
 | `:popover-open` | `context-menu` |
 
 The base links states to graphics: buttons use the variables `--wmp-image-<variant>-button`, `-hover`, `-active` and `-disabled` for `:hover`, `:active` and `[aria-pressed='true']`, and `:disabled`. A theme can therefore change all button states by setting variables only.
@@ -253,11 +284,13 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | Attribute | Parts | Values |
 |---|---|---|
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
+| `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `admin-users`, `not-found` |
+| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `admin-library`, `admin-jobs`, `admin-users`, `not-found` |
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year` |
+| `data-item` | `admin-nav-item`, `stat-item`, `job-item` | Id of the entry: the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`) or the job (`library-scan`) |
 
 ## Variables
 
@@ -326,6 +359,8 @@ The background of `avatar` is the color of the profile, `--wmp-profile-color` (s
 |---|---|---|
 | `--wmp-image-logo` | `url('/brand/logo.svg') center / contain no-repeat` | `logo-image` |
 | `--wmp-image-cover-placeholder` | `var(--wmp-color-surface-raised)` | `cover` without image |
+| `--wmp-progress-track-background` | `var(--wmp-color-border)` | `progress-track` |
+| `--wmp-progress-fill-background` | `var(--wmp-color-accent)` | `progress-fill` |
 | `--wmp-image-default-button` | `var(--wmp-color-surface)` | Buttons with `data-variant="default"` |
 | `--wmp-image-default-button-hover` | `var(--wmp-color-hover)` | |
 | `--wmp-image-default-button-active` | `var(--wmp-color-selection)` | Also `aria-pressed="true"` |
@@ -416,6 +451,7 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-avatar-size` | `2rem` | Size of `avatar` |
 | `--wmp-avatar-size-l` | `6rem` | Size of `avatar` in `profile-tile` |
 | `--wmp-swatch-size` | `2rem` | Size of `color-swatch` |
+| `--wmp-progress-height` | `0.5rem` | Height of `progress-track` |
 
 On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list`.
 
@@ -431,6 +467,7 @@ The app sets these variables on single elements. Themes can read them, but never
 | `--wmp-menu-y` | `context-menu` | Vertical position in pixels |
 | `--wmp-profile-color` | `avatar` | Color of the profile as `#rrggbb` |
 | `--wmp-swatch-color` | `color-swatch` | Color of the swatch as `#rrggbb` |
+| `--wmp-progress-value` | `progress` | Share of the work done between 0 and 1 (0 while indeterminate) |
 
 ## Icons
 
@@ -480,6 +517,8 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `has-video` | `--wmp-icon-has-video` | `/icons/phosphor/regular/video-camera.svg` | Content |
 | `info` | `--wmp-icon-info` | `/icons/phosphor/regular/info.svg` | Content |
 | `cover-placeholder` | `--wmp-icon-cover-placeholder` | `/icons/phosphor/fill/music-notes-fill.svg` | Content |
+| `admin-library` | `--wmp-icon-admin-library` | `/icons/phosphor/regular/folder-open.svg` | Content (administration) |
+| `admin-jobs` | `--wmp-icon-admin-jobs` | `/icons/phosphor/regular/clock-clockwise.svg` | Content (administration) |
 | `shuffle` | `--wmp-icon-shuffle` | `/icons/phosphor/fill/shuffle-fill.svg` | Transport |
 | `repeat` | `--wmp-icon-repeat` | `/icons/phosphor/fill/repeat-fill.svg` | Transport |
 | `repeat-one` | `--wmp-icon-repeat-one` | `/icons/phosphor/fill/repeat-once-fill.svg` | Transport |
@@ -496,7 +535,10 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `settings` | `--wmp-icon-settings` | `/icons/phosphor/regular/gear-six.svg` | Menus and dialogs |
 | `profile` | `--wmp-icon-profile` | `/icons/phosphor/regular/user-circle.svg` | Menus and dialogs |
 | `switch-profile` | `--wmp-icon-switch-profile` | `/icons/phosphor/regular/user-switch.svg` | Menus and dialogs |
-| `manage-profiles` | `--wmp-icon-manage-profiles` | `/icons/phosphor/regular/users.svg` | Menus and dialogs |
+| `manage-profiles` | `--wmp-icon-manage-profiles` | `/icons/phosphor/regular/users.svg` | Menus and dialogs, administration |
+| `administration` | `--wmp-icon-administration` | `/icons/phosphor/regular/wrench.svg` | Menus and dialogs |
+| `scan` | `--wmp-icon-scan` | `/icons/phosphor/regular/arrows-clockwise.svg` | Menus and dialogs |
+| `run-job` | `--wmp-icon-run-job` | `/icons/phosphor/regular/play.svg` | Menus and dialogs |
 | `edit` | `--wmp-icon-edit` | `/icons/phosphor/regular/pencil-simple.svg` | Menus and dialogs |
 | `delete` | `--wmp-icon-delete` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `add` | `--wmp-icon-add` | `/icons/phosphor/regular/plus.svg` | Menus and dialogs |
@@ -546,3 +588,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
     - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.
+    - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item`, the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.

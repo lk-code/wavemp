@@ -11,13 +11,13 @@ export interface ProfileMenuProfile {
     readonly name: string
     readonly initials: string
     readonly color: string
-    /** Admins also get the profile administration. */
+    /** Admins also get the administration. */
     readonly role?: Role
 }
 
 /**
- * Button with the avatar of the current profile; opens the settings, the profile administration
- * (admins only) and the profile switch.
+ * Button with the avatar of the current profile; opens the settings, the administration (admins
+ * only) and the profile switch.
  */
 const props = defineProps<{
     profile: ProfileMenuProfile
@@ -38,9 +38,9 @@ const items = computed<MenuItem[]>(() => [
     ...(isAdmin.value
         ? [
               {
-                  id: 'manage-profiles',
-                  label: t('profileMenu.manageProfiles'),
-                  icon: 'manage-profiles' as const,
+                  id: 'administration',
+                  label: t('profileMenu.administration'),
+                  icon: 'administration' as const,
               },
           ]
         : []),
@@ -63,8 +63,8 @@ async function choose(id: string): Promise<void> {
         case 'settings':
             await router.push({ name: 'settings' })
             break
-        case 'manage-profiles':
-            await router.push({ name: 'admin-users' })
+        case 'administration':
+            await router.push({ name: 'admin-library' })
             break
         case 'switch-profile':
             // The selection opens first, so the end of the session does not lead back here.

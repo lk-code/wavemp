@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ProblemCodeObject, RoleObject, type User } from '@/api/generated/models'
 import { problemCodeOf } from '@/api/problems'
+import AdminNav from '@/components/admin/AdminNav.vue'
 import UserDeleteDialog from '@/components/admin/UserDeleteDialog.vue'
 import UserEditDialog from '@/components/admin/UserEditDialog.vue'
 import UserList, { type UserListItem } from '@/components/admin/UserList.vue'
@@ -114,6 +115,7 @@ onMounted(() => {
 
 <template>
     <div data-part="view" data-view="admin-users">
+        <AdminNav />
         <div data-part="view-actions">
             <BaseButton
                 variant="primary"

@@ -54,6 +54,8 @@ export const iconSlots = {
     'has-video': { file: regular('video-camera'), area: 'content' },
     info: { file: regular('info'), area: 'content' },
     'cover-placeholder': { file: fill('music-notes'), area: 'content' },
+    'admin-library': { file: regular('folder-open'), area: 'content' },
+    'admin-jobs': { file: regular('clock-clockwise'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },
@@ -75,6 +77,9 @@ export const iconSlots = {
     profile: { file: regular('user-circle'), area: 'general' },
     'switch-profile': { file: regular('user-switch'), area: 'general' },
     'manage-profiles': { file: regular('users'), area: 'general' },
+    administration: { file: regular('wrench'), area: 'general' },
+    scan: { file: regular('arrows-clockwise'), area: 'general' },
+    'run-job': { file: regular('play'), area: 'general' },
     edit: { file: regular('pencil-simple'), area: 'general' },
     delete: { file: regular('trash'), area: 'general' },
     add: { file: regular('plus'), area: 'general' },

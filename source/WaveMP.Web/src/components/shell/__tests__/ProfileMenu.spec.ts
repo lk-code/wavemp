@@ -49,16 +49,16 @@ describe('ProfileMenu', () => {
         wrapper.unmount()
     })
 
-    it('offers the profile administration to admins', async () => {
+    it('offers the administration to admins', async () => {
         const { wrapper, router } = await mountMenu({ ...profile, role: 'Admin' })
 
         const items = wrapper.findAll('[data-part="menu-item"]').map((item) => item.text())
-        expect(items).toEqual(['Settings', 'Manage profiles', 'Switch profile'])
+        expect(items).toEqual(['Settings', 'Administration', 'Switch profile'])
 
-        await wrapper.get('[data-item="manage-profiles"]').trigger('click')
+        await wrapper.get('[data-item="administration"]').trigger('click')
         await flushPromises()
 
-        expect(router.currentRoute.value.name).toBe('admin-users')
+        expect(router.currentRoute.value.name).toBe('admin-library')
         wrapper.unmount()
     })
 

@@ -56,12 +56,24 @@ describe('createRoutes', () => {
         expect(route.meta.bare).toBeUndefined()
     })
 
-    it('keeps the profile administration for admins', async () => {
+    it('opens the library of the administration for admins', async () => {
         const route = await resolve('/admin')
 
-        expect(route.name).toBe('admin-users')
-        expect(route.fullPath).toBe('/admin/users')
+        expect(route.name).toBe('admin-library')
+        expect(route.fullPath).toBe('/admin/library')
         expect(route.meta.admin).toBe(true)
+    })
+
+    it('keeps every page of the administration for admins', async () => {
+        for (const [path, name] of [
+            ['/admin/library', 'admin-library'],
+            ['/admin/jobs', 'admin-jobs'],
+            ['/admin/users', 'admin-users'],
+        ]) {
+            const route = await resolve(path!)
+            expect(route.name, path).toBe(name)
+            expect(route.meta.admin, path).toBe(true)
+        }
     })
 
     it('protects the pages of the app', async () => {
