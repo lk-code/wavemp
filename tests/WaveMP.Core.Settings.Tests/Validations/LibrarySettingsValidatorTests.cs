@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Validations;
+using WaveMP.Data.Entities;
 
 namespace WaveMP.Core.Settings.Tests.Validations;
 
@@ -147,5 +148,30 @@ public class LibrarySettingsValidatorTests
 
         errors.Should().Equal(
             new SettingsValidationError(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.Invalid));
+    }
+
+    [Test]
+    public void CoverPriority_ByDefault_IsAlbumFirst()
+    {
+        new LibrarySettings().CoverPriority.Should().Be(CoverPriority.AlbumFirst);
+    }
+
+    [Test]
+    public void Normalize_CoverPriority_KeepsTheValue()
+    {
+        LibrarySettings settings = new() { CoverPriority = CoverPriority.TrackFirst };
+
+        LibrarySettingsValidator.Normalize(settings).CoverPriority.Should().Be(CoverPriority.TrackFirst);
+    }
+
+    [Test]
+    public void Validate_UndefinedCoverPriority_IsInvalid()
+    {
+        LibrarySettings settings = new() { CoverPriority = (CoverPriority)7 };
+
+        IReadOnlyList<SettingsValidationError> errors = LibrarySettingsValidator.Validate(settings);
+
+        errors.Should().Equal(
+            new SettingsValidationError(LibrarySettingsField.CoverPriority, SettingsErrorReason.Invalid));
     }
 }

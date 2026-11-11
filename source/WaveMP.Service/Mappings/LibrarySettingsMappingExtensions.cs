@@ -43,6 +43,7 @@ public static class LibrarySettingsMappingExtensions
             LibrarySettingsField.VideoExtensions => "videoExtensions",
             LibrarySettingsField.ImageExtensions => "imageExtensions",
             LibrarySettingsField.AlbumCoverNames => "albumCoverNames",
+            LibrarySettingsField.CoverPriority => "coverPriority",
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Unknown field."),
         };
     }

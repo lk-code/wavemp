@@ -43,6 +43,8 @@ internal sealed class LibrarySettingsService(
                 VideoExtensions = command.VideoExtensions ?? current.VideoExtensions,
                 ImageExtensions = command.ImageExtensions ?? current.ImageExtensions,
                 AlbumCoverNames = command.AlbumCoverNames ?? current.AlbumCoverNames,
+                // Not changeable through the command yet; the rule per album and per track follows later.
+                CoverPriority = current.CoverPriority,
             });
 
             IReadOnlyList<SettingsValidationError> errors = LibrarySettingsValidator.Validate(changed);

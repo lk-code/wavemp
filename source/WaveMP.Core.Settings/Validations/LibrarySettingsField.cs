@@ -11,4 +11,5 @@ public enum LibrarySettingsField
     VideoExtensions,
     ImageExtensions,
     AlbumCoverNames,
+    CoverPriority,
 }

@@ -8,6 +8,7 @@ using WaveMP.Core.Settings.Services;
 using WaveMP.Core.Settings.Snapshots;
 using WaveMP.Core.Settings.Stores;
 using WaveMP.Core.Settings.Validations;
+using WaveMP.Data.Entities;
 
 namespace WaveMP.Core.Settings.Tests.Services;
 
@@ -71,6 +72,18 @@ public class LibrarySettingsServiceTests
         result.Settings.ImageExtensions.Should().Equal("png");
         result.Settings.AlbumCoverNames.Should().Equal("front");
         await _store.Received(1).SaveAsync(LibrarySettings.Key, result.Settings, Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task UpdateAsync_AnyChange_KeepsTheCoverPriority()
+    {
+        _saved = new LibrarySettings { CoverPriority = CoverPriority.TrackFirst };
+
+        LibrarySettingsResult result = await _service.UpdateAsync(
+            new UpdateLibrarySettingsCommand(ScanIntervalMinutes: 60));
+
+        result.IsSuccess.Should().BeTrue();
+        result.Settings!.CoverPriority.Should().Be(CoverPriority.TrackFirst);
     }
 
     [Test]

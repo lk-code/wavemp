@@ -27,6 +27,7 @@ public static partial class LibrarySettingsValidator
             VideoExtensions = NormalizeList(settings.VideoExtensions, trimDot: true),
             ImageExtensions = NormalizeList(settings.ImageExtensions, trimDot: true),
             AlbumCoverNames = NormalizeList(settings.AlbumCoverNames, trimDot: false),
+            CoverPriority = settings.CoverPriority,
         };
     }
 
@@ -81,6 +82,12 @@ public static partial class LibrarySettingsValidator
         else if (!settings.AlbumCoverNames.All(IsValidCoverName))
         {
             errors.Add(new(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.Invalid));
+        }
+
+        // The stored JSON may hold a number instead of the name.
+        if (!Enum.IsDefined(settings.CoverPriority))
+        {
+            errors.Add(new(LibrarySettingsField.CoverPriority, SettingsErrorReason.Invalid));
         }
 
         return errors;

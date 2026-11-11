@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+using WaveMP.Data.Entities;
+
 namespace WaveMP.Core.Settings.Groups;
 
 /// <summary>
-/// Settings of the media library: how often the media folder is scanned, whether changes are watched and which files
-/// belong to the library. Stored as the settings group <see cref="Key"/>; values missing in the stored JSON keep the
+/// Settings of the media library: how often the media folder is scanned, whether changes are watched, which files
+/// belong to the library and which cover a track shows. Stored as the settings group <see cref="Key"/>; values missing in the stored JSON keep the
 /// defaults below. Extensions are lower case without a dot.
 /// </summary>
 public sealed class LibrarySettings
@@ -38,4 +41,11 @@ public sealed class LibrarySettings
     /// Lower case; compared without regard to case.
     /// </summary>
     public IReadOnlyList<string> AlbumCoverNames { get; init; } = ["cover", "folder", "front", "album", "albumart"];
+
+    /// <summary>
+    /// Which cover a track shows: the cover of its album or its own; the other one is the fallback. Applies to all
+    /// albums and tracks; settings per album and per track can override it later. Stored as its name.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<CoverPriority>))]
+    public CoverPriority CoverPriority { get; init; } = CoverPriority.AlbumFirst;
 }

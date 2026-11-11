@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Stores;
+using WaveMP.Data.Entities;
 using WaveMP.Data.Repositories;
 
 namespace WaveMP.Core.Settings.Tests.Stores;
@@ -46,6 +47,17 @@ public class SettingsStoreTests
     }
 
     [Test]
+    public async Task GetAsync_WithCoverPriorityName_ReadsIt()
+    {
+        _repository.FindAsync(LibrarySettings.Key, Arg.Any<CancellationToken>())
+            .Returns("{\"coverPriority\":\"TrackFirst\"}");
+
+        LibrarySettings settings = await _store.GetAsync<LibrarySettings>(LibrarySettings.Key);
+
+        settings.CoverPriority.Should().Be(CoverPriority.TrackFirst);
+    }
+
+    [Test]
     public async Task GetAsync_WithUnreadableJson_ReturnsTheDefaults()
     {
         _repository.FindAsync(LibrarySettings.Key, Arg.Any<CancellationToken>()).Returns("{not json");
@@ -72,13 +84,14 @@ public class SettingsStoreTests
             VideoExtensions = [],
             ImageExtensions = ["png"],
             AlbumCoverNames = ["front"],
+            CoverPriority = CoverPriority.TrackFirst,
         };
 
         await _store.SaveAsync(LibrarySettings.Key, settings);
         _repository.FindAsync(LibrarySettings.Key, Arg.Any<CancellationToken>()).Returns(saved);
         LibrarySettings loaded = await _store.GetAsync<LibrarySettings>(LibrarySettings.Key);
 
-        saved.Should().Contain("\"scanIntervalMinutes\":60");
+        saved.Should().Contain("\"scanIntervalMinutes\":60").And.Contain("\"coverPriority\":\"TrackFirst\"");
         loaded.Should().BeEquivalentTo(settings);
     }
 }
