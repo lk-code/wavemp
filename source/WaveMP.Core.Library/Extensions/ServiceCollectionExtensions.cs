@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITrackService, TrackService>();
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ICoverService, CoverService>();
+        services.AddSingleton<ICoverSourceReader, CoverSourceReader>();
 
         return services;
     }

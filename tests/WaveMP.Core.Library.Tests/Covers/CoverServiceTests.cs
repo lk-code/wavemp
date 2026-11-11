@@ -1,177 +1,167 @@
 using AwesomeAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using WaveMP.Core.Library.Covers;
-using WaveMP.Core.Metadata.Files;
-using WaveMP.Core.Metadata.Tags;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Snapshots;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Projections;
 using WaveMP.Data.Repositories;
-using WaveMP.Testing.Files;
 
 namespace WaveMP.Core.Library.Tests.Covers;
 
 [TestFixture]
 public class CoverServiceTests
 {
-    private static readonly byte[] _png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4, 5];
-    private static readonly byte[] _jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-    private static readonly DateTimeOffset _modifiedAt = new(2026, 5, 1, 8, 0, 0, TimeSpan.Zero);
-
     private readonly Guid _trackId = Guid.NewGuid();
     private readonly Guid _albumId = Guid.NewGuid();
 
-    private TemporaryDirectory _media = null!;
     private ICoverRepository _covers = null!;
-    private IEmbeddedPictureReader _pictures = null!;
+    private ICoverSourceReader _reader = null!;
     private ISettingsSnapshot<LibrarySettings> _settings = null!;
     private CoverService _service = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _media = new TemporaryDirectory();
         _covers = Substitute.For<ICoverRepository>();
-        _pictures = Substitute.For<IEmbeddedPictureReader>();
+        _covers.ListAlbumIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([]);
+        _covers.ListLooseTrackIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([]);
+        _reader = Substitute.For<ICoverSourceReader>();
         _settings = Substitute.For<ISettingsSnapshot<LibrarySettings>>();
         _settings.Current.Returns(new LibrarySettings());
-        IMediaFileLocator locator = Substitute.For<IMediaFileLocator>();
-        locator.TryGetFullPath(Arg.Any<string>(), out _).Returns(call =>
-        {
-            string relative = call.ArgAt<string>(0);
-            call[1] = _media.Combine(relative);
-            return !relative.StartsWith("..", StringComparison.Ordinal);
-        });
-        _service = new CoverService(_covers, _settings, locator, _pictures, NullLogger<CoverService>.Instance);
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        _media.Dispose();
+        _service = new CoverService(_covers, _settings, _reader);
     }
 
     [Test]
-    public async Task GetTrackCoverAsync_UnknownTrack_ReturnsOwnerNotFound()
+    public async Task GetTrackCandidatesAsync_UnknownTrack_ReturnsOwnerNotFound()
     {
         _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>())
             .Returns((IReadOnlyList<CoverCandidateRow>?)null);
 
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
+        CoverCandidates candidates = await _service.GetTrackCandidatesAsync(_trackId);
 
-        result.Status.Should().Be(CoverStatus.OwnerNotFound);
-        result.Image.Should().BeNull();
+        candidates.Should().Be(CoverCandidates.OwnerNotFound);
+        candidates.OwnerExists.Should().BeFalse();
     }
 
     [Test]
-    public async Task GetTrackCoverAsync_WithoutCovers_ReturnsNotFound()
+    public async Task GetTrackCandidatesAsync_AlbumAndOwnCover_PutsTheAlbumCoverFirstByDefault()
     {
-        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([]);
-
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
-
-        result.Should().Be(CoverResult.NotFound);
-    }
-
-    [Test]
-    public async Task GetTrackCoverAsync_AlbumAndOwnCover_DeliversTheAlbumCoverByDefault()
-    {
-        CoverCandidateRow album = Write(AlbumCover("Album/cover.jpg"), _jpeg);
-        CoverCandidateRow own = Write(TrackCover("Album/Song.png"), _png);
+        CoverCandidateRow album = AlbumCover();
+        CoverCandidateRow own = TrackCover(_trackId);
         _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([own, album]);
 
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
+        CoverCandidates candidates = await _service.GetTrackCandidatesAsync(_trackId);
 
-        result.Status.Should().Be(CoverStatus.Found);
-        result.Image!.ContentType.Should().Be("image/jpeg");
-        result.Image.CoverId.Should().Be(album.CoverId);
-        result.Image.SourceModifiedAt.Should().Be(_modifiedAt);
-        (await ReadAsync(result.Image)).Should().Equal(_jpeg);
+        candidates.OwnerExists.Should().BeTrue();
+        candidates.Ordered.Should().Equal(album, own);
     }
 
     [Test]
-    public async Task GetTrackCoverAsync_TrackFirst_DeliversTheOwnCover()
+    public async Task GetTrackCandidatesAsync_TrackFirst_PutsTheOwnCoverFirst()
     {
         _settings.Current.Returns(new LibrarySettings { CoverPriority = CoverPriority.TrackFirst });
-        CoverCandidateRow album = Write(AlbumCover("Album/cover.jpg"), _jpeg);
-        CoverCandidateRow own = Write(TrackCover("Album/Song.png"), _png);
+        CoverCandidateRow album = AlbumCover();
+        CoverCandidateRow own = TrackCover(_trackId);
         _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([album, own]);
 
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
+        CoverCandidates candidates = await _service.GetTrackCandidatesAsync(_trackId);
 
-        result.Image!.CoverId.Should().Be(own.CoverId);
-        result.Image.ContentType.Should().Be("image/png");
-        await result.Image.Content.DisposeAsync();
+        candidates.Ordered.Should().Equal(own, album);
     }
 
     [Test]
-    public async Task GetTrackCoverAsync_MissingOrUnknownFiles_FallsBackToTheNextCover()
+    public async Task GetAlbumCandidatesAsync_UnknownAndKnownAlbum_ReturnsOwnerNotFoundOrTheOrderedCovers()
     {
-        CoverCandidateRow missing = AlbumCover("Album/missing.jpg");
-        CoverCandidateRow notAPicture = Write(
-            AlbumCover("Album/folder.jpg") with { IsPrimary = false },
-            "<svg/>"u8.ToArray());
-        CoverCandidateRow outside = TrackCover("../outside.jpg");
-        CoverCandidateRow own = Write(TrackCover("Album/Song.jpg") with { IsPrimary = false }, _jpeg);
-        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>())
-            .Returns([own, outside, notAPicture, missing]);
-
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
-
-        result.Image!.CoverId.Should().Be(own.CoverId);
-        await result.Image.Content.DisposeAsync();
-    }
-
-    [Test]
-    public async Task GetTrackCoverAsync_EmbeddedPicture_ReadsItFromTheTags()
-    {
-        CoverCandidateRow embedded = TrackCover("Album/Song.flac") with { Source = CoverSource.Embedded };
-        _pictures.ReadPicture(_media.Combine("Album/Song.flac")).Returns(new EmbeddedPictureData(_png, "image/jpeg"));
-        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([embedded]);
-
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
-
-        result.Image!.ContentType.Should().Be("image/png");
-        (await ReadAsync(result.Image)).Should().Equal(_png);
-    }
-
-    [Test]
-    public async Task GetTrackCoverAsync_EmbeddedPictureThatCannotBeRead_ReturnsNotFound()
-    {
-        CoverCandidateRow embedded = TrackCover("Album/Song.mp3") with { Source = CoverSource.Embedded };
-        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([embedded]);
-
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
-
-        result.Status.Should().Be(CoverStatus.NotFound);
-    }
-
-    [Test]
-    public async Task GetAlbumCoverAsync_UnknownAlbum_ReturnsOwnerNotFound()
-    {
-        _covers.GetAlbumCandidatesAsync(_albumId, Arg.Any<CancellationToken>())
+        CoverCandidateRow track = TrackCover(_trackId);
+        CoverCandidateRow album = AlbumCover();
+        _covers.GetAlbumCandidatesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((IReadOnlyList<CoverCandidateRow>?)null);
+        _covers.GetAlbumCandidatesAsync(_albumId, Arg.Any<CancellationToken>()).Returns([track, album]);
 
-        CoverResult result = await _service.GetAlbumCoverAsync(_albumId);
+        CoverCandidates missing = await _service.GetAlbumCandidatesAsync(Guid.NewGuid());
+        CoverCandidates known = await _service.GetAlbumCandidatesAsync(_albumId);
 
-        result.Status.Should().Be(CoverStatus.OwnerNotFound);
+        missing.OwnerExists.Should().BeFalse();
+        known.Ordered.Should().Equal(album, track);
     }
 
     [Test]
-    public async Task GetAlbumCoverAsync_WithoutAlbumPicture_UsesTheCoverOfATrack()
+    public async Task EnumerateShownCoversAsync_AlbumsAndLooseTracks_ListsEveryDistinctListOnce()
     {
-        CoverCandidateRow track = Write(TrackCover("Album/Song.png"), _png);
-        _covers.GetAlbumCandidatesAsync(_albumId, Arg.Any<CancellationToken>()).Returns([track]);
+        var otherAlbumId = Guid.NewGuid();
+        var looseId = Guid.NewGuid();
+        CoverCandidateRow album = AlbumCover();
+        CoverCandidateRow own = TrackCover(_trackId);
+        CoverCandidateRow otherAlbum = AlbumCover() with { AlbumId = otherAlbumId };
+        CoverCandidateRow loose = TrackCover(looseId) with { TrackAlbumId = null };
+        _covers.ListAlbumIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([_albumId, otherAlbumId]);
+        _covers.GetAlbumBatchCandidatesAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([own, otherAlbum, album]);
+        _covers.ListLooseTrackIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([looseId]);
+        _covers.GetTrackBatchCandidatesAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([loose]);
 
-        CoverResult result = await _service.GetAlbumCoverAsync(_albumId);
+        List<IReadOnlyList<CoverCandidateRow>> lists = [];
+        await foreach (IReadOnlyList<CoverCandidateRow> list in _service.EnumerateShownCoversAsync())
+        {
+            lists.Add(list);
+        }
 
-        result.Image!.CoverId.Should().Be(track.CoverId);
-        await result.Image.Content.DisposeAsync();
+        lists.Select(CoverChoices.KeyOf).Should().OnlyHaveUniqueItems();
+        lists.Should().ContainEquivalentOf(new[] { album, own }, options => options.WithStrictOrdering());
+        lists.Should().ContainEquivalentOf(new[] { otherAlbum }, options => options.WithStrictOrdering());
+        lists.Should().ContainEquivalentOf(new[] { loose }, options => options.WithStrictOrdering());
+        lists.Should().HaveCount(3);
     }
 
-    private CoverCandidateRow AlbumCover(string relativePath)
+    [Test]
+    public async Task EnumerateShownCoversAsync_ManyAlbums_ReadsThemInBatches()
+    {
+        Guid[] albumIds = [.. Enumerable.Range(0, CoverService.AlbumBatchSize + 1).Select(_ => Guid.NewGuid())];
+        _covers.ListAlbumIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns(albumIds);
+        _covers.GetAlbumBatchCandidatesAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([]);
+
+        await foreach (IReadOnlyList<CoverCandidateRow> _ in _service.EnumerateShownCoversAsync())
+        {
+        }
+
+        await _covers.Received(1).GetAlbumBatchCandidatesAsync(
+            Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Count == CoverService.AlbumBatchSize),
+            Arg.Any<CancellationToken>());
+        await _covers.Received(1).GetAlbumBatchCandidatesAsync(
+            Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Count == 1),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task GetTrackCoverAsync_UnreadableFirstCover_DeliversTheNextOne()
+    {
+        CoverCandidateRow album = AlbumCover();
+        CoverCandidateRow own = TrackCover(_trackId);
+        CoverImage image = new(new MemoryStream([1]), "image/png", own.CoverId, own.ModifiedAt);
+        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([own, album]);
+        _reader.OpenAsync(own, Arg.Any<CancellationToken>()).Returns(image);
+
+        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
+
+        result.Should().Be(CoverResult.Found(image));
+        await _reader.Received(1).OpenAsync(album, Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task GetAlbumCoverAsync_UnknownAlbumOrNoReadableCover_ReturnsTheStatus()
+    {
+        _covers.GetAlbumCandidatesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns((IReadOnlyList<CoverCandidateRow>?)null);
+        _covers.GetAlbumCandidatesAsync(_albumId, Arg.Any<CancellationToken>()).Returns([AlbumCover()]);
+
+        (await _service.GetAlbumCoverAsync(Guid.NewGuid())).Status.Should().Be(CoverStatus.OwnerNotFound);
+        (await _service.GetAlbumCoverAsync(_albumId)).Status.Should().Be(CoverStatus.NotFound);
+    }
+
+    private CoverCandidateRow AlbumCover()
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
@@ -184,44 +174,28 @@ public class CoverServiceTests
             null,
             true,
             CoverSource.File,
-            relativePath,
+            "Album/cover.jpg",
             "image/jpeg",
             100,
-            _modifiedAt);
+            DateTimeOffset.UnixEpoch);
     }
 
-    private CoverCandidateRow TrackCover(string relativePath)
+    private CoverCandidateRow TrackCover(Guid trackId)
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
             Guid.NewGuid(),
             null,
-            _trackId,
+            trackId,
             _albumId,
             1,
             1,
             "Song",
             true,
             CoverSource.File,
-            relativePath,
+            "Album/Song.jpg",
             null,
             100,
-            _modifiedAt);
-    }
-
-    private CoverCandidateRow Write(CoverCandidateRow candidate, byte[] content)
-    {
-        string path = _media.Combine(candidate.RelativePath);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        File.WriteAllBytes(path, content);
-        return candidate;
-    }
-
-    private static async Task<byte[]> ReadAsync(CoverImage image)
-    {
-        await using Stream content = image.Content;
-        using MemoryStream copy = new();
-        await content.CopyToAsync(copy);
-        return copy.ToArray();
+            DateTimeOffset.UnixEpoch);
     }
 }
