@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <!-- Large round play button, pressed state: deeper blue, light from below. -->
+    <defs>
+        <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0.7" stop-color="#2a8cf0" stop-opacity="0.5"/>
+            <stop offset="1" stop-color="#2a8cf0" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="body" cx="50%" cy="80%" r="66%">
+            <stop offset="0" stop-color="#5cc0ff"/>
+            <stop offset="0.5" stop-color="#145fbd"/>
+            <stop offset="1" stop-color="#031c4a"/>
+        </radialGradient>
+        <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#06204d"/>
+            <stop offset="1" stop-color="#9fd6ff"/>
+        </linearGradient>
+        <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.4"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="32" fill="url(#halo)"/>
+    <circle cx="32" cy="32" r="25" fill="url(#body)" stroke="url(#rim)" stroke-width="1.5"/>
+    <ellipse cx="32" cy="22" rx="15" ry="8" fill="url(#gloss)"/>
+</svg>

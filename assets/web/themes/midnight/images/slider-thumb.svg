@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+    <!-- Knob of the sliders: a small blue glass ball. -->
+    <defs>
+        <radialGradient id="body" cx="50%" cy="65%" r="62%">
+            <stop offset="0" stop-color="#a6e2ff"/>
+            <stop offset="0.5" stop-color="#2289ea"/>
+            <stop offset="1" stop-color="#073272"/>
+        </radialGradient>
+        <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0.05"/>
+        </linearGradient>
+    </defs>
+    <circle cx="8" cy="8" r="7.25" fill="url(#body)" stroke="#06234f" stroke-width="0.75"/>
+    <ellipse cx="8" cy="5.25" rx="4.75" ry="2.75" fill="url(#gloss)"/>
+</svg>
