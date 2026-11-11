@@ -119,7 +119,6 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the OpenAPI document <c>v1</c>, served at <c>/openapi/v1.json</c>.
-    /// Keep XML summaries of API types on one line: the generator joins lines with the platform's line break.
     /// </summary>
     public static IServiceCollection AddWaveMpOpenApi(this IServiceCollection services)
     {
@@ -128,6 +127,9 @@ public static class ServiceCollectionExtensions
             // Clients see "Health" instead of "HealthDto" and "ProfilePage" for a PageDto of profiles.
             options.CreateSchemaReferenceId = CreateSchemaReferenceId;
 
+            // Wrapped XML comment lines become spaces, so the document is the same on every build platform.
+            options.AddOperationTransformer<XmlCommentLineBreakTransformer>();
+            options.AddSchemaTransformer<XmlCommentLineBreakTransformer>();
             options.AddSchemaTransformer<StringEnumSchemaTransformer>();
             options.AddDocumentTransformer(AddProblemCodeAsync);
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();

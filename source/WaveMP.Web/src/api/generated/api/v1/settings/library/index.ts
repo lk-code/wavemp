@@ -19,7 +19,7 @@ export interface LibraryRequestBuilder extends BaseRequestBuilder<LibraryRequest
      */
      get(requestConfiguration?: RequestConfiguration<object> | undefined) : Promise<LibrarySettings | undefined>;
     /**
-     * Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and thefile watcher apply at once, the lists with the next scan.
+     * Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and the file watcher apply at once, the lists with the next scan.
      * @param body Changes the settings of the media library. Missing or null values stay unchanged.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {Promise<LibrarySettings>}
@@ -35,7 +35,7 @@ export interface LibraryRequestBuilder extends BaseRequestBuilder<LibraryRequest
      */
      toGetRequestInformation(requestConfiguration?: RequestConfiguration<object> | undefined) : RequestInformation;
     /**
-     * Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and thefile watcher apply at once, the lists with the next scan.
+     * Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and the file watcher apply at once, the lists with the next scan.
      * @param body Changes the settings of the media library. Missing or null values stay unchanged.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {RequestInformation}

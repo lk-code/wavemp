@@ -199,7 +199,7 @@
         "tags": [
           "Jobs"
         ],
-        "summary": "Lists the runs of the job by the time they were requested, newest first by default, optionally filtered.\r\nRuns older than 30 days and beyond the 100 newest are removed automatically.",
+        "summary": "Lists the runs of the job by the time they were requested, newest first by default, optionally filtered. Runs older than 30 days and beyond the 100 newest are removed automatically.",
         "operationId": "ListJobRuns",
         "parameters": [
           {
@@ -1024,7 +1024,7 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and the\r\nfile watcher apply at once, the lists with the next scan.",
+        "summary": "Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and the file watcher apply at once, the lists with the next scan.",
         "operationId": "UpdateLibrarySettings",
         "requestBody": {
           "description": "Aborts the request.",

@@ -285,6 +285,31 @@ public class ApiIntegrationTests
         limit["schema"]!["maximum"]!.GetValue<int>().Should().Be(100);
     }
 
+    [Test]
+    public async Task GetOpenApiDocument_Always_JoinsWrappedXmlCommentLines()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        // The summary is wrapped in the XML comment; the document must not depend on the line break of the platform.
+        FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == "ListJobRuns")["summary"]!
+            .GetValue<string>().Should().Be("Lists the runs of the job by the time they were requested, newest first "
+                + "by default, optionally filtered. Runs older than 30 days and beyond the 100 newest are removed "
+                + "automatically.");
+        FindStrings(document).Should().NotContain(text => text.Contains('\r'));
+    }
+
+    private static IEnumerable<string> FindStrings(JsonNode? node)
+    {
+        return node switch
+        {
+            JsonObject jsonObject => jsonObject.SelectMany(entry => FindStrings(entry.Value)),
+            JsonArray jsonArray => jsonArray.SelectMany(FindStrings),
+            JsonValue jsonValue when jsonValue.GetValueKind() == JsonValueKind.String => [jsonValue.GetValue<string>()],
+            _ => [],
+        };
+    }
+
     private static IEnumerable<JsonNode> FindOperations(JsonNode document)
     {
         return document["paths"]!.AsObject()

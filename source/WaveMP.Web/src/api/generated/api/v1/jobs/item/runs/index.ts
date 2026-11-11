@@ -19,7 +19,7 @@ export interface RunsRequestBuilder extends BaseRequestBuilder<RunsRequestBuilde
      */
      byRunId(runId: Guid) : WithRunItemRequestBuilder;
     /**
-     * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered.Runs older than 30 days and beyond the 100 newest are removed automatically.
+     * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered. Runs older than 30 days and beyond the 100 newest are removed automatically.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {Promise<JobRunPage>}
      * @throws {ValidationProblemDetails} error when the service returns a 400 status code
@@ -39,7 +39,7 @@ export interface RunsRequestBuilder extends BaseRequestBuilder<RunsRequestBuilde
      */
      post(requestConfiguration?: RequestConfiguration<object> | undefined) : Promise<JobRun | undefined>;
     /**
-     * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered.Runs older than 30 days and beyond the 100 newest are removed automatically.
+     * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered. Runs older than 30 days and beyond the 100 newest are removed automatically.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {RequestInformation}
      */
@@ -52,7 +52,7 @@ export interface RunsRequestBuilder extends BaseRequestBuilder<RunsRequestBuilde
      toPostRequestInformation(requestConfiguration?: RequestConfiguration<object> | undefined) : RequestInformation;
 }
 /**
- * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered.Runs older than 30 days and beyond the 100 newest are removed automatically.
+ * Lists the runs of the job by the time they were requested, newest first by default, optionally filtered. Runs older than 30 days and beyond the 100 newest are removed automatically.
  */
 export interface RunsRequestBuilderGetQueryParameters {
     /**
