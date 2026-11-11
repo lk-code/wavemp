@@ -23,8 +23,8 @@ import { parseSort, sortContext } from '@/library/sorting'
 
 /**
  * A section of the library: the songs grouped by album, the recently added songs (newest first),
- * or albums, artists, genres and years as tiles. Search text (?q=) and sort order (?sort=,
- * ?direction=) come from the query of the route.
+ * or albums, artists, genres and years as tiles. Search text (?q=, not for years) and sort order
+ * (?sort=, ?direction=) come from the query of the route.
  */
 const props = defineProps<{
     /** Section of the library (route parameter), e.g. "songs". */
@@ -36,7 +36,9 @@ const route = useRoute()
 const tiles = useLibraryTiles()
 const status = ref<PagedListStatus>('idle')
 
-const search = computed(() => queryText(route.query))
+// The years cannot be filtered, so their section ignores a search text and does not offer one.
+const filterable = computed(() => props.section !== 'years')
+const search = computed(() => (filterable.value ? queryText(route.query) : ''))
 const sortState = computed(() => {
     const list = sortContext({ name: 'library-section', params: { section: props.section } })
     return list ? parseSort(list, route.query, search.value !== '') : {}

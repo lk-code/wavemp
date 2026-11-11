@@ -157,6 +157,23 @@ describe('LibraryView', () => {
         wrapper.unmount()
     })
 
+    it('ignores a search text in the years, which cannot be filtered', async () => {
+        api.listYears.mockResolvedValue({
+            items: [{ year: 1999, trackCount: 3, albumCount: 1 }],
+            total: 1,
+        })
+
+        const { wrapper } = await mountView(LibraryView, '/library/years?q=gust', {
+            section: 'years',
+        })
+
+        expect(api.listYears).toHaveBeenCalledWith(expect.not.objectContaining({ q: 'gust' }))
+        expect(wrapper.find('[data-part="alert"]').exists()).toBe(false)
+        expect(wrapper.find('[data-part="view"] > [data-part="link"]').exists()).toBe(false)
+        expect(wrapper.findAll('[data-part="tile"]')).toHaveLength(1)
+        wrapper.unmount()
+    })
+
     it('offers to try again after an error', async () => {
         api.listTracks.mockRejectedValueOnce(new Error('offline'))
         api.listTracks.mockResolvedValueOnce({ items: [track('Back')], total: 1 })
