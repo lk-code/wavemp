@@ -4,6 +4,7 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
 import ProfileSelectView from '@/views/ProfileSelectView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 import {
     defaultLibrarySection,
     librarySectionPattern,
@@ -74,6 +75,7 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             component: PlaylistsView,
             meta: { tab: 'playlists' },
         },
+        { path: '/settings', name: 'settings', component: SettingsView },
         ...extra,
         { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
     ]

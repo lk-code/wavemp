@@ -60,6 +60,10 @@
         grid-area: server-status;
     }
 
+    [data-part='header'] > [data-part='btn-profile'] {
+        grid-area: btn-profile;
+    }
+
     [data-part='toolbar'] > [data-part='breadcrumb'] {
         grid-area: breadcrumb;
     }
@@ -122,8 +126,8 @@
 
         [data-part='header'] {
             display: grid;
-            grid-template-areas: 'logo nav-history tabs server-status';
-            grid-template-columns: auto auto minmax(0, 1fr) auto;
+            grid-template-areas: 'logo nav-history tabs server-status btn-profile';
+            grid-template-columns: auto auto minmax(0, 1fr) auto auto;
             align-items: stretch;
             gap: var(--wmp-space-l);
             min-block-size: var(--wmp-header-height);

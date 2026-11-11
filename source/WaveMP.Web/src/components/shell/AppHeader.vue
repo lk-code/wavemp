@@ -5,18 +5,22 @@ import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
 import BaseTabs from '@/components/base/BaseTabs.vue'
+import ProfileMenu, { type ProfileMenuProfile } from './ProfileMenu.vue'
 import ServerStatus from './ServerStatus.vue'
 import { historyAvailability } from '@/navigation/history'
 import { mainNavigation, type MainTab } from '@/navigation/libraryTree'
+import { useSessionStore } from '@/stores/session'
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         /** State of the sidebar drawer on mobile (btn-menu). */
         sidebarOpen?: boolean
         /** Active tab; by default the tab of the current route. */
         activeTab?: MainTab
+        /** Profile of the profile menu; by default the selected profile. */
+        profile?: ProfileMenuProfile
     }>(),
-    { sidebarOpen: false, activeTab: undefined },
+    { sidebarOpen: false, activeTab: undefined, profile: undefined },
 )
 
 const emit = defineEmits<{
@@ -26,6 +30,11 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const session = useSessionStore()
+
+const menuProfile = computed(
+    () => props.profile ?? (session.isAuthenticated ? session.profile : null) ?? undefined,
+)
 
 const tabs = computed(() =>
     mainNavigation.map((item) => ({
@@ -87,5 +96,6 @@ onUnmounted(() => {
         </div>
         <BaseTabs :items="tabs" :label="t('nav.main')" :active="activeTab ?? route.meta.tab" />
         <ServerStatus />
+        <ProfileMenu v-if="menuProfile" :profile="menuProfile" />
     </header>
 </template>

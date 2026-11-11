@@ -49,8 +49,21 @@ describe('createRoutes', () => {
         expect(route.meta.public).toBe(true)
     })
 
+    it('knows the settings page', async () => {
+        const route = await resolve('/settings')
+
+        expect(route.name).toBe('settings')
+        expect(route.meta.bare).toBeUndefined()
+    })
+
     it('protects the pages of the app', async () => {
-        for (const path of ['/now-playing', '/library/songs', '/playlists', '/unknown']) {
+        for (const path of [
+            '/now-playing',
+            '/library/songs',
+            '/playlists',
+            '/settings',
+            '/unknown',
+        ]) {
             expect((await resolve(path)).meta.public, path).toBeUndefined()
         }
     })

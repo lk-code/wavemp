@@ -143,7 +143,8 @@
       "icons": "Icon-Slots",
       "previews": "Layouts",
       "profiles": "Profilauswahl",
-      "alerts": "Meldungen"
+      "alerts": "Meldungen",
+      "forms": "Formulare"
     },
     "samples": {
       "button": "Button",
@@ -170,7 +171,12 @@
       "loadError": "Profile konnten nicht geladen werden",
       "alertError": "Etwas ist schiefgelaufen.",
       "alertSuccess": "Die Änderungen sind gespeichert.",
-      "alertInfo": "Änderungen gelten sofort."
+      "alertInfo": "Änderungen gelten sofort.",
+      "selectLabel": "Option",
+      "optionOne": "Erste Option",
+      "optionTwo": "Zweite Option",
+      "hint": "Hilfetext zum Feld.",
+      "error": "Dieser Wert ist ungültig."
     },
     "transportStates": {
       "idle": "Leerlauf",
@@ -203,5 +209,21 @@
     "retry": "Erneut versuchen",
     "selectError": "Das Profil konnte nicht ausgewählt werden. Bitte versuche es erneut.",
     "profileGone": "Dieses Profil existiert nicht mehr."
+  },
+  "profileMenu": {
+    "label": "Profilmenü",
+    "open": "Profil: {name}",
+    "settings": "Einstellungen",
+    "switchProfile": "Profil wechseln"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "languageHint": "Gilt für dieses Profil auf allen Geräten.",
+    "saveError": "Die Einstellung konnte nicht gespeichert werden.",
+    "languages": {
+      "en": "English",
+      "de": "Deutsch"
+    }
   }
 }

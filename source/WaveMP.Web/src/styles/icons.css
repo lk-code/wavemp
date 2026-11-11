@@ -207,6 +207,10 @@
         --_icon: var(--wmp-icon-profile);
     }
 
+    [data-icon='switch-profile'] {
+        --_icon: var(--wmp-icon-switch-profile);
+    }
+
     [data-icon='edit'] {
         --_icon: var(--wmp-icon-edit);
     }

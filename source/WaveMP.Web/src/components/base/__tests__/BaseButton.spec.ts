@@ -70,6 +70,12 @@ describe('BaseButton', () => {
         expect(icons.map((icon) => icon.attributes('data-icon'))).toEqual(['sort', 'dropdown'])
     })
 
+    it('submits forms when it is the submit button', () => {
+        const wrapper = mount(BaseButton, { props: { label: 'Save', type: 'submit' } })
+
+        expect(wrapper.get('button').attributes('type')).toBe('submit')
+    })
+
     it('emits clicks', async () => {
         const wrapper = mount(BaseButton, { props: { label: 'Save' } })
 

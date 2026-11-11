@@ -1,5 +1,5 @@
 /*
- * Fixed mobile base for all themes: header with menu button, search toolbar, the sidebar as a
+ * Fixed mobile base for all themes: header with menu button and profile button, search toolbar, the sidebar as a
  * drawer, the transport as a mini player above the bottom navigation and as a full-screen player
  * when expanded. The layout properties of these areas are !important inside this layer: a
  * layered !important wins over every theme rule, also over an !important without layer, so a
@@ -46,8 +46,8 @@
         [data-part='app'] > [data-part='header'] {
             grid-area: header !important;
             display: grid !important;
-            grid-template-areas: 'btn-menu logo server-status' !important;
-            grid-template-columns: auto minmax(0, 1fr) auto !important;
+            grid-template-areas: 'btn-menu logo server-status btn-profile' !important;
+            grid-template-columns: auto minmax(0, 1fr) auto auto !important;
             grid-template-rows: auto !important;
             align-items: center;
             gap: var(--wmp-space-s);
@@ -71,6 +71,11 @@
 
         [data-part='header'] > [data-part='server-status'] {
             grid-area: server-status !important;
+            display: inline-flex !important;
+        }
+
+        [data-part='header'] > [data-part='btn-profile'] {
+            grid-area: btn-profile !important;
             display: inline-flex !important;
         }
 

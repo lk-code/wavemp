@@ -21,6 +21,10 @@ describe('buildBreadcrumb', () => {
             'music',
             'playlists',
         ])
+        expect(buildBreadcrumb({ name: 'settings', params: {} }).map((c) => c.id)).toEqual([
+            'music',
+            'settings',
+        ])
         expect(buildBreadcrumb({ name: 'not-found', params: {} }).map((c) => c.id)).toEqual([
             'music',
             'not-found',
@@ -43,6 +47,7 @@ describe('pageTitleKey', () => {
             'library.albums',
         )
         expect(pageTitleKey({ name: 'now-playing', params: {} })).toBe('nav.nowPlaying')
+        expect(pageTitleKey({ name: 'settings', params: {} })).toBe('settings.title')
     })
 })
 
@@ -53,6 +58,7 @@ describe('activeTreeId', () => {
         )
         expect(activeTreeId({ name: 'playlists', params: {} })).toBe('playlists')
         expect(activeTreeId({ name: 'now-playing', params: {} })).toBeUndefined()
+        expect(activeTreeId({ name: 'settings', params: {} })).toBeUndefined()
         expect(
             activeTreeId({ name: 'library-section', params: { section: 'unknown' } }),
         ).toBeUndefined()

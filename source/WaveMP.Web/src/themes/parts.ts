@@ -106,6 +106,10 @@ export const parts = [
     'avatar',
     'avatar-initials',
 
+    // Profile menu and settings
+    'btn-profile',
+    'profile-summary',
+
     // Base components
     'button',
     'icon',
@@ -117,6 +121,10 @@ export const parts = [
     'slider-fill',
     'slider-thumb',
     'field',
+    'form',
+    'select',
+    'field-hint',
+    'field-error',
     'dialog',
     'dialog-header',
     'dialog-title',

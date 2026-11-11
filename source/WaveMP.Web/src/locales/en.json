@@ -143,7 +143,8 @@
       "icons": "Icon slots",
       "previews": "Layouts",
       "profiles": "Profile selection",
-      "alerts": "Messages"
+      "alerts": "Messages",
+      "forms": "Forms"
     },
     "samples": {
       "button": "Button",
@@ -170,7 +171,12 @@
       "loadError": "Profiles could not be loaded",
       "alertError": "Something went wrong.",
       "alertSuccess": "The changes are saved.",
-      "alertInfo": "Changes apply at once."
+      "alertInfo": "Changes apply at once.",
+      "selectLabel": "Option",
+      "optionOne": "First option",
+      "optionTwo": "Second option",
+      "hint": "Help text for the field.",
+      "error": "This value is not valid."
     },
     "transportStates": {
       "idle": "Idle",
@@ -203,5 +209,21 @@
     "retry": "Try again",
     "selectError": "The profile could not be selected. Please try again.",
     "profileGone": "This profile no longer exists."
+  },
+  "profileMenu": {
+    "label": "Profile menu",
+    "open": "Profile: {name}",
+    "settings": "Settings",
+    "switchProfile": "Switch profile"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageHint": "Applies to this profile on all devices.",
+    "saveError": "The setting could not be saved.",
+    "languages": {
+      "en": "English",
+      "de": "Deutsch"
+    }
   }
 }

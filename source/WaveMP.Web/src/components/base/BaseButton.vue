@@ -22,6 +22,8 @@ const props = withDefaults(
         /** data-state tokens, e.g. "playing" or "on". */
         state?: string
         disabled?: boolean
+        /** submit for the button that submits a form. */
+        type?: 'button' | 'submit'
     }>(),
     {
         part: 'button',
@@ -32,6 +34,7 @@ const props = withDefaults(
         pressed: undefined,
         state: undefined,
         disabled: false,
+        type: 'button',
     },
 )
 
@@ -43,7 +46,7 @@ const title = computed(() => {
 
 <template>
     <button
-        type="button"
+        :type="type"
         :data-part="part"
         :data-variant="variant"
         :data-state="state"

@@ -542,8 +542,8 @@ a[data-part='breadcrumb-link']:hover {
     }
 
     [data-part='header'] {
-        grid-template-areas: 'nav-history tabs server-status';
-        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas: 'nav-history tabs server-status btn-profile';
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
         gap: 1.5rem;
         padding-inline: 0.625rem 1rem;
     }

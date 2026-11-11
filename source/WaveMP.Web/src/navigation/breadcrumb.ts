@@ -33,6 +33,9 @@ export function buildBreadcrumb(route: RouteInfo): Crumb[] {
             }
             break
         }
+        case 'settings':
+            crumbs.push({ id: 'settings', labelKey: 'settings.title' })
+            break
         case 'not-found':
             crumbs.push({ id: 'not-found', labelKey: 'notFound.title' })
             break

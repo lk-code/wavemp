@@ -321,6 +321,37 @@
         color: var(--wmp-color-text-muted);
     }
 
+    [data-part='select'] {
+        min-inline-size: 0;
+        min-block-size: var(--wmp-field-height);
+        padding-inline: var(--wmp-space-s);
+        border: 1px solid var(--wmp-color-border);
+        border-radius: var(--wmp-radius-s);
+        background: var(--wmp-color-surface);
+        color: var(--wmp-color-text);
+    }
+
+    [data-part='field-hint'] {
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+    }
+
+    [data-part='field-error'] {
+        color: var(--wmp-color-danger);
+        font-size: var(--wmp-font-size-s);
+    }
+
+    [data-part='field'][data-state~='invalid'] > :is([data-part='input'], [data-part='select']) {
+        border-color: var(--wmp-color-danger);
+    }
+
+    [data-part='form'] {
+        display: grid;
+        align-content: start;
+        gap: var(--wmp-space-l);
+        max-inline-size: 32rem;
+    }
+
     [data-part='search'] {
         position: relative;
         display: flex;
@@ -545,6 +576,28 @@
     }
 
     [data-part='avatar-initials'] {
+        white-space: nowrap;
+    }
+
+    [data-part='btn-profile'] {
+        padding: 0.125rem;
+        border-radius: var(--wmp-radius-m);
+    }
+
+    [data-part='profile-summary'] {
+        --_avatar-size: 3rem;
+
+        display: flex;
+        align-items: center;
+        gap: var(--wmp-space-m);
+        min-inline-size: 0;
+        font-size: var(--wmp-font-size-l);
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
+    [data-part='profile-summary'] > [data-part='label'] {
+        overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
     }
 

@@ -41,7 +41,7 @@ Rules for theme files:
 
 The layout uses CSS Grid with `grid-template-areas`. The names of the grid areas are the part names, for example `header`, `toolbar`, `sidebar`, `content`, `transport` and `bottom-nav`.
 
-- **Below 64rem** (`@media (width < 64rem)`), the fixed mobile base applies to every theme: a header with menu button, logo and server status, the search as toolbar, the content, the transport bar as mini player above the bottom navigation, the sidebar as drawer and the full-screen player (`transport` with the state `expanded`). Its layout properties are `!important` inside a cascade layer and cannot be changed by a theme, not even with `!important`. Colors, graphics, fonts and sizes still come from the theme.
+- **Below 64rem** (`@media (width < 64rem)`), the fixed mobile base applies to every theme: a header with menu button, logo, server status and profile button, the search as toolbar, the content, the transport bar as mini player above the bottom navigation, the sidebar as drawer and the full-screen player (`transport` with the state `expanded`). Its layout properties are `!important` inside a cascade layer and cannot be changed by a theme, not even with `!important`. Colors, graphics, fonts and sizes still come from the theme.
 - **From 64rem on** (`@media (width >= 64rem)`), the layout of the theme applies. The base provides a neutral desktop layout that a theme replaces in its own `@media (width >= 64rem)` rules. The breakpoint is fixed, because media queries cannot use variables.
 
 The DOM is a superset: all areas exist on every device, including `tabs` and `bottom-nav`, `logo`, `content-title`, `btn-menu`, `sidebar-backdrop` and `btn-collapse`. The desktop layout of a theme decides which of them are visible. A part that is hidden in a grid layout should get `display: none`; parts that are not part of `grid-template-areas` would otherwise create implicit grid cells. To hide a label or a title but keep it for assistive technology, use the pattern from [Rules](#rules).
@@ -51,7 +51,7 @@ These parts are grids with named areas:
 | Grid | Areas | Base desktop layout |
 |---|---|---|
 | `app` | `header`, `toolbar`, `sidebar`, `content`, `transport`, `bottom-nav` | `'header header' 'toolbar toolbar' 'sidebar content' 'transport transport'` |
-| `header` | `btn-menu`, `logo`, `nav-history`, `tabs`, `server-status` | `'logo nav-history tabs server-status'` |
+| `header` | `btn-menu`, `logo`, `nav-history`, `tabs`, `server-status`, `btn-profile` | `'logo nav-history tabs server-status btn-profile'` |
 | `toolbar` | `breadcrumb`, `view-switch`, `sort`, `search` | `'breadcrumb view-switch sort search'` |
 | `transport` | `seek`, `now-playing-mini`, `transport-controls`, `mode-switch`, `btn-collapse` | `'seek seek seek' 'now-playing-mini transport-controls mode-switch'` |
 | `list-group` | `list-group-header`, `list-group-info`, `list-group-rows` | `'list-group-header list-group-header' 'list-group-info list-group-rows'` |
@@ -87,6 +87,7 @@ Example of a desktop layout with the sidebar on the right:
 | `tab` | `a` (`aria-current`) | `tabs` | Entry of the main navigation with `icon`, `label` and `indicator` |
 | `server-status` | `div` (`role="status"`) | `header` | Connection to the server with `status-indicator` and `label` |
 | `status-indicator` | `span` | `server-status` | Dot that shows the state |
+| `btn-profile` | `button` (`aria-haspopup="menu"`, `aria-expanded`) | `header` | Opens the profile menu (settings, switch profile); `avatar` and `label` with the name |
 | `toolbar` | `div` | `app` | Bar below the header |
 | `breadcrumb` | `nav` | `toolbar` | Location of the current page |
 | `breadcrumb-list` | `ol` | `breadcrumb` | List of the breadcrumb items |
@@ -96,7 +97,7 @@ Example of a desktop layout with the sidebar on the right:
 | `view-switch` | `button` (`aria-haspopup="menu"`) | `toolbar` | View options of the list (disabled in this version) |
 | `sort` | `button` (`aria-haspopup="menu"`) | `toolbar` | Sort options of the list (disabled in this version) |
 | `search` | `div` (`role="search"`) | `toolbar` | Search field with `icon`, `input` and `btn-clear` |
-| `input` | `input` | `search`, `field` | Text input |
+| `input` | `input` (`aria-invalid`) | `search`, `field` | Text input |
 | `btn-clear` | `button` | `search` | Clears the search; `hidden` while the field is empty |
 | `sidebar` | `aside` | `app` | Navigation tree; a drawer on mobile |
 | `sidebar-backdrop` | `div` | `app` | Backdrop behind the drawer (mobile) |
@@ -157,6 +158,7 @@ Example of a desktop layout with the sidebar on the right:
 | `profile-tile` | `button` | `profile-item` | Selects the profile; `avatar` and `label` (name) |
 | `avatar` | `span` (`aria-hidden`) | `profile-tile`, any | Initials on the color of the profile (`--wmp-profile-color`) |
 | `avatar-initials` | `span` | `avatar` | Initials of the profile |
+| `profile-summary` | `div` | `view` | The current profile on the settings page: `avatar` and `label` with the name |
 | `button` | `button` | any | Generic button, see `data-variant` in [States](#states) |
 | `icon` | `span` (`aria-hidden`) | any | Icon wrapper with the slot in `data-icon`, see [Icons](#icons) |
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
@@ -166,7 +168,11 @@ Example of a desktop layout with the sidebar on the right:
 | `slider-track` | `div` | `slider` | Track of the slider |
 | `slider-fill` | `div` | `slider-track` | Filled part of the track |
 | `slider-thumb` | `div` (`role="slider"`) | `slider` | Knob, focusable |
-| `field` | `label` | any | Text field with `label` and `input` |
+| `field` | `label` | `form`, any | Text field or selection with `label`, `input` or `select`, and optionally `field-hint` and `field-error` |
+| `form` | `form` | `view`, `dialog-body` | Form with fields |
+| `select` | `select` (`aria-invalid`) | `field` | Selection list |
+| `field-hint` | `span` | `field` | Help text of the field |
+| `field-error` | `span` | `field` | Error message of the field |
 | `dialog` | `dialog` | any | Modal dialog |
 | `dialog-header` | `div` | `dialog` | Title bar of the dialog |
 | `dialog-title` | `h2` | `dialog-header` | Title of the dialog |
@@ -210,6 +216,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
 | `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
 | `alert` | `error`, `success` or `info` |
+| `field` | `invalid` while the field has an error |
 
 ### ARIA attributes and native states
 
@@ -218,7 +225,8 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item` |
 | `aria-current="true"` | `profile-tile` of the current profile |
 | `aria-busy="true"` | `profile-select` while a profile is being selected |
-| `aria-expanded` | `tree-item`, `btn-menu`, `now-playing-mini` (mobile) |
+| `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
+| `aria-invalid="true"` | `input` and `select` of a field with an error |
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
@@ -235,7 +243,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 |---|---|---|
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `now-playing`, `playlists`, `not-found` |
+| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `not-found` |
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year` |
@@ -474,6 +482,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `collapse-player` | `--wmp-icon-collapse-player` | `/icons/phosphor/fill/caret-down-fill.svg` | Transport |
 | `settings` | `--wmp-icon-settings` | `/icons/phosphor/regular/gear-six.svg` | Menus and dialogs |
 | `profile` | `--wmp-icon-profile` | `/icons/phosphor/regular/user-circle.svg` | Menus and dialogs |
+| `switch-profile` | `--wmp-icon-switch-profile` | `/icons/phosphor/regular/user-switch.svg` | Menus and dialogs |
 | `edit` | `--wmp-icon-edit` | `/icons/phosphor/regular/pencil-simple.svg` | Menus and dialogs |
 | `delete` | `--wmp-icon-delete` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `add` | `--wmp-icon-add` | `/icons/phosphor/regular/plus.svg` | Menus and dialogs |
@@ -522,4 +531,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 ### Changelog
 
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
-    - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the base component `alert`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size` and `--wmp-avatar-size-l` and the runtime variable `--wmp-profile-color`.
+    - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the base components `alert`, `form`, `select`, `field-hint` and `field-error`, the icon slot `switch-profile`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size` and `--wmp-avatar-size-l` and the runtime variable `--wmp-profile-color`.

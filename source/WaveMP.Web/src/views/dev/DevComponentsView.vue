@@ -12,6 +12,7 @@ import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
 import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
 import BaseSearchField from '@/components/base/BaseSearchField.vue'
+import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseSlider from '@/components/base/BaseSlider.vue'
 import BaseTabs from '@/components/base/BaseTabs.vue'
 import BaseTextField from '@/components/base/BaseTextField.vue'
@@ -19,6 +20,7 @@ import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
 import AlbumGroupList from '@/components/library/AlbumGroupList.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
+import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
 import type { ProfileTileData } from '@/components/profiles/ProfileTile.vue'
 import AppBottomNav from '@/components/shell/AppBottomNav.vue'
 import AppHeader from '@/components/shell/AppHeader.vue'
@@ -82,6 +84,12 @@ const textEmpty = ref('')
 const textFilled = ref('')
 const searchEmpty = ref('')
 const searchFilled = ref('')
+const textInvalid = ref('')
+const selected = ref('one')
+const selectOptions = computed(() => [
+    { value: 'one', label: t('dev.samples.optionOne') },
+    { value: 'two', label: t('dev.samples.optionTwo') },
+])
 textFilled.value = t('dev.samples.textValue')
 searchFilled.value = t('dev.samples.searchValue')
 
@@ -199,6 +207,7 @@ const sampleProfiles = computed<ProfileTileData[]>(() => [
     },
     adminProfile.value,
 ])
+const firstProfile = computed(() => sampleProfiles.value[0]!)
 </script>
 
 <template>
@@ -331,6 +340,43 @@ const sampleProfiles = computed<ProfileTileData[]>(() => [
         </section>
 
         <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.forms') }}</h2>
+            <div data-part="dev-samples">
+                <ProfileSummary
+                    :name="firstProfile.name"
+                    :initials="firstProfile.initials"
+                    :color="firstProfile.color"
+                />
+            </div>
+            <form data-part="form" @submit.prevent>
+                <BaseTextField
+                    v-model="textFilled"
+                    :label="t('dev.samples.textField')"
+                    :hint="t('dev.samples.hint')"
+                    required
+                    :maxlength="50"
+                />
+                <BaseTextField
+                    v-model="textInvalid"
+                    :label="t('dev.samples.textField')"
+                    :error="t('dev.samples.error')"
+                />
+                <BaseSelect
+                    v-model="selected"
+                    :label="t('dev.samples.selectLabel')"
+                    :options="selectOptions"
+                    :hint="t('dev.samples.hint')"
+                />
+                <BaseSelect
+                    v-model="selected"
+                    :label="t('dev.samples.selectLabel')"
+                    :options="selectOptions"
+                    :error="t('dev.samples.error')"
+                />
+            </form>
+        </section>
+
+        <section data-part="dev-section">
             <h2 data-part="dev-section-title">{{ t('dev.sections.dialog') }}</h2>
             <div data-part="dev-samples">
                 <BaseButton :label="t('dev.samples.openDialog')" @click="dialogOpen = true" />
@@ -400,7 +446,7 @@ const sampleProfiles = computed<ProfileTileData[]>(() => [
 
         <section data-part="dev-section">
             <h2 data-part="dev-section-title">{{ t('dev.sections.header') }}</h2>
-            <AppHeader active-tab="library" />
+            <AppHeader active-tab="library" :profile="firstProfile" />
         </section>
 
         <section data-part="dev-section">
