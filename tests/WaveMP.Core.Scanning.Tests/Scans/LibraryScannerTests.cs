@@ -305,6 +305,44 @@ public class LibraryScannerTests
     }
 
     [Test]
+    public async Task Rescan_ChangedAlbumSpellingAndYear_UpdatesTheAlbum()
+    {
+        TestTags tags = new() { Artist = "Band", Album = "the album", Date = "2001" };
+        await AudioAsync("Band/Album/01 - One.mp3", tags: tags with { Title = "One" });
+        await AudioAsync("Band/Album/02 - Two.mp3", tags: tags with { Title = "Two" });
+        await ScanAsync();
+        Guid albumId;
+        await using (WaveMpDbContext before = _database.CreateDbContext())
+        {
+            albumId = (await LoadAlbumAsync(before, "the album")).Id;
+        }
+
+        TestTags changed = tags with { Album = "The Album", Date = "2002" };
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", changed with { Title = "One" });
+        await ChangeAudioAsync("Band/Album/02 - Two.mp3", changed with { Title = "Two" });
+        await ScanAsync();
+
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        Album album = await LoadAlbumAsync(db, "The Album");
+        album.Id.Should().Be(albumId, "only the spelling changed, so it is the same album");
+        album.Year.Should().Be(2002);
+        album.Tracks.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task Rescan_FolderWithoutYear_KeepsTheYearOfTheAlbum()
+    {
+        await AudioAsync("Band/Album/01 - One.mp3", tags: new TestTags { Artist = "Band", Album = "A", Date = "2001" });
+        await ScanAsync();
+
+        await ChangeAudioAsync("Band/Album/01 - One.mp3", new TestTags { Artist = "Band", Album = "A" });
+        await ScanAsync();
+
+        await using WaveMpDbContext db = _database.CreateDbContext();
+        (await LoadAlbumAsync(db, "A")).Year.Should().Be(2001);
+    }
+
+    [Test]
     public async Task Rescan_BetterFileAdded_ChangesThePrimaryFile()
     {
         await AudioAsync("Song.mp3");

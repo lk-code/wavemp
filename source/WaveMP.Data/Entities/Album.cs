@@ -2,7 +2,7 @@ namespace WaveMP.Data.Entities;
 
 /// <summary>
 /// An album, unique by its album artist (or compilation) and title. Created by the scan and removed once it has no
-/// tracks.
+/// tracks. The spelling of the title and the year follow the folder of the album that was written last.
 /// </summary>
 public class Album
 {

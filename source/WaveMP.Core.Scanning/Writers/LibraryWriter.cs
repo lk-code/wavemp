@@ -328,14 +328,36 @@ public sealed class LibraryWriter(ILibraryScanRepository library)
             };
             library.Add(album);
         }
-        else if (album.Year is null && assignment.Year is not null)
+        else if (UpdateAlbum(album, assignment))
         {
-            album.Year = assignment.Year;
             album.UpdatedAt = now;
         }
 
         cache.Albums[assignment.Key] = album.Id;
         return album.Id;
+    }
+
+    /// <summary>
+    /// An existing album follows the folder written last: the spelling of its title (the key, and so the album, stays
+    /// the same) and its year, unless the folder names none. Returns whether anything changed. Artists keep their
+    /// first spelling, so their names do not change from folder to folder.
+    /// </summary>
+    private static bool UpdateAlbum(Album album, AlbumAssignment assignment)
+    {
+        bool changed = false;
+        if (album.Title != assignment.Title)
+        {
+            album.Title = assignment.Title;
+            changed = true;
+        }
+
+        if (assignment.Year is not null && album.Year != assignment.Year)
+        {
+            album.Year = assignment.Year;
+            changed = true;
+        }
+
+        return changed;
     }
 
     private static MediaFile CreateFile(DiscoveredFile discovered, string directoryPath, DateTimeOffset now)
