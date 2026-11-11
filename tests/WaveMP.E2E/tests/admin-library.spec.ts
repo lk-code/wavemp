@@ -25,6 +25,9 @@ test('shows the jobs page without horizontal scrolling', async ({ page }) => {
     await page.goto('/admin/jobs')
 
     await expect(page.locator("[data-part='job-item'][data-item='library-scan']")).toBeVisible()
+    const covers = page.locator("[data-part='job-item'][data-item='cover-cache']")
+    await expect(covers.locator("[data-part='job-name']")).toHaveText('Prepare covers')
+    await expect(covers.locator("[data-part='job-meta']")).toContainText('Runs after scans')
     const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
@@ -54,6 +57,8 @@ test.describe('settings', () => {
         await page.reload()
         await expect(page.getByLabel('Scan the library')).toHaveValue('720')
         await adminNavItem(page, 'admin-jobs').click()
-        await expect(page.locator("[data-part='job-meta']")).toContainText('Every 720 minutes')
+        await expect(
+            page.locator("[data-part='job-item'][data-item='library-scan'] [data-part='job-meta']"),
+        ).toContainText('Every 720 minutes')
     })
 })

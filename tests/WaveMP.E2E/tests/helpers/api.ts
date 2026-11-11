@@ -169,3 +169,57 @@ export async function updateTrackMetadata(
     })
     expect(response.status(), await response.text()).toBe(200)
 }
+
+/** Id of the album with exactly this title. */
+export async function findAlbumId(request: APIRequestContext, title: string): Promise<string> {
+    const response = await request.get(`/api/v1/albums?q=${encodeURIComponent(title)}&limit=100`, {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    const album = ((await response.json()).items as { id: string; title: string }[]).find(
+        (item) => item.title === title,
+    )
+    expect(album, `The library has no album "${title}".`).toBeDefined()
+    return album!.id
+}
+
+// Cache
+
+export interface CacheUsage {
+    readonly isAvailable: boolean
+    readonly sizeBytes: number
+    readonly entryCount: number
+    readonly maxSizeBytes: number
+}
+
+export async function getCacheUsage(request: APIRequestContext): Promise<CacheUsage> {
+    const response = await request.get('/api/v1/cache', {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    return (await response.json()) as CacheUsage
+}
+
+export async function updateCacheSettings(
+    request: APIRequestContext,
+    changes: Record<string, unknown>,
+): Promise<void> {
+    const response = await request.patch('/api/v1/settings/cache', {
+        data: changes,
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+}
+
+/** Restores the default size limit of the cache. */
+export async function resetCacheSettings(request: APIRequestContext): Promise<void> {
+    await updateCacheSettings(request, { maxSizeMegabytes: 2000 })
+}
+
+/** A request with the session of the built-in admin profile, e.g. for pictures. */
+export async function adminHeaders(
+    request: APIRequestContext,
+    headers: Record<string, string> = {},
+): Promise<Record<string, string>> {
+    return { ...authorization(await adminToken(request)), ...headers }
+}
