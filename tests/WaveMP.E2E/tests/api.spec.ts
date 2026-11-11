@@ -18,3 +18,17 @@ test('unsupported methods on API routes return 405 with an Allow header', async 
     expect(response.headers()['content-type']).toContain('application/problem+json')
     expect((await response.json()).code).toBe('request.failed')
 })
+
+test('health reports the version of the image', async ({ request }) => {
+    const response = await request.get('/api/v1/health')
+
+    expect(response.status()).toBe(200)
+    const { version } = await response.json()
+    // Release builds pass the tag version; other builds keep the version from Directory.Build.props.
+    const expected = process.env.E2E_EXPECTED_VERSION
+    if (expected) {
+        expect(version).toBe(expected)
+    } else {
+        expect(version).toMatch(/^\d+\.\d+\.\d+/)
+    }
+})
