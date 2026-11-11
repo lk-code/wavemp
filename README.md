@@ -232,7 +232,7 @@ docker compose -f docker-compose.dev.yml up -d wavemp-db
 dotnet test
 
 # Web app checks
-(cd source/WaveMP.Web && npm run lint:check && npm run type-check && npm run format:check)
+(cd source/WaveMP.Web && npm run lint:check && npm run type-check && npm run format:check && npm run test:unit)
 
 # E2E tests against a running instance
 docker compose -f docker-compose.dev.yml up --build -d
@@ -259,7 +259,7 @@ It restores the .NET tools and npm packages it needs by itself and fails if a pa
 
 ### Continuous integration
 
-GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit tests and integration tests against a PostgreSQL 18 service container, lint, type check and build of the web app, the license check, and the E2E tests against the Docker image. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
+GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit tests and integration tests against a PostgreSQL 18 service container, lint, type check, unit tests (Vitest) and build of the web app, the license check, and the E2E tests against the Docker image. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
 
 ## License
 

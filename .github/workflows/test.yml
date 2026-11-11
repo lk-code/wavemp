@@ -84,7 +84,7 @@ jobs:
         run: dotnet test WaveMP.slnx --no-build --filter "TestCategory=Integration"
 
   web:
-    name: Web app lint, type check and build
+    name: Web app lint, type check, unit tests and build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
@@ -114,6 +114,9 @@ jobs:
 
       - name: Type check
         run: npm run type-check
+
+      - name: Unit tests
+        run: npm run test:unit
 
       - name: Build
         run: npm run build-only
