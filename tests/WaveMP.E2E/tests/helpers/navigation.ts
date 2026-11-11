@@ -16,7 +16,7 @@ export function profileButton(page: Page): Locator {
     return page.locator("[data-part='app'] [data-part='btn-profile']")
 }
 
-/** Opens the profile menu and chooses an entry (settings, manage-profiles, switch-profile). */
+/** Opens the profile menu and chooses an entry (settings, administration, switch-profile). */
 export async function chooseFromProfileMenu(page: Page, item: string): Promise<void> {
     await profileButton(page).click()
     await page.locator(`[data-part='context-menu'] [data-item='${item}']`).click()
@@ -31,4 +31,9 @@ export function profileTile(page: Page, name: string): Locator {
 
 export function builtInAdminTile(page: Page): Locator {
     return page.locator("[data-part='profile-tile'][data-state~='built-in']")
+}
+
+/** The navigation of the administration. */
+export function adminNavItem(page: Page, item: string): Locator {
+    return page.locator(`[data-part='admin-nav'] [data-item='${item}']`)
 }

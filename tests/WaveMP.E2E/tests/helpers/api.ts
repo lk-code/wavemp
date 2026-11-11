@@ -58,3 +58,64 @@ export async function deleteUser(request: APIRequestContext, id: string): Promis
     })
     expect([204, 404]).toContain(response.status())
 }
+
+// Scans and library settings
+
+export interface ScanSummary {
+    readonly id: string
+    readonly status: string
+    readonly statistics?: { readonly tracksTotal: number; readonly filesFound: number } | null
+}
+
+/** True while a scan is queued or running. */
+export async function isScanActive(request: APIRequestContext): Promise<boolean> {
+    const response = await request.get('/api/v1/scans/current', {
+        headers: authorization(await adminToken(request)),
+    })
+    expect([200, 404]).toContain(response.status())
+    return response.status() === 200
+}
+
+/** Waits until no scan is queued or running, e.g. the periodic scan after the start. */
+export async function waitForIdleScan(request: APIRequestContext): Promise<void> {
+    await expect
+        .poll(() => isScanActive(request), { timeout: 120_000, intervals: [500] })
+        .toBe(false)
+}
+
+/** The newest scan, or undefined if there was none. */
+export async function latestScan(request: APIRequestContext): Promise<ScanSummary | undefined> {
+    const response = await request.get('/api/v1/scans?limit=1', {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    return ((await response.json()).items as ScanSummary[])[0]
+}
+
+/** Id of the newest run of a job, or undefined. */
+export async function latestJobRunId(
+    request: APIRequestContext,
+    jobId: string,
+): Promise<string | undefined> {
+    const response = await request.get(`/api/v1/jobs/${jobId}/runs?limit=1`, {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    return ((await response.json()).items as { id: string }[])[0]?.id
+}
+
+export async function updateLibrarySettings(
+    request: APIRequestContext,
+    changes: Record<string, unknown>,
+): Promise<void> {
+    const response = await request.patch('/api/v1/settings/library', {
+        data: changes,
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+}
+
+/** Restores the defaults of the settings the tests change. */
+export async function resetLibrarySettings(request: APIRequestContext): Promise<void> {
+    await updateLibrarySettings(request, { scanIntervalMinutes: 360 })
+}

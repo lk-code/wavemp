@@ -68,7 +68,7 @@ test('switches the profile through the menu', async ({ page }) => {
     await expect(profileButton(page).locator("[data-part='avatar-initials']")).toHaveText('A')
     await profileButton(page).click()
     await expect(
-        page.locator("[data-part='context-menu'] [data-item='manage-profiles']"),
+        page.locator("[data-part='context-menu'] [data-item='administration']"),
     ).toBeVisible()
 })
 

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { deleteUser, findUserByName, uniqueSuffix } from './helpers/api'
-import { chooseFromProfileMenu } from './helpers/navigation'
+import { adminNavItem, chooseFromProfileMenu } from './helpers/navigation'
 
 // Profile administration with the session of the built-in admin.
 
@@ -19,8 +19,11 @@ test.afterEach(async ({ request }) => {
 
 test('creates, edits and deletes a profile', async ({ page }) => {
     await page.goto('/library/songs')
-    await chooseFromProfileMenu(page, 'manage-profiles')
+    await chooseFromProfileMenu(page, 'administration')
+    await expect(page).toHaveURL(/\/admin\/library$/)
+    await adminNavItem(page, 'admin-users').click()
     await expect(page).toHaveURL(/\/admin\/users$/)
+    await expect(adminNavItem(page, 'admin-users')).toHaveAttribute('aria-current', 'page')
 
     const builtIn = page.locator("[data-part='user-item'][data-state~='built-in']")
     await expect(builtIn.locator("[data-part='user-actions'] button").nth(1)).toBeDisabled()
