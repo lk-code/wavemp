@@ -48,7 +48,8 @@ RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -a "$T
 # --- Runtime --------------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 
-# ffmpeg and ffprobe are used as external processes only (never linked).
+# ffmpeg and ffprobe are used as external processes only (never linked); the cache scales covers
+# to WebP with the libwebp encoder of the Alpine ffmpeg package.
 RUN apk add --no-cache ffmpeg \
     && mkdir -p /licenses/ffmpeg /licenses/phosphor-icons /licenses/taglibsharp /licenses/wavemp /data /media \
     && ffmpeg -hide_banner -version > /licenses/ffmpeg/VERSION \

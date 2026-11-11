@@ -8,6 +8,7 @@ services:
       DB_HOST: wavemp-db
       DB_PASSWORD: ${DB_PASSWORD:?Please set DB_PASSWORD in .env}
     volumes:
+      # Data of WaveMP that is not in the database, e.g. the cache of scaled covers.
       - wavemp-data:/data
       # Append :ro to keep WaveMP from changing your files; the metadata editor is then off.
       - /path/to/your/media:/media
