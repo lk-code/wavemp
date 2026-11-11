@@ -14,6 +14,11 @@ public class UserServiceTests
 {
     private static readonly DateTimeOffset _now = new(2026, 11, 11, 9, 30, 0, TimeSpan.Zero);
 
+    // A valid name whose first word starts with "á" and 17 more combining marks: one text element of 18 UTF-16 code
+    // units, too long for initials.
+    private static readonly string _nameWithLongTextElement =
+        "\u00E1" + string.Concat(Enumerable.Range(0x0302, 17).Select(mark => (char)mark)) + " x";
+
     private IUserRepository _users = null!;
     private UserService _service = null!;
 
@@ -73,6 +78,16 @@ public class UserServiceTests
         UserResult result = await _service.CreateAsync(new CreateUserCommand("Anna Bell", "  "));
 
         result.User!.Initials.Should().Be("AB");
+    }
+
+    [Test]
+    public async Task CreateAsync_WithTooLongTextElementInName_DerivesValidInitials()
+    {
+        UserResult result = await _service.CreateAsync(new CreateUserCommand(_nameWithLongTextElement));
+
+        result.IsSuccess.Should().BeTrue();
+        result.User!.Initials.Should().Be("\u00C1X");
+        await _users.Received(1).AddAsync(result.User, Arg.Any<CancellationToken>());
     }
 
     [TestCase("", null, null, UserError.InvalidName)]
@@ -188,6 +203,28 @@ public class UserServiceTests
         await _service.UpdateAsync(user.Id, new UpdateUserCommand(Initials: string.Empty));
 
         user.Initials.Should().Be("AB");
+    }
+
+    [Test]
+    public async Task UpdateAsync_WithNewNameWithTooLongTextElement_LetsDerivedInitialsFollowValidly()
+    {
+        User user = Given(CreateUser("Anna Bell"));
+
+        UserResult result = await _service.UpdateAsync(user.Id, new UpdateUserCommand(Name: _nameWithLongTextElement));
+
+        result.IsSuccess.Should().BeTrue();
+        user.Initials.Should().Be("\u00C1X");
+    }
+
+    [Test]
+    public async Task UpdateAsync_WithEmptyInitialsAndTooLongTextElementInName_DerivesValidInitials()
+    {
+        User user = Given(CreateUser(_nameWithLongTextElement, initials: "XY"));
+
+        UserResult result = await _service.UpdateAsync(user.Id, new UpdateUserCommand(Initials: string.Empty));
+
+        result.IsSuccess.Should().BeTrue();
+        user.Initials.Should().Be("\u00C1X");
     }
 
     [Test]

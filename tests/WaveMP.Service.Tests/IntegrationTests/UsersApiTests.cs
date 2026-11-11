@@ -154,6 +154,22 @@ public class UsersApiTests
     }
 
     [Test]
+    public async Task CreateUser_WithTooLongTextElementInName_DerivesValidInitials()
+    {
+        // The first word starts with "á" and 17 more combining marks: one text element of 18 UTF-16 code units.
+        string name = "\u00E1" + string.Concat(Enumerable.Range(0x0302, 17).Select(mark => (char)mark))
+            + $" {HttpClientExtensions.Unique()} x";
+
+        UserDto user = await _admin.CreateUserAsync(new { name });
+        UserDto renamed = await PatchAsync(user.Id, new { name = "Z" + name });
+        UserDto rederived = await PatchAsync(user.Id, new { name, initials = string.Empty });
+
+        user.Initials.Should().Be("\u00C1X");
+        renamed.Initials.Should().Be("ZX");
+        rederived.Initials.Should().Be("\u00C1X");
+    }
+
+    [Test]
     public async Task GetUser_WithId_ReturnsTheUser()
     {
         UserDto created = await _admin.CreateUserAsync(new { name = $"Get {HttpClientExtensions.Unique()}" });
@@ -185,7 +201,11 @@ public class UsersApiTests
 
         List<string> names = [.. page.Items.Select(user => user.Name).Where(name => name.Contains(unique))];
         names.Should().Equal($"Sort {unique} c", $"Sort {unique} b", $"Sort {unique} A");
-        page.Items.Select(user => user.Name.ToUpperInvariant()).Should().BeInDescendingOrder(StringComparer.Ordinal);
+        // The database sorts with its collation, e.g. "Á" next to "A"; an ordinal comparison matches it for ASCII only.
+        page.Items
+            .Select(user => user.Name.ToUpperInvariant())
+            .Where(name => name.All(char.IsAscii))
+            .Should().BeInDescendingOrder(StringComparer.Ordinal);
     }
 
     [Test]
