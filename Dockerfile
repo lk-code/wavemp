@@ -9,6 +9,8 @@ FROM --platform=$BUILDPLATFORM node:24-alpine AS web
 WORKDIR /src/source/WaveMP.Web
 COPY source/WaveMP.Web/package.json source/WaveMP.Web/package-lock.json ./
 RUN npm ci
+# Graphics, icons and themes, served unchanged by the web app (Vite publicDir).
+COPY assets/web/ /src/assets/web/
 COPY source/WaveMP.Web/ ./
 RUN npm run build
 
@@ -34,12 +36,13 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 
 # ffmpeg is used as an external process only (never linked).
 RUN apk add --no-cache ffmpeg \
-    && mkdir -p /licenses/ffmpeg /licenses/wavemp /data /media \
+    && mkdir -p /licenses/ffmpeg /licenses/phosphor-icons /licenses/wavemp /data /media \
     && ffmpeg -hide_banner -version > /licenses/ffmpeg/VERSION \
     && chown "$APP_UID" /data
 
 COPY LICENSE /licenses/wavemp/LICENSE
 COPY assets/licenses/ffmpeg/ /licenses/ffmpeg/
+COPY assets/web/icons/phosphor/LICENSE /licenses/phosphor-icons/LICENSE
 
 WORKDIR /app
 COPY --from=build /app ./

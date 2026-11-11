@@ -10,6 +10,9 @@ const serviceUrl = process.env.WAVEMP_SERVICE_URL ?? 'http://localhost:5080'
 
 // https://vite.dev/config/
 export default defineConfig({
+    // Graphics, icons and themes from /assets/web are served unchanged at the root (e.g.
+    // /themes/midnight/theme.css), in development and in the build.
+    publicDir: fileURLToPath(new URL('../../assets/web', import.meta.url)),
     plugins: [
         vue(),
         vueDevTools(),

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <!-- Placeholder logo of WaveMP: a glossy blue orb with a white wave. -->
+    <defs>
+        <radialGradient id="orb" cx="50%" cy="36%" r="64%">
+            <stop offset="0" stop-color="#8ad8ff"/>
+            <stop offset="0.55" stop-color="#1f7ce0"/>
+            <stop offset="1" stop-color="#0a2a6b"/>
+        </radialGradient>
+        <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#bfe8ff"/>
+            <stop offset="1" stop-color="#06204f"/>
+        </linearGradient>
+    </defs>
+    <circle cx="256" cy="256" r="236" fill="url(#orb)" stroke="url(#rim)" stroke-width="8"/>
+    <path d="M128 268C168 180 216 180 256 268S344 356 384 268" fill="none" stroke="#ffffff" stroke-width="30" stroke-linecap="round"/>
+    <ellipse cx="256" cy="148" rx="176" ry="104" fill="url(#gloss)"/>
+</svg>
