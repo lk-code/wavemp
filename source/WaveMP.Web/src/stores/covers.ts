@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { statusOf } from '@/api/problems'
 import { fetchAlbumCover, fetchTrackCover } from '@/library/api'
+import { defaultCoverSize, type CoverSize } from '@/library/covers'
 
 export type CoverKind = 'album' | 'track'
 
@@ -17,21 +18,24 @@ interface Entry {
 
 /**
  * Covers as object URLs. Pictures of the API need the session token, which an <img> element cannot
- * send, so they are loaded through the API client and shown from a blob. Components acquire a
- * cover while they show it and release it afterwards; requests for the same cover are shared. A
- * missing cover (404) is remembered as null, other errors are not, so the next attempt loads again.
+ * send, so they are loaded through the API client and shown from a blob. Every size of a cover is
+ * an entry of its own. Components acquire a cover while they show it and release it afterwards;
+ * requests for the same cover and size are shared. The browser keeps the pictures as well and asks
+ * the API with their ETag whether they changed. A missing cover (404) is remembered as null, other
+ * errors are not, so the next attempt loads again.
  */
 export const useCoversStore = defineStore('covers', () => {
     const entries = new Map<string, Entry>()
     let clock = 0
 
-    function keyOf(kind: CoverKind, id: string): string {
-        return `${kind}:${id}`
+    function keyOf(kind: CoverKind, id: string, size: CoverSize): string {
+        return `${kind}:${id}:${size}`
     }
 
-    async function load(kind: CoverKind, id: string): Promise<string | null> {
+    async function load(kind: CoverKind, id: string, size: CoverSize): Promise<string | null> {
         try {
-            const buffer = kind === 'album' ? await fetchAlbumCover(id) : await fetchTrackCover(id)
+            const buffer =
+                kind === 'album' ? await fetchAlbumCover(id, size) : await fetchTrackCover(id, size)
             return buffer && buffer.byteLength > 0 ? URL.createObjectURL(new Blob([buffer])) : null
         } catch (error) {
             if (statusOf(error) === 404) {
@@ -65,9 +69,16 @@ export const useCoversStore = defineStore('covers', () => {
         }
     }
 
-    /** The object URL of a cover, or null if there is none; release it when it is not shown. */
-    function acquire(kind: CoverKind, id: string): Promise<string | null> {
-        const key = keyOf(kind, id)
+    /**
+     * The object URL of a cover in the size, or null if there is none; release it with the same
+     * size when it is not shown.
+     */
+    function acquire(
+        kind: CoverKind,
+        id: string,
+        size: CoverSize = defaultCoverSize,
+    ): Promise<string | null> {
+        const key = keyOf(kind, id, size)
         let entry = entries.get(key)
         if (!entry) {
             entry = { url: null, loaded: false, pending: null, refs: 0, used: 0 }
@@ -83,7 +94,7 @@ export const useCoversStore = defineStore('covers', () => {
         let pending = entry.pending
         if (!pending) {
             const current = entry
-            pending = load(kind, id).then(
+            pending = load(kind, id, size).then(
                 (url) => {
                     current.url = url
                     current.loaded = true
@@ -103,8 +114,8 @@ export const useCoversStore = defineStore('covers', () => {
         return pending
     }
 
-    function release(kind: CoverKind, id: string): void {
-        const key = keyOf(kind, id)
+    function release(kind: CoverKind, id: string, size: CoverSize = defaultCoverSize): void {
+        const key = keyOf(kind, id, size)
         const entry = entries.get(key)
         if (!entry) {
             return

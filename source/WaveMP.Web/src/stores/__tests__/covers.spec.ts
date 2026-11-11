@@ -42,14 +42,31 @@ describe('covers store', () => {
         expect(second).toBe(first)
         expect(third).toBe(first)
         expect(api.fetchAlbumCover).toHaveBeenCalledTimes(1)
-        expect(api.fetchAlbumCover).toHaveBeenCalledWith('a')
+        expect(api.fetchAlbumCover).toHaveBeenCalledWith('a', 300)
+    })
+
+    it('loads every size of a cover once and frees each size on its own', async () => {
+        const store = useCoversStore()
+
+        const small = await store.acquire('album', 'a', 96)
+        const large = await store.acquire('album', 'a', 1000)
+        const smallAgain = await store.acquire('album', 'a', 96)
+        store.release('album', 'a', 1000)
+
+        expect(small).toBe('blob:cover-1')
+        expect(large).toBe('blob:cover-2')
+        expect(smallAgain).toBe(small)
+        expect(api.fetchAlbumCover).toHaveBeenCalledTimes(2)
+        expect(api.fetchAlbumCover).toHaveBeenNthCalledWith(1, 'a', 96)
+        expect(api.fetchAlbumCover).toHaveBeenNthCalledWith(2, 'a', 1000)
+        expect(store.size()).toBe(2)
     })
 
     it('loads covers of tracks through their endpoint', async () => {
         const store = useCoversStore()
 
         expect(await store.acquire('track', 't')).toBe('blob:cover-1')
-        expect(api.fetchTrackCover).toHaveBeenCalledWith('t')
+        expect(api.fetchTrackCover).toHaveBeenCalledWith('t', 300)
         expect(api.fetchAlbumCover).not.toHaveBeenCalled()
     })
 

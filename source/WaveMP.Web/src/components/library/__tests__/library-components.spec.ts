@@ -264,7 +264,26 @@ describe('LibraryCover', () => {
 
         expect(wrapper.get('[data-part="cover-image"]').attributes('src')).toBe('blob:album')
         expect(wrapper.get('[data-part="cover"]').attributes('data-state')).toBeUndefined()
+        // jsdom has no layout: without a width the default size is loaded.
+        expect(covers.fetchAlbumCover).toHaveBeenCalledWith('a', 300)
         wrapper.unmount()
+    })
+
+    it('loads the size the cover is shown with', async () => {
+        const measure = vi
+            .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+            .mockReturnValue({ width: 48, height: 48 } as DOMRect)
+        vi.stubGlobal('devicePixelRatio', 2)
+
+        const { wrapper } = await mountWith(LibraryCover, {
+            kind: 'album',
+            id: 'mini',
+            available: true,
+        })
+
+        expect(covers.fetchAlbumCover).toHaveBeenCalledWith('mini', 96)
+        wrapper.unmount()
+        measure.mockRestore()
     })
 
     it('shows the placeholder and loads nothing without a cover', async () => {

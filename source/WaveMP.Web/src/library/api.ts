@@ -24,6 +24,7 @@ import type {
     UpdateTrackMetadata,
     YearPage,
 } from '@/api/generated/models'
+import type { CoverSize } from './covers'
 
 export type TrackQuery = TracksRequestBuilderGetQueryParameters
 export type AlbumQuery = AlbumsRequestBuilderGetQueryParameters
@@ -47,8 +48,9 @@ export function listTrackFiles(
     return apiClient.api.v1.tracks.byId(id).files.get({ queryParameters: query })
 }
 
-export function fetchTrackCover(id: string): Promise<ArrayBuffer | undefined> {
-    return apiClient.api.v1.tracks.byId(id).cover.get()
+/** The cover of a track, scaled by the API to fit into a square of the size (96, 300 or 1000). */
+export function fetchTrackCover(id: string, size: CoverSize): Promise<ArrayBuffer | undefined> {
+    return apiClient.api.v1.tracks.byId(id).cover.get({ queryParameters: { size } })
 }
 
 export function getTrackMetadata(id: string): Promise<TrackMetadata | undefined> {
@@ -77,8 +79,9 @@ export function listAlbumTracks(
     return apiClient.api.v1.albums.byId(id).tracks.get({ queryParameters: query })
 }
 
-export function fetchAlbumCover(id: string): Promise<ArrayBuffer | undefined> {
-    return apiClient.api.v1.albums.byId(id).cover.get()
+/** The cover of an album, scaled by the API to fit into a square of the size (96, 300 or 1000). */
+export function fetchAlbumCover(id: string, size: CoverSize): Promise<ArrayBuffer | undefined> {
+    return apiClient.api.v1.albums.byId(id).cover.get({ queryParameters: { size } })
 }
 
 export function listArtists(query: ArtistQuery): Promise<ArtistPage | undefined> {
