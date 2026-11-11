@@ -18,24 +18,28 @@ public class ApiIntegrationTests
         Converters = { new JsonStringEnumConverter() },
     };
 
-    private WaveMpTestServer _server = null!;
+    private WaveMpWebApplicationFactory _factory = null!;
+    private HttpClient _client = null!;
 
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public void OneTimeSetUp()
     {
-        _server = await WaveMpTestServer.StartAsync();
+        _factory = new WaveMpWebApplicationFactory();
+        _client = _factory.CreateClient();
     }
 
     [OneTimeTearDown]
     public async Task OneTimeTearDown()
     {
-        await _server.DisposeAsync();
+        // Also runs if the service did not start; the client is then missing.
+        _client?.Dispose();
+        await _factory.DisposeAsync();
     }
 
     [Test]
     public async Task GetHealth_WithDatabase_ReturnsHealthy()
     {
-        HttpResponseMessage response = await _server.Client.GetAsync(new Uri("/api/v1/health", UriKind.Relative));
+        HttpResponseMessage response = await _client.GetAsync(new Uri("/api/v1/health", UriKind.Relative));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         HealthDto? health = await response.Content.ReadFromJsonAsync<HealthDto>(_jsonOptions);
@@ -46,11 +50,12 @@ public class ApiIntegrationTests
     [Test]
     public async Task GetHealth_WithMissingDatabase_ReturnsServiceUnavailableProblemWithCode()
     {
-        await using WaveMpTestServer server = await WaveMpTestServer.StartAsync(
-            new Dictionary<string, string?> { ["DB_NAME"] = WaveMpTestServer.TestDatabaseName + "_missing" },
-            initializeDatabase: false);
+        // The startup creates and migrates the database like in production, so the test drops it afterwards.
+        await using WaveMpWebApplicationFactory factory = new(WaveMpWebApplicationFactory.TestDatabaseName + "_missing");
+        using HttpClient client = factory.CreateClient();
+        await factory.DeleteDatabaseAsync();
 
-        HttpResponseMessage response = await server.Client.GetAsync(new Uri("/api/v1/health", UriKind.Relative));
+        HttpResponseMessage response = await client.GetAsync(new Uri("/api/v1/health", UriKind.Relative));
 
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
@@ -64,7 +69,7 @@ public class ApiIntegrationTests
     [TestCase("/API/V1/DOES-NOT-EXIST")]
     public async Task GetUnknownApiRoute_Always_ReturnsNotFoundProblemWithCode(string path)
     {
-        HttpResponseMessage response = await _server.Client.GetAsync(new Uri(path, UriKind.Relative));
+        HttpResponseMessage response = await _client.GetAsync(new Uri(path, UriKind.Relative));
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
@@ -81,7 +86,7 @@ public class ApiIntegrationTests
     {
         using HttpRequestMessage request = new(new HttpMethod(method), new Uri("/api/v1/health", UriKind.Relative));
 
-        HttpResponseMessage response = await _server.Client.SendAsync(request);
+        HttpResponseMessage response = await _client.SendAsync(request);
 
         response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
         response.Content.Headers.Allow.Should().Equal(HttpMethods.Get);
@@ -96,7 +101,7 @@ public class ApiIntegrationTests
     {
         using HttpRequestMessage request = new(HttpMethod.Head, new Uri("/api/v1/health", UriKind.Relative));
 
-        HttpResponseMessage response = await _server.Client.SendAsync(request);
+        HttpResponseMessage response = await _client.SendAsync(request);
 
         response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
         response.Content.Headers.Allow.Should().Equal(HttpMethods.Get);
@@ -159,7 +164,7 @@ public class ApiIntegrationTests
 
     private async Task<JsonNode> GetOpenApiDocumentAsync()
     {
-        HttpResponseMessage response = await _server.Client.GetAsync(new Uri("/openapi/v1.json", UriKind.Relative));
+        HttpResponseMessage response = await _client.GetAsync(new Uri("/openapi/v1.json", UriKind.Relative));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         return JsonNode.Parse(await response.Content.ReadAsStringAsync())!;

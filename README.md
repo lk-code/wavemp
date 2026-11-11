@@ -253,7 +253,7 @@ npx playwright install chromium
 npm test                                          # E2E_BASE_URL defaults to http://localhost:8080
 ```
 
-The integration tests start the service in-process on a free local port, use their own database `wavemp_tests` and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
+The integration tests host the service in memory with `WebApplicationFactory` and its real startup, including the configuration check and the database migrations. They use their own database `wavemp_tests` and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
 
 If you set `WAVEMP_PORT` in `.env`, point the E2E tests at it, for example `E2E_BASE_URL=http://localhost:8081 npm test`. `npm run test:unit` runs the unit tests of the web app (Vitest), including checks that every text comes from the translation files and that `THEMING.md` matches the code.
 

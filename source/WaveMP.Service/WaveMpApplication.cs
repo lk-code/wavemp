@@ -7,8 +7,8 @@ using WaveMP.Service.Extensions;
 namespace WaveMP.Service;
 
 /// <summary>
-/// Sets up the WaveMP web application. Used by <c>Program.cs</c> and by the integration tests, so both run exactly
-/// the same configuration.
+/// Sets up the WaveMP web application for <c>Program.cs</c>. The integration tests start <c>Program.cs</c> itself
+/// through <c>WebApplicationFactory</c>, so they run exactly the same configuration and startup.
 /// </summary>
 public static class WaveMpApplication
 {
