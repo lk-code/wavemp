@@ -78,11 +78,20 @@ jobs:
         run: dotnet format WaveMP.slnx --verify-no-changes --no-restore
 
       # The media tests and the scan create their test files with ffmpeg and read them with ffprobe.
+      # Static binaries from a pinned image instead of apt, so the job does not depend on the Ubuntu
+      # package mirror (an unreachable mirror let apt hang until the job timeout). FFMPEG_PATH tells
+      # the tests where to find them.
       - name: Install ffmpeg
+        env:
+          FFMPEG_IMAGE: mwader/static-ffmpeg:9.0.2
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends ffmpeg
-          ffprobe -version
+          mkdir -p "$RUNNER_TEMP/ffmpeg"
+          container=$(docker create "$FFMPEG_IMAGE")
+          docker cp "$container:/ffmpeg" "$RUNNER_TEMP/ffmpeg/ffmpeg"
+          docker cp "$container:/ffprobe" "$RUNNER_TEMP/ffmpeg/ffprobe"
+          docker rm "$container"
+          echo "FFMPEG_PATH=$RUNNER_TEMP/ffmpeg" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/ffmpeg/ffprobe" -hide_banner -version
 
       - name: Unit tests
         run: dotnet test WaveMP.slnx --no-build --filter "TestCategory!=Integration"
@@ -219,18 +228,22 @@ jobs:
         working-directory: tests/WaveMP.E2E
         run: npm ci
 
-      # Not cached, as recommended by Playwright: restoring takes about as long as downloading.
-      - name: Install Playwright browser
-        working-directory: tests/WaveMP.E2E
-        run: npm run install-browsers
-
+      # Runs in the official Playwright image of the installed version, which brings the browser and
+      # its system packages (installing them with --with-deps needs the Ubuntu package mirror, which
+      # is not always reachable from the runners). Host network, so localhost:8080 reaches the app.
       - name: E2E tests
         working-directory: tests/WaveMP.E2E
         env:
           E2E_BASE_URL: http://localhost:8080
           E2E_EXPECTED_VERSION: ${{ inputs.version }}
           E2E_EXPECTED_TRACKS: '4'
-        run: npm test
+        run: |
+          version=$(node -p "require('./node_modules/@playwright/test/package.json').version")
+          docker run --rm --init --ipc host --network host \
+            --user "$(id -u):$(id -g)" --env HOME=/tmp \
+            --env CI --env E2E_BASE_URL --env E2E_EXPECTED_VERSION --env E2E_EXPECTED_TRACKS \
+            --volume "$PWD:/e2e" --workdir /e2e \
+            "mcr.microsoft.com/playwright:v$version-noble" npm test
 
       - name: Show container logs
         if: failure()
