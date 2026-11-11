@@ -9,9 +9,10 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "run-s \"lint:*\"",
+    "lint": "run-s lint:oxlint lint:eslint",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
+    "lint:check": "oxlint . --deny-warnings && eslint . --max-warnings 0",
     "format": "prettier --write --experimental-cli .",
     "generate:api": "dotnet build ../WaveMP.Service/WaveMP.Service.csproj && dotnet tool restore && dotnet tool run kiota generate --language typescript --openapi ../WaveMP.Service/openapi.json --class-name WaveMpApiClient --output ./src/api/generated --clean-output --exclude-backward-compatible",
     "format:check": "prettier --check --experimental-cli ."
