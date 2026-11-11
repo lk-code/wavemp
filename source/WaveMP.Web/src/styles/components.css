@@ -1471,6 +1471,11 @@
         outline: none;
     }
 
+    [data-part='menu-item'][aria-checked='true'] {
+        color: var(--wmp-color-accent);
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
     [data-part='menu-item']:disabled {
         color: var(--wmp-color-text-disabled);
         cursor: default;

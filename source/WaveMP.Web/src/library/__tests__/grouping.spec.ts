@@ -61,6 +61,12 @@ describe('groupTracksByAlbum', () => {
         expect(groups[1]?.cover).toBeNull()
     })
 
+    it('treats an album without id as no album', () => {
+        const groups = groupTracksByAlbum([track('clip', { artist: beta, album: {} })])
+
+        expect(groups[0]).toMatchObject({ id: 'artist:beta', title: null, artist: beta })
+    })
+
     it('keeps the ids unique when an album appears twice', () => {
         const groups = groupTracksByAlbum([
             track('one', { album: first }),

@@ -36,7 +36,8 @@ function groupKey(track: Track): string {
 }
 
 function createGroup(key: string, track: Track): TrackGroup {
-    const album = track.album
+    // A missing album may arrive as an object without id.
+    const album = track.album?.id ? track.album : null
     return {
         id: key,
         albumId: album?.id ?? undefined,

@@ -7,6 +7,7 @@ import BaseButton from '@/components/base/BaseButton.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
 import TileList from '@/components/library/TileList.vue'
 import TrackGroupList from '@/components/library/TrackGroupList.vue'
+import { useFormat } from '@/composables/useFormat'
 import { useLibraryTiles } from '@/composables/useLibraryTiles'
 import { searchLibrary } from '@/library/api'
 import type { TrackGroup } from '@/library/grouping'
@@ -18,6 +19,7 @@ import { queryText } from '@/library/search'
  */
 const { t } = useI18n()
 const route = useRoute()
+const format = useFormat()
 const tiles = useLibraryTiles()
 const artistsTitleId = useId()
 const albumsTitleId = useId()
@@ -40,7 +42,9 @@ const songs = computed<TrackGroup[]>(() => {
         : [
               {
                   id: 'songs',
-                  title: t('search.songs'),
+                  title: t('library.songCount', {
+                      count: format.number(result.value?.tracks?.total ?? tracks.length),
+                  }),
                   artist: null,
                   isCompilation: false,
                   year: null,

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Creates the synthetic test media of the E2E tests with ffmpeg: sine tones, test pictures and
 # tags written with -metadata, no files from other sources. The result are 4 tracks:
-#   E2E Artist/E2E Album/01 - First Song.mp3          tagged audio
+#   E2E Artist/E2E Album/01 - First Song.mp3          tagged audio (genre E2E Genre, 2026)
 #   E2E Artist/E2E Album/02 - Second Song.flac + .mp4  audio with music video
 #   E2E Artist/E2E Album/cover.jpg                     album cover
 #   E2E Artist/Video Only.mp4                          music video without audio file
@@ -38,7 +38,8 @@ video() {
 
 audio 440 "$album/01 - First Song.mp3" -c:a libmp3lame -b:a 128k \
     -metadata title="First Song" -metadata artist="E2E Artist" \
-    -metadata album="E2E Album" -metadata track=1 -metadata date=2026
+    -metadata album="E2E Album" -metadata track=1 -metadata date=2026 \
+    -metadata genre="E2E Genre"
 audio 550 "$album/02 - Second Song.flac" -c:a flac
 video 320x240 "$album/02 - Second Song.mp4"
 ff -f lavfi -i "testsrc=size=300x300:rate=1" -frames:v 1 -update 1 "$album/cover.jpg"

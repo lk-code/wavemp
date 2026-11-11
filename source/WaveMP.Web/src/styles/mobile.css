@@ -376,5 +376,15 @@
         [data-part='view'] {
             padding: var(--wmp-space-s);
         }
+
+        /* Detail pages show their name in detail-title; the page title stays for assistive technology. */
+        [data-part='content']:has([data-part='detail-header']) > [data-part='content-title'] {
+            position: absolute;
+            inline-size: 1px;
+            block-size: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
     }
 }
