@@ -4,6 +4,7 @@ using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Library.Extensions;
 using WaveMP.Core.Metadata.Extensions;
 using WaveMP.Core.Metadata.Options;
+using WaveMP.Core.Playlists.Extensions;
 using WaveMP.Core.Scanning.Extensions;
 using WaveMP.Core.Settings.Extensions;
 using WaveMP.Core.Streaming.Extensions;
@@ -49,6 +50,7 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpScanning();
         builder.Services.AddWaveMpLibrary();
         builder.Services.AddWaveMpCaching();
+        builder.Services.AddWaveMpPlaylists();
         builder.Services.AddWaveMpStreaming();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
@@ -101,6 +103,7 @@ public static class WaveMpApplication
         await app.Services.InitializeWaveMpStreamingAsync(cancellationToken);
         await app.Services.InitializeWaveMpSettingsAsync(cancellationToken);
         await app.Services.InitializeWaveMpCacheAsync(cancellationToken);
+        await app.Services.InitializeWaveMpPlaylistsAsync(cancellationToken);
         await app.Services.InitializeWaveMpJobsAsync(cancellationToken);
 
         string mediaFolder = app.Services.GetRequiredService<IOptions<MediaLibraryOptions>>().Value.RootPath;

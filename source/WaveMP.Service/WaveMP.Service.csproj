@@ -36,6 +36,7 @@
     <ProjectReference Include="..\WaveMP.Core.Jobs\WaveMP.Core.Jobs.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Library\WaveMP.Core.Library.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Metadata\WaveMP.Core.Metadata.csproj" />
+    <ProjectReference Include="..\WaveMP.Core.Playlists\WaveMP.Core.Playlists.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Scanning\WaveMP.Core.Scanning.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Settings\WaveMP.Core.Settings.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Streaming\WaveMP.Core.Streaming.csproj" />
