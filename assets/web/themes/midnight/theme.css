@@ -694,6 +694,134 @@ a[data-part='breadcrumb-link']:hover {
     opacity: 0.4;
 }
 
+/* --- Administration ----------------------------------------------------------------------------- */
+
+/* Glass tabs; the current page is light blue. */
+[data-part='admin-nav'] {
+    border-block-end-color: #b9c3ce;
+}
+
+[data-part='admin-nav-item'] {
+    border: 1px solid #c3cbd4;
+    border-block-end: 0;
+    border-radius: 0.25rem 0.25rem 0 0;
+    background: linear-gradient(#fdfdfe, #eceff2 48%, #dfe3e8 52%, #e8ebef);
+    color: #3d4855;
+    box-shadow: inset 0 1px rgb(255 255 255 / 80%);
+}
+
+[data-part='admin-nav-item']:hover {
+    background: linear-gradient(#f4faff, #e3f1fd 48%, #d2e8fc 52%, #e2f0fd);
+    color: #10253f;
+}
+
+[data-part='admin-nav-item'][data-state~='active'] {
+    border-color: #84b9ea;
+    background: linear-gradient(#e6f3fe, #c9e2fa 48%, #b4d6f8 52%, #cfe6fb);
+    color: #10253f;
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 90%),
+        0 0 6px rgb(59 155 255 / 35%);
+}
+
+[data-part='admin-nav-item'] > [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#4aa8ff, #1f6fd6);
+}
+
+[data-part='section-title'] {
+    color: #1e3a5c;
+    text-shadow: 0 1px 0 #ffffff;
+}
+
+:root {
+    --wmp-progress-track-background: linear-gradient(#c9d1da, #e6eaee);
+    --wmp-progress-fill-background: linear-gradient(
+        #bfe6ff 0%,
+        #4aa8ff 48%,
+        #1f6fd6 52%,
+        #5bb4ff 100%
+    );
+}
+
+[data-part='progress-track'] {
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 25%);
+}
+
+[data-part='progress-fill'] {
+    box-shadow: 0 0 6px rgb(59 155 255 / 60%);
+}
+
+/* Panels and list entries in the style of the profile administration. */
+[data-part='scan-status'],
+[data-part='stat-item'],
+[data-part='run-item'],
+[data-part='job-item'],
+[data-part='disclosure'] {
+    border: 1px solid #d9e0e8;
+    border-radius: 0.25rem;
+    background: linear-gradient(#ffffff, #f6f8fa);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+
+[data-part='run-item']:hover,
+[data-part='job-item']:hover {
+    border-color: #c5e1fb;
+    background: linear-gradient(#f4faff, #e9f4fe);
+}
+
+[data-part='stat-value'] {
+    color: #1e3a5c;
+}
+
+[data-part='scan-status'] > [data-part='badge'],
+[data-part='run-item'] > [data-part='badge'],
+[data-part='run-meta'] > [data-part='badge'],
+[data-part='job-meta'] > [data-part='badge'] {
+    border-color: #c9d1da;
+    background: linear-gradient(#ffffff, #eef1f4);
+    color: #4f5862;
+}
+
+[data-part='badge']:is([data-state~='running'], [data-state~='queued']) {
+    border-color: #84b9ea;
+    background: linear-gradient(#e6f3fe, #c9e2fa);
+    color: #10253f;
+}
+
+[data-part='badge'][data-state~='succeeded'] {
+    border-color: #a4d8b0;
+    background: linear-gradient(#f2fbf4, #d8f0de);
+    color: #1d4a27;
+}
+
+[data-part='badge']:is([data-state~='failed'], [data-state~='interrupted']) {
+    border-color: #efb7b7;
+    background: linear-gradient(#fff8f8, #fadcdc);
+    color: #5c1f1f;
+}
+
+[data-part='badge'][data-state~='canceled'] {
+    border-color: #ecd09a;
+    background: linear-gradient(#fffbf2, #faecd0);
+    color: #5a3d07;
+}
+
+[data-part='disclosure-summary'] {
+    color: #3d4855;
+}
+
+[data-part='disclosure'][open] > [data-part='disclosure-summary'] {
+    border-block-end: 1px solid #e3e8ee;
+}
+
+[data-part='issue-path'] {
+    color: #1e2329;
+}
+
+[data-part='job-actions'] [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#4aa8ff, #1f6fd6);
+}
+
 /* --- Dialogs and menus -------------------------------------------------------------------------- */
 
 [data-part='dialog'] {
