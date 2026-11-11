@@ -20,4 +20,32 @@ public static class ControllerBaseExtensions
 
         return result;
     }
+
+    /// <summary>
+    /// Checks the enums of a query of job runs. Model binding of query parameters also accepts numbers for enums,
+    /// including undefined ones; such values are added to the model state. Returns whether the query is valid.
+    /// </summary>
+    public static bool ValidateRunQuery(
+        this ControllerBase controller,
+        SortDirectionDto direction,
+        JobRunStatusDto? status,
+        JobTriggerDto? trigger)
+    {
+        if (!Enum.IsDefined(direction))
+        {
+            controller.ModelState.AddModelError(nameof(direction), "The sort direction is not valid.");
+        }
+
+        if (status is { } statusValue && !Enum.IsDefined(statusValue))
+        {
+            controller.ModelState.AddModelError(nameof(status), "The status is not valid.");
+        }
+
+        if (trigger is { } triggerValue && !Enum.IsDefined(triggerValue))
+        {
+            controller.ModelState.AddModelError(nameof(trigger), "The trigger is not valid.");
+        }
+
+        return controller.ModelState.IsValid;
+    }
 }

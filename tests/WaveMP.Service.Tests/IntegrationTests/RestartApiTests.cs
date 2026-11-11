@@ -1,5 +1,9 @@
 using System.Net;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using WaveMP.Core.Jobs.Definitions;
+using WaveMP.Data;
+using WaveMP.Data.Entities;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
 
@@ -32,6 +36,39 @@ public class RestartApiTests
         response.StatusCode.Should().Be(HttpStatusCode.OK, "the signing key is kept in the database");
         profiles.Items.Should().ContainSingle(profile => profile.IsBuiltIn);
         profiles.Total.Should().Be(1);
+        await second.DeleteDatabaseAsync();
+    }
+
+    [Test]
+    public async Task Restart_WithRunThatWasRunning_MarksItAsInterrupted()
+    {
+        var runId = Guid.CreateVersion7();
+        await using (WaveMpWebApplicationFactory first = new(DatabaseName + "_jobs", freshDatabase: true))
+        {
+            await using AsyncServiceScope scope = first.Services.CreateAsyncScope();
+            WaveMpDbContext db = scope.ServiceProvider.GetRequiredService<WaveMpDbContext>();
+            db.JobRuns.Add(new JobRun
+            {
+                Id = runId,
+                JobId = JobIds.LibraryScan,
+                Trigger = JobRunTrigger.Manual,
+                Status = JobRunStatus.Running,
+                QueuedAt = DateTimeOffset.UtcNow,
+                StartedAt = DateTimeOffset.UtcNow,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        await using WaveMpWebApplicationFactory second = new(DatabaseName + "_jobs");
+        using HttpClient admin = await second.CreateAdminClientAsync();
+
+        JobRunDto run = await admin.GetJsonAsync<JobRunDto>($"/api/v1/jobs/library-scan/runs/{runId}");
+        ScanDto scan = await admin.GetJsonAsync<ScanDto>($"/api/v1/scans/{runId}");
+
+        run.Status.Should().Be(JobRunStatusDto.Interrupted);
+        run.ErrorCode.Should().Be(JobErrorCodeDto.JobInterrupted);
+        run.FinishedAt.Should().NotBeNull();
+        scan.Status.Should().Be(JobRunStatusDto.Interrupted);
         await second.DeleteDatabaseAsync();
     }
 }

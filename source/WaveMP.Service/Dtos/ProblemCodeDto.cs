@@ -80,4 +80,40 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("user.built_in_admin")]
     UserBuiltInAdmin,
+
+    /// <summary>
+    /// A scan is already queued or running (409).
+    /// </summary>
+    [JsonStringEnumMemberName("scan.already_running")]
+    ScanAlreadyRunning,
+
+    /// <summary>
+    /// No scan is queued or running (404).
+    /// </summary>
+    [JsonStringEnumMemberName("scan.not_running")]
+    ScanNotRunning,
+
+    /// <summary>
+    /// The scan does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("scan.not_found")]
+    ScanNotFound,
+
+    /// <summary>
+    /// The job does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("job.not_found")]
+    JobNotFound,
+
+    /// <summary>
+    /// The job is already queued or running (409).
+    /// </summary>
+    [JsonStringEnumMemberName("job.already_running")]
+    JobAlreadyRunning,
+
+    /// <summary>
+    /// The run does not exist or belongs to another job (404).
+    /// </summary>
+    [JsonStringEnumMemberName("job.run_not_found")]
+    JobRunNotFound,
 }

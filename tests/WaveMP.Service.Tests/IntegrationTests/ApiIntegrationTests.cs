@@ -179,6 +179,11 @@ public class ApiIntegrationTests
     [TestCase("DeleteCurrentSession", true)]
     [TestCase("GetMySettings", true)]
     [TestCase("UpdateMySettings", true)]
+    [TestCase("StartScan", true)]
+    [TestCase("GetCurrentScan", true)]
+    [TestCase("ListJobs", true)]
+    [TestCase("StartJobRun", true)]
+    [TestCase("UpdateLibrarySettings", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -199,8 +204,11 @@ public class ApiIntegrationTests
         }
     }
 
-    [Test]
-    public async Task GetOpenApiDocument_Always_DescribesUnauthorizedAndForbiddenResponses()
+    [TestCase("Users", 5)]
+    [TestCase("Scans", 4)]
+    [TestCase("Jobs", 4)]
+    [TestCase("Settings", 2)]
+    public async Task GetOpenApiDocument_Always_DescribesUnauthorizedAndForbiddenResponses(string tag, int operations)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
 
@@ -209,13 +217,16 @@ public class ApiIntegrationTests
         secured.Should().NotBeEmpty();
         secured.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
         FindOperations(document)
-            .Where(operation => operation["tags"]![0]!.GetValue<string>() == "Users")
-            .Should().HaveCount(5)
+            .Where(operation => operation["tags"]![0]!.GetValue<string>() == tag)
+            .Should().HaveCount(operations)
             .And.AllSatisfy(operation => operation["responses"]!["403"].Should().NotBeNull());
     }
 
     [TestCase("ProfilePage", "Profile")]
     [TestCase("UserPage", "User")]
+    [TestCase("ScanPage", "Scan")]
+    [TestCase("JobPage", "Job")]
+    [TestCase("JobRunPage", "JobRun")]
     public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
     {
         JsonNode document = await GetOpenApiDocumentAsync();

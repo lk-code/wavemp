@@ -56,6 +56,51 @@ export function createHealthFromDiscriminatorValue(parseNode: ParseNode | undefi
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Job}
+ */
+// @ts-ignore
+export function createJobFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoJob;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {JobPage}
+ */
+// @ts-ignore
+export function createJobPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoJobPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {JobRun}
+ */
+// @ts-ignore
+export function createJobRunFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoJobRun;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {JobRunPage}
+ */
+// @ts-ignore
+export function createJobRunPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoJobRunPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {LibrarySettings}
+ */
+// @ts-ignore
+export function createLibrarySettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoLibrarySettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {ProblemDetails}
  */
 // @ts-ignore
@@ -81,6 +126,51 @@ export function createProfilePageFromDiscriminatorValue(parseNode: ParseNode | u
     return deserializeIntoProfilePage;
 }
 /**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Scan}
+ */
+// @ts-ignore
+export function createScanFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoScan;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ScanIssue}
+ */
+// @ts-ignore
+export function createScanIssueFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoScanIssue;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ScanPage}
+ */
+// @ts-ignore
+export function createScanPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoScanPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ScanProgress}
+ */
+// @ts-ignore
+export function createScanProgressFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoScanProgress;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ScanStatistics}
+ */
+// @ts-ignore
+export function createScanStatisticsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoScanStatistics;
+}
+/**
  * Selects a profile.
  */
 export interface CreateSession extends AdditionalDataHolder, Parsable {
@@ -97,6 +187,15 @@ export interface CreateSession extends AdditionalDataHolder, Parsable {
 // @ts-ignore
 export function createSessionFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoSession;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateLibrarySettings}
+ */
+// @ts-ignore
+export function createUpdateLibrarySettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateLibrarySettings;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -233,6 +332,84 @@ export function deserializeIntoHealth(health: Partial<Health> | undefined = {}) 
 }
 /**
  * The deserialization information for the current model
+ * @param Job The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoJob(job: Partial<Job> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "id": n => { job.id = n.getEnumValue<JobId>(JobIdObject); },
+        "intervalMinutes": n => { job.intervalMinutes = n.getNumberValue(); },
+        "lastRun": n => { job.lastRun = n.getObjectValue<JobRun>(createJobRunFromDiscriminatorValue); },
+        "nextRunAt": n => { job.nextRunAt = n.getDateValue(); },
+        "state": n => { job.state = n.getEnumValue<JobState>(JobStateObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param JobPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoJobPage(jobPage: Partial<JobPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { jobPage.items = n.getCollectionOfObjectValues<Job>(createJobFromDiscriminatorValue); },
+        "limit": n => { jobPage.limit = n.getNumberValue(); },
+        "offset": n => { jobPage.offset = n.getNumberValue(); },
+        "total": n => { jobPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param JobRun The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoJobRun(jobRun: Partial<JobRun> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "durationMilliseconds": n => { jobRun.durationMilliseconds = n.getNumberValue(); },
+        "errorCode": n => { jobRun.errorCode = n.getEnumValue<JobErrorCode>(JobErrorCodeObject); },
+        "finishedAt": n => { jobRun.finishedAt = n.getDateValue(); },
+        "id": n => { jobRun.id = n.getGuidValue(); },
+        "jobId": n => { jobRun.jobId = n.getEnumValue<JobId>(JobIdObject); },
+        "queuedAt": n => { jobRun.queuedAt = n.getDateValue(); },
+        "startedAt": n => { jobRun.startedAt = n.getDateValue(); },
+        "status": n => { jobRun.status = n.getEnumValue<JobRunStatus>(JobRunStatusObject); },
+        "trigger": n => { jobRun.trigger = n.getEnumValue<JobTrigger>(JobTriggerObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param JobRunPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoJobRunPage(jobRunPage: Partial<JobRunPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { jobRunPage.items = n.getCollectionOfObjectValues<JobRun>(createJobRunFromDiscriminatorValue); },
+        "limit": n => { jobRunPage.limit = n.getNumberValue(); },
+        "offset": n => { jobRunPage.offset = n.getNumberValue(); },
+        "total": n => { jobRunPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param LibrarySettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoLibrarySettings(librarySettings: Partial<LibrarySettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumCoverNames": n => { librarySettings.albumCoverNames = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "audioExtensions": n => { librarySettings.audioExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "fileWatcherEnabled": n => { librarySettings.fileWatcherEnabled = n.getBooleanValue(); },
+        "imageExtensions": n => { librarySettings.imageExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "scanIntervalMinutes": n => { librarySettings.scanIntervalMinutes = n.getNumberValue(); },
+        "videoExtensions": n => { librarySettings.videoExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param ProblemDetails The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -279,6 +456,95 @@ export function deserializeIntoProfilePage(profilePage: Partial<ProfilePage> | u
 }
 /**
  * The deserialization information for the current model
+ * @param Scan The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoScan(scan: Partial<Scan> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "durationMilliseconds": n => { scan.durationMilliseconds = n.getNumberValue(); },
+        "errorCode": n => { scan.errorCode = n.getEnumValue<JobErrorCode>(JobErrorCodeObject); },
+        "finishedAt": n => { scan.finishedAt = n.getDateValue(); },
+        "id": n => { scan.id = n.getGuidValue(); },
+        "isPartial": n => { scan.isPartial = n.getBooleanValue(); },
+        "issues": n => { scan.issues = n.getCollectionOfObjectValues<ScanIssue>(createScanIssueFromDiscriminatorValue); },
+        "progress": n => { scan.progress = n.getObjectValue<ScanProgress>(createScanProgressFromDiscriminatorValue); },
+        "queuedAt": n => { scan.queuedAt = n.getDateValue(); },
+        "startedAt": n => { scan.startedAt = n.getDateValue(); },
+        "statistics": n => { scan.statistics = n.getObjectValue<ScanStatistics>(createScanStatisticsFromDiscriminatorValue); },
+        "status": n => { scan.status = n.getEnumValue<JobRunStatus>(JobRunStatusObject); },
+        "trigger": n => { scan.trigger = n.getEnumValue<JobTrigger>(JobTriggerObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ScanIssue The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoScanIssue(scanIssue: Partial<ScanIssue> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "code": n => { scanIssue.code = n.getEnumValue<ScanIssueCode>(ScanIssueCodeObject); },
+        "path": n => { scanIssue.path = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ScanPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoScanPage(scanPage: Partial<ScanPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { scanPage.items = n.getCollectionOfObjectValues<Scan>(createScanFromDiscriminatorValue); },
+        "limit": n => { scanPage.limit = n.getNumberValue(); },
+        "offset": n => { scanPage.offset = n.getNumberValue(); },
+        "total": n => { scanPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ScanProgress The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoScanProgress(scanProgress: Partial<ScanProgress> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "directoriesFound": n => { scanProgress.directoriesFound = n.getNumberValue(); },
+        "directoriesProcessed": n => { scanProgress.directoriesProcessed = n.getNumberValue(); },
+        "directoriesToProcess": n => { scanProgress.directoriesToProcess = n.getNumberValue(); },
+        "filesFound": n => { scanProgress.filesFound = n.getNumberValue(); },
+        "filesRead": n => { scanProgress.filesRead = n.getNumberValue(); },
+        "filesToRead": n => { scanProgress.filesToRead = n.getNumberValue(); },
+        "phase": n => { scanProgress.phase = n.getEnumValue<ScanPhase>(ScanPhaseObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ScanStatistics The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoScanStatistics(scanStatistics: Partial<ScanStatistics> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumsTotal": n => { scanStatistics.albumsTotal = n.getNumberValue(); },
+        "artistsTotal": n => { scanStatistics.artistsTotal = n.getNumberValue(); },
+        "directoriesChanged": n => { scanStatistics.directoriesChanged = n.getNumberValue(); },
+        "directoriesScanned": n => { scanStatistics.directoriesScanned = n.getNumberValue(); },
+        "filesAdded": n => { scanStatistics.filesAdded = n.getNumberValue(); },
+        "filesFailed": n => { scanStatistics.filesFailed = n.getNumberValue(); },
+        "filesFound": n => { scanStatistics.filesFound = n.getNumberValue(); },
+        "filesRemoved": n => { scanStatistics.filesRemoved = n.getNumberValue(); },
+        "filesUnchanged": n => { scanStatistics.filesUnchanged = n.getNumberValue(); },
+        "filesUpdated": n => { scanStatistics.filesUpdated = n.getNumberValue(); },
+        "tracksAdded": n => { scanStatistics.tracksAdded = n.getNumberValue(); },
+        "tracksRemoved": n => { scanStatistics.tracksRemoved = n.getNumberValue(); },
+        "tracksTotal": n => { scanStatistics.tracksTotal = n.getNumberValue(); },
+        "tracksUpdated": n => { scanStatistics.tracksUpdated = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param Session The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -289,6 +555,22 @@ export function deserializeIntoSession(session: Partial<Session> | undefined = {
         "expiresAt": n => { session.expiresAt = n.getDateValue(); },
         "id": n => { session.id = n.getGuidValue(); },
         "profile": n => { session.profile = n.getObjectValue<Profile>(createProfileFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateLibrarySettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateLibrarySettings(updateLibrarySettings: Partial<UpdateLibrarySettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumCoverNames": n => { updateLibrarySettings.albumCoverNames = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "audioExtensions": n => { updateLibrarySettings.audioExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "fileWatcherEnabled": n => { updateLibrarySettings.fileWatcherEnabled = n.getBooleanValue(); },
+        "imageExtensions": n => { updateLibrarySettings.imageExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+        "scanIntervalMinutes": n => { updateLibrarySettings.scanIntervalMinutes = n.getNumberValue(); },
+        "videoExtensions": n => { updateLibrarySettings.videoExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
     }
 }
 /**
@@ -399,7 +681,149 @@ export interface Health extends AdditionalDataHolder, Parsable {
     version?: string | null;
 }
 export type HealthStatus = (typeof HealthStatusObject)[keyof typeof HealthStatusObject];
+/**
+ * A background job with its schedule, its next and its last run.
+ */
+export interface Job extends AdditionalDataHolder, Parsable {
+    /**
+     * Id of a background job.
+     */
+    id?: JobId | null;
+    /**
+     * Minutes between two scheduled runs; null for jobs that only run when started.
+     */
+    intervalMinutes?: number | null;
+    /**
+     * The lastRun property
+     */
+    lastRun?: JobRun | null;
+    /**
+     * When the schedule runs the job next.
+     */
+    nextRunAt?: Date | null;
+    /**
+     * What a job is doing right now.
+     */
+    state?: JobState | null;
+}
+export type JobErrorCode = (typeof JobErrorCodeObject)[keyof typeof JobErrorCodeObject];
+export type JobId = (typeof JobIdObject)[keyof typeof JobIdObject];
+/**
+ * One page of a collection.
+ */
+export interface JobPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Job[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+/**
+ * One run of a background job.
+ */
+export interface JobRun extends AdditionalDataHolder, Parsable {
+    /**
+     * Duration of a finished run in milliseconds.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * The errorCode property
+     */
+    errorCode?: JobErrorCode | null;
+    /**
+     * The finishedAt property
+     */
+    finishedAt?: Date | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * Id of a background job.
+     */
+    jobId?: JobId | null;
+    /**
+     * When the run was requested.
+     */
+    queuedAt?: Date | null;
+    /**
+     * The startedAt property
+     */
+    startedAt?: Date | null;
+    /**
+     * State of a job run.
+     */
+    status?: JobRunStatus | null;
+    /**
+     * What started a job run.
+     */
+    trigger?: JobTrigger | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface JobRunPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: JobRun[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type JobRunStatus = (typeof JobRunStatusObject)[keyof typeof JobRunStatusObject];
+export type JobState = (typeof JobStateObject)[keyof typeof JobStateObject];
+export type JobTrigger = (typeof JobTriggerObject)[keyof typeof JobTriggerObject];
 export type Language = (typeof LanguageObject)[keyof typeof LanguageObject];
+/**
+ * Settings of the media library.
+ */
+export interface LibrarySettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Base names of pictures that are album covers, in the order of their priority.
+     */
+    albumCoverNames?: string[] | null;
+    /**
+     * Extensions of audio files, lower case without dot.
+     */
+    audioExtensions?: string[] | null;
+    /**
+     * Watches the media folder for changes and scans changed folders shortly after.
+     */
+    fileWatcherEnabled?: boolean | null;
+    /**
+     * Extensions of pictures (covers), lower case without dot.
+     */
+    imageExtensions?: string[] | null;
+    /**
+     * Minutes between two periodic scans (15 to 1440). The periodic scan always runs.
+     */
+    scanIntervalMinutes?: number | null;
+    /**
+     * Extensions of video files, lower case without dot.
+     */
+    videoExtensions?: string[] | null;
+}
 export type ProblemCode = (typeof ProblemCodeObject)[keyof typeof ProblemCodeObject];
 export interface ProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
     /**
@@ -479,6 +903,189 @@ export interface ProfilePage extends AdditionalDataHolder, Parsable {
 }
 export type Role = (typeof RoleObject)[keyof typeof RoleObject];
 /**
+ * A scan of the media folder: its run, its progress while running and its result once finished.
+ */
+export interface Scan extends AdditionalDataHolder, Parsable {
+    /**
+     * Duration of a finished scan in milliseconds.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * The errorCode property
+     */
+    errorCode?: JobErrorCode | null;
+    /**
+     * The finishedAt property
+     */
+    finishedAt?: Date | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * Only some folders were scanned (after changes found by the file watcher).
+     */
+    isPartial?: boolean | null;
+    /**
+     * Files with problems (at most 50), empty while running.
+     */
+    issues?: ScanIssue[] | null;
+    /**
+     * The progress property
+     */
+    progress?: ScanProgress | null;
+    /**
+     * When the scan was requested.
+     */
+    queuedAt?: Date | null;
+    /**
+     * The startedAt property
+     */
+    startedAt?: Date | null;
+    /**
+     * The statistics property
+     */
+    statistics?: ScanStatistics | null;
+    /**
+     * State of a job run.
+     */
+    status?: JobRunStatus | null;
+    /**
+     * What started a job run.
+     */
+    trigger?: JobTrigger | null;
+}
+/**
+ * A file with a problem found by a scan.
+ */
+export interface ScanIssue extends AdditionalDataHolder, Parsable {
+    /**
+     * Problem with a file found by a scan. Clients translate it.
+     */
+    code?: ScanIssueCode | null;
+    /**
+     * Path of the file relative to the media folder.
+     */
+    path?: string | null;
+}
+export type ScanIssueCode = (typeof ScanIssueCodeObject)[keyof typeof ScanIssueCodeObject];
+/**
+ * One page of a collection.
+ */
+export interface ScanPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Scan[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type ScanPhase = (typeof ScanPhaseObject)[keyof typeof ScanPhaseObject];
+/**
+ * Progress of a running scan.
+ */
+export interface ScanProgress extends AdditionalDataHolder, Parsable {
+    /**
+     * Folders found so far.
+     */
+    directoriesFound?: number | null;
+    /**
+     * The directoriesProcessed property
+     */
+    directoriesProcessed?: number | null;
+    /**
+     * Folders with changes that are updated.
+     */
+    directoriesToProcess?: number | null;
+    /**
+     * Media files found so far.
+     */
+    filesFound?: number | null;
+    /**
+     * The filesRead property
+     */
+    filesRead?: number | null;
+    /**
+     * New and changed files that are read.
+     */
+    filesToRead?: number | null;
+    /**
+     * What a running scan is doing.
+     */
+    phase?: ScanPhase | null;
+}
+/**
+ * What a scan found and changed; the totals count the whole library after the scan.
+ */
+export interface ScanStatistics extends AdditionalDataHolder, Parsable {
+    /**
+     * The albumsTotal property
+     */
+    albumsTotal?: number | null;
+    /**
+     * The artistsTotal property
+     */
+    artistsTotal?: number | null;
+    /**
+     * The directoriesChanged property
+     */
+    directoriesChanged?: number | null;
+    /**
+     * The directoriesScanned property
+     */
+    directoriesScanned?: number | null;
+    /**
+     * The filesAdded property
+     */
+    filesAdded?: number | null;
+    /**
+     * Files with problems, including those beyond the listed issues.
+     */
+    filesFailed?: number | null;
+    /**
+     * The filesFound property
+     */
+    filesFound?: number | null;
+    /**
+     * The filesRemoved property
+     */
+    filesRemoved?: number | null;
+    /**
+     * The filesUnchanged property
+     */
+    filesUnchanged?: number | null;
+    /**
+     * The filesUpdated property
+     */
+    filesUpdated?: number | null;
+    /**
+     * The tracksAdded property
+     */
+    tracksAdded?: number | null;
+    /**
+     * The tracksRemoved property
+     */
+    tracksRemoved?: number | null;
+    /**
+     * The tracksTotal property
+     */
+    tracksTotal?: number | null;
+    /**
+     * The tracksUpdated property
+     */
+    tracksUpdated?: number | null;
+}
+/**
  * Serializes information the current object
  * @param CreatedSession The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
@@ -534,6 +1141,89 @@ export function serializeHealth(writer: SerializationWriter, health: Partial<Hea
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param Job The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeJob(writer: SerializationWriter, job: Partial<Job> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!job || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<JobId>("id", job.id);
+    writer.writeNumberValue("intervalMinutes", job.intervalMinutes);
+    writer.writeObjectValue<JobRun>("lastRun", job.lastRun, serializeJobRun);
+    writer.writeDateValue("nextRunAt", job.nextRunAt);
+    writer.writeEnumValue<JobState>("state", job.state);
+    writer.writeAdditionalData(job.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param JobPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeJobPage(writer: SerializationWriter, jobPage: Partial<JobPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!jobPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Job>("items", jobPage.items, serializeJob);
+    writer.writeNumberValue("limit", jobPage.limit);
+    writer.writeNumberValue("offset", jobPage.offset);
+    writer.writeNumberValue("total", jobPage.total);
+    writer.writeAdditionalData(jobPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param JobRun The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeJobRun(writer: SerializationWriter, jobRun: Partial<JobRun> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!jobRun || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("durationMilliseconds", jobRun.durationMilliseconds);
+    writer.writeEnumValue<JobErrorCode>("errorCode", jobRun.errorCode);
+    writer.writeDateValue("finishedAt", jobRun.finishedAt);
+    writer.writeGuidValue("id", jobRun.id);
+    writer.writeEnumValue<JobId>("jobId", jobRun.jobId);
+    writer.writeDateValue("queuedAt", jobRun.queuedAt);
+    writer.writeDateValue("startedAt", jobRun.startedAt);
+    writer.writeEnumValue<JobRunStatus>("status", jobRun.status);
+    writer.writeEnumValue<JobTrigger>("trigger", jobRun.trigger);
+    writer.writeAdditionalData(jobRun.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param JobRunPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeJobRunPage(writer: SerializationWriter, jobRunPage: Partial<JobRunPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!jobRunPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<JobRun>("items", jobRunPage.items, serializeJobRun);
+    writer.writeNumberValue("limit", jobRunPage.limit);
+    writer.writeNumberValue("offset", jobRunPage.offset);
+    writer.writeNumberValue("total", jobRunPage.total);
+    writer.writeAdditionalData(jobRunPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param LibrarySettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeLibrarySettings(writer: SerializationWriter, librarySettings: Partial<LibrarySettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!librarySettings || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfPrimitiveValues<string>("albumCoverNames", librarySettings.albumCoverNames);
+    writer.writeCollectionOfPrimitiveValues<string>("audioExtensions", librarySettings.audioExtensions);
+    writer.writeBooleanValue("fileWatcherEnabled", librarySettings.fileWatcherEnabled);
+    writer.writeCollectionOfPrimitiveValues<string>("imageExtensions", librarySettings.imageExtensions);
+    writer.writeNumberValue("scanIntervalMinutes", librarySettings.scanIntervalMinutes);
+    writer.writeCollectionOfPrimitiveValues<string>("videoExtensions", librarySettings.videoExtensions);
+    writer.writeAdditionalData(librarySettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param ProblemDetails The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -583,6 +1273,100 @@ export function serializeProfilePage(writer: SerializationWriter, profilePage: P
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param Scan The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeScan(writer: SerializationWriter, scan: Partial<Scan> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!scan || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("durationMilliseconds", scan.durationMilliseconds);
+    writer.writeEnumValue<JobErrorCode>("errorCode", scan.errorCode);
+    writer.writeDateValue("finishedAt", scan.finishedAt);
+    writer.writeGuidValue("id", scan.id);
+    writer.writeBooleanValue("isPartial", scan.isPartial);
+    writer.writeCollectionOfObjectValues<ScanIssue>("issues", scan.issues, serializeScanIssue);
+    writer.writeObjectValue<ScanProgress>("progress", scan.progress, serializeScanProgress);
+    writer.writeDateValue("queuedAt", scan.queuedAt);
+    writer.writeDateValue("startedAt", scan.startedAt);
+    writer.writeObjectValue<ScanStatistics>("statistics", scan.statistics, serializeScanStatistics);
+    writer.writeEnumValue<JobRunStatus>("status", scan.status);
+    writer.writeEnumValue<JobTrigger>("trigger", scan.trigger);
+    writer.writeAdditionalData(scan.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param ScanIssue The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeScanIssue(writer: SerializationWriter, scanIssue: Partial<ScanIssue> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!scanIssue || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<ScanIssueCode>("code", scanIssue.code);
+    writer.writeStringValue("path", scanIssue.path);
+    writer.writeAdditionalData(scanIssue.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param ScanPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeScanPage(writer: SerializationWriter, scanPage: Partial<ScanPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!scanPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Scan>("items", scanPage.items, serializeScan);
+    writer.writeNumberValue("limit", scanPage.limit);
+    writer.writeNumberValue("offset", scanPage.offset);
+    writer.writeNumberValue("total", scanPage.total);
+    writer.writeAdditionalData(scanPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param ScanProgress The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeScanProgress(writer: SerializationWriter, scanProgress: Partial<ScanProgress> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!scanProgress || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("directoriesFound", scanProgress.directoriesFound);
+    writer.writeNumberValue("directoriesProcessed", scanProgress.directoriesProcessed);
+    writer.writeNumberValue("directoriesToProcess", scanProgress.directoriesToProcess);
+    writer.writeNumberValue("filesFound", scanProgress.filesFound);
+    writer.writeNumberValue("filesRead", scanProgress.filesRead);
+    writer.writeNumberValue("filesToRead", scanProgress.filesToRead);
+    writer.writeEnumValue<ScanPhase>("phase", scanProgress.phase);
+    writer.writeAdditionalData(scanProgress.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param ScanStatistics The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeScanStatistics(writer: SerializationWriter, scanStatistics: Partial<ScanStatistics> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!scanStatistics || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("albumsTotal", scanStatistics.albumsTotal);
+    writer.writeNumberValue("artistsTotal", scanStatistics.artistsTotal);
+    writer.writeNumberValue("directoriesChanged", scanStatistics.directoriesChanged);
+    writer.writeNumberValue("directoriesScanned", scanStatistics.directoriesScanned);
+    writer.writeNumberValue("filesAdded", scanStatistics.filesAdded);
+    writer.writeNumberValue("filesFailed", scanStatistics.filesFailed);
+    writer.writeNumberValue("filesFound", scanStatistics.filesFound);
+    writer.writeNumberValue("filesRemoved", scanStatistics.filesRemoved);
+    writer.writeNumberValue("filesUnchanged", scanStatistics.filesUnchanged);
+    writer.writeNumberValue("filesUpdated", scanStatistics.filesUpdated);
+    writer.writeNumberValue("tracksAdded", scanStatistics.tracksAdded);
+    writer.writeNumberValue("tracksRemoved", scanStatistics.tracksRemoved);
+    writer.writeNumberValue("tracksTotal", scanStatistics.tracksTotal);
+    writer.writeNumberValue("tracksUpdated", scanStatistics.tracksUpdated);
+    writer.writeAdditionalData(scanStatistics.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param Session The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -594,6 +1378,23 @@ export function serializeSession(writer: SerializationWriter, session: Partial<S
     writer.writeGuidValue("id", session.id);
     writer.writeObjectValue<Profile>("profile", session.profile, serializeProfile);
     writer.writeAdditionalData(session.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateLibrarySettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateLibrarySettings(writer: SerializationWriter, updateLibrarySettings: Partial<UpdateLibrarySettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateLibrarySettings || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfPrimitiveValues<string>("albumCoverNames", updateLibrarySettings.albumCoverNames);
+    writer.writeCollectionOfPrimitiveValues<string>("audioExtensions", updateLibrarySettings.audioExtensions);
+    writer.writeBooleanValue("fileWatcherEnabled", updateLibrarySettings.fileWatcherEnabled);
+    writer.writeCollectionOfPrimitiveValues<string>("imageExtensions", updateLibrarySettings.imageExtensions);
+    writer.writeNumberValue("scanIntervalMinutes", updateLibrarySettings.scanIntervalMinutes);
+    writer.writeCollectionOfPrimitiveValues<string>("videoExtensions", updateLibrarySettings.videoExtensions);
+    writer.writeAdditionalData(updateLibrarySettings.additionalData);
 }
 /**
  * Serializes information the current object
@@ -718,6 +1519,35 @@ export interface Session extends AdditionalDataHolder, Parsable {
     profile?: Profile | null;
 }
 export type SortDirection = (typeof SortDirectionObject)[keyof typeof SortDirectionObject];
+/**
+ * Changes the settings of the media library. Missing or null values stay unchanged.
+ */
+export interface UpdateLibrarySettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Base names of album covers (without extension), in the order of their priority.
+     */
+    albumCoverNames?: string[] | null;
+    /**
+     * Extensions of audio files (1 to 10 letters or digits; a leading dot is removed); applies to the next scan.
+     */
+    audioExtensions?: string[] | null;
+    /**
+     * Switches the file watcher on or off at once.
+     */
+    fileWatcherEnabled?: boolean | null;
+    /**
+     * Extensions of pictures; may be empty.
+     */
+    imageExtensions?: string[] | null;
+    /**
+     * Minutes between two periodic scans; the scan is planned again at once.
+     */
+    scanIntervalMinutes?: number | null;
+    /**
+     * Extensions of video files; an extension may only be in one list.
+     */
+    videoExtensions?: string[] | null;
+}
 /**
  * Changes a user (profile). Missing or null values stay unchanged.
  */
@@ -853,6 +1683,51 @@ export const HealthStatusObject = {
     Unhealthy: "Unhealthy",
 } as const;
 /**
+ * Why the scan failed or was interrupted.
+ */
+export const JobErrorCodeObject = {
+    JobFailed: "job.failed",
+    JobInterrupted: "job.interrupted",
+    ScanMedia_folder_not_found: "scan.media_folder_not_found",
+    ScanMedia_folder_unreadable: "scan.media_folder_unreadable",
+    ScanMedia_folder_empty: "scan.media_folder_empty",
+    ScanProbe_unavailable: "scan.probe_unavailable",
+    OpenapiJsonNullSentinelValue2BF936000FE44250987AE5DDB203E464: "openapi-json-null-sentinel-value-2BF93600-0FE4-4250-987A-E5DDB203E464",
+} as const;
+/**
+ * Id of a background job.
+ */
+export const JobIdObject = {
+    LibraryScan: "library-scan",
+} as const;
+/**
+ * State of a job run.
+ */
+export const JobRunStatusObject = {
+    Queued: "Queued",
+    Running: "Running",
+    Succeeded: "Succeeded",
+    Failed: "Failed",
+    Canceled: "Canceled",
+    Interrupted: "Interrupted",
+} as const;
+/**
+ * What a job is doing right now.
+ */
+export const JobStateObject = {
+    Idle: "Idle",
+    Queued: "Queued",
+    Running: "Running",
+} as const;
+/**
+ * What started a job run.
+ */
+export const JobTriggerObject = {
+    Schedule: "Schedule",
+    Manual: "Manual",
+    FileWatcher: "FileWatcher",
+} as const;
+/**
  * Language of the user interface.
  */
 export const LanguageObject = {
@@ -875,6 +1750,12 @@ export const ProblemCodeObject = {
     UserNot_found: "user.not_found",
     UserName_taken: "user.name_taken",
     UserBuilt_in_admin: "user.built_in_admin",
+    ScanAlready_running: "scan.already_running",
+    ScanNot_running: "scan.not_running",
+    ScanNot_found: "scan.not_found",
+    JobNot_found: "job.not_found",
+    JobAlready_running: "job.already_running",
+    JobRun_not_found: "job.run_not_found",
 } as const;
 /**
  * Role of a profile.
@@ -882,6 +1763,23 @@ export const ProblemCodeObject = {
 export const RoleObject = {
     Admin: "Admin",
     User: "User",
+} as const;
+/**
+ * Problem with a file found by a scan. Clients translate it.
+ */
+export const ScanIssueCodeObject = {
+    FileUnreadable: "file.unreadable",
+    FileTags_unreadable: "file.tags_unreadable",
+    FileProbe_failed: "file.probe_failed",
+    FilePath_too_long: "file.path_too_long",
+} as const;
+/**
+ * What a running scan is doing.
+ */
+export const ScanPhaseObject = {
+    Discovering: "Discovering",
+    Processing: "Processing",
+    CleaningUp: "CleaningUp",
 } as const;
 /**
  * Sort direction.

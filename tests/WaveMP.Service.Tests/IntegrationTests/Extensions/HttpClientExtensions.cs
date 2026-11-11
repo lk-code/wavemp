@@ -106,4 +106,40 @@ internal static class HttpClientExtensions
         JsonNode problem = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
         return problem["errors"]!.AsObject();
     }
+
+    /// <summary>
+    /// Polls a scan until it has finished (neither queued nor running) and returns it.
+    /// </summary>
+    public static async Task<ScanDto> WaitForScanAsync(this HttpClient client, Guid id)
+    {
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(60));
+        while (true)
+        {
+            ScanDto scan = await client.GetJsonAsync<ScanDto>($"/api/v1/scans/{id}");
+            if (scan.Status is not (JobRunStatusDto.Queued or JobRunStatusDto.Running))
+            {
+                return scan;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(100), timeout.Token);
+        }
+    }
+
+    /// <summary>
+    /// Sends a request with an optional JSON body given as text.
+    /// </summary>
+    public static async Task<HttpResponseMessage> SendJsonAsync(
+        this HttpClient client,
+        string method,
+        string path,
+        string? body = null)
+    {
+        using HttpRequestMessage request = new(new HttpMethod(method), path);
+        if (body is not null)
+        {
+            request.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+        }
+
+        return await client.SendAsync(request);
+    }
 }

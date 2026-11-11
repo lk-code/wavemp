@@ -1,4 +1,9 @@
 using Microsoft.Extensions.Options;
+using WaveMP.Core.Jobs.Extensions;
+using WaveMP.Core.Metadata.Extensions;
+using WaveMP.Core.Scanning.Extensions;
+using WaveMP.Core.Scanning.Options;
+using WaveMP.Core.Settings.Extensions;
 using WaveMP.Core.Users.Extensions;
 using WaveMP.Data;
 using WaveMP.Data.Extensions;
@@ -35,6 +40,10 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpOpenApi();
         builder.Services.AddWaveMpData();
         builder.Services.AddWaveMpUsers();
+        builder.Services.AddWaveMpSettings();
+        builder.Services.AddWaveMpMetadata();
+        builder.Services.AddWaveMpJobs();
+        builder.Services.AddWaveMpScanning();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<WaveMpDbContext>("database");
@@ -64,7 +73,8 @@ public static class WaveMpApplication
 
     /// <summary>
     /// Validates the database configuration, applies pending migrations, creates the built-in admin profile on the
-    /// first start and loads the key that signs the session tokens.
+    /// first start, loads the key that signs the session tokens and the server settings, and plans the background
+    /// jobs (they start to run once the application has started).
     /// Returns <c>false</c> if the configuration is invalid; the reason is logged.
     /// </summary>
     public static async Task<bool> InitializeAsync(WebApplication app, CancellationToken cancellationToken = default)
@@ -82,6 +92,17 @@ public static class WaveMpApplication
         await app.Services.MigrateWaveMpDatabaseAsync(cancellationToken);
         await app.Services.InitializeWaveMpUsersAsync(cancellationToken);
         await app.Services.GetRequiredService<SigningKeyStore>().InitializeAsync(cancellationToken);
+        await app.Services.InitializeWaveMpSettingsAsync(cancellationToken);
+        await app.Services.InitializeWaveMpJobsAsync(cancellationToken);
+
+        string mediaFolder = app.Services.GetRequiredService<IOptions<MediaLibraryOptions>>().Value.RootPath;
+        if (!Directory.Exists(mediaFolder))
+        {
+            app.Logger.LogWarning(
+                "The media folder {MediaFolder} does not exist; mount it or set MEDIA_PATH",
+                mediaFolder);
+        }
+
         return true;
     }
 }

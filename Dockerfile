@@ -19,10 +19,18 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY .editorconfig global.json Directory.Build.props Directory.Packages.props ./
+COPY source/WaveMP.Core.Jobs/WaveMP.Core.Jobs.csproj source/WaveMP.Core.Jobs/
+COPY source/WaveMP.Core.Metadata/WaveMP.Core.Metadata.csproj source/WaveMP.Core.Metadata/
+COPY source/WaveMP.Core.Scanning/WaveMP.Core.Scanning.csproj source/WaveMP.Core.Scanning/
+COPY source/WaveMP.Core.Settings/WaveMP.Core.Settings.csproj source/WaveMP.Core.Settings/
 COPY source/WaveMP.Core.Users/WaveMP.Core.Users.csproj source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/WaveMP.Data.csproj source/WaveMP.Data/
 COPY source/WaveMP.Service/WaveMP.Service.csproj source/WaveMP.Service/
 RUN dotnet restore source/WaveMP.Service/WaveMP.Service.csproj -a "$TARGETARCH"
+COPY source/WaveMP.Core.Jobs/ source/WaveMP.Core.Jobs/
+COPY source/WaveMP.Core.Metadata/ source/WaveMP.Core.Metadata/
+COPY source/WaveMP.Core.Scanning/ source/WaveMP.Core.Scanning/
+COPY source/WaveMP.Core.Settings/ source/WaveMP.Core.Settings/
 COPY source/WaveMP.Core.Users/ source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/ source/WaveMP.Data/
 COPY source/WaveMP.Service/ source/WaveMP.Service/
@@ -36,14 +44,15 @@ RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -a "$T
 # --- Runtime --------------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 
-# ffmpeg is used as an external process only (never linked).
+# ffmpeg and ffprobe are used as external processes only (never linked).
 RUN apk add --no-cache ffmpeg \
-    && mkdir -p /licenses/ffmpeg /licenses/phosphor-icons /licenses/wavemp /data /media \
+    && mkdir -p /licenses/ffmpeg /licenses/phosphor-icons /licenses/taglibsharp /licenses/wavemp /data /media \
     && ffmpeg -hide_banner -version > /licenses/ffmpeg/VERSION \
     && chown "$APP_UID" /data
 
 COPY LICENSE /licenses/wavemp/LICENSE
 COPY assets/licenses/ffmpeg/ /licenses/ffmpeg/
+COPY assets/licenses/taglibsharp/ /licenses/taglibsharp/
 COPY assets/web/icons/phosphor/LICENSE /licenses/phosphor-icons/LICENSE
 
 WORKDIR /app

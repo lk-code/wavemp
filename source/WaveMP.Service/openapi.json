@@ -37,6 +37,366 @@
         }
       }
     },
+    "/api/v1/jobs": {
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Lists the jobs with their state, schedule, next and last run.",
+        "operationId": "ListJobs",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of jobs to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of jobs of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of jobs, sorted by id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid paging parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/jobs/{id}/runs": {
+      "post": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Starts a run of the job now. It runs in the background.",
+        "operationId": "StartJobRun",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the job, e.g. `library-scan`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The run is queued; Location points to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The job does not exist (code `job.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is already queued or running (code `job.already_running`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Lists the runs of the job by the time they were requested, newest first by default, optionally filtered.\r\nRuns older than 30 days and beyond the 100 newest are removed automatically.",
+        "operationId": "ListJobRuns",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the job, e.g. `library-scan`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of runs to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of runs of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; ties are sorted by id.",
+            "schema": {
+              "default": "Desc",
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Only runs in this state.",
+            "schema": {
+              "$ref": "#/components/schemas/JobRunStatus"
+            }
+          },
+          {
+            "name": "trigger",
+            "in": "query",
+            "description": "Only runs started this way.",
+            "schema": {
+              "$ref": "#/components/schemas/JobTrigger"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRunPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The job does not exist (code `job.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/jobs/{id}/runs/{runId}": {
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Returns a run of the job.",
+        "operationId": "GetJobRun",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the job, e.g. `library-scan`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "description": "Id of the run.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such job or run (code `job.not_found` or `job.run_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/me/settings": {
       "get": {
         "tags": [
@@ -210,6 +570,291 @@
         }
       }
     },
+    "/api/v1/scans": {
+      "post": {
+        "tags": [
+          "Scans"
+        ],
+        "summary": "Starts a scan of the whole media folder. The scan runs in the background; follow it with the current scan.",
+        "operationId": "StartScan",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The scan is queued; Location points to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scan"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A scan is already queued or running (code `scan.already_running`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Scans"
+        ],
+        "summary": "Lists the scans by the time they were requested, newest first by default, optionally filtered.",
+        "operationId": "ListScans",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of scans to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of scans of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; ties are sorted by id.",
+            "schema": {
+              "default": "Desc",
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Only scans in this state.",
+            "schema": {
+              "$ref": "#/components/schemas/JobRunStatus"
+            }
+          },
+          {
+            "name": "trigger",
+            "in": "query",
+            "description": "Only scans started this way.",
+            "schema": {
+              "$ref": "#/components/schemas/JobTrigger"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of scans.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/scans/current": {
+      "get": {
+        "tags": [
+          "Scans"
+        ],
+        "summary": "Returns the queued or running scan with its progress.",
+        "operationId": "GetCurrentScan",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The current scan.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scan"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No scan is queued or running (code `scan.not_running`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/scans/{id}": {
+      "get": {
+        "tags": [
+          "Scans"
+        ],
+        "summary": "Returns a scan with its result, or its progress while it runs.",
+        "operationId": "GetScan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the scan.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The scan.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scan"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The scan does not exist (code `scan.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/sessions": {
       "post": {
         "tags": [
@@ -318,6 +963,122 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/settings/library": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Returns the settings of the media library.",
+        "operationId": "GetLibrarySettings",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The library settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibrarySettings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Changes the settings of the media library. Missing or null values stay unchanged. A new scan interval and the\r\nfile watcher apply at once, the lists with the next scan.",
+        "operationId": "UpdateLibrarySettings",
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLibrarySettings"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLibrarySettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The changed settings, normalized (e.g. extensions in lower case without dot).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibrarySettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid (code `request.invalid`, errors by field).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
                 }
               }
             }
@@ -861,6 +1622,233 @@
         "type": "string",
         "description": "Aggregated health status."
       },
+      "Job": {
+        "required": [
+          "id",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "state": {
+            "$ref": "#/components/schemas/JobState"
+          },
+          "intervalMinutes": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Minutes between two scheduled runs; null for jobs that only run when started.",
+            "format": "int32"
+          },
+          "nextRunAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the schedule runs the job next.",
+            "format": "date-time"
+          },
+          "lastRun": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The most recent run, also while it is queued or running.",
+                "$ref": "#/components/schemas/JobRun"
+              }
+            ]
+          }
+        },
+        "description": "A background job with its schedule, its next and its last run."
+      },
+      "JobErrorCode": {
+        "enum": [
+          "job.failed",
+          "job.interrupted",
+          "scan.media_folder_not_found",
+          "scan.media_folder_unreadable",
+          "scan.media_folder_empty",
+          "scan.probe_unavailable",
+          null
+        ],
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "JobId": {
+        "enum": [
+          "library-scan"
+        ],
+        "type": "string",
+        "description": "Id of a background job."
+      },
+      "JobPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "JobRun": {
+        "required": [
+          "id",
+          "jobId",
+          "trigger",
+          "status",
+          "queuedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/JobTrigger"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobRunStatus"
+          },
+          "queuedAt": {
+            "type": "string",
+            "description": "When the run was requested.",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Duration of a finished run in milliseconds.",
+            "format": "int64"
+          },
+          "errorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Why the run failed or was interrupted.",
+                "$ref": "#/components/schemas/JobErrorCode"
+              }
+            ]
+          }
+        },
+        "description": "One run of a background job."
+      },
+      "JobRunPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobRun"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "JobRunStatus": {
+        "enum": [
+          "Queued",
+          "Running",
+          "Succeeded",
+          "Failed",
+          "Canceled",
+          "Interrupted"
+        ],
+        "type": "string",
+        "description": "State of a job run."
+      },
+      "JobState": {
+        "enum": [
+          "Idle",
+          "Queued",
+          "Running"
+        ],
+        "type": "string",
+        "description": "What a job is doing right now."
+      },
+      "JobTrigger": {
+        "enum": [
+          "Schedule",
+          "Manual",
+          "FileWatcher"
+        ],
+        "type": "string",
+        "description": "What started a job run."
+      },
       "Language": {
         "enum": [
           "en",
@@ -868,6 +1856,57 @@
         ],
         "type": "string",
         "description": "Language of the user interface."
+      },
+      "LibrarySettings": {
+        "required": [
+          "scanIntervalMinutes",
+          "fileWatcherEnabled",
+          "audioExtensions",
+          "videoExtensions",
+          "imageExtensions",
+          "albumCoverNames"
+        ],
+        "type": "object",
+        "properties": {
+          "scanIntervalMinutes": {
+            "type": "integer",
+            "description": "Minutes between two periodic scans (15 to 1440). The periodic scan always runs.",
+            "format": "int32"
+          },
+          "fileWatcherEnabled": {
+            "type": "boolean",
+            "description": "Watches the media folder for changes and scans changed folders shortly after."
+          },
+          "audioExtensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of audio files, lower case without dot."
+          },
+          "videoExtensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of video files, lower case without dot."
+          },
+          "imageExtensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of pictures (covers), lower case without dot."
+          },
+          "albumCoverNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Base names of pictures that are album covers, in the order of their priority."
+          }
+        },
+        "description": "Settings of the media library."
       },
       "ProblemCode": {
         "enum": [
@@ -882,7 +1921,13 @@
           "profile.not_found",
           "user.not_found",
           "user.name_taken",
-          "user.built_in_admin"
+          "user.built_in_admin",
+          "scan.already_running",
+          "scan.not_running",
+          "scan.not_found",
+          "job.not_found",
+          "job.already_running",
+          "job.run_not_found"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -1008,6 +2053,296 @@
         "type": "string",
         "description": "Role of a profile."
       },
+      "Scan": {
+        "required": [
+          "id",
+          "trigger",
+          "status",
+          "queuedAt",
+          "isPartial",
+          "issues"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/JobTrigger"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobRunStatus"
+          },
+          "queuedAt": {
+            "type": "string",
+            "description": "When the scan was requested.",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Duration of a finished scan in milliseconds.",
+            "format": "int64"
+          },
+          "errorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Why the scan failed or was interrupted.",
+                "$ref": "#/components/schemas/JobErrorCode"
+              }
+            ]
+          },
+          "isPartial": {
+            "type": "boolean",
+            "description": "Only some folders were scanned (after changes found by the file watcher)."
+          },
+          "progress": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Progress while the scan is running.",
+                "$ref": "#/components/schemas/ScanProgress"
+              }
+            ]
+          },
+          "statistics": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Statistics of a finished scan.",
+                "$ref": "#/components/schemas/ScanStatistics"
+              }
+            ]
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScanIssue"
+            },
+            "description": "Files with problems (at most 50), empty while running."
+          }
+        },
+        "description": "A scan of the media folder: its run, its progress while running and its result once finished."
+      },
+      "ScanIssue": {
+        "required": [
+          "path",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path of the file relative to the media folder."
+          },
+          "code": {
+            "$ref": "#/components/schemas/ScanIssueCode"
+          }
+        },
+        "description": "A file with a problem found by a scan."
+      },
+      "ScanIssueCode": {
+        "enum": [
+          "file.unreadable",
+          "file.tags_unreadable",
+          "file.probe_failed",
+          "file.path_too_long"
+        ],
+        "type": "string",
+        "description": "Problem with a file found by a scan. Clients translate it."
+      },
+      "ScanPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scan"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "ScanPhase": {
+        "enum": [
+          "Discovering",
+          "Processing",
+          "CleaningUp"
+        ],
+        "type": "string",
+        "description": "What a running scan is doing."
+      },
+      "ScanProgress": {
+        "required": [
+          "phase",
+          "directoriesFound",
+          "filesFound",
+          "directoriesToProcess",
+          "directoriesProcessed",
+          "filesToRead",
+          "filesRead"
+        ],
+        "type": "object",
+        "properties": {
+          "phase": {
+            "$ref": "#/components/schemas/ScanPhase"
+          },
+          "directoriesFound": {
+            "type": "integer",
+            "description": "Folders found so far.",
+            "format": "int32"
+          },
+          "filesFound": {
+            "type": "integer",
+            "description": "Media files found so far.",
+            "format": "int32"
+          },
+          "directoriesToProcess": {
+            "type": "integer",
+            "description": "Folders with changes that are updated.",
+            "format": "int32"
+          },
+          "directoriesProcessed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesToRead": {
+            "type": "integer",
+            "description": "New and changed files that are read.",
+            "format": "int32"
+          },
+          "filesRead": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "Progress of a running scan."
+      },
+      "ScanStatistics": {
+        "required": [
+          "directoriesScanned",
+          "directoriesChanged",
+          "filesFound",
+          "filesAdded",
+          "filesUpdated",
+          "filesRemoved",
+          "filesUnchanged",
+          "filesFailed",
+          "tracksAdded",
+          "tracksUpdated",
+          "tracksRemoved",
+          "tracksTotal",
+          "albumsTotal",
+          "artistsTotal"
+        ],
+        "type": "object",
+        "properties": {
+          "directoriesScanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "directoriesChanged": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesFound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesUnchanged": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "filesFailed": {
+            "type": "integer",
+            "description": "Files with problems, including those beyond the listed issues.",
+            "format": "int32"
+          },
+          "tracksAdded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tracksUpdated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tracksRemoved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tracksTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "albumsTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "artistsTotal": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "What a scan found and changed; the totals count the whole library after the scan."
+      },
       "Session": {
         "required": [
           "id",
@@ -1044,6 +2379,73 @@
         ],
         "type": "string",
         "description": "Sort direction."
+      },
+      "UpdateLibrarySettings": {
+        "type": "object",
+        "properties": {
+          "scanIntervalMinutes": {
+            "maximum": 1440,
+            "minimum": 15,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Minutes between two periodic scans; the scan is planned again at once.",
+            "format": "int32"
+          },
+          "fileWatcherEnabled": {
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Switches the file watcher on or off at once."
+          },
+          "audioExtensions": {
+            "maxItems": 50,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of audio files (1 to 10 letters or digits; a leading dot is removed); applies to the next scan."
+          },
+          "videoExtensions": {
+            "maxItems": 50,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of video files; an extension may only be in one list."
+          },
+          "imageExtensions": {
+            "maxItems": 50,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Extensions of pictures; may be empty."
+          },
+          "albumCoverNames": {
+            "maxItems": 50,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Base names of album covers (without extension), in the order of their priority."
+          }
+        },
+        "description": "Changes the settings of the media library. Missing or null values stay unchanged."
       },
       "UpdateUser": {
         "type": "object",
@@ -1269,13 +2671,22 @@
       "name": "Health"
     },
     {
+      "name": "Jobs"
+    },
+    {
       "name": "Me"
     },
     {
       "name": "Profiles"
     },
     {
+      "name": "Scans"
+    },
+    {
       "name": "Sessions"
+    },
+    {
+      "name": "Settings"
     },
     {
       "name": "Users"

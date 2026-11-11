@@ -4,11 +4,17 @@
 // @ts-ignore
 import { HealthRequestBuilderRequestsMetadata, type HealthRequestBuilder } from './health/index.js';
 // @ts-ignore
+import { JobsRequestBuilderNavigationMetadata, JobsRequestBuilderRequestsMetadata, type JobsRequestBuilder } from './jobs/index.js';
+// @ts-ignore
 import { MeRequestBuilderNavigationMetadata, type MeRequestBuilder } from './me/index.js';
 // @ts-ignore
 import { ProfilesRequestBuilderRequestsMetadata, type ProfilesRequestBuilder } from './profiles/index.js';
 // @ts-ignore
+import { ScansRequestBuilderNavigationMetadata, ScansRequestBuilderRequestsMetadata, type ScansRequestBuilder } from './scans/index.js';
+// @ts-ignore
 import { SessionsRequestBuilderNavigationMetadata, SessionsRequestBuilderRequestsMetadata, type SessionsRequestBuilder } from './sessions/index.js';
+// @ts-ignore
+import { SettingsRequestBuilderNavigationMetadata, type SettingsRequestBuilder } from './settings/index.js';
 // @ts-ignore
 import { type UsersRequestBuilder, UsersRequestBuilderNavigationMetadata, UsersRequestBuilderRequestsMetadata } from './users/index.js';
 // @ts-ignore
@@ -23,6 +29,10 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      */
     get health(): HealthRequestBuilder;
     /**
+     * The jobs property
+     */
+    get jobs(): JobsRequestBuilder;
+    /**
      * The me property
      */
     get me(): MeRequestBuilder;
@@ -31,9 +41,17 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      */
     get profiles(): ProfilesRequestBuilder;
     /**
+     * The scans property
+     */
+    get scans(): ScansRequestBuilder;
+    /**
      * The sessions property
      */
     get sessions(): SessionsRequestBuilder;
+    /**
+     * The settings property
+     */
+    get settings(): SettingsRequestBuilder;
     /**
      * The users property
      */
@@ -50,15 +68,26 @@ export const V1RequestBuilderNavigationMetadata: Record<Exclude<keyof V1RequestB
     health: {
         requestsMetadata: HealthRequestBuilderRequestsMetadata,
     },
+    jobs: {
+        requestsMetadata: JobsRequestBuilderRequestsMetadata,
+        navigationMetadata: JobsRequestBuilderNavigationMetadata,
+    },
     me: {
         navigationMetadata: MeRequestBuilderNavigationMetadata,
     },
     profiles: {
         requestsMetadata: ProfilesRequestBuilderRequestsMetadata,
     },
+    scans: {
+        requestsMetadata: ScansRequestBuilderRequestsMetadata,
+        navigationMetadata: ScansRequestBuilderNavigationMetadata,
+    },
     sessions: {
         requestsMetadata: SessionsRequestBuilderRequestsMetadata,
         navigationMetadata: SessionsRequestBuilderNavigationMetadata,
+    },
+    settings: {
+        navigationMetadata: SettingsRequestBuilderNavigationMetadata,
     },
     users: {
         requestsMetadata: UsersRequestBuilderRequestsMetadata,
