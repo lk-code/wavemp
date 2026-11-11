@@ -1,3 +1,5 @@
+using WaveMP.Core.Settings.Paths;
+
 namespace WaveMP.Core.Caching.Options;
 
 /// <summary>
@@ -9,14 +11,12 @@ namespace WaveMP.Core.Caching.Options;
 public sealed class CacheOptions
 {
     public const string SectionName = "Caching";
-    public const string DataPathVariable = "DATA_PATH";
-    public const string DefaultDataPath = "/data";
     public const string FolderName = "cache";
 
     /// <summary>
-    /// Absolute path of the cache folder.
+    /// Absolute path of the cache folder, set from the data folder (see <see cref="DataPaths"/>).
     /// </summary>
-    public string RootPath { get; set; } = DefaultDataPath + "/" + FolderName;
+    public string RootPath { get; set; } = DataPaths.DefaultDataPath + "/" + FolderName;
 
     /// <summary>
     /// ffmpeg executable; a name is looked up in the PATH.

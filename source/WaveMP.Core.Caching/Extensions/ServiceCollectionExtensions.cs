@@ -12,6 +12,7 @@ using WaveMP.Core.Jobs.Definitions;
 using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Handlers;
+using WaveMP.Core.Settings.Paths;
 
 namespace WaveMP.Core.Caching.Extensions;
 
@@ -30,14 +31,10 @@ public static class ServiceCollectionExtensions
         services.AddOptions<CacheOptions>()
             .BindConfiguration(CacheOptions.SectionName)
             .Configure<IConfiguration, IServiceProvider>((options, configuration, provider) =>
-            {
-                string dataPath = configuration[CacheOptions.DataPathVariable] is { Length: > 0 } configured
-                    ? configured
-                    : CacheOptions.DefaultDataPath;
-                string contentRoot = provider.GetService<IHostEnvironment>()?.ContentRootPath
-                    ?? Directory.GetCurrentDirectory();
-                options.RootPath = Path.Combine(Path.GetFullPath(dataPath, contentRoot), CacheOptions.FolderName);
-            });
+                options.RootPath = DataPaths.Resolve(
+                    configuration,
+                    provider.GetService<IHostEnvironment>(),
+                    CacheOptions.FolderName));
 
         services.AddSingleton<ICacheStore, CacheStore>();
         services.AddSingleton<ICoverImageEncoder, FfmpegCoverImageEncoder>();

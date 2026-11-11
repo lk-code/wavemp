@@ -6,11 +6,13 @@ namespace WaveMP.Core.Caching.Images;
 
 /// <summary>
 /// The arguments of ffmpeg that scale a picture read from standard input to WebP pictures: the input is split once
-/// per target and scaled to fit into a square of the target size, keeping the aspect ratio and never enlarging it.
-/// Metadata (e.g. EXIF) is not copied.
+/// per target, optionally cropped to a square around its center, and scaled to fit into a square of the target size,
+/// keeping the aspect ratio and never enlarging it. Metadata (e.g. EXIF) is not copied.
 /// </summary>
 internal static class FfmpegCoverArguments
 {
+    private const string SquareCrop = "crop='min(iw,ih)':'min(iw,ih)',";
+
     /// <summary>
     /// The demuxer of ffmpeg for a picture format, so that the content decides and never a file extension;
     /// <c>null</c> for other formats.
@@ -42,9 +44,14 @@ internal static class FfmpegCoverArguments
         for (int index = 0; index < targets.Count; index++)
         {
             int size = targets[index].MaxSize;
-            filter.Append(
-                CultureInfo.InvariantCulture,
-                $";[s{index}]scale='min(iw,{size})':'min(ih,{size})'");
+            filter.Append(CultureInfo.InvariantCulture, $";[s{index}]");
+            if (targets[index].Square)
+            {
+                // Without a position, crop keeps the center.
+                filter.Append(SquareCrop);
+            }
+
+            filter.Append(CultureInfo.InvariantCulture, $"scale='min(iw,{size})':'min(ih,{size})'");
             filter.Append(
                 CultureInfo.InvariantCulture,
                 $":force_original_aspect_ratio=decrease:flags=lanczos[o{index}]");

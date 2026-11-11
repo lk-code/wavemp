@@ -39,6 +39,21 @@ public class FfmpegCoverArgumentsTests
     }
 
     [Test]
+    public void Build_SquareTarget_CropsTheCenterBeforeScaling()
+    {
+        IReadOnlyList<string> arguments = FfmpegCoverArguments.Build(
+            "png_pipe",
+            [new CoverEncodeTarget(96, "small.webp", Square: true), new CoverEncodeTarget(300, "medium.webp")],
+            80);
+
+        arguments[10].Should().Be(
+            "[0:v]split=2[s0][s1]"
+            + ";[s0]crop='min(iw,ih)':'min(iw,ih)',scale='min(iw,96)':'min(ih,96)'"
+            + ":force_original_aspect_ratio=decrease:flags=lanczos[o0]"
+            + ";[s1]scale='min(iw,300)':'min(ih,300)':force_original_aspect_ratio=decrease:flags=lanczos[o1]");
+    }
+
+    [Test]
     public void Build_WithoutTargets_Throws()
     {
         Action build = () => FfmpegCoverArguments.Build("png_pipe", [], 80);

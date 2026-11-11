@@ -60,6 +60,21 @@ public class FfmpegCoverImageEncoderTests
     }
 
     [Test]
+    public async Task EncodeAsync_SquareTargets_CropsTheCenterAndNeverEnlargesIt()
+    {
+        string source = _folder.Combine("cover.png");
+        await TestMediaGenerator.CreateImageAsync(source, 400, 250);
+        CoverEncodeTarget small = new(96, _folder.Combine("small.webp"), Square: true);
+        CoverEncodeTarget large = new(1000, _folder.Combine("large.webp"), Square: true);
+
+        CoverEncodeStatus status = await EncodeAsync(source, "image/png", small, large);
+
+        status.Should().Be(CoverEncodeStatus.Encoded);
+        await ShouldBeWebPAsync(small.OutputPath, 96, 96);
+        await ShouldBeWebPAsync(large.OutputPath, 250, 250);
+    }
+
+    [Test]
     public async Task EncodeAsync_Gif_WritesItsFirstFrame()
     {
         string source = _folder.Combine("cover.gif");

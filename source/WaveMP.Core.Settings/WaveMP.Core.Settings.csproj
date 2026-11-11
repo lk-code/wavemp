@@ -5,6 +5,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- IHostEnvironment: a relative data folder is resolved against the content root. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WaveMP.Data\WaveMP.Data.csproj" />
   </ItemGroup>
 
