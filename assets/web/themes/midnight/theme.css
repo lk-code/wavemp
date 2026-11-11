@@ -934,15 +934,23 @@ a[data-part='breadcrumb-link']:hover {
     );
 }
 
-[data-part='progress-track'] {
+/* The meter of the cache is a glass bar like the progress of the scan. */
+[data-part='progress-track'],
+[data-part='meter-track'] {
     box-shadow: inset 0 1px 2px rgb(0 0 0 / 25%);
 }
 
-[data-part='progress-fill'] {
+[data-part='progress-fill'],
+[data-part='meter-fill'] {
     box-shadow: 0 0 6px rgb(59 155 255 / 60%);
 }
 
+[data-part='meter'] {
+    --wmp-progress-height: 0.75rem;
+}
+
 /* Panels and list entries in the style of the profile administration. */
+[data-part='cache-usage'],
 [data-part='scan-status'],
 [data-part='stat-item'],
 [data-part='run-item'],
@@ -1011,6 +1019,25 @@ a[data-part='breadcrumb-link']:hover {
 
 [data-part='job-actions'] [data-part='icon'] {
     --wmp-icon-fill: linear-gradient(#4aa8ff, #1f6fd6);
+}
+
+/* Cache: the used space stands out, the hint stays quiet; the button to clear it is a warning. */
+[data-part='cache-usage'] > [data-part='label']:first-of-type {
+    color: #1e3a5c;
+    font-weight: 600;
+}
+
+[data-part='cache-usage'] > [data-part='label']:last-of-type {
+    color: #5c6773;
+    font-size: var(--wmp-font-size-s);
+}
+
+[data-part='cache-usage'] > [data-part='stat-list'] > [data-part='stat-item'] {
+    box-shadow: none;
+}
+
+[data-part='cache-usage'] > [data-part='button'] [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#e35d5d, #b52a2a);
 }
 
 /* --- Dialogs and menus -------------------------------------------------------------------------- */
