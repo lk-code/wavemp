@@ -543,6 +543,83 @@ namespace WaveMP.Data.Migrations
                     b.ToTable("play_history", (string)null);
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.Playlist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CoverUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cover_updated_at");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("normalized_name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_playlists");
+
+                    b.HasIndex("UserId", "NormalizedName", "Id")
+                        .HasDatabaseName("ix_playlists_user_id_normalized_name_id");
+
+                    b.ToTable("playlists", (string)null);
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.PlaylistEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("added_at");
+
+                    b.Property<Guid>("PlaylistId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("playlist_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_playlist_entries");
+
+                    b.HasIndex("TrackId")
+                        .HasDatabaseName("ix_playlist_entries_track_id");
+
+                    b.HasIndex("PlaylistId", "Position", "Id")
+                        .HasDatabaseName("ix_playlist_entries_playlist_id_position_id");
+
+                    b.ToTable("playlist_entries", (string)null);
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.ServerSecret", b =>
                 {
                     b.Property<string>("Name")
@@ -952,6 +1029,39 @@ namespace WaveMP.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.Playlist", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlists_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.PlaylistEntry", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.Playlist", "Playlist")
+                        .WithMany("Entries")
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlist_entries_playlists_playlist_id");
+
+                    b.HasOne("WaveMP.Data.Entities.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlist_entries_tracks_track_id");
+
+                    b.Navigation("Playlist");
+
+                    b.Navigation("Track");
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.Session", b =>
                 {
                     b.HasOne("WaveMP.Data.Entities.User", "User")
@@ -1011,6 +1121,11 @@ namespace WaveMP.Data.Migrations
                     b.Navigation("Covers");
 
                     b.Navigation("Tracks");
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.Playlist", b =>
+                {
+                    b.Navigation("Entries");
                 });
 
             modelBuilder.Entity("WaveMP.Data.Entities.Track", b =>

@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using WaveMP.Data.Entities;
+using WaveMP.Data.Projections;
 using WaveMP.Data.Queries;
 using WaveMP.Data.Repositories;
 
@@ -111,6 +112,49 @@ public class PlayHistoryRepositoryTests : LibraryDatabaseTests
         Page<PlayHistoryEntry> page = await CreateRepository().ListAsync(new PlayHistoryListQuery(user.Id, 0, 10));
         page.Items.Select(entry => entry.Id).Should().Equal(kept.Id);
         page.Items.Should().NotContain(entry => entry.Id == removed.Id);
+    }
+
+    [Test]
+    public async Task ListRecentTracksAsync_Always_ListsEachTrackOnceByItsLastPlay()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+        User user = await AddUserAsync();
+        User other = await AddUserAsync();
+        await AddEntryAsync(user, library.Opening, _start);
+        await AddEntryAsync(user, library.Ballad, _start.AddMinutes(5));
+        await AddEntryAsync(user, library.Opening, _start.AddMinutes(10));
+        await AddEntryAsync(user, library.Duet, _start.AddMinutes(1));
+        await AddEntryAsync(other, library.Closing, _start.AddMinutes(20));
+
+        Page<RecentTrackRow> page = await CreateRepository().ListRecentTracksAsync(
+            new RecentTrackListQuery(user.Id, 0, 10, 100));
+
+        page.Items.Should().Equal(
+            new RecentTrackRow(library.Opening.Id, _start.AddMinutes(10)),
+            new RecentTrackRow(library.Ballad.Id, _start.AddMinutes(5)),
+            new RecentTrackRow(library.Duet.Id, _start.AddMinutes(1)));
+        page.Total.Should().Be(3);
+    }
+
+    [Test]
+    public async Task ListRecentTracksAsync_MoreTracksThanTheMaximum_CutsTheList()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+        User user = await AddUserAsync();
+        await AddEntryAsync(user, library.Opening, _start);
+        await AddEntryAsync(user, library.Ballad, _start.AddMinutes(1));
+        await AddEntryAsync(user, library.Duet, _start.AddMinutes(2));
+
+        IPlayHistoryRepository repository = CreateRepository();
+        Page<RecentTrackRow> first = await repository.ListRecentTracksAsync(new RecentTrackListQuery(user.Id, 0, 1, 2));
+        Page<RecentTrackRow> second = await repository.ListRecentTracksAsync(new RecentTrackListQuery(user.Id, 1, 5, 2));
+        Page<RecentTrackRow> beyond = await repository.ListRecentTracksAsync(new RecentTrackListQuery(user.Id, 2, 5, 2));
+
+        first.Items.Select(row => row.TrackId).Should().Equal(library.Duet.Id);
+        second.Items.Select(row => row.TrackId).Should().Equal(library.Ballad.Id);
+        beyond.Items.Should().BeEmpty();
+        first.Total.Should().Be(2);
+        beyond.Total.Should().Be(2);
     }
 
     private IPlayHistoryRepository CreateRepository()
