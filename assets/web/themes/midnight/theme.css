@@ -3,7 +3,8 @@
  *
  * A dark glass look: a glossy black header and transport bar with round glass buttons and a
  * glowing blue play button, a light toolbar, a white sidebar and a white library list grouped by
- * album. All graphics in images/ were drawn for this theme.
+ * album. The profile selection is a black glass stage with glossy initials tiles that glow light
+ * blue. All graphics in images/ were drawn for this theme.
  *
  * Rules of the theme API: no @import, no @layer, no external URLs, root-absolute url() only.
  * Layout rules live in @media (width >= 64rem); below that, the fixed mobile base applies and
@@ -60,6 +61,11 @@
     --wmp-dialog-background: #ffffff;
     --wmp-menu-color: #1e2329;
     --wmp-menu-background: linear-gradient(#ffffff, #f3f5f8);
+    --wmp-profile-select-color: #d7dce3;
+    --wmp-profile-select-background:
+        radial-gradient(120% 60% at 50% 0%, rgb(50 130 220 / 35%), rgb(0 0 0 / 0%) 65%),
+        linear-gradient(#2c3036 0%, #121417 45%, #030405 100%);
+    --wmp-profile-secondary-opacity: 0.5;
 
     --wmp-image-cover-placeholder: url('/themes/midnight/images/cover-placeholder.svg') center /
         100% 100% no-repeat;
@@ -478,6 +484,216 @@ a[data-part='breadcrumb-link']:hover {
     --wmp-icon-size: 1.75rem;
 }
 
+/* --- Profiles: avatar, profile selection and profile button --------------------------------------- */
+
+/* Glass over the color of the profile; --wmp-profile-color is set on the avatar itself. */
+[data-part='avatar'] {
+    border: 1px solid rgb(0 0 0 / 40%);
+    background:
+        linear-gradient(
+            rgb(255 255 255 / 45%) 0%,
+            rgb(255 255 255 / 12%) 48%,
+            rgb(255 255 255 / 0%) 52%,
+            rgb(255 255 255 / 10%) 100%
+        ),
+        var(--wmp-profile-color);
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 55%),
+        0 1px 3px rgb(0 0 0 / 35%);
+    text-shadow: 0 1px 1px rgb(0 0 0 / 45%);
+}
+
+[data-part='profile-select'] {
+    color-scheme: dark;
+}
+
+[data-part='profile-select-title'] {
+    color: #ffffff;
+    font-weight: 600;
+    text-shadow:
+        0 0 10px rgb(120 200 255 / 45%),
+        0 1px 0 #000000;
+}
+
+[data-part='profile-select-hint'] {
+    color: #b9c3cf;
+    opacity: 1;
+}
+
+[data-part='profile-select'] [data-part='empty-state-title'] {
+    color: #ffffff;
+}
+
+[data-part='profile-select'] [data-part='empty-state-text'] {
+    color: #b9c3cf;
+}
+
+[data-part='profile-tile'] {
+    border-radius: 0.5rem;
+    transition:
+        background 0.15s ease,
+        opacity 0.15s ease;
+}
+
+[data-part='profile-tile'] > [data-part='label'] {
+    color: #d7dce3;
+    text-shadow: 0 1px 0 #000000;
+}
+
+[data-part='profile-tile']:is(:hover, :focus-visible):not(:disabled) {
+    background: radial-gradient(
+        90% 80% at 50% 45%,
+        rgb(74 168 255 / 28%),
+        rgb(74 168 255 / 0%) 70%
+    );
+    outline: none;
+}
+
+[data-part='profile-tile']:is(:hover, :focus-visible):not(:disabled) > [data-part='avatar'] {
+    outline: none;
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 55%),
+        0 0 0 2px #8fd2ff,
+        0 0 16px rgb(74 168 255 / 85%);
+}
+
+[data-part='profile-tile']:is(:hover, :focus-visible):not(:disabled) > [data-part='label'] {
+    color: #ffffff;
+    text-shadow:
+        0 0 6px rgb(130 205 255 / 90%),
+        0 1px 0 #000000;
+}
+
+[data-part='profile-tile'][data-state~='current'] > [data-part='avatar'] {
+    outline: none;
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 55%),
+        0 0 0 2px #3b9bff;
+}
+
+/* The profile button in the dark header glows like the other header buttons. */
+[data-part='btn-profile'] {
+    border: 0;
+    padding: 0;
+}
+
+[data-part='btn-profile']:is(:hover, [aria-expanded='true']) {
+    filter: drop-shadow(0 0 3px #4aa8ff) drop-shadow(0 0 6px rgb(74 168 255 / 60%));
+}
+
+[data-part='profile-summary'] {
+    color: #1e2329;
+}
+
+/* --- Forms and messages ------------------------------------------------------------------------- */
+
+[data-part='field'] > [data-part='input'],
+[data-part='select'] {
+    border: 1px solid #a9b2bd;
+    border-radius: 0.1875rem;
+    background: #ffffff;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 12%);
+}
+
+[data-part='field'] > [data-part='input']:focus,
+[data-part='select']:focus {
+    border-color: #3b9bff;
+    outline: none;
+    box-shadow:
+        inset 0 1px 2px rgb(0 0 0 / 12%),
+        0 0 0 2px rgb(59 155 255 / 35%);
+}
+
+[data-part='select'] {
+    background: linear-gradient(#ffffff, #eef1f4);
+    box-shadow: inset 0 1px #ffffff;
+}
+
+[data-part='field'][data-state~='invalid'] > :is([data-part='input'], [data-part='select']) {
+    border-color: #d64545;
+}
+
+[data-part='field-error'] {
+    color: #c62828;
+}
+
+[data-part='alert'] {
+    border: 1px solid #c6ddf4;
+    border-radius: 0.1875rem;
+    background: linear-gradient(#f7fbff, #eaf4fe);
+    color: #3d4855;
+}
+
+[data-part='alert'][data-state~='error'] {
+    border-color: #efb7b7;
+    background: linear-gradient(#fff8f8, #fdeaea);
+    color: #5c1f1f;
+}
+
+[data-part='alert'][data-state~='success'] {
+    border-color: #b5dfbe;
+    background: linear-gradient(#f6fcf7, #e5f5e8);
+    color: #1d4a27;
+}
+
+[data-part='alert'] > [data-part='icon'] {
+    --wmp-icon-fill: currentColor;
+}
+
+[data-part='color-swatch'] {
+    border: 1px solid rgb(0 0 0 / 35%);
+    background:
+        linear-gradient(rgb(255 255 255 / 40%), rgb(255 255 255 / 0%) 50%),
+        var(--wmp-swatch-color);
+    box-shadow: inset 0 1px rgb(255 255 255 / 50%);
+}
+
+[data-part='color-swatch'][aria-checked='true'] {
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 50%),
+        0 0 0 2px #ffffff,
+        0 0 0 4px #3b9bff,
+        0 0 8px rgb(59 155 255 / 60%);
+}
+
+/* --- Profile administration --------------------------------------------------------------------- */
+
+[data-part='user-item'] {
+    border: 1px solid #d9e0e8;
+    border-radius: 0.25rem;
+    background: linear-gradient(#ffffff, #f6f8fa);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+
+[data-part='user-item']:hover {
+    border-color: #c5e1fb;
+    background: linear-gradient(#f4faff, #e9f4fe);
+}
+
+[data-part='user-meta'] > [data-part='badge'] {
+    border-color: #c9d1da;
+    background: linear-gradient(#ffffff, #eef1f4);
+    color: #4f5862;
+}
+
+[data-part='user-meta'] > [data-part='badge'][data-state~='admin'] {
+    border-color: #84b9ea;
+    background: linear-gradient(#e6f3fe, #c9e2fa);
+    color: #10253f;
+}
+
+[data-part='user-actions'] [data-variant='icon'] {
+    --wmp-icon-fill: #6b737e;
+}
+
+[data-part='user-actions'] [data-variant='icon']:hover:not(:disabled) [data-part='icon'] {
+    --wmp-icon-fill: #1f6fd6;
+}
+
+[data-part='user-actions'] [data-variant='icon']:disabled [data-part='icon'] {
+    opacity: 0.4;
+}
+
 /* --- Dialogs and menus -------------------------------------------------------------------------- */
 
 [data-part='dialog'] {
@@ -539,6 +755,15 @@ a[data-part='breadcrumb-link']:hover {
         overflow: hidden;
         clip-path: inset(50%);
         white-space: nowrap;
+    }
+
+    /* The profile selection has no header, so it shows the logo. */
+    [data-part='profile-select'] > [data-part='logo'] {
+        position: static;
+        inline-size: auto;
+        block-size: auto;
+        overflow: visible;
+        clip-path: none;
     }
 
     [data-part='header'] {
