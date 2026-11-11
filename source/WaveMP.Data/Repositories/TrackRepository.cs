@@ -33,6 +33,37 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
         return dbContext.Tracks.AnyAsync(track => track.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TrackRow>> ListByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        Guid[] distinct = [.. ids.Distinct()];
+        return await Project(dbContext.Tracks.AsNoTracking().Where(track => distinct.Contains(track.Id)))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<TrackFileRow?> FindPrimaryFileAsync(
+        Guid trackId,
+        MediaFileKind kind,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await ExistsAsync(trackId, cancellationToken))
+        {
+            return null;
+        }
+
+        MediaFile? file = await dbContext.MediaFiles.AsNoTracking()
+            .Where(file => file.TrackId == trackId && file.Kind == kind && file.IsPrimary)
+            .OrderBy(file => file.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        return new TrackFileRow(trackId, file);
+    }
+
     public Task<Page<MediaFile>> ListFilesAsync(
         TrackFileListQuery query,
         CancellationToken cancellationToken = default)

@@ -512,6 +512,37 @@ namespace WaveMP.Data.Migrations
                     b.ToTable("media_files", (string)null);
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.PlayHistoryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("PlayedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("played_at");
+
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_play_history");
+
+                    b.HasIndex("TrackId")
+                        .HasDatabaseName("ix_play_history_track_id");
+
+                    b.HasIndex("UserId", "PlayedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_play_history_user_id_played_at_id");
+
+                    b.ToTable("play_history", (string)null);
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.ServerSecret", b =>
                 {
                     b.Property<string>("Name")
@@ -837,6 +868,13 @@ namespace WaveMP.Data.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("language");
 
+                    b.Property<string>("ReplayGain")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("Off")
+                        .HasColumnName("replay_gain");
+
                     b.HasKey("UserId")
                         .HasName("pk_user_settings");
 
@@ -891,6 +929,27 @@ namespace WaveMP.Data.Migrations
                         .HasConstraintName("fk_media_files_tracks_track_id");
 
                     b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.PlayHistoryEntry", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_play_history_tracks_track_id");
+
+                    b.HasOne("WaveMP.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_play_history_users_user_id");
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WaveMP.Data.Entities.Session", b =>

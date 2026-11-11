@@ -10,4 +10,9 @@ public class UserSettings
     public User? User { get; set; }
 
     public Language Language { get; set; } = Language.En;
+
+    /// <summary>
+    /// Volume normalization of the player; off by default.
+    /// </summary>
+    public ReplayGainMode ReplayGain { get; set; } = ReplayGainMode.Off;
 }

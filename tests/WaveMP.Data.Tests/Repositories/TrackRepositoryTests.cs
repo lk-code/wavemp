@@ -294,6 +294,63 @@ public class TrackRepositoryTests : LibraryDatabaseTests
             options => options.WithStrictOrdering());
     }
 
+    [Test]
+    public async Task FindPrimaryFileAsync_WithDuplicates_ReturnsThePrimaryFileOfTheKind()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+        TrackRepository repository = new(CreateDbContext());
+
+        TrackFileRow? audio = await repository.FindPrimaryFileAsync(library.Closing.Id, MediaFileKind.Audio);
+        TrackFileRow? video = await repository.FindPrimaryFileAsync(library.Closing.Id, MediaFileKind.Video);
+
+        audio!.TrackId.Should().Be(library.Closing.Id);
+        audio.File!.RelativePath.Should().Be("Alpha Band/First Album/02 - Closing.flac");
+        video!.File!.RelativePath.Should().Be("Alpha Band/First Album/02 - Closing.mkv");
+    }
+
+    [Test]
+    public async Task FindPrimaryFileAsync_TrackWithoutAudio_ReturnsTheTrackWithoutFile()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+
+        TrackFileRow? row = await new TrackRepository(CreateDbContext())
+            .FindPrimaryFileAsync(library.Clip.Id, MediaFileKind.Audio);
+
+        row.Should().NotBeNull();
+        row!.File.Should().BeNull();
+    }
+
+    [Test]
+    public async Task FindPrimaryFileAsync_UnknownTrack_ReturnsNull()
+    {
+        await SeedStandardLibraryAsync();
+
+        TrackFileRow? row = await new TrackRepository(CreateDbContext())
+            .FindPrimaryFileAsync(Guid.NewGuid(), MediaFileKind.Audio);
+
+        row.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ListByIdsAsync_Always_ReturnsTheExistingTracksOnce()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+
+        IReadOnlyList<TrackRow> rows = await new TrackRepository(CreateDbContext()).ListByIdsAsync(
+            [library.Opening.Id, library.Ballad.Id, library.Opening.Id, Guid.NewGuid()]);
+
+        rows.Select(row => row.Title).Should().BeEquivalentTo(["Opening", "Ballad"]);
+        rows.Single(row => row.Title == "Ballad").HasCover.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task ListByIdsAsync_WithoutIds_ReturnsNothing()
+    {
+        IReadOnlyList<TrackRow> rows = await new TrackRepository(CreateDbContext()).ListByIdsAsync([]);
+
+        rows.Should().BeEmpty();
+    }
+
     private static TrackListQuery Query(
         string? search = null,
         Guid? artistId = null,

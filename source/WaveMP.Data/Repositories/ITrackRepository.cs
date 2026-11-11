@@ -19,6 +19,22 @@ public interface ITrackRepository
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// The tracks with these ids, in no particular order; ids of missing tracks are left out.
+    /// </summary>
+    Task<IReadOnlyList<TrackRow>> ListByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The file of the kind the track plays (its primary file of the kind), or <c>null</c> if the track does not
+    /// exist. <see cref="TrackFileRow.File"/> is <c>null</c> if the track has no file of the kind.
+    /// </summary>
+    Task<TrackFileRow?> FindPrimaryFileAsync(
+        Guid trackId,
+        MediaFileKind kind,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Lists the files of a track: audio, video and its own pictures, also duplicates of lower quality.
     /// </summary>
     Task<Page<MediaFile>> ListFilesAsync(TrackFileListQuery query, CancellationToken cancellationToken = default);

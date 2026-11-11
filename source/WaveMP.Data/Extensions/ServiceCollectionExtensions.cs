@@ -39,6 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITrackRepository, TrackRepository>();
         services.AddScoped<ICoverRepository, CoverRepository>();
         services.AddScoped<ITrackMetadataRepository, TrackMetadataRepository>();
+        services.AddScoped<IPlayHistoryRepository, PlayHistoryRepository>();
 
         return services;
     }

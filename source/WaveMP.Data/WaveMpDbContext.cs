@@ -33,6 +33,8 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     public DbSet<TagBackup> TagBackups => Set<TagBackup>();
 
+    public DbSet<PlayHistoryEntry> PlayHistory => Set<PlayHistoryEntry>();
+
     /// <summary>
     /// PostgreSQL extension of the fault-tolerant library search (trigrams). It is part of the official image and
     /// trusted since PostgreSQL 13, so the owner of the database can create it.
@@ -58,5 +60,6 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
         modelBuilder.ApplyConfiguration(new MediaFileConfiguration());
         modelBuilder.ApplyConfiguration(new CoverConfiguration());
         modelBuilder.ApplyConfiguration(new TagBackupConfiguration());
+        modelBuilder.ApplyConfiguration(new PlayHistoryEntryConfiguration());
     }
 }

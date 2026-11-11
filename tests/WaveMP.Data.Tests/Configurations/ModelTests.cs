@@ -38,6 +38,7 @@ public class ModelTests
     [TestCase(typeof(MediaFile), "media_files")]
     [TestCase(typeof(Cover), "covers")]
     [TestCase(typeof(TagBackup), "tag_backups")]
+    [TestCase(typeof(PlayHistoryEntry), "play_history")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);
@@ -84,6 +85,7 @@ public class ModelTests
 
     [TestCase(typeof(Session))]
     [TestCase(typeof(UserSettings))]
+    [TestCase(typeof(PlayHistoryEntry))]
     public void DependentsOfUser_Always_AreDeletedWithTheUser(Type dependentType)
     {
         IForeignKey foreignKey = GetEntity(dependentType).GetForeignKeys()
@@ -98,6 +100,15 @@ public class ModelTests
         IProperty role = GetEntity(typeof(User)).FindProperty(nameof(User.Role))!;
 
         role.GetProviderClrType().Should().Be<string>();
+    }
+
+    [Test]
+    public void UserSettings_ReplayGain_IsStoredAsNameWithOffAsDefault()
+    {
+        IProperty replayGain = GetEntity(typeof(UserSettings)).FindProperty(nameof(UserSettings.ReplayGain))!;
+
+        replayGain.GetProviderClrType().Should().Be<string>();
+        replayGain.GetDefaultValue().Should().Be(ReplayGainMode.Off);
     }
 
     [Test]
@@ -156,6 +167,7 @@ public class ModelTests
     [TestCase(typeof(Album), typeof(Artist), DeleteBehavior.SetNull)]
     [TestCase(typeof(MediaFile), typeof(Track), DeleteBehavior.SetNull)]
     [TestCase(typeof(TagBackup), typeof(MediaFile), DeleteBehavior.SetNull)]
+    [TestCase(typeof(PlayHistoryEntry), typeof(Track), DeleteBehavior.Cascade)]
     public void Library_ForeignKeys_HaveTheirDeleteBehavior(Type dependent, Type principal, DeleteBehavior expected)
     {
         IForeignKey foreignKey = GetEntity(dependent).GetForeignKeys()
