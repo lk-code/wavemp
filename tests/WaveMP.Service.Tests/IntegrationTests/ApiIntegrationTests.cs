@@ -59,17 +59,48 @@ public class ApiIntegrationTests
         problem["status"]!.GetValue<int>().Should().Be(StatusCodes.Status503ServiceUnavailable);
     }
 
-    [Test]
-    public async Task GetUnknownApiRoute_Always_ReturnsNotFoundProblemWithCode()
+    [TestCase("/api")]
+    [TestCase("/api/v1/does-not-exist")]
+    [TestCase("/API/V1/DOES-NOT-EXIST")]
+    public async Task GetUnknownApiRoute_Always_ReturnsNotFoundProblemWithCode(string path)
     {
-        HttpResponseMessage response = await _server.Client.GetAsync(
-            new Uri("/api/v1/does-not-exist", UriKind.Relative));
+        HttpResponseMessage response = await _server.Client.GetAsync(new Uri(path, UriKind.Relative));
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
         JsonNode problem = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
         problem["code"]!.GetValue<string>().Should().Be("request.not_found");
         problem["status"]!.GetValue<int>().Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [TestCase("POST")]
+    [TestCase("PUT")]
+    [TestCase("PATCH")]
+    [TestCase("DELETE")]
+    public async Task SendToHealth_WithUnsupportedMethod_ReturnsMethodNotAllowedProblemWithCode(string method)
+    {
+        using HttpRequestMessage request = new(new HttpMethod(method), new Uri("/api/v1/health", UriKind.Relative));
+
+        HttpResponseMessage response = await _server.Client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+        response.Content.Headers.Allow.Should().Equal(HttpMethods.Get);
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        JsonNode problem = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
+        problem["code"]!.GetValue<string>().Should().Be("request.failed");
+        problem["status"]!.GetValue<int>().Should().Be(StatusCodes.Status405MethodNotAllowed);
+    }
+
+    [Test]
+    public async Task HeadHealth_Always_ReturnsMethodNotAllowedWithAllowHeader()
+    {
+        using HttpRequestMessage request = new(HttpMethod.Head, new Uri("/api/v1/health", UriKind.Relative));
+
+        HttpResponseMessage response = await _server.Client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+        response.Content.Headers.Allow.Should().Equal(HttpMethods.Get);
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
     }
 
     [Test]
