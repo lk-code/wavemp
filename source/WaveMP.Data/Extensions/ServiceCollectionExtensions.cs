@@ -36,12 +36,20 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static void BindDatabaseOptions(DatabaseOptions options, IConfiguration configuration)
     {
-        options.Host = configuration["DB_HOST"] ?? options.Host;
-        options.Name = configuration["DB_NAME"] ?? options.Name;
-        options.User = configuration["DB_USER"] ?? options.User;
-        options.Password = configuration["DB_PASSWORD"] ?? options.Password;
+        BindDatabaseOptions(options, key => configuration[key]);
+    }
 
-        string? port = configuration["DB_PORT"];
+    /// <summary>
+    /// Maps the flat variables returned by <paramref name="getValue"/> onto <see cref="DatabaseOptions"/>.
+    /// </summary>
+    internal static void BindDatabaseOptions(DatabaseOptions options, Func<string, string?> getValue)
+    {
+        options.Host = getValue("DB_HOST") ?? options.Host;
+        options.Name = getValue("DB_NAME") ?? options.Name;
+        options.User = getValue("DB_USER") ?? options.User;
+        options.Password = getValue("DB_PASSWORD") ?? options.Password;
+
+        string? port = getValue("DB_PORT");
         if (port is not null)
         {
             options.Port = int.TryParse(port, NumberStyles.None, CultureInfo.InvariantCulture, out int value)

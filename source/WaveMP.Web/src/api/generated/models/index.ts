@@ -42,6 +42,7 @@ export function deserializeIntoHealth(health: Partial<Health> | undefined = {}) 
 // @ts-ignore
 export function deserializeIntoProblemDetails(problemDetails: Partial<ProblemDetails> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
+        "code": n => { problemDetails.code = n.getEnumValue<ProblemCode>(ProblemCodeObject); },
         "detail": n => { problemDetails.detail = n.getStringValue(); },
         "instance": n => { problemDetails.instance = n.getStringValue(); },
         "status": n => { problemDetails.status = n.getNumberValue(); },
@@ -63,7 +64,12 @@ export interface Health extends AdditionalDataHolder, Parsable {
     version?: string | null;
 }
 export type HealthStatus = (typeof HealthStatusObject)[keyof typeof HealthStatusObject];
+export type ProblemCode = (typeof ProblemCodeObject)[keyof typeof ProblemCodeObject];
 export interface ProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
+    /**
+     * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
+     */
+    code?: ProblemCode | null;
     /**
      * The detail property
      */
@@ -107,6 +113,7 @@ export function serializeHealth(writer: SerializationWriter, health: Partial<Hea
 // @ts-ignore
 export function serializeProblemDetails(writer: SerializationWriter, problemDetails: Partial<ProblemDetails> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!problemDetails || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<ProblemCode>("code", problemDetails.code);
     writer.writeStringValue("detail", problemDetails.detail);
     writer.writeStringValue("instance", problemDetails.instance);
     writer.writeNumberValue("status", problemDetails.status);
@@ -121,6 +128,17 @@ export const HealthStatusObject = {
     Healthy: "Healthy",
     Degraded: "Degraded",
     Unhealthy: "Unhealthy",
+} as const;
+/**
+ * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
+ */
+export const ProblemCodeObject = {
+    RequestInvalid: "request.invalid",
+    RequestNot_found: "request.not_found",
+    RequestFailed: "request.failed",
+    ServerError: "server.error",
+    ServiceUnavailable: "service.unavailable",
+    HealthUnhealthy: "health.unhealthy",
 } as const;
 /* tslint:enable */
 /* eslint-enable */

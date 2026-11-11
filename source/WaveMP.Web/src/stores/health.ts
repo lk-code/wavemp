@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { apiClient } from '@/api/client'
-import type { HealthStatus } from '@/api/generated/models'
+import { ProblemCodeObject, type HealthStatus, type ProblemDetails } from '@/api/generated/models'
 
-/** Health as shown in the UI; "Unreachable" means the service did not answer at all. */
+/** Health as shown in the UI; "Unreachable" means the service did not answer as expected. */
 export type DisplayHealthStatus = HealthStatus | 'Checking' | 'Unreachable'
 
 export const useHealthStore = defineStore('health', () => {
@@ -17,9 +17,9 @@ export const useHealthStore = defineStore('health', () => {
             status.value = health?.status ?? 'Unreachable'
             version.value = health?.version ?? null
         } catch (error) {
-            // A 503 arrives as Problem Details (with a status code); anything else means no answer.
-            const responseStatusCode = (error as { responseStatusCode?: number }).responseStatusCode
-            status.value = responseStatusCode === 503 ? 'Unhealthy' : 'Unreachable'
+            // A failed health check arrives as Problem Details with a machine-readable code.
+            const code = (error as Partial<ProblemDetails>).code
+            status.value = code === ProblemCodeObject.HealthUnhealthy ? 'Unhealthy' : 'Unreachable'
             version.value = null
         }
     }

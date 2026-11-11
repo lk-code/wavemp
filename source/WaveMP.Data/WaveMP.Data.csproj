@@ -1,9 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <!--
+      Design-time only (dotnet ef). Compile assets are needed for WaveMpDesignTimeServices; PrivateAssets keeps the
+      package out of the service and its image.
+    -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <!-- Lifts EF Core to the same patch version as the design-time package (Npgsql references an older one). -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />

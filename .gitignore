@@ -37,16 +37,13 @@ playwright-report/
 blob-report/
 playwright/.cache/
 
-# Docker / runtime data
-data/
-media/
+# Local runtime data (bind mounts such as ./media in docker-compose.dev.yml), root folders only
+/data/
+/media/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Claude Code (local)
-.claude/settings.local.json
 
 # Claude Code (local)
 .claude/settings.local.json

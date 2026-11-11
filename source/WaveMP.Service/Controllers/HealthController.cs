@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.Extensions;
 
 namespace WaveMP.Service.Controllers;
 
@@ -18,7 +19,7 @@ public sealed class HealthController(HealthCheckService healthCheckService) : Co
     /// Returns the health of the service.
     /// </summary>
     /// <response code="200">The service is healthy or degraded.</response>
-    /// <response code="503">At least one health check failed.</response>
+    /// <response code="503">At least one health check failed (code <c>health.unhealthy</c>).</response>
     [HttpGet(Name = "GetHealth")]
     [ProducesResponseType<HealthDto>(StatusCodes.Status200OK, "application/json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable, "application/problem+json")]
@@ -28,10 +29,7 @@ public sealed class HealthController(HealthCheckService healthCheckService) : Co
 
         if (report.Status == HealthStatus.Unhealthy)
         {
-            return Problem(
-                statusCode: StatusCodes.Status503ServiceUnavailable,
-                title: "Service unavailable",
-                detail: "At least one health check failed.");
+            return this.Problem(ProblemCodeDto.HealthUnhealthy, StatusCodes.Status503ServiceUnavailable);
         }
 
         return Ok(new HealthDto

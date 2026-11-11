@@ -6,6 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSubstitute;
 using WaveMP.Service.Controllers;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.Problems;
 
 namespace WaveMP.Service.Tests.Controllers;
 
@@ -60,7 +61,7 @@ public class HealthControllerTests
     }
 
     [Test]
-    public async Task GetHealthAsync_WhenUnhealthy_ReturnsServiceUnavailableProblem()
+    public async Task GetHealthAsync_WhenUnhealthy_ReturnsServiceUnavailableProblemWithCode()
     {
         SetupReport(HealthStatus.Unhealthy);
 
@@ -68,8 +69,9 @@ public class HealthControllerTests
 
         ObjectResult objectResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status503ServiceUnavailable);
-        objectResult.Value.Should().BeOfType<ProblemDetails>()
-            .Which.Status.Should().Be(StatusCodes.Status503ServiceUnavailable);
+        ProblemDetails problem = objectResult.Value.Should().BeOfType<ProblemDetails>().Subject;
+        problem.Status.Should().Be(StatusCodes.Status503ServiceUnavailable);
+        problem.Extensions.Should().Contain(ProblemCodes.ExtensionName, ProblemCodeDto.HealthUnhealthy);
     }
 
     private void SetupReport(HealthStatus status)
