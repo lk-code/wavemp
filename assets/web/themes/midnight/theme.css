@@ -358,7 +358,7 @@ a[data-part='breadcrumb-link']:hover {
     color: #4f5862;
 }
 
-[data-part='meta-item'][data-field='album'] {
+[data-part='list-group-meta'] > [data-part='meta-item'][data-field='album'] {
     color: #1e2329;
     font-weight: 600;
 }
@@ -389,6 +389,180 @@ a[data-part='breadcrumb-link']:hover {
 
 [data-part='stage'] [data-part='cover'] {
     box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 35%);
+}
+
+/* --- Library: tiles, detail pages, files ------------------------------------------------------- */
+
+/* Covers are glossy pictures with a soft shadow; a light reflection lies on their upper half. */
+[data-part='tile'] > [data-part='cover'],
+[data-part='detail-header'] > [data-part='cover'] {
+    position: relative;
+    border-radius: 0.1875rem;
+    box-shadow:
+        0 2px 6px rgb(0 0 0 / 28%),
+        0 0 0 1px rgb(0 0 0 / 12%);
+}
+
+[data-part='tile'] > [data-part='cover']::after,
+[data-part='detail-header'] > [data-part='cover']::after {
+    position: absolute;
+    inset: 0 0 50%;
+    border-radius: inherit;
+    background: linear-gradient(rgb(255 255 255 / 30%), rgb(255 255 255 / 4%));
+    content: '';
+    pointer-events: none;
+}
+
+[data-part='tile'] {
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+[data-part='tile']:hover,
+[data-part='tile']:focus-visible {
+    border-color: #c5e1fb;
+    background: linear-gradient(#f4faff, #e3f1fe);
+}
+
+/* Hovered tiles glow light blue around their cover. */
+[data-part='tile']:is(:hover, :focus-visible) > [data-part='cover'] {
+    box-shadow:
+        0 2px 6px rgb(0 0 0 / 28%),
+        0 0 0 1px rgb(31 111 214 / 45%),
+        0 0 10px rgb(74 168 255 / 55%);
+}
+
+[data-part='tile'] > [data-part='cover'] > [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#b7c1cd, #8995a3);
+}
+
+[data-part='tile-title'] {
+    color: #1e2329;
+    font-weight: 600;
+}
+
+[data-part='tile-subtitle'] {
+    color: #5f6873;
+}
+
+[data-part='detail-header'] {
+    padding-block-end: 0.75rem;
+    border-block-end: 1px solid #dfe4ea;
+}
+
+[data-part='detail-header'] > [data-part='cover'] {
+    box-shadow:
+        0 0.5rem 1.5rem rgb(0 0 0 / 30%),
+        0 0 0 1px rgb(0 0 0 / 12%);
+}
+
+[data-part='detail-header'] > [data-part='cover'] > [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#9fb5cc, #5d7896);
+}
+
+[data-part='detail-title'] {
+    color: #1e3a5c;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+[data-part='detail-info'] > [data-part='meta-item'] > [data-part='label'] {
+    color: #6b737e;
+}
+
+[data-part='meta-value'] > [data-part='link'] {
+    color: inherit;
+}
+
+[data-part='meta-value'] > [data-part='link']:hover {
+    color: #1f6fd6;
+}
+
+/* The badge of songs with a video only is a little stronger than the one next to audio. */
+[data-part='badge'][data-state~='video-only'] {
+    --wmp-icon-fill: #1f6fd6;
+}
+
+[data-part='list-row'][data-state~='video-only'] [data-part='list-cell'][data-column='title'] {
+    color: #2b4f7a;
+}
+
+/* "Show more" is a glass button below the list. */
+[data-part='load-more'] {
+    min-inline-size: 10rem;
+    border: 1px solid #a9b2bd;
+    border-radius: 999px;
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 90%),
+        0 1px 2px rgb(0 0 0 / 12%);
+}
+
+[data-part='load-more'][data-state~='loading'] {
+    color: #5f6873;
+}
+
+/* The files of a song in the style of the runs of the administration. */
+[data-part='file-item'] {
+    border: 1px solid #d9e0e8;
+    border-radius: 0.25rem;
+    background: linear-gradient(#ffffff, #f6f8fa);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+
+[data-part='file-item'][data-state~='primary'] {
+    border-color: #c5e1fb;
+    background: linear-gradient(#f9fcff, #eef6fe);
+}
+
+[data-part='file-path'] {
+    color: #1e2329;
+}
+
+[data-part='file-meta'] > [data-part='badge'] {
+    border-color: #c9d1da;
+    background: linear-gradient(#ffffff, #eef1f4);
+    color: #4f5862;
+}
+
+[data-part='file-meta'] > [data-part='badge'][data-state~='primary'] {
+    border-color: #84b9ea;
+    background: linear-gradient(#e6f3fe, #c9e2fa);
+    color: #10253f;
+}
+
+[data-part='file-meta'] > [data-part='badge'][data-state~='lossless'] {
+    border-color: #a4d8b0;
+    background: linear-gradient(#f2fbf4, #d8f0de);
+    color: #1d4a27;
+}
+
+[data-part='file-meta'] > [data-part='badge'][data-state~='issue'] {
+    border-color: #efb7b7;
+    background: linear-gradient(#fff8f8, #fadcdc);
+    color: #5c1f1f;
+}
+
+/* The chosen sort key and direction carry a blue dot. */
+[data-part='menu-item'][aria-checked='true'] {
+    color: #10253f;
+    font-weight: 600;
+}
+
+[data-part='menu-item'][aria-checked='true']::before {
+    inline-size: 0.4375rem;
+    block-size: 0.4375rem;
+    margin-inline-end: 0.125rem;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 35%, #8fd2ff, #1f6fd6 70%);
+    box-shadow: 0 0 4px rgb(59 155 255 / 70%);
+    content: '';
+}
+
+[data-part='menu-item'][role='menuitemradio'][aria-checked='false'] {
+    padding-inline-start: 1.25rem;
 }
 
 /* --- Transport bar ------------------------------------------------------------------------------ */
@@ -919,9 +1093,21 @@ a[data-part='breadcrumb-link']:hover {
         padding-inline: 0.5rem 0.625rem;
     }
 
-    [data-part='view'][data-view='library'] {
-        gap: 0.5rem;
-        padding: 0.5rem 0.75rem 1rem;
+    [data-part='view']:is(
+            [data-view='library'],
+            [data-view='library-search'],
+            [data-view='library-album'],
+            [data-view='library-artist'],
+            [data-view='library-genre'],
+            [data-view='library-year'],
+            [data-view='library-track']
+        ) {
+        gap: 0.75rem;
+        padding: 0.75rem 0.75rem 1rem;
+    }
+
+    [data-part='detail-header'] > [data-part='cover'] {
+        inline-size: 11rem;
     }
 
     [data-part='list-group'] {
