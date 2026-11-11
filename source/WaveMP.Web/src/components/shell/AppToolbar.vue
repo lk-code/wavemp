@@ -5,12 +5,17 @@ import { RouterLink, useRoute } from 'vue-router'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
 import BaseSearchField from '@/components/base/BaseSearchField.vue'
-import { buildBreadcrumb } from '@/navigation/breadcrumb'
+import { buildBreadcrumb, type RouteInfo } from '@/navigation/breadcrumb'
+
+const props = defineProps<{
+    /** Location of the breadcrumb; by default the current route. */
+    location?: RouteInfo
+}>()
 
 const { t } = useI18n()
 const route = useRoute()
 
-const crumbs = computed(() => buildBreadcrumb(route))
+const crumbs = computed(() => buildBreadcrumb(props.location ?? route))
 
 // The search needs the library API (step 6); until then the field only holds its text.
 const query = ref('')

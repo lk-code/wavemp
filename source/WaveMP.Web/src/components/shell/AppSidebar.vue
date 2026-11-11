@@ -4,15 +4,17 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
-import { activeTreeId } from '@/navigation/breadcrumb'
+import { activeTreeId, type RouteInfo } from '@/navigation/breadcrumb'
 import { initiallyExpanded, libraryTree, type NavigationTreeNode } from '@/navigation/libraryTree'
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         /** Drawer state on mobile; on the desktop the sidebar is always shown. */
         open?: boolean
+        /** Location that decides the active node; by default the current route. */
+        location?: RouteInfo
     }>(),
-    { open: false },
+    { open: false, location: undefined },
 )
 
 const emit = defineEmits<{
@@ -36,7 +38,7 @@ function toTreeNode(node: NavigationTreeNode): TreeNode {
 }
 
 const nodes = computed(() => libraryTree.map(toTreeNode))
-const active = computed(() => activeTreeId(route))
+const active = computed(() => activeTreeId(props.location ?? route))
 </script>
 
 <template>

@@ -1,0 +1,160 @@
+/*
+ * Layout of the internal component overview (/dev/components). Imported only by
+ * DevComponentsView, so it is part of the development build only. The dev-* parts are not part
+ * of the theme API.
+ */
+@layer wavemp.dev {
+    [data-part='dev-components'] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--wmp-space-xl);
+        max-inline-size: 90rem;
+        margin-inline: auto;
+        padding: var(--wmp-space-l);
+        background: var(--wmp-content-background);
+        color: var(--wmp-content-color);
+    }
+
+    [data-part='dev-header'] {
+        display: grid;
+        gap: var(--wmp-space-s);
+    }
+
+    [data-part='dev-title'] {
+        font-size: var(--wmp-font-size-xl);
+    }
+
+    [data-part='dev-intro'] {
+        color: var(--wmp-color-text-muted);
+    }
+
+    [data-part='dev-language'],
+    [data-part='dev-samples'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--wmp-space-m);
+    }
+
+    [data-part='dev-section'] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--wmp-space-m);
+        padding-block-start: var(--wmp-space-l);
+        border-block-start: 1px solid var(--wmp-color-border);
+    }
+
+    [data-part='dev-section-title'] {
+        font-size: var(--wmp-font-size-l);
+    }
+
+    [data-part='dev-sample'] {
+        display: grid;
+        gap: var(--wmp-space-xs);
+        min-inline-size: min(14rem, 100%);
+        max-inline-size: 100%;
+        overflow: hidden;
+        border: 1px dashed var(--wmp-color-border);
+    }
+
+    [data-part='dev-sample-title'] {
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+    }
+
+    [data-part='dev-samples'][data-tone='dark'] {
+        padding: var(--wmp-space-m);
+        background: var(--wmp-transport-background);
+        color: var(--wmp-transport-color);
+
+        --wmp-icon-fill: linear-gradient(#ffffff 40%, #bfe0ff);
+    }
+
+    [data-part='dev-samples'][data-tone='dark'] [data-part='tabs'] {
+        min-block-size: var(--wmp-header-height);
+        background: var(--wmp-header-background);
+        color: var(--wmp-header-color);
+    }
+
+    [data-part='dev-context-area'] {
+        display: grid;
+        place-items: center;
+        min-inline-size: 14rem;
+        min-block-size: 5rem;
+        border: 1px dashed var(--wmp-color-border);
+        color: var(--wmp-color-text-muted);
+    }
+
+    /* Areas that the layout hides outside of their device stay visible here. */
+    [data-part='dev-sample'] > [data-part='bottom-nav'] {
+        display: grid;
+        grid-auto-columns: minmax(0, 1fr);
+        grid-auto-flow: column;
+    }
+
+    [data-part='dev-sample'] > [data-part='sidebar'] {
+        max-inline-size: 18rem;
+    }
+
+    [data-part='dev-part-list'] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--wmp-space-xs) var(--wmp-space-m);
+    }
+
+    [data-part='dev-table'] {
+        display: block;
+        overflow-x: auto;
+        border-collapse: collapse;
+        text-align: start;
+    }
+
+    [data-part='dev-table'] :is(th, td) {
+        padding: var(--wmp-space-xs) var(--wmp-space-m);
+        border-block-end: 1px solid var(--wmp-color-border);
+        text-align: start;
+    }
+
+    [data-part='dev-previews'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: var(--wmp-space-xl);
+    }
+
+    [data-part='dev-preview'] {
+        display: grid;
+        align-content: start;
+        gap: var(--wmp-space-xs);
+        max-inline-size: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    /* The real app at phone and desktop size, scaled down. */
+    [data-part='dev-preview'][data-device='mobile'] {
+        inline-size: calc(390px * 0.6);
+        block-size: calc(844px * 0.6 + 1.5rem);
+    }
+
+    [data-part='dev-preview'][data-device='desktop'] {
+        inline-size: calc(1280px * 0.6);
+        block-size: calc(800px * 0.6 + 1.5rem);
+    }
+
+    [data-part='dev-frame'] {
+        border: 1px solid var(--wmp-color-border);
+        transform: scale(0.6);
+        transform-origin: 0 0;
+    }
+
+    [data-part='dev-frame'][data-device='mobile'] {
+        inline-size: 390px;
+        block-size: 844px;
+    }
+
+    [data-part='dev-frame'][data-device='desktop'] {
+        inline-size: 1280px;
+        block-size: 800px;
+    }
+}

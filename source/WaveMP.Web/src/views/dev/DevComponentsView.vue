@@ -1,0 +1,455 @@
+<script setup lang="ts">
+// Internal component overview, only part of the development build (see devRoutes). It shows every
+// part of the theme API in the current theme and both layouts of the real app side by side.
+// Its own structure uses dev-* parts, which are not part of the theme API.
+import '@/styles/dev.css'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import BaseButton from '@/components/base/BaseButton.vue'
+import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
+import BaseDialog from '@/components/base/BaseDialog.vue'
+import BaseIcon from '@/components/base/BaseIcon.vue'
+import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
+import BaseSearchField from '@/components/base/BaseSearchField.vue'
+import BaseSlider from '@/components/base/BaseSlider.vue'
+import BaseTabs from '@/components/base/BaseTabs.vue'
+import BaseTextField from '@/components/base/BaseTextField.vue'
+import BaseTree from '@/components/base/BaseTree.vue'
+import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
+import AlbumGroupList from '@/components/library/AlbumGroupList.vue'
+import AppBottomNav from '@/components/shell/AppBottomNav.vue'
+import AppHeader from '@/components/shell/AppHeader.vue'
+import AppSidebar from '@/components/shell/AppSidebar.vue'
+import AppToolbar from '@/components/shell/AppToolbar.vue'
+import AppTransport from '@/components/shell/AppTransport.vue'
+import type { TransportState } from '@/components/shell/transport'
+import { useFormat } from '@/composables/useFormat'
+import { setLocale } from '@/i18n'
+import { supportedLocales, type SupportedLocale } from '@/i18n/locales'
+import { libraryTree, mainNavigation, type NavigationTreeNode } from '@/navigation/libraryTree'
+import { iconSlotNames, iconSlots } from '@/themes/iconSlots'
+import { parts } from '@/themes/parts'
+import LibraryView from '@/views/LibraryView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
+import NowPlayingView from '@/views/NowPlayingView.vue'
+import PlaylistsView from '@/views/PlaylistsView.vue'
+
+const i18n = useI18n({ useScope: 'global' })
+const { t } = i18n
+const format = useFormat()
+
+function languageName(locale: SupportedLocale): string {
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(locale) ?? locale
+}
+
+function switchLanguage(locale: SupportedLocale): void {
+    setLocale(i18n, locale)
+}
+
+// Buttons, tabs and tree
+const tabs = computed(() =>
+    mainNavigation.map((item) => ({
+        id: item.id,
+        label: t(item.labelKey),
+        icon: item.icon,
+        to: item.to,
+    })),
+)
+
+function toTreeNode(node: NavigationTreeNode): TreeNode {
+    return {
+        id: node.id,
+        label: t(node.labelKey),
+        icon: node.icon,
+        to: node.to,
+        disabled: node.disabled,
+        children: node.children?.map(toTreeNode),
+    }
+}
+
+const treeNodes = computed(() => libraryTree.map(toTreeNode))
+const treeExpanded = ref<string[]>(['playlists', 'library'])
+const treeCollapsed = ref<string[]>([])
+
+// List, sliders and fields
+const selectedTrack = ref<string | undefined>('track-2')
+const sliders = ref([0, 0.5, 1])
+const disabledSlider = ref(0.3)
+const textEmpty = ref('')
+const textFilled = ref('')
+const searchEmpty = ref('')
+const searchFilled = ref('')
+textFilled.value = t('dev.samples.textValue')
+searchFilled.value = t('dev.samples.searchValue')
+
+// Dialog and context menu
+const dialogOpen = ref(false)
+const menu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
+const menuItems = computed<MenuItem[]>(() => [
+    { id: 'edit', label: t('actions.edit'), icon: 'edit' },
+    { id: 'delete', label: t('actions.delete'), icon: 'delete' },
+    { id: 'separator-1', separator: true },
+    { id: 'add', label: t('actions.add'), icon: 'add' },
+    { id: 'settings', label: t('actions.settings'), icon: 'settings' },
+    { id: 'profile', label: t('actions.profile'), icon: 'profile', disabled: true },
+    { id: 'separator-2', separator: true },
+    { id: 'view-video', label: t('actions.showVideo'), icon: 'view-video' },
+    { id: 'view-visualization', label: t('actions.showVisualization'), icon: 'view-visualization' },
+    { id: 'view-cover', label: t('actions.showCover'), icon: 'view-cover' },
+])
+
+function openMenuAtElement(event: MouseEvent): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    void menu.value?.openAt(rect.left, rect.bottom + 4)
+}
+
+function openMenuAtPointer(event: MouseEvent): void {
+    void menu.value?.openAt(event.clientX, event.clientY)
+}
+
+// Transport in all states (fixtures)
+const idle: TransportState = {
+    playback: 'idle',
+    position: 0,
+    duration: 0,
+    shuffle: false,
+    repeat: 'off',
+    volume: 0.8,
+    muted: false,
+}
+const track = computed(() => ({
+    title: t('placeholders.track', { number: 1 }),
+    artist: t('placeholders.artist', { number: 1 }),
+    position: 65,
+    duration: 225,
+}))
+const transports = computed(() => [
+    { id: 'idle', label: t('dev.transportStates.idle'), state: idle, expanded: false },
+    {
+        id: 'playing',
+        label: t('dev.transportStates.playing'),
+        state: { ...idle, ...track.value, playback: 'playing' as const },
+        expanded: false,
+    },
+    {
+        id: 'paused',
+        label: t('dev.transportStates.paused'),
+        state: { ...idle, ...track.value, playback: 'paused' as const },
+        expanded: false,
+    },
+    {
+        id: 'shuffle',
+        label: t('dev.transportStates.shuffle'),
+        state: { ...idle, ...track.value, playback: 'playing' as const, shuffle: true },
+        expanded: false,
+    },
+    {
+        id: 'repeat-all',
+        label: t('dev.transportStates.repeatAll'),
+        state: { ...idle, ...track.value, playback: 'playing' as const, repeat: 'all' as const },
+        expanded: false,
+    },
+    {
+        id: 'repeat-one',
+        label: t('dev.transportStates.repeatOne'),
+        state: { ...idle, ...track.value, playback: 'playing' as const, repeat: 'one' as const },
+        expanded: false,
+    },
+    {
+        id: 'muted',
+        label: t('dev.transportStates.muted'),
+        state: { ...idle, ...track.value, playback: 'paused' as const, muted: true },
+        expanded: false,
+    },
+    {
+        id: 'expanded',
+        label: t('dev.transportStates.expanded'),
+        state: { ...idle, ...track.value, playback: 'playing' as const },
+        expanded: true,
+    },
+])
+
+const libraryLocation = { name: 'library-section', params: { section: 'songs' } }
+</script>
+
+<template>
+    <div data-part="dev-components">
+        <header data-part="dev-header">
+            <h1 data-part="dev-title">{{ t('dev.title') }}</h1>
+            <p data-part="dev-intro">{{ t('dev.intro') }}</p>
+            <div data-part="dev-language" role="group" :aria-label="t('dev.language')">
+                <BaseButton
+                    v-for="locale in supportedLocales"
+                    :key="locale"
+                    :label="languageName(locale)"
+                    :pressed="i18n.locale.value === locale"
+                    @click="switchLanguage(locale)"
+                />
+            </div>
+        </header>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.buttons') }}</h2>
+            <div data-part="dev-samples">
+                <BaseButton :label="t('dev.samples.button')" />
+                <BaseButton variant="primary" icon="add" :label="t('dev.samples.primary')" />
+                <BaseButton :label="t('dev.samples.disabled')" disabled />
+                <BaseButton :label="t('dev.samples.pressed')" :pressed="true" />
+                <BaseButton variant="icon" icon="settings" :label="t('actions.settings')" />
+                <BaseButton variant="icon" icon="edit" :label="t('actions.edit')" :pressed="true" />
+                <BaseButton
+                    variant="icon"
+                    icon="view-details"
+                    dropdown
+                    :label="t('toolbar.view')"
+                />
+            </div>
+            <div data-part="dev-samples" data-tone="dark">
+                <BaseRoundButton icon="back" :label="t('nav.back')" />
+                <BaseRoundButton icon="forward" :label="t('nav.forward')" :pressed="true" />
+                <BaseRoundButton icon="back" :label="t('dev.samples.disabled')" disabled />
+                <BaseButton part="btn-play" variant="round" icon="play" :label="t('player.play')" />
+                <BaseButton
+                    part="btn-play"
+                    variant="round"
+                    icon="pause"
+                    :label="t('player.pause')"
+                    state="playing"
+                />
+                <BaseButton
+                    part="btn-play"
+                    variant="round"
+                    icon="play"
+                    :label="t('dev.samples.disabled')"
+                    disabled
+                />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.tabs') }}</h2>
+            <div data-part="dev-samples" data-tone="dark">
+                <BaseTabs :items="tabs" :label="t('nav.main')" active="library" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.tree') }}</h2>
+            <div data-part="dev-samples">
+                <div data-part="dev-sample">
+                    <BaseTree
+                        v-model:expanded="treeExpanded"
+                        :nodes="treeNodes"
+                        :label="t('sidebar.label')"
+                        active="songs"
+                    />
+                </div>
+                <div data-part="dev-sample">
+                    <BaseTree
+                        v-model:expanded="treeCollapsed"
+                        :nodes="treeNodes"
+                        :label="t('sidebar.label')"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.list') }}</h2>
+            <AlbumGroupList v-model:selected="selectedTrack" />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.sliders') }}</h2>
+            <div data-part="dev-samples">
+                <div v-for="(_, index) in sliders" :key="index" data-part="dev-sample">
+                    <BaseSlider
+                        :model-value="sliders[index] ?? 0"
+                        :label="t('dev.samples.slider', { value: index + 1 })"
+                        :value-text="format.percent(sliders[index] ?? 0)"
+                        @update:model-value="sliders[index] = $event"
+                    />
+                </div>
+                <div data-part="dev-sample">
+                    <BaseSlider
+                        v-model="disabledSlider"
+                        :label="t('dev.samples.sliderDisabled')"
+                        disabled
+                    />
+                </div>
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.fields') }}</h2>
+            <div data-part="dev-samples">
+                <BaseTextField v-model="textEmpty" :label="t('dev.samples.textField')" />
+                <BaseTextField v-model="textFilled" :label="t('dev.samples.textField')" />
+                <BaseTextField v-model="textFilled" :label="t('dev.samples.disabled')" disabled />
+                <BaseSearchField
+                    v-model="searchEmpty"
+                    :label="t('toolbar.search')"
+                    :placeholder="t('toolbar.searchPlaceholder')"
+                    :clear-label="t('toolbar.clearSearch')"
+                />
+                <BaseSearchField
+                    v-model="searchFilled"
+                    :label="t('toolbar.search')"
+                    :placeholder="t('toolbar.searchPlaceholder')"
+                    :clear-label="t('toolbar.clearSearch')"
+                />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.dialog') }}</h2>
+            <div data-part="dev-samples">
+                <BaseButton :label="t('dev.samples.openDialog')" @click="dialogOpen = true" />
+            </div>
+            <BaseDialog v-model:open="dialogOpen" :title="t('dev.samples.dialogTitle')">
+                <p>{{ t('dev.samples.dialogText') }}</p>
+                <template #footer>
+                    <BaseButton :label="t('actions.cancel')" @click="dialogOpen = false" />
+                    <BaseButton
+                        variant="primary"
+                        :label="t('actions.confirm')"
+                        @click="dialogOpen = false"
+                    />
+                </template>
+            </BaseDialog>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.contextMenu') }}</h2>
+            <div data-part="dev-samples">
+                <BaseButton
+                    :label="t('dev.samples.openContextMenu')"
+                    aria-haspopup="menu"
+                    @click="openMenuAtElement"
+                />
+                <div data-part="dev-context-area" @contextmenu.prevent="openMenuAtPointer">
+                    {{ t('dev.samples.contextMenuArea') }}
+                </div>
+            </div>
+            <BaseContextMenu
+                ref="menu"
+                :items="menuItems"
+                :label="t('dev.samples.openContextMenu')"
+            />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.header') }}</h2>
+            <AppHeader active-tab="library" />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.toolbar') }}</h2>
+            <AppToolbar :location="libraryLocation" />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.sidebar') }}</h2>
+            <div data-part="dev-sample">
+                <AppSidebar :location="libraryLocation" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.transport') }}</h2>
+            <div v-for="transport in transports" :key="transport.id" data-part="dev-sample">
+                <p data-part="dev-sample-title">{{ transport.label }}</p>
+                <AppTransport :state="transport.state" :expanded="transport.expanded" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.bottomNav') }}</h2>
+            <div data-part="dev-sample">
+                <AppBottomNav active-tab="library" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.states') }}</h2>
+            <div data-part="dev-samples">
+                <div data-part="dev-sample">
+                    <LibraryView section="albums" />
+                </div>
+                <div data-part="dev-sample">
+                    <NowPlayingView />
+                </div>
+                <div data-part="dev-sample">
+                    <PlaylistsView />
+                </div>
+                <div data-part="dev-sample">
+                    <NotFoundView />
+                </div>
+            </div>
+            <div data-part="dev-sample">
+                <LibraryView section="songs" />
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.previews') }}</h2>
+            <div data-part="dev-previews">
+                <figure data-part="dev-preview" data-device="mobile">
+                    <figcaption data-part="dev-sample-title">
+                        {{ t('dev.previews.mobile') }}
+                    </figcaption>
+                    <iframe
+                        data-part="dev-frame"
+                        data-device="mobile"
+                        src="/library/songs"
+                        :title="t('dev.previews.mobile')"
+                    ></iframe>
+                </figure>
+                <figure data-part="dev-preview" data-device="desktop">
+                    <figcaption data-part="dev-sample-title">
+                        {{ t('dev.previews.desktop') }}
+                    </figcaption>
+                    <iframe
+                        data-part="dev-frame"
+                        data-device="desktop"
+                        src="/library/songs"
+                        :title="t('dev.previews.desktop')"
+                    ></iframe>
+                </figure>
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.parts') }}</h2>
+            <ul data-part="dev-part-list" :aria-label="t('dev.table.part')">
+                <li v-for="part in parts" :key="part" data-part="dev-part">
+                    <code>{{ part }}</code>
+                </li>
+            </ul>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.icons') }}</h2>
+            <table data-part="dev-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ t('dev.table.preview') }}</th>
+                        <th scope="col">{{ t('dev.table.slot') }}</th>
+                        <th scope="col">{{ t('dev.table.file') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="slot in iconSlotNames" :key="slot">
+                        <td><BaseIcon :name="slot" /></td>
+                        <td>
+                            <code>{{ slot }}</code>
+                        </td>
+                        <td>
+                            <code>{{ iconSlots[slot].file }}</code>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</template>

@@ -52,7 +52,7 @@ describe('setLocale', () => {
 
         expect(i18n.global.t('nav.library')).toBe('Library')
 
-        setLocale(i18n, 'de', doc)
+        setLocale(i18n.global, 'de', doc)
 
         expect(i18n.global.locale.value).toBe('de')
         expect(i18n.global.t('nav.library')).toBe('Bibliothek')

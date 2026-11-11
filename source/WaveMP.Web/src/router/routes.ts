@@ -22,7 +22,16 @@ declare module 'vue-router' {
  * Internal pages that exist only in development mode. The check of import.meta.env.DEV stays
  * literally at the import, so the production build leaves out the page and its chunk.
  */
-export const devRoutes: RouteRecordRaw[] = []
+export const devRoutes: RouteRecordRaw[] = import.meta.env.DEV
+    ? [
+          {
+              path: '/dev/components',
+              name: 'dev-components',
+              component: () => import('@/views/dev/DevComponentsView.vue'),
+              meta: { bare: true },
+          },
+      ]
+    : []
 
 const librarySongs = { name: 'library-section', params: { section: defaultLibrarySection } }
 

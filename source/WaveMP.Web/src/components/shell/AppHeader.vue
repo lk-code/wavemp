@@ -7,14 +7,16 @@ import BaseRoundButton from '@/components/base/BaseRoundButton.vue'
 import BaseTabs from '@/components/base/BaseTabs.vue'
 import ServerStatus from './ServerStatus.vue'
 import { historyAvailability } from '@/navigation/history'
-import { mainNavigation } from '@/navigation/libraryTree'
+import { mainNavigation, type MainTab } from '@/navigation/libraryTree'
 
 withDefaults(
     defineProps<{
         /** State of the sidebar drawer on mobile (btn-menu). */
         sidebarOpen?: boolean
+        /** Active tab; by default the tab of the current route. */
+        activeTab?: MainTab
     }>(),
-    { sidebarOpen: false },
+    { sidebarOpen: false, activeTab: undefined },
 )
 
 const emit = defineEmits<{
@@ -83,7 +85,7 @@ onUnmounted(() => {
                 @click="router.forward()"
             />
         </div>
-        <BaseTabs :items="tabs" :label="t('nav.main')" :active="route.meta.tab" />
+        <BaseTabs :items="tabs" :label="t('nav.main')" :active="activeTab ?? route.meta.tab" />
         <ServerStatus />
     </header>
 </template>

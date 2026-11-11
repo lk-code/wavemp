@@ -3,9 +3,14 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import BaseTabs from '@/components/base/BaseTabs.vue'
-import { mainNavigation } from '@/navigation/libraryTree'
+import { mainNavigation, type MainTab } from '@/navigation/libraryTree'
 
 /** Bottom navigation of the mobile base; the same entries as the tabs of the header. */
+defineProps<{
+    /** Active entry; by default the tab of the current route. */
+    activeTab?: MainTab
+}>()
+
 const { t } = useI18n()
 const route = useRoute()
 
@@ -20,5 +25,10 @@ const items = computed(() =>
 </script>
 
 <template>
-    <BaseTabs part="bottom-nav" :items="items" :label="t('nav.main')" :active="route.meta.tab" />
+    <BaseTabs
+        part="bottom-nav"
+        :items="items"
+        :label="t('nav.main')"
+        :active="activeTab ?? route.meta.tab"
+    />
 </template>

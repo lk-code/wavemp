@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { createRoutes } from '../routes'
+import { createRoutes, devRoutes } from '../routes'
 
 async function resolve(path: string, routes = createRoutes()) {
     const router = createRouter({ history: createMemoryHistory(), routes })
@@ -51,5 +51,13 @@ describe('createRoutes', () => {
 
         expect(route.name).toBe('not-found')
         expect(createRoutes().some((record) => record.path.startsWith('/dev'))).toBe(false)
+    })
+
+    it('adds the internal pages of the development build before the catch-all route', async () => {
+        const route = await resolve('/dev/components', createRoutes(devRoutes))
+
+        expect(route.name).toBe('dev-components')
+        expect(route.meta.bare).toBe(true)
+        expect(createRoutes(devRoutes).at(-1)?.name).toBe('not-found')
     })
 })

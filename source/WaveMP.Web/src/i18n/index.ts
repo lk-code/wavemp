@@ -17,16 +17,21 @@ export function createWaveMpI18n(locale: SupportedLocale = defaultLocale) {
 
 export type WaveMpI18n = ReturnType<typeof createWaveMpI18n>
 
+/** The global composer (i18n.global, or useI18n({ useScope: 'global' }) in components). */
+export interface LocaleTarget {
+    locale: { value: string }
+}
+
 /**
  * Switches the language of the web app and of the document.
  * Prepared for step 4: after selecting a profile, the app calls this with the language stored
  * for the user. Until then, the browser language applies.
  */
 export function setLocale(
-    i18n: WaveMpI18n,
+    composer: LocaleTarget,
     locale: SupportedLocale,
     doc: Document = document,
 ): void {
-    i18n.global.locale.value = locale
+    composer.locale.value = locale
     doc.documentElement.lang = locale
 }

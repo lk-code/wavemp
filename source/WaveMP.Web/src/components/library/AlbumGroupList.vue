@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseCover from '@/components/base/BaseCover.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
@@ -26,7 +26,8 @@ interface AlbumInfo {
 const { t } = useI18n()
 const format = useFormat()
 
-const selected = ref<string | undefined>(undefined)
+/** Id of the selected track row. */
+const selected = defineModel<string | undefined>('selected', { default: undefined })
 
 const columns = computed(() => [
     { id: 'number', label: t('list.columns.number') },
