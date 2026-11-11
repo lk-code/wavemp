@@ -35,8 +35,9 @@ pnpm-debug.log*
 test-results/
 playwright-report/
 blob-report/
-playwright/.cache/
-playwright/.auth/
+**/playwright/.cache/
+# Browser state with session tokens of the E2E setup (tests/WaveMP.E2E/playwright/.auth)
+**/playwright/.auth/
 
 # Local runtime data (bind mounts such as ./media in docker-compose.dev.yml), root folders only
 /data/
