@@ -1,0 +1,12 @@
+{
+  "name": "wavemp-scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "devDependencies": {
+    "licensee": "^12.0.2"
+  }
+}

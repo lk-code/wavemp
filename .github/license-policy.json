@@ -1,0 +1,26 @@
+{
+  "$comment": "Licenses allowed for all NuGet and npm dependencies (SPDX identifiers), checked by .github/scripts/check-licenses.mjs. Only MIT-compatible licenses, never GPL or AGPL. LGPL only as a reviewed package exception. Package exceptions are added only after a manual license review.",
+  "allowedLicenses": [
+    "0BSD",
+    "Apache-2.0",
+    "BlueOak-1.0.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC-BY-4.0",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0",
+    "PostgreSQL",
+    "Zlib"
+  ],
+  "nuget": {
+    "solution": "WaveMP.slnx",
+    "allowedPackages": []
+  },
+  "npm": {
+    "projects": ["source/WaveMP.Web", "tests/WaveMP.E2E"],
+    "allowedPackages": {}
+  }
+}
