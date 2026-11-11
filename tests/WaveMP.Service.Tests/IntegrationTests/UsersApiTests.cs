@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using AwesomeAssertions;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
@@ -131,11 +132,25 @@ public class UsersApiTests
     [TestCase("{\"name\":\"Valid\",\"initials\":\"ABCD\"}")]
     [TestCase("{\"name\":\"Valid\",\"initials\":\"ABCDEFGHIJKLMNOPQ\"}")]
     [TestCase("{\"name\":\"Valid\",\"role\":\"Owner\"}")]
+    [TestCase("{\"name\":\"Valid\",\"role\":0}")]
+    [TestCase("{\"name\":\"Valid\",\"role\":7}")]
     public async Task CreateUser_WithInvalidInput_ReturnsBadRequest(string body)
     {
         HttpResponseMessage response = await SendAsync(_admin, "POST", "/api/v1/users", body);
 
         await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+    }
+
+    [TestCase("{\"name\":\"Valid\",\"color\":\"blue\"}", "color")]
+    [TestCase("{\"name\":\"Valid\",\"initials\":\"ABCDEFGHIJKLMNOPQ\"}", "initials")]
+    [TestCase("{\"name\":\"Valid\",\"initials\":\"ABCD\"}", "initials")]
+    [TestCase("{\"name\":\"\"}", "name")]
+    public async Task CreateUser_WithInvalidField_ReportsTheErrorUnderItsJsonName(string body, string field)
+    {
+        HttpResponseMessage response = await SendAsync(_admin, "POST", "/api/v1/users", body);
+
+        JsonObject errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Key).Should().Equal(field);
     }
 
     [Test]
@@ -206,6 +221,27 @@ public class UsersApiTests
         await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
     }
 
+    [TestCase("sort=5", "sort")]
+    [TestCase("direction=9", "direction")]
+    [TestCase("role=9", "role")]
+    [TestCase("limit=0", "limit")]
+    public async Task ListUsers_WithInvalidQuery_ReportsTheErrorUnderTheParameter(string query, string parameter)
+    {
+        HttpResponseMessage response = await _admin.GetAsync($"/api/v1/users?{query}");
+
+        JsonObject errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Key).Should().Equal(parameter);
+    }
+
+    [Test]
+    public async Task ListUsers_WithUndefinedNumbersForAllEnums_ReportsEachParameter()
+    {
+        HttpResponseMessage response = await _admin.GetAsync("/api/v1/users?sort=5&direction=9&role=9");
+
+        JsonObject errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Key).Should().BeEquivalentTo("sort", "direction", "role");
+    }
+
     [Test]
     public async Task UpdateUser_WithName_LetsDerivedInitialsFollowAndKeepsOwnInitials()
     {
@@ -270,6 +306,23 @@ public class UsersApiTests
             HttpClientExtensions.JsonOptions);
 
         await response.ShouldBeProblemAsync(HttpStatusCode.NotFound, "user.not_found");
+    }
+
+    [TestCase("0")]
+    [TestCase("1")]
+    [TestCase("5")]
+    public async Task UpdateUser_WithRoleAsNumber_ReturnsBadRequestAndKeepsTheRole(string role)
+    {
+        UserDto user = await _admin.CreateUserAsync(new { name = $"Number {HttpClientExtensions.Unique()}" });
+
+        HttpResponseMessage response = await SendAsync(
+            _admin,
+            "PATCH",
+            $"/api/v1/users/{user.Id}",
+            $"{{\"role\":{role}}}");
+
+        await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+        (await _admin.GetJsonAsync<UserDto>($"/api/v1/users/{user.Id}")).Role.Should().Be(RoleDto.User);
     }
 
     [Test]

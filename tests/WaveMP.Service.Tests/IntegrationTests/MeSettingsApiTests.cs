@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using AwesomeAssertions;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
@@ -97,6 +98,23 @@ public class MeSettingsApiTests
                 HttpClientExtensions.JsonOptions);
 
             await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+        }
+    }
+
+    [TestCase("0")]
+    [TestCase("1")]
+    [TestCase("7")]
+    public async Task UpdateMySettings_WithLanguageAsNumber_ReturnsBadRequestAndKeepsTheLanguage(string language)
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            using StringContent body = new($"{{\"language\":{language}}}", Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PatchAsync("/api/v1/me/settings", body);
+
+            await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+            (await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings")).Language.Should().Be(LanguageDto.En);
         }
     }
 

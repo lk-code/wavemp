@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -29,12 +30,26 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Configures JSON for minimal APIs and controllers alike: numbers are only read as JSON numbers (so the OpenAPI
-    /// document describes them as plain integers) and enums are always written as strings.
+    /// document describes them as plain integers) and enums are only read and written as strings, like the OpenAPI
+    /// document describes them. Enum DTOs declare <see cref="Converters.StrictStringEnumConverter{TEnum}"/> themselves;
+    /// the global converter covers every other enum.
     /// </summary>
     public static IServiceCollection AddWaveMpJson(this IServiceCollection services)
     {
         services.ConfigureHttpJsonOptions(options => ConfigureSerializer(options.SerializerOptions));
         services.Configure<JsonOptions>(options => ConfigureSerializer(options.JsonSerializerOptions));
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the controllers. The keys of validation errors (member <c>errors</c> of the Problem Details) are the
+    /// JSON names of the members, e.g. <c>name</c> instead of the C# property <c>Name</c>, so clients can assign every
+    /// error to its field.
+    /// </summary>
+    public static IServiceCollection AddWaveMpControllers(this IServiceCollection services)
+    {
+        services.AddControllers(options =>
+            options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider()));
         return services;
     }
 
@@ -133,7 +148,7 @@ public static class ServiceCollectionExtensions
     private static void ConfigureSerializer(JsonSerializerOptions options)
     {
         options.NumberHandling = JsonNumberHandling.Strict;
-        options.Converters.Add(new JsonStringEnumConverter());
+        options.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
     }
 
     private static string? CreateSchemaReferenceId(JsonTypeInfo typeInfo)

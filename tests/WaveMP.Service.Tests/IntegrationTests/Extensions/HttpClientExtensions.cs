@@ -96,4 +96,14 @@ internal static class HttpClientExtensions
         problem["code"]!.GetValue<string>().Should().Be(code);
         problem["status"]!.GetValue<int>().Should().Be((int)status);
     }
+
+    /// <summary>
+    /// Checks that the response is a validation problem (400, <c>request.invalid</c>) and returns its errors by field.
+    /// </summary>
+    public static async Task<JsonObject> ShouldBeValidationProblemAsync(this HttpResponseMessage response)
+    {
+        await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+        JsonNode problem = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
+        return problem["errors"]!.AsObject();
+    }
 }

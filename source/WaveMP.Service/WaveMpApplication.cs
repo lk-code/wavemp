@@ -31,7 +31,7 @@ public static class WaveMpApplication
     {
         builder.Services.AddWaveMpJson();
         builder.Services.AddWaveMpProblemDetails();
-        builder.Services.AddControllers();
+        builder.Services.AddWaveMpControllers();
         builder.Services.AddWaveMpOpenApi();
         builder.Services.AddWaveMpData();
         builder.Services.AddWaveMpUsers();

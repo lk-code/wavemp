@@ -47,10 +47,24 @@ public sealed class UsersController(IUserService users) : ControllerBase
         [FromQuery] RoleDto? role = null,
         CancellationToken cancellationToken = default)
     {
-        // Model binding also accepts numbers for enums, including undefined ones.
-        if (!Enum.IsDefined(sort) || !Enum.IsDefined(direction) || (role is { } value && !Enum.IsDefined(value)))
+        // Model binding of query parameters also accepts numbers for enums, including undefined ones.
+        if (!Enum.IsDefined(sort))
         {
-            ModelState.AddModelError(nameof(sort), "The sort key, direction or role is not valid.");
+            ModelState.AddModelError(nameof(sort), "The sort key is not valid.");
+        }
+
+        if (!Enum.IsDefined(direction))
+        {
+            ModelState.AddModelError(nameof(direction), "The sort direction is not valid.");
+        }
+
+        if (role is { } value && !Enum.IsDefined(value))
+        {
+            ModelState.AddModelError(nameof(role), "The role is not valid.");
+        }
+
+        if (!ModelState.IsValid)
+        {
             return ValidationProblem();
         }
 

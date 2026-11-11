@@ -1,11 +1,12 @@
 using System.Text.Json.Serialization;
+using WaveMP.Service.Converters;
 
 namespace WaveMP.Service.Dtos;
 
 /// <summary>
 /// Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<ProblemCodeDto>))]
+[JsonConverter(typeof(StrictStringEnumConverter<ProblemCodeDto>))]
 public enum ProblemCodeDto
 {
     /// <summary>

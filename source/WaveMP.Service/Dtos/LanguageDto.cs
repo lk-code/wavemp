@@ -1,11 +1,12 @@
 using System.Text.Json.Serialization;
+using WaveMP.Service.Converters;
 
 namespace WaveMP.Service.Dtos;
 
 /// <summary>
 /// Language of the user interface.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<LanguageDto>))]
+[JsonConverter(typeof(StrictStringEnumConverter<LanguageDto>))]
 public enum LanguageDto
 {
     [JsonStringEnumMemberName("en")]
