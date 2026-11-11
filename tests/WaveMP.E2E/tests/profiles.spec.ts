@@ -79,7 +79,7 @@ test('keeps the language per profile', async ({ page }) => {
 
     await chooseFromProfileMenu(page, 'settings')
     await expect(page).toHaveURL(/\/settings$/)
-    await page.locator("[data-part='select']").selectOption('de')
+    await page.locator("[data-field='language'] [data-part='select']").selectOption('de')
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'de')
     expect(await navigationLabels(page)).toEqual(['Aktuelle Wiedergabe', 'Bibliothek', 'Playlists'])

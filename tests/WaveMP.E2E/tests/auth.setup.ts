@@ -12,7 +12,7 @@ setup('select the built-in admin profile', async ({ page }) => {
 
     // The tests expect English texts, also if a former run changed the language of the profile.
     await page.goto('/settings')
-    await page.locator("[data-part='select']").selectOption('en')
+    await page.locator("[data-field='language'] [data-part='select']").selectOption('en')
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
     expect(await navigationLabels(page)).toEqual(['Now Playing', 'Library', 'Playlists'])
 

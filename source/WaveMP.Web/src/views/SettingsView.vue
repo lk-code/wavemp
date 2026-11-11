@@ -97,6 +97,7 @@ async function changeLanguage(value: string): Promise<void> {
         <form data-part="form" @submit.prevent>
             <BaseSelect
                 v-model="language"
+                data-field="language"
                 :label="t('settings.language')"
                 :options="languageOptions"
                 :hint="t('settings.languageHint')"
@@ -105,6 +106,7 @@ async function changeLanguage(value: string): Promise<void> {
             />
             <BaseSelect
                 v-model="replayGain"
+                data-field="replay-gain"
                 :label="t('settings.replayGain')"
                 :options="replayGainOptions"
                 :hint="t('settings.replayGainHint')"
