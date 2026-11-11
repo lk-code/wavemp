@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WaveMP.Core.Jobs.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Background jobs, in-memory only. Includes the integration with dependency injection and hosting. -->
+    <PackageReference Include="Quartz" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WaveMP.Data\WaveMP.Data.csproj" />
+  </ItemGroup>
+
+</Project>

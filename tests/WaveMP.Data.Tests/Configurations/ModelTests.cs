@@ -31,6 +31,7 @@ public class ModelTests
     [TestCase(typeof(Session), "sessions")]
     [TestCase(typeof(ServerSecret), "server_secrets")]
     [TestCase(typeof(ServerSetting), "server_settings")]
+    [TestCase(typeof(JobRun), "job_runs")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);
@@ -99,6 +100,25 @@ public class ModelTests
         IProperty value = GetEntity(typeof(ServerSetting)).FindProperty(nameof(ServerSetting.Value))!;
 
         value.GetColumnType().Should().Be("jsonb");
+    }
+
+    [TestCase(nameof(JobRun.Trigger))]
+    [TestCase(nameof(JobRun.Status))]
+    [TestCase(nameof(JobRun.ErrorCode))]
+    public void JobRun_Enums_AreStoredAsNames(string property)
+    {
+        IProperty column = GetEntity(typeof(JobRun)).FindProperty(property)!;
+
+        column.GetProviderClrType().Should().Be<string>();
+    }
+
+    [Test]
+    public void JobRun_Result_IsStoredAsJsonb()
+    {
+        IProperty result = GetEntity(typeof(JobRun)).FindProperty(nameof(JobRun.Result))!;
+
+        result.GetColumnType().Should().Be("jsonb");
+        result.IsNullable.Should().BeTrue();
     }
 
     private IEntityType GetEntity(Type type)
