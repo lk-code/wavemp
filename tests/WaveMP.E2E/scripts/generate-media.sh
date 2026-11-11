@@ -6,6 +6,8 @@
 #   E2E Artist/E2E Album/cover.jpg                     album cover
 #   E2E Artist/Video Only.mp4                          music video without audio file
 #   Loose Artist - Loose Song.mp3                      audio without tags in the root
+# The files are made writable for everyone: the metadata editor test writes tags, and the container
+# runs as another user (1654) than the one who creates the media.
 #
 # Usage: generate-media.sh <target folder>
 # With the ffmpeg of the WaveMP image (see README):
@@ -46,4 +48,5 @@ ff -f lavfi -i "testsrc=size=300x300:rate=1" -frames:v 1 -update 1 "$album/cover
 video 320x240 "$artist/Video Only.mp4"
 audio 660 "$target/Loose Artist - Loose Song.mp3" -c:a libmp3lame -b:a 128k
 
+chmod -R a+rwX "$artist" "$target/Loose Artist - Loose Song.mp3"
 echo "Test media created in $target"

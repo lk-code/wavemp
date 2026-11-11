@@ -143,3 +143,29 @@ export async function listTrackTitles(request: APIRequestContext): Promise<strin
     expect(response.status()).toBe(200)
     return ((await response.json()).items as { title: string }[]).map((track) => track.title)
 }
+
+/** Id of the track with exactly this title. */
+export async function findTrackId(request: APIRequestContext, title: string): Promise<string> {
+    const response = await request.get(`/api/v1/tracks?q=${encodeURIComponent(title)}&limit=100`, {
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status()).toBe(200)
+    const track = ((await response.json()).items as { id: string; title: string }[]).find(
+        (item) => item.title === title,
+    )
+    expect(track, `The library has no song "${title}".`).toBeDefined()
+    return track!.id
+}
+
+/** Writes metadata into the audio file of a track; null removes a value. */
+export async function updateTrackMetadata(
+    request: APIRequestContext,
+    id: string,
+    changes: Record<string, string | number | null>,
+): Promise<void> {
+    const response = await request.patch(`/api/v1/tracks/${id}/metadata`, {
+        data: changes,
+        headers: authorization(await adminToken(request)),
+    })
+    expect(response.status(), await response.text()).toBe(200)
+}
