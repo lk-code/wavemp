@@ -30,7 +30,14 @@ test('shows the bottom navigation instead of tabs, history and sidebar', async (
     for (const name of ['tabs', 'nav-history', 'sidebar', 'breadcrumb', 'mode-switch']) {
         await expect(part(page, name), name).toBeHidden()
     }
-    for (const name of ['btn-menu', 'logo', 'server-status', 'search', 'content-title']) {
+    for (const name of [
+        'btn-menu',
+        'logo',
+        'server-status',
+        'btn-profile',
+        'search',
+        'content-title',
+    ]) {
         await expect(part(page, name), name).toBeVisible()
     }
 })

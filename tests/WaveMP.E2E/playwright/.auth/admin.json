@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:8081",
+      "localStorage": [
+        {
+          "name": "wavemp.session.v1",
+          "value": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ3YXZlbXAiLCJpc3MiOiJ3YXZlbXAiLCJleHAiOjE4MjU5MjY0NTMsImlhdCI6MTc5NDM5MDQ1MywibmJmIjoxNzk0MzkwNDUzLCJzdWIiOiIwMWExY2EwMC1mZmI0LTc5MzItYTI0Ny05NmE0MmUxZGI5NTIiLCJzaWQiOiIwMWExY2EwMS02ZDU3LTc0NjItYjI2NS05ZGY3YzMxOTI5ZWQifQ.O5WxUDVhuFSL-Qw_3lTkBIaFHy9ggampSSzRmipPi28\",\"sessionId\":\"01a1ca01-6d57-7462-b265-9df7c31929ed\",\"expiresAt\":\"2027-11-11T09:47:33.591Z\",\"profile\":{\"id\":\"01a1ca00-ffb4-7932-a247-96a42e1db952\",\"name\":\"Admin\",\"initials\":\"A\",\"color\":\"#1f6fd6\",\"role\":\"Admin\",\"isBuiltIn\":true},\"language\":\"en\"}"
+        }
+      ]
+    }
+  ]
+}

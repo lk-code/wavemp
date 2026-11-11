@@ -1,22 +1,34 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { navigationLabels } from './helpers/navigation'
+import { emptyStorageState } from './helpers/storage'
 
-// Until a profile is selected, the browser language decides; English is the fallback.
+// Until a profile is selected, the browser language decides (English as fallback); afterwards the
+// language of the profile.
 
-async function navigationLabels(page: Page): Promise<string[]> {
-    // Tabs on the desktop, bottom navigation on mobile: the same entries.
-    const labels = page
-        .locator(
-            "[data-part='tab'] > [data-part='label'], [data-part='bottom-nav-item'] > [data-part='label']",
-        )
-        .filter({ visible: true })
-    await expect(labels).toHaveCount(3)
-    return labels.allTextContents()
+const browserLanguages = [
+    { locale: 'en-US', lang: 'en', title: "Who's listening?" },
+    { locale: 'de-DE', lang: 'de', title: 'Wer hört zu?' },
+    { locale: 'fr-FR', lang: 'en', title: "Who's listening?" },
+]
+
+for (const { locale, lang, title } of browserLanguages) {
+    test.describe(`profile selection in a browser with ${locale}`, () => {
+        test.use({ storageState: emptyStorageState, locale })
+
+        test(`shows the language ${lang}`, async ({ page }) => {
+            await page.goto('/')
+
+            await expect(page).toHaveURL(/\/profiles$/)
+            await expect(page.locator('html')).toHaveAttribute('lang', lang)
+            await expect(page.locator("[data-part='profile-select-title']")).toHaveText(title)
+        })
+    })
 }
 
-test.describe('English browser', () => {
-    test.use({ locale: 'en-US' })
+test.describe('selected profile in a German browser', () => {
+    test.use({ locale: 'de-DE' })
 
-    test('shows English texts', async ({ page }) => {
+    test('uses the language of the profile', async ({ page }) => {
         await page.goto('/library/songs')
 
         await expect(page.locator('html')).toHaveAttribute('lang', 'en')
@@ -25,41 +37,5 @@ test.describe('English browser', () => {
             'Title',
         )
         await expect(page.locator("[data-part='content-title']")).toHaveText('Songs')
-    })
-})
-
-test.describe('German browser', () => {
-    test.use({ locale: 'de-DE' })
-
-    test('shows German texts and formats', async ({ page }) => {
-        await page.goto('/library/songs')
-
-        await expect(page.locator('html')).toHaveAttribute('lang', 'de')
-        expect(await navigationLabels(page)).toEqual([
-            'Aktuelle Wiedergabe',
-            'Bibliothek',
-            'Playlists',
-        ])
-        await expect(page.locator("[data-part='list-column'][data-column='title']")).toHaveText(
-            'Titel',
-        )
-        await expect(page.locator("[data-part='content-title']")).toHaveText('Titel')
-        await expect(
-            page.locator("[data-part='list-group-header']").first(),
-        ).toHaveText('Platzhalter-Album 1')
-        await expect(
-            page.locator("[data-part='volume'] [role='slider']"),
-        ).toHaveAttribute('aria-valuetext', /^80\s%$/u)
-    })
-})
-
-test.describe('Unsupported browser language', () => {
-    test.use({ locale: 'fr-FR' })
-
-    test('falls back to English', async ({ page }) => {
-        await page.goto('/library/songs')
-
-        await expect(page.locator('html')).toHaveAttribute('lang', 'en')
-        expect(await navigationLabels(page)).toEqual(['Now Playing', 'Library', 'Playlists'])
     })
 })

@@ -1,8 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
+import { adminStorageState } from './tests/helpers/storage'
 
 /**
  * Runs against a running WaveMP instance, e.g. started with
  * `docker compose -f docker-compose.dev.yml up --build`.
+ * The project "setup" selects the built-in admin profile once; the other projects start with its
+ * session (see tests/helpers/storage.ts).
  */
 export default defineConfig({
     testDir: './tests',
@@ -15,7 +18,16 @@ export default defineConfig({
         trace: 'on-first-retry',
     },
     projects: [
-        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-        { name: 'mobile', use: { ...devices['Pixel 7'] } },
+        { name: 'setup', testMatch: /.*\.setup\.ts/, use: { ...devices['Desktop Chrome'] } },
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'], storageState: adminStorageState },
+            dependencies: ['setup'],
+        },
+        {
+            name: 'mobile',
+            use: { ...devices['Pixel 7'], storageState: adminStorageState },
+            dependencies: ['setup'],
+        },
     ],
 })

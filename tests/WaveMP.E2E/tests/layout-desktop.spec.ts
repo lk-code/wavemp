@@ -33,6 +33,7 @@ test('shows all desktop areas and hides the mobile ones', async ({ page }) => {
         'btn-forward',
         'tabs',
         'server-status',
+        'btn-profile',
         'toolbar',
         'breadcrumb',
         'view-switch',
