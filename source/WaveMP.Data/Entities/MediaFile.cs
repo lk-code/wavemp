@@ -94,7 +94,8 @@ public class MediaFile
     public string? EmbeddedPictureMimeType { get; set; }
 
     /// <summary>
-    /// Whether the tags can be written back (audio files only; always <c>false</c> for videos and pictures).
+    /// Whether the tags can be written back (audio files only; always <c>false</c> for videos and pictures). Set by
+    /// the scan and also updated by the metadata editor whenever it checks the file.
     /// </summary>
     public required bool IsWritable { get; set; }
 

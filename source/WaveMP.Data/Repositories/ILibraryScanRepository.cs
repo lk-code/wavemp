@@ -15,6 +15,13 @@ public interface ILibraryScanRepository
         IReadOnlyCollection<string>? directories,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// The stored files of one folder, without its subfolders; an empty path for the media folder itself.
+    /// </summary>
+    Task<IReadOnlyList<MediaFileSnapshot>> GetFolderSnapshotsAsync(
+        string directoryPath,
+        CancellationToken cancellationToken = default);
+
     Task<int> CountFilesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>

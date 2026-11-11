@@ -37,6 +37,7 @@ public class ModelTests
     [TestCase(typeof(Track), "tracks")]
     [TestCase(typeof(MediaFile), "media_files")]
     [TestCase(typeof(Cover), "covers")]
+    [TestCase(typeof(TagBackup), "tag_backups")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);
@@ -154,6 +155,7 @@ public class ModelTests
     [TestCase(typeof(Track), typeof(Artist), DeleteBehavior.SetNull)]
     [TestCase(typeof(Album), typeof(Artist), DeleteBehavior.SetNull)]
     [TestCase(typeof(MediaFile), typeof(Track), DeleteBehavior.SetNull)]
+    [TestCase(typeof(TagBackup), typeof(MediaFile), DeleteBehavior.SetNull)]
     public void Library_ForeignKeys_HaveTheirDeleteBehavior(Type dependent, Type principal, DeleteBehavior expected)
     {
         IForeignKey foreignKey = GetEntity(dependent).GetForeignKeys()
@@ -203,6 +205,25 @@ public class ModelTests
         tags.ComplexType.FindProperty(nameof(MediaFileTags.Title))!.GetColumnName().Should().Be("tags_title");
         tags.ComplexType.FindProperty(nameof(MediaFileTags.ReplayGainTrackGain))!.GetColumnName()
             .Should().Be("tags_replay_gain_track_gain");
+    }
+
+    [TestCase(nameof(TagBackup.Performers))]
+    [TestCase(nameof(TagBackup.AlbumArtists))]
+    [TestCase(nameof(TagBackup.Genres))]
+    public void TagBackup_Lists_AreTextArrays(string property)
+    {
+        IProperty column = GetEntity(typeof(TagBackup)).FindProperty(property)!;
+
+        column.GetColumnType().Should().Be("text[]");
+        column.IsNullable.Should().BeFalse();
+    }
+
+    [Test]
+    public void TagBackup_Texts_HaveNoLengthLimit()
+    {
+        IProperty title = GetEntity(typeof(TagBackup)).FindProperty(nameof(TagBackup.Title))!;
+
+        title.GetColumnType().Should().Be("text");
     }
 
     private IEntityType GetEntity(Type type)

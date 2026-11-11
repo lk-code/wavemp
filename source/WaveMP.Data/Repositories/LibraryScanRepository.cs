@@ -31,6 +31,15 @@ internal sealed class LibraryScanRepository(WaveMpDbContext dbContext) : ILibrar
         return [.. snapshots.Values];
     }
 
+    public async Task<IReadOnlyList<MediaFileSnapshot>> GetFolderSnapshotsAsync(
+        string directoryPath,
+        CancellationToken cancellationToken = default)
+    {
+        return await ToSnapshots(dbContext.MediaFiles.AsNoTracking()
+                .Where(file => file.DirectoryPath == directoryPath))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<int> CountFilesAsync(CancellationToken cancellationToken = default)
     {
         return dbContext.MediaFiles.CountAsync(cancellationToken);

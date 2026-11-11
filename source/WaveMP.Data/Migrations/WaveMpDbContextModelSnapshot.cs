@@ -586,6 +586,77 @@ namespace WaveMP.Data.Migrations
                     b.ToTable("sessions", (string)null);
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.TagBackup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Album")
+                        .HasColumnType("text")
+                        .HasColumnName("album");
+
+                    b.PrimitiveCollection<string[]>("AlbumArtists")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("album_artists");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("DiscCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("disc_count");
+
+                    b.Property<int?>("DiscNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("disc_number");
+
+                    b.PrimitiveCollection<string[]>("Genres")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("genres");
+
+                    b.Property<Guid?>("MediaFileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("media_file_id");
+
+                    b.PrimitiveCollection<string[]>("Performers")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("performers");
+
+                    b.Property<string>("RelativePath")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("relative_path");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<int?>("TrackCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("track_count");
+
+                    b.Property<int?>("TrackNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("track_number");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tag_backups");
+
+                    b.HasIndex("MediaFileId")
+                        .HasDatabaseName("ix_tag_backups_media_file_id");
+
+                    b.ToTable("tag_backups", (string)null);
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.Track", b =>
                 {
                     b.Property<Guid>("Id")
@@ -832,6 +903,17 @@ namespace WaveMP.Data.Migrations
                         .HasConstraintName("fk_sessions_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.TagBackup", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.MediaFile", "MediaFile")
+                        .WithMany()
+                        .HasForeignKey("MediaFileId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_tag_backups_media_files_media_file_id");
+
+                    b.Navigation("MediaFile");
                 });
 
             modelBuilder.Entity("WaveMP.Data.Entities.Track", b =>
