@@ -43,6 +43,48 @@ public class MeSettingsApiTests
             UserSettingsDto settings = await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
 
             settings.Language.Should().Be(LanguageDto.En);
+            settings.ReplayGain.Should().Be(ReplayGainModeDto.Off);
+        }
+    }
+
+    [TestCase("Track", ReplayGainModeDto.Track)]
+    [TestCase("Album", ReplayGainModeDto.Album)]
+    [TestCase("Off", ReplayGainModeDto.Off)]
+    public async Task UpdateMySettings_WithReplayGain_KeepsItAndTheLanguage(string value, ReplayGainModeDto expected)
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            await client.PatchAsJsonAsync("/api/v1/me/settings", new { language = "de" }, HttpClientExtensions.JsonOptions);
+
+            HttpResponseMessage response = await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { replayGain = value },
+                HttpClientExtensions.JsonOptions);
+            UserSettingsDto read = await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            (await response.Content.ReadAsStringAsync()).Should().Contain($"\"replayGain\":\"{value}\"");
+            read.ReplayGain.Should().Be(expected);
+            read.Language.Should().Be(LanguageDto.De);
+        }
+    }
+
+    [TestCase("\"Loud\"")]
+    [TestCase("1")]
+    public async Task UpdateMySettings_WithInvalidReplayGain_ReturnsBadRequest(string value)
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            using StringContent body = new($"{{\"replayGain\":{value}}}", Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PatchAsync("/api/v1/me/settings", body);
+
+            IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+            errors.Should().Contain(error => error.Field == "replayGain");
+            (await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings")).ReplayGain
+                .Should().Be(ReplayGainModeDto.Off);
         }
     }
 

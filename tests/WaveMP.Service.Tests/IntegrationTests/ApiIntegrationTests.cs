@@ -224,6 +224,8 @@ public class ApiIntegrationTests
     [TestCase("GetAlbumCover", true)]
     [TestCase("ListTrackFiles", true)]
     [TestCase("GetTrackPlayback", true)]
+    [TestCase("CreateMyHistoryEntry", true)]
+    [TestCase("ListMyHistory", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -275,6 +277,7 @@ public class ApiIntegrationTests
     [TestCase("GenrePage", "Genre")]
     [TestCase("YearPage", "Year")]
     [TestCase("MediaFilePage", "MediaFile")]
+    [TestCase("PlayHistoryEntryPage", "PlayHistoryEntry")]
     public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
     {
         JsonNode document = await GetOpenApiDocumentAsync();

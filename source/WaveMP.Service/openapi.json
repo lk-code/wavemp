@@ -937,6 +937,206 @@
         }
       }
     },
+    "/api/v1/me/history": {
+      "post": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Records a play of a track. Clients send it once the track has played for half its duration or four minutes, whichever comes first, and may send it later (up to seven days) with the time the play started.",
+        "operationId": "CreateMyHistoryEntry",
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayHistoryEntry"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayHistoryEntry"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new entry; Location points to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayHistoryEntry"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, for example playedAt in the future or older than seven days (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Lists the plays of the current profile, the newest first. Plays of tracks that left the library are gone.",
+        "operationId": "ListMyHistory",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of entries to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of entries of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayHistoryEntryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/history/{id}": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Returns an entry of the play history of the current profile.",
+        "operationId": "GetMyHistoryEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the entry.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayHistoryEntry"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entry does not exist or belongs to another profile (code `history.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/jobs": {
       "get": {
         "tags": [
@@ -3995,6 +4195,28 @@
         },
         "description": "A new session with its token."
       },
+      "CreatePlayHistoryEntry": {
+        "required": [
+          "trackId"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track that was played.",
+            "format": "uuid"
+          },
+          "playedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the play started; now if missing. It must not lie in the future or be older than seven days, so clients can report plays they could not send right away.",
+            "format": "date-time"
+          }
+        },
+        "description": "Records a play of a track in the play history of the current profile."
+      },
       "CreateSession": {
         "required": [
           "profileId"
@@ -4641,6 +4863,65 @@
         "type": "string",
         "description": "How a client plays a track."
       },
+      "PlayHistoryEntry": {
+        "required": [
+          "id",
+          "playedAt",
+          "track"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the entry.",
+            "format": "uuid"
+          },
+          "playedAt": {
+            "type": "string",
+            "description": "When the play started.",
+            "format": "date-time"
+          },
+          "track": {
+            "description": "The track that was played.",
+            "$ref": "#/components/schemas/Track"
+          }
+        },
+        "description": "A play of a track in the play history of the current profile."
+      },
+      "PlayHistoryEntryPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayHistoryEntry"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
       "ProblemCode": {
         "enum": [
           "request.invalid",
@@ -4668,7 +4949,8 @@
           "track.not_writable",
           "cover.not_found",
           "stream.transcoding_required",
-          "stream.file_missing"
+          "stream.file_missing",
+          "history.not_found"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -4823,6 +5105,15 @@
           }
         },
         "description": "The ReplayGain tags of the audio file of a track. Missing tags are null; clients then leave the volume as it is."
+      },
+      "ReplayGainMode": {
+        "enum": [
+          "Off",
+          "Track",
+          "Album"
+        ],
+        "type": "string",
+        "description": "Whether and how a client evens out the volume of tracks with their ReplayGain tags."
       },
       "Role": {
         "enum": [
@@ -5710,6 +6001,17 @@
                 "$ref": "#/components/schemas/Language"
               }
             ]
+          },
+          "replayGain": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Whether the players even out the volume with the ReplayGain tags.",
+                "$ref": "#/components/schemas/ReplayGainMode"
+              }
+            ]
           }
         },
         "description": "Changes the settings of the current profile. Missing or null values stay unchanged."
@@ -5793,13 +6095,18 @@
       },
       "UserSettings": {
         "required": [
-          "language"
+          "language",
+          "replayGain"
         ],
         "type": "object",
         "properties": {
           "language": {
             "description": "Language of the user interface.",
             "$ref": "#/components/schemas/Language"
+          },
+          "replayGain": {
+            "description": "Whether the players even out the volume with the ReplayGain tags; Off by default.",
+            "$ref": "#/components/schemas/ReplayGainMode"
           }
         },
         "description": "Settings of the current profile."
@@ -6000,6 +6307,9 @@
     },
     {
       "name": "Health"
+    },
+    {
+      "name": "History"
     },
     {
       "name": "Jobs"

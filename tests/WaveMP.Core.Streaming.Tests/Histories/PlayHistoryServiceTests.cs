@@ -63,6 +63,17 @@ public class PlayHistoryServiceTests
     }
 
     [Test]
+    public async Task RecordAsync_StartWithTicks_KeepsMicroseconds()
+    {
+        TrackRow track = Track("Song");
+        DateTimeOffset start = _now.AddMinutes(-3).AddTicks(1_234_567);
+
+        PlayHistoryResult result = await _service.RecordAsync(_userId, track.Id, start);
+
+        result.Item!.Entry.PlayedAt.Should().Be(_now.AddMinutes(-3).AddTicks(1_234_560));
+    }
+
+    [Test]
     public async Task RecordAsync_StartWithinTheClockSkew_IsAccepted()
     {
         TrackRow track = Track("Song");

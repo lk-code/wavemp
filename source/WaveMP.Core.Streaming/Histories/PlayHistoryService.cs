@@ -38,7 +38,7 @@ internal sealed class PlayHistoryService(
             Id = Guid.CreateVersion7(now),
             UserId = userId,
             TrackId = trackId,
-            PlayedAt = start,
+            PlayedAt = TruncateToMicroseconds(start),
         };
         await history.AddAsync(entry, cancellationToken);
         return new PlayHistoryResult(PlayHistoryStatus.Created, new PlayHistoryItem(entry, track));
@@ -75,5 +75,13 @@ internal sealed class PlayHistoryService(
 
         TrackRow? track = await tracks.FindAsync(entry.TrackId, cancellationToken);
         return track is null ? null : new PlayHistoryItem(entry, track);
+    }
+
+    /// <summary>
+    /// PostgreSQL keeps microseconds; the new entry is returned with the precision it is read with later.
+    /// </summary>
+    private static DateTimeOffset TruncateToMicroseconds(DateTimeOffset value)
+    {
+        return new DateTimeOffset(value.Ticks - (value.Ticks % TimeSpan.TicksPerMicrosecond), value.Offset);
     }
 }

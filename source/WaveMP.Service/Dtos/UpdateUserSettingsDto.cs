@@ -9,4 +9,9 @@ public sealed class UpdateUserSettingsDto
     /// Language of the user interface.
     /// </summary>
     public LanguageDto? Language { get; init; }
+
+    /// <summary>
+    /// Whether the players even out the volume with the ReplayGain tags.
+    /// </summary>
+    public ReplayGainModeDto? ReplayGain { get; init; }
 }

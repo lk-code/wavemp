@@ -51,7 +51,7 @@ public sealed class MeController(IUserSettingsService settings) : ControllerBase
         UpdateUserSettingsDto request,
         CancellationToken cancellationToken)
     {
-        UpdateUserSettingsCommand command = new(request.Language?.ToEntity());
+        UpdateUserSettingsCommand command = new(request.Language?.ToEntity(), request.ReplayGain?.ToEntity());
         UserSettings? result = await settings.UpdateAsync(User.GetUserId(), command, cancellationToken);
         return result is null
             ? this.Problem(ProblemCodeDto.UserNotFound, StatusCodes.Status404NotFound)

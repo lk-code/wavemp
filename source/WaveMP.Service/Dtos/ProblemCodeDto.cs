@@ -167,4 +167,10 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("stream.file_missing")]
     StreamFileMissing,
+
+    /// <summary>
+    /// The entry of the play history does not exist or belongs to another profile (404).
+    /// </summary>
+    [JsonStringEnumMemberName("history.not_found")]
+    HistoryNotFound,
 }
