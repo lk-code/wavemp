@@ -18,7 +18,8 @@ public class TrackRepositoryTests : LibraryDatabaseTests
     {
         await SeedStandardLibraryAsync();
 
-        Page<TrackRow> page = await ListAsync(new TrackListQuery(0, 100, TrackSortField.AlbumArtist, SortDirection.Asc));
+        Page<TrackRow> page = await ListAsync(
+            new TrackListQuery(0, 100, TrackSortField.AlbumArtist, SortDirection.Asc));
 
         page.Items.Select(track => track.Title).Should().Equal(
             "Opening", "Closing", "Duet", "Ballad", "Clip", "Loose Song", "Hit One", "Hit Two");

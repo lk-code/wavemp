@@ -51,7 +51,8 @@ public class ApiIntegrationTests
     public async Task GetHealth_WithMissingDatabase_ReturnsServiceUnavailableProblemWithCode()
     {
         // The startup creates and migrates the database like in production, so the test drops it afterwards.
-        await using WaveMpWebApplicationFactory factory = new(WaveMpWebApplicationFactory.TestDatabaseName + "_missing");
+        await using WaveMpWebApplicationFactory factory =
+            new(WaveMpWebApplicationFactory.TestDatabaseName + "_missing");
         using HttpClient client = factory.CreateClient();
         await factory.DeleteDatabaseAsync();
 
@@ -225,7 +226,8 @@ public class ApiIntegrationTests
     {
         JsonNode document = await GetOpenApiDocumentAsync();
 
-        JsonNode operation = FindOperations(document).Single(node => node["operationId"]!.GetValue<string>() == operationId);
+        JsonNode operation = FindOperations(document)
+            .Single(node => node["operationId"]!.GetValue<string>() == operationId);
 
         if (secured)
         {

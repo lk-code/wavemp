@@ -211,7 +211,13 @@ public class LibraryApiTests
             HasCover = true,
         });
         Closing.DurationMilliseconds.Should().BeInRange(800, 1200);
-        Clip.Should().BeEquivalentTo(new { HasAudio = false, HasVideo = true, HasCover = false, Album = (object?)null });
+        Clip.Should().BeEquivalentTo(new
+        {
+            HasAudio = false,
+            HasVideo = true,
+            HasCover = false,
+            Album = (object?)null,
+        });
         Song.Should().BeEquivalentTo(new { Artist = new { Name = "Loose" }, HasCover = false });
         Ballad.HasCover.Should().BeTrue();
     }
