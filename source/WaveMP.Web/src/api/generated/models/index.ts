@@ -447,6 +447,15 @@ export function createTrackFromDiscriminatorValue(parseNode: ParseNode | undefin
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TrackMetadata}
+ */
+// @ts-ignore
+export function createTrackMetadataFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrackMetadata;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {TrackPage}
  */
 // @ts-ignore
@@ -461,6 +470,15 @@ export function createTrackPageFromDiscriminatorValue(parseNode: ParseNode | und
 // @ts-ignore
 export function createUpdateLibrarySettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoUpdateLibrarySettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateTrackMetadata}
+ */
+// @ts-ignore
+export function createUpdateTrackMetadataFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateTrackMetadata;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -1041,6 +1059,27 @@ export function deserializeIntoTrack(track: Partial<Track> | undefined = {}) : R
 }
 /**
  * The deserialization information for the current model
+ * @param TrackMetadata The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrackMetadata(trackMetadata: Partial<TrackMetadata> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "album": n => { trackMetadata.album = n.getStringValue(); },
+        "albumArtist": n => { trackMetadata.albumArtist = n.getStringValue(); },
+        "artist": n => { trackMetadata.artist = n.getStringValue(); },
+        "audioFilePath": n => { trackMetadata.audioFilePath = n.getStringValue(); },
+        "discNumber": n => { trackMetadata.discNumber = n.getNumberValue(); },
+        "genre": n => { trackMetadata.genre = n.getStringValue(); },
+        "status": n => { trackMetadata.status = n.getEnumValue<TrackMetadataStatus>(TrackMetadataStatusObject); },
+        "title": n => { trackMetadata.title = n.getStringValue(); },
+        "trackId": n => { trackMetadata.trackId = n.getGuidValue(); },
+        "trackNumber": n => { trackMetadata.trackNumber = n.getNumberValue(); },
+        "year": n => { trackMetadata.year = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param TrackPage The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1067,6 +1106,24 @@ export function deserializeIntoUpdateLibrarySettings(updateLibrarySettings: Part
         "imageExtensions": n => { updateLibrarySettings.imageExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
         "scanIntervalMinutes": n => { updateLibrarySettings.scanIntervalMinutes = n.getNumberValue(); },
         "videoExtensions": n => { updateLibrarySettings.videoExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateTrackMetadata The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateTrackMetadata(updateTrackMetadata: Partial<UpdateTrackMetadata> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "album": n => { updateTrackMetadata.album = n.getStringValue(); },
+        "albumArtist": n => { updateTrackMetadata.albumArtist = n.getStringValue(); },
+        "artist": n => { updateTrackMetadata.artist = n.getStringValue(); },
+        "discNumber": n => { updateTrackMetadata.discNumber = n.getNumberValue(); },
+        "genre": n => { updateTrackMetadata.genre = n.getStringValue(); },
+        "title": n => { updateTrackMetadata.title = n.getStringValue(); },
+        "trackNumber": n => { updateTrackMetadata.trackNumber = n.getNumberValue(); },
+        "year": n => { updateTrackMetadata.year = n.getNumberValue(); },
     }
 }
 /**
@@ -2292,6 +2349,28 @@ export function serializeTrack(writer: SerializationWriter, track: Partial<Track
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TrackMetadata The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrackMetadata(writer: SerializationWriter, trackMetadata: Partial<TrackMetadata> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!trackMetadata || isSerializingDerivedType) { return; }
+    writer.writeStringValue("album", trackMetadata.album);
+    writer.writeStringValue("albumArtist", trackMetadata.albumArtist);
+    writer.writeStringValue("artist", trackMetadata.artist);
+    writer.writeStringValue("audioFilePath", trackMetadata.audioFilePath);
+    writer.writeNumberValue("discNumber", trackMetadata.discNumber);
+    writer.writeStringValue("genre", trackMetadata.genre);
+    writer.writeEnumValue<TrackMetadataStatus>("status", trackMetadata.status);
+    writer.writeStringValue("title", trackMetadata.title);
+    writer.writeGuidValue("trackId", trackMetadata.trackId);
+    writer.writeNumberValue("trackNumber", trackMetadata.trackNumber);
+    writer.writeNumberValue("year", trackMetadata.year);
+    writer.writeAdditionalData(trackMetadata.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param TrackPage The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -2320,6 +2399,25 @@ export function serializeUpdateLibrarySettings(writer: SerializationWriter, upda
     writer.writeNumberValue("scanIntervalMinutes", updateLibrarySettings.scanIntervalMinutes);
     writer.writeCollectionOfPrimitiveValues<string>("videoExtensions", updateLibrarySettings.videoExtensions);
     writer.writeAdditionalData(updateLibrarySettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateTrackMetadata The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateTrackMetadata(writer: SerializationWriter, updateTrackMetadata: Partial<UpdateTrackMetadata> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateTrackMetadata || isSerializingDerivedType) { return; }
+    writer.writeStringValue("album", updateTrackMetadata.album);
+    writer.writeStringValue("albumArtist", updateTrackMetadata.albumArtist);
+    writer.writeStringValue("artist", updateTrackMetadata.artist);
+    writer.writeNumberValue("discNumber", updateTrackMetadata.discNumber);
+    writer.writeStringValue("genre", updateTrackMetadata.genre);
+    writer.writeStringValue("title", updateTrackMetadata.title);
+    writer.writeNumberValue("trackNumber", updateTrackMetadata.trackNumber);
+    writer.writeNumberValue("year", updateTrackMetadata.year);
+    writer.writeAdditionalData(updateTrackMetadata.additionalData);
 }
 /**
  * Serializes information the current object
@@ -2531,6 +2629,56 @@ export interface Track extends AdditionalDataHolder, Parsable {
     year?: number | null;
 }
 /**
+ * The metadata of a track as the metadata editor shows it: the values of the tags of its audio file; values the tags do not contain come from the library (e.g. derived from the folder and file name).
+ */
+export interface TrackMetadata extends AdditionalDataHolder, Parsable {
+    /**
+     * The album property
+     */
+    album?: string | null;
+    /**
+     * The albumArtist property
+     */
+    albumArtist?: string | null;
+    /**
+     * The artist property
+     */
+    artist?: string | null;
+    /**
+     * Path of the audio file the editor writes, relative to the media folder; null without audio file.
+     */
+    audioFilePath?: string | null;
+    /**
+     * The discNumber property
+     */
+    discNumber?: number | null;
+    /**
+     * The genre property
+     */
+    genre?: string | null;
+    /**
+     * Whether the editor can write the tags.
+     */
+    status?: TrackMetadataStatus | null;
+    /**
+     * The title property
+     */
+    title?: string | null;
+    /**
+     * Id of the track.
+     */
+    trackId?: Guid | null;
+    /**
+     * Number of the track on its disc.
+     */
+    trackNumber?: number | null;
+    /**
+     * The year property
+     */
+    year?: number | null;
+}
+export type TrackMetadataStatus = (typeof TrackMetadataStatusObject)[keyof typeof TrackMetadataStatusObject];
+/**
  * One page of a collection.
  */
 export interface TrackPage extends AdditionalDataHolder, Parsable {
@@ -2580,6 +2728,43 @@ export interface UpdateLibrarySettings extends AdditionalDataHolder, Parsable {
      * Extensions of video files; an extension may only be in one list.
      */
     videoExtensions?: string[] | null;
+}
+/**
+ * Changes the metadata of a track. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again.
+ */
+export interface UpdateTrackMetadata extends AdditionalDataHolder, Parsable {
+    /**
+     * New album.
+     */
+    album?: string | null;
+    /**
+     * New album artist; replaces all album artists of the file.
+     */
+    albumArtist?: string | null;
+    /**
+     * New artist; replaces all artists of the file.
+     */
+    artist?: string | null;
+    /**
+     * New number of the disc; the number of discs in the file stays.
+     */
+    discNumber?: number | null;
+    /**
+     * New genre; replaces all genres of the file.
+     */
+    genre?: string | null;
+    /**
+     * New title.
+     */
+    title?: string | null;
+    /**
+     * New number of the track on its disc; the number of tracks in the file stays.
+     */
+    trackNumber?: number | null;
+    /**
+     * New year.
+     */
+    year?: number | null;
 }
 /**
  * Changes a user (profile). Missing or null values stay unchanged.
@@ -2858,6 +3043,8 @@ export const ProblemCodeObject = {
     ArtistNot_found: "artist.not_found",
     AlbumNot_found: "album.not_found",
     TrackNot_found: "track.not_found",
+    TrackNo_audio: "track.no_audio",
+    TrackNot_writable: "track.not_writable",
     CoverNot_found: "cover.not_found",
 } as const;
 /**
@@ -2887,6 +3074,14 @@ export const ScanPhaseObject = {
 export const SortDirectionObject = {
     Asc: "Asc",
     Desc: "Desc",
+} as const;
+/**
+ * Whether the editor can write the tags.
+ */
+export const TrackMetadataStatusObject = {
+    Editable: "Editable",
+    NoAudio: "NoAudio",
+    NotWritable: "NotWritable",
 } as const;
 export const TrackSortObject = {
     AlbumArtist: "AlbumArtist",

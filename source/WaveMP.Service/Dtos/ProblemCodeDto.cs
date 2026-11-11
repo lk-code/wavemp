@@ -136,6 +136,19 @@ public enum ProblemCodeDto
     TrackNotFound,
 
     /// <summary>
+    /// The track has no audio file; tags are only written to audio files, never to videos (409).
+    /// </summary>
+    [JsonStringEnumMemberName("track.no_audio")]
+    TrackNoAudio,
+
+    /// <summary>
+    /// The audio file of the track cannot be written: a read-only file or media folder, missing permissions,
+    /// unreadable tags or a format whose tags cannot be written (409).
+    /// </summary>
+    [JsonStringEnumMemberName("track.not_writable")]
+    TrackNotWritable,
+
+    /// <summary>
     /// The track or album exists, but has no cover that can be delivered (404).
     /// </summary>
     [JsonStringEnumMemberName("cover.not_found")]

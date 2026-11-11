@@ -2390,6 +2390,176 @@
         ]
       }
     },
+    "/api/v1/tracks/{id}/metadata": {
+      "get": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Returns the metadata of a track as the metadata editor shows it, for admins only: the values of the tags of its audio file (values the tags do not contain come from the library, e.g. the folder and file name), whether the editor can write them and the audio file it writes. The file is checked each time.",
+        "operationId": "GetTrackMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The metadata of the track.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackMetadata"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Writes metadata into the tags of the audio file of a track, for admins only, and reads the track again. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again. The previous tags are saved in the database first. Only the audio file that the track plays is written, never videos; file names stay as they are.",
+        "operationId": "UpdateTrackMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackMetadata"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackMetadata"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The metadata of the track after reading it again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackMetadata"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid values (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The track has no audio file (code `track.no_audio`) or its audio file cannot be written (code `track.not_writable`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/users": {
       "get": {
         "tags": [
@@ -3815,6 +3985,8 @@
           "artist.not_found",
           "album.not_found",
           "track.not_found",
+          "track.no_audio",
+          "track.not_writable",
           "cover.not_found"
         ],
         "type": "string",
@@ -4383,6 +4555,91 @@
         },
         "description": "A track of the library: all media files with the same base name in one folder."
       },
+      "TrackMetadata": {
+        "required": [
+          "trackId",
+          "status",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track.",
+            "format": "uuid"
+          },
+          "status": {
+            "description": "Whether the editor can write the tags.",
+            "$ref": "#/components/schemas/TrackMetadataStatus"
+          },
+          "audioFilePath": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Path of the audio file the editor writes, relative to the media folder; null without audio file."
+          },
+          "title": {
+            "type": "string"
+          },
+          "artist": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "album": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "albumArtist": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "year": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "trackNumber": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Number of the track on its disc.",
+            "format": "int32"
+          },
+          "discNumber": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "genre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "The metadata of a track as the metadata editor shows it: the values of the tags of its audio file; values the tags do not contain come from the library (e.g. derived from the folder and file name)."
+      },
+      "TrackMetadataStatus": {
+        "enum": [
+          "Editable",
+          "NoAudio",
+          "NotWritable"
+        ],
+        "type": "string",
+        "description": "Whether the metadata editor can write the tags of a track."
+      },
       "TrackPage": {
         "required": [
           "items",
@@ -4497,6 +4754,87 @@
           }
         },
         "description": "Changes the settings of the media library. Missing or null values stay unchanged."
+      },
+      "UpdateTrackMetadata": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New title."
+          },
+          "artist": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New artist; replaces all artists of the file."
+          },
+          "album": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New album."
+          },
+          "albumArtist": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New album artist; replaces all album artists of the file."
+          },
+          "year": {
+            "maximum": 9999,
+            "minimum": 1,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "New year.",
+            "format": "int32"
+          },
+          "trackNumber": {
+            "maximum": 9999,
+            "minimum": 1,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "New number of the track on its disc; the number of tracks in the file stays.",
+            "format": "int32"
+          },
+          "discNumber": {
+            "maximum": 9999,
+            "minimum": 1,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "New number of the disc; the number of discs in the file stays.",
+            "format": "int32"
+          },
+          "genre": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New genre; replaces all genres of the file."
+          }
+        },
+        "description": "Changes the metadata of a track. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again."
       },
       "UpdateUser": {
         "type": "object",

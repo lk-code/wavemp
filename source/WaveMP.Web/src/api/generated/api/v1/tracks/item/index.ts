@@ -8,6 +8,8 @@ import { CoverRequestBuilderRequestsMetadata, type CoverRequestBuilder } from '.
 // @ts-ignore
 import { FilesRequestBuilderRequestsMetadata, type FilesRequestBuilder } from './files/index.js';
 // @ts-ignore
+import { MetadataRequestBuilderRequestsMetadata, type MetadataRequestBuilder } from './metadata/index.js';
+// @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata, type Parsable, type ParsableFactory, type RequestConfiguration, type RequestInformation, type RequestsMetadata } from '@microsoft/kiota-abstractions';
 
 /**
@@ -22,6 +24,10 @@ export interface TracksItemRequestBuilder extends BaseRequestBuilder<TracksItemR
      * The files property
      */
     get files(): FilesRequestBuilder;
+    /**
+     * The metadata property
+     */
+    get metadata(): MetadataRequestBuilder;
     /**
      * Returns a track.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
@@ -50,6 +56,9 @@ export const TracksItemRequestBuilderNavigationMetadata: Record<Exclude<keyof Tr
     },
     files: {
         requestsMetadata: FilesRequestBuilderRequestsMetadata,
+    },
+    metadata: {
+        requestsMetadata: MetadataRequestBuilderRequestsMetadata,
     },
 };
 /**

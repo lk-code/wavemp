@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaveMP.Core.Library.Covers;
 using WaveMP.Core.Library.Tracks;
+using WaveMP.Core.Scanning.Edits;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Projections;
 using WaveMP.Data.Queries;
@@ -15,13 +16,14 @@ using WaveMP.Service.Tokens;
 namespace WaveMP.Service.Controllers;
 
 /// <summary>
-/// The tracks of the library, their covers and, for admins, their files.
+/// The tracks of the library, their covers and, for admins, their files and the metadata editor.
 /// </summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/tracks")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-public sealed class TracksController(ITrackService tracks, ICoverService covers) : ControllerBase
+public sealed class TracksController(ITrackService tracks, ICoverService covers, ITrackMetadataEditor editor)
+    : ControllerBase
 {
     /// <summary>
     /// Lists the tracks, sorted and optionally searched and filtered.
@@ -170,5 +172,71 @@ public sealed class TracksController(ITrackService tracks, ICoverService covers)
         return page is null
             ? this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound)
             : Ok(page.ToDto(file => file.ToDto()));
+    }
+
+    /// <summary>
+    /// Returns the metadata of a track as the metadata editor shows it, for admins only: the values of the tags of its
+    /// audio file (values the tags do not contain come from the library, e.g. the folder and file name), whether the
+    /// editor can write them and the audio file it writes. The file is checked each time.
+    /// </summary>
+    /// <param name="id">Id of the track.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The metadata of the track.</response>
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>).</response>
+    [HttpGet("{id:guid}/metadata", Name = "GetTrackMetadata")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [ProducesResponseType<TrackMetadataDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<TrackMetadataDto>> GetTrackMetadataAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        TrackMetadata? metadata = await editor.GetAsync(id, cancellationToken);
+        return metadata is null
+            ? this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound)
+            : Ok(metadata.ToDto());
+    }
+
+    /// <summary>
+    /// Writes metadata into the tags of the audio file of a track, for admins only, and reads the track again. Missing
+    /// members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from
+    /// the folder and file name again. The previous tags are saved in the database first. Only the audio file that
+    /// the track plays is written, never videos; file names stay as they are.
+    /// </summary>
+    /// <param name="id">Id of the track.</param>
+    /// <param name="request">The changed values.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The metadata of the track after reading it again.</response>
+    /// <response code="400">Invalid values (code <c>request.invalid</c>).</response>
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>).</response>
+    /// <response code="409">The track has no audio file (code <c>track.no_audio</c>) or its audio file cannot be
+    /// written (code <c>track.not_writable</c>).</response>
+    [HttpPatch("{id:guid}/metadata", Name = "UpdateTrackMetadata")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [Consumes("application/json")]
+    [ProducesResponseType<TrackMetadataDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")]
+    public async Task<ActionResult<TrackMetadataDto>> UpdateTrackMetadataAsync(
+        Guid id,
+        UpdateTrackMetadataDto request,
+        CancellationToken cancellationToken)
+    {
+        TrackMetadataResult result = await editor.UpdateAsync(id, request.ToChanges(), cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Metadata.ToDto());
+        }
+
+        return result.Error switch
+        {
+            TrackMetadataError.NoAudio => this.Problem(ProblemCodeDto.TrackNoAudio, StatusCodes.Status409Conflict),
+            TrackMetadataError.NotWritable =>
+                this.Problem(ProblemCodeDto.TrackNotWritable, StatusCodes.Status409Conflict),
+            _ => this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound),
+        };
     }
 }

@@ -302,7 +302,7 @@ public class ApiIntegrationTests
     }
 
     [Test]
-    public async Task GetOpenApiDocument_Always_DescribesForbiddenOnlyForTheFilesOfATrackInTheLibrary()
+    public async Task GetOpenApiDocument_Always_DescribesForbiddenOnlyForTheAdminEndpointsOfTheLibrary()
     {
         string[] libraryTags = ["Artists", "Albums", "Tracks", "Genres", "Years", "Search"];
 
@@ -310,11 +310,11 @@ public class ApiIntegrationTests
 
         List<JsonNode> library = [.. FindOperations(document)
             .Where(operation => libraryTags.Contains(operation["tags"]![0]!.GetValue<string>()))];
-        library.Should().HaveCount(14);
+        library.Should().HaveCount(16);
         library.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
         library.Where(operation => operation["responses"]!["403"] is not null)
             .Select(operation => operation["operationId"]!.GetValue<string>())
-            .Should().Equal("ListTrackFiles");
+            .Should().Equal("ListTrackFiles", "GetTrackMetadata", "UpdateTrackMetadata");
     }
 
     [Test]
