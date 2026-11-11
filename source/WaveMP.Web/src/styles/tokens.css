@@ -133,6 +133,7 @@
         --wmp-icon-settings: url('/icons/phosphor/regular/gear-six.svg');
         --wmp-icon-profile: url('/icons/phosphor/regular/user-circle.svg');
         --wmp-icon-switch-profile: url('/icons/phosphor/regular/user-switch.svg');
+        --wmp-icon-manage-profiles: url('/icons/phosphor/regular/users.svg');
         --wmp-icon-edit: url('/icons/phosphor/regular/pencil-simple.svg');
         --wmp-icon-delete: url('/icons/phosphor/regular/trash.svg');
         --wmp-icon-add: url('/icons/phosphor/regular/plus.svg');
@@ -183,6 +184,7 @@
         --wmp-list-group-info-width: 11rem;
         --wmp-avatar-size: 2rem;
         --wmp-avatar-size-l: 6rem;
+        --wmp-swatch-size: 2rem;
     }
 
     /* Document defaults */

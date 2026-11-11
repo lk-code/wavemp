@@ -144,7 +144,8 @@
       "previews": "Layouts",
       "profiles": "Profile selection",
       "alerts": "Messages",
-      "forms": "Forms"
+      "forms": "Forms",
+      "admin": "Profile administration"
     },
     "samples": {
       "button": "Button",
@@ -176,7 +177,8 @@
       "optionOne": "First option",
       "optionTwo": "Second option",
       "hint": "Help text for the field.",
-      "error": "This value is not valid."
+      "error": "This value is not valid.",
+      "colorLabel": "Color"
     },
     "transportStates": {
       "idle": "Idle",
@@ -214,7 +216,8 @@
     "label": "Profile menu",
     "open": "Profile: {name}",
     "settings": "Settings",
-    "switchProfile": "Switch profile"
+    "switchProfile": "Switch profile",
+    "manageProfiles": "Manage profiles"
   },
   "settings": {
     "title": "Settings",
@@ -224,6 +227,56 @@
     "languages": {
       "en": "English",
       "de": "Deutsch"
+    }
+  },
+  "adminUsers": {
+    "title": "Manage profiles",
+    "list": "Profiles",
+    "add": "Add profile",
+    "edit": "Edit {name}",
+    "delete": "Delete {name}",
+    "builtIn": "Built-in",
+    "builtInNotDeletable": "The built-in admin profile cannot be deleted.",
+    "created": "Created {date}",
+    "loadError": "The profiles could not be loaded.",
+    "roles": {
+      "admin": "Admin",
+      "user": "User"
+    },
+    "dialog": {
+      "createTitle": "Add profile",
+      "editTitle": "Edit profile",
+      "name": "Name",
+      "initials": "Initials",
+      "initialsHint": "Leave empty to create them from the name.",
+      "color": "Color",
+      "currentColor": "Current color",
+      "role": "Role",
+      "roleBuiltInHint": "The built-in admin profile always stays an admin.",
+      "save": "Save"
+    },
+    "colors": {
+      "blue": "Blue",
+      "teal": "Teal",
+      "green": "Green",
+      "purple": "Purple",
+      "pink": "Pink",
+      "orange": "Orange",
+      "brown": "Brown",
+      "slate": "Slate"
+    },
+    "errors": {
+      "nameRequired": "Please enter a name.",
+      "nameTaken": "A profile with this name already exists.",
+      "invalid": "Please check your input.",
+      "saveFailed": "The profile could not be saved.",
+      "deleteFailed": "The profile could not be deleted.",
+      "notFound": "This profile no longer exists."
+    },
+    "deleteDialog": {
+      "title": "Delete profile",
+      "text": "Delete the profile {name}? This cannot be undone.",
+      "confirm": "Delete"
     }
   }
 }

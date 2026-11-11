@@ -129,7 +129,7 @@ Example of a desktop layout with the sidebar on the right:
 | `list-group-rows` | `div` (`role="presentation"`) | `list-group` | Rows of the group |
 | `list-row` | `div` (`role="row"`, `aria-selected`) | `list-group-rows` | Row of a track |
 | `list-cell` | `span` (`role="gridcell"`) | `list-row` | Cell of a row |
-| `badge` | `span` | `list-cell` | Small hint with `icon` and `label`, for example that a video exists |
+| `badge` | `span` | `list-cell`, `user-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role with a visible `label` |
 | `transport` | `section` | `app` | Transport bar; mini player and full-screen player on mobile |
 | `seek` | `div` | `transport` | Progress bar with a `slider` |
 | `now-playing-mini` | `button` | `transport` | Cover and title of the current track; opens Now Playing (desktop) or the full-screen player (mobile) |
@@ -159,6 +159,13 @@ Example of a desktop layout with the sidebar on the right:
 | `avatar` | `span` (`aria-hidden`) | `profile-tile`, any | Initials on the color of the profile (`--wmp-profile-color`) |
 | `avatar-initials` | `span` | `avatar` | Initials of the profile |
 | `profile-summary` | `div` | `view` | The current profile on the settings page: `avatar` and `label` with the name |
+| `view-actions` | `div` | `view` | Actions of a page, for example "Add profile" |
+| `user-list` | `ul` | `view` | Profiles on the admin page |
+| `user-item` | `li` | `user-list` | One profile with `avatar`, `user-info` and `user-actions` |
+| `user-info` | `div` | `user-item` | Name and details of the profile |
+| `user-name` | `span` | `user-info` | Name of the profile |
+| `user-meta` | `span` | `user-info` | Role and built-in state as `badge` with a visible `label`, and the creation date as `label` |
+| `user-actions` | `div` | `user-item` | Buttons to edit and delete the profile |
 | `button` | `button` | any | Generic button, see `data-variant` in [States](#states) |
 | `icon` | `span` (`aria-hidden`) | any | Icon wrapper with the slot in `data-icon`, see [Icons](#icons) |
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
@@ -168,11 +175,13 @@ Example of a desktop layout with the sidebar on the right:
 | `slider-track` | `div` | `slider` | Track of the slider |
 | `slider-fill` | `div` | `slider-track` | Filled part of the track |
 | `slider-thumb` | `div` (`role="slider"`) | `slider` | Knob, focusable |
-| `field` | `label` | `form`, any | Text field or selection with `label`, `input` or `select`, and optionally `field-hint` and `field-error` |
+| `field` | `label`, or `div` around a `color-picker` | `form`, any | Text field or selection with `label`, `input`, `select` or `color-picker`, and optionally `field-hint` and `field-error` |
 | `form` | `form` | `view`, `dialog-body` | Form with fields |
 | `select` | `select` (`aria-invalid`) | `field` | Selection list |
 | `field-hint` | `span` | `field` | Help text of the field |
 | `field-error` | `span` | `field` | Error message of the field |
+| `color-picker` | `div` (`role="radiogroup"`) | `field` | Selection of a color |
+| `color-swatch` | `button` (`role="radio"`, `aria-checked`) | `color-picker` | One color (`--wmp-swatch-color`) with a visually hidden `label` |
 | `dialog` | `dialog` | any | Modal dialog |
 | `dialog-header` | `div` | `dialog` | Title bar of the dialog |
 | `dialog-title` | `h2` | `dialog-header` | Title of the dialog |
@@ -212,11 +221,12 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `server-status` | `checking`, `healthy`, `degraded`, `unhealthy` or `unreachable` |
 | `search` | `empty` or `filled` |
 | `context-menu` | `open` or `closed` |
-| `badge` | the kind of hint, for example `has-video` |
+| `badge` | the kind of hint, for example `has-video`; in `user-meta` `admin` or `user`, and `built-in` |
 | `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
 | `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
 | `alert` | `error`, `success` or `info` |
 | `field` | `invalid` while the field has an error |
+| `user-item` | `built-in` for the built-in admin profile |
 
 ### ARIA attributes and native states
 
@@ -227,6 +237,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-busy="true"` | `profile-select` while a profile is being selected |
 | `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
+| `aria-checked` | `color-swatch` |
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
@@ -243,7 +254,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 |---|---|---|
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `not-found` |
+| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `admin-users`, `not-found` |
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year` |
@@ -404,8 +415,9 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-list-group-info-width` | `11rem` | Width of `list-group-info` (desktop) |
 | `--wmp-avatar-size` | `2rem` | Size of `avatar` |
 | `--wmp-avatar-size-l` | `6rem` | Size of `avatar` in `profile-tile` |
+| `--wmp-swatch-size` | `2rem` | Size of `color-swatch` |
 
-On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size` and `--wmp-field-height` on `app`, and its own `--wmp-list-columns` on `list`.
+On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list`.
 
 ### Runtime variables
 
@@ -418,6 +430,7 @@ The app sets these variables on single elements. Themes can read them, but never
 | `--wmp-menu-x` | `context-menu` | Horizontal position in pixels |
 | `--wmp-menu-y` | `context-menu` | Vertical position in pixels |
 | `--wmp-profile-color` | `avatar` | Color of the profile as `#rrggbb` |
+| `--wmp-swatch-color` | `color-swatch` | Color of the swatch as `#rrggbb` |
 
 ## Icons
 
@@ -483,6 +496,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `settings` | `--wmp-icon-settings` | `/icons/phosphor/regular/gear-six.svg` | Menus and dialogs |
 | `profile` | `--wmp-icon-profile` | `/icons/phosphor/regular/user-circle.svg` | Menus and dialogs |
 | `switch-profile` | `--wmp-icon-switch-profile` | `/icons/phosphor/regular/user-switch.svg` | Menus and dialogs |
+| `manage-profiles` | `--wmp-icon-manage-profiles` | `/icons/phosphor/regular/users.svg` | Menus and dialogs |
 | `edit` | `--wmp-icon-edit` | `/icons/phosphor/regular/pencil-simple.svg` | Menus and dialogs |
 | `delete` | `--wmp-icon-delete` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `add` | `--wmp-icon-add` | `/icons/phosphor/regular/plus.svg` | Menus and dialogs |
@@ -531,4 +545,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 ### Changelog
 
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
-    - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the base components `alert`, `form`, `select`, `field-hint` and `field-error`, the icon slot `switch-profile`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size` and `--wmp-avatar-size-l` and the runtime variable `--wmp-profile-color`.
+    - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.

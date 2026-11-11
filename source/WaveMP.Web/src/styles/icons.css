@@ -211,6 +211,10 @@
         --_icon: var(--wmp-icon-switch-profile);
     }
 
+    [data-icon='manage-profiles'] {
+        --_icon: var(--wmp-icon-manage-profiles);
+    }
+
     [data-icon='edit'] {
         --_icon: var(--wmp-icon-edit);
     }

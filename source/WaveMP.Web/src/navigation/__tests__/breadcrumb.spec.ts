@@ -25,6 +25,10 @@ describe('buildBreadcrumb', () => {
             'music',
             'settings',
         ])
+        expect(buildBreadcrumb({ name: 'admin-users', params: {} }).map((c) => c.id)).toEqual([
+            'music',
+            'admin-users',
+        ])
         expect(buildBreadcrumb({ name: 'not-found', params: {} }).map((c) => c.id)).toEqual([
             'music',
             'not-found',
@@ -48,6 +52,7 @@ describe('pageTitleKey', () => {
         )
         expect(pageTitleKey({ name: 'now-playing', params: {} })).toBe('nav.nowPlaying')
         expect(pageTitleKey({ name: 'settings', params: {} })).toBe('settings.title')
+        expect(pageTitleKey({ name: 'admin-users', params: {} })).toBe('adminUsers.title')
     })
 })
 

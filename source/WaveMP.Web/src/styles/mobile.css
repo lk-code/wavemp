@@ -13,6 +13,7 @@
             --wmp-button-height: 2.75rem;
             --wmp-round-button-size: 2.75rem;
             --wmp-field-height: 2.5rem;
+            --wmp-swatch-size: 2.75rem;
 
             display: grid !important;
             grid-template-areas:

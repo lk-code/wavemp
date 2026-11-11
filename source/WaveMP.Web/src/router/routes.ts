@@ -5,6 +5,7 @@ import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
 import ProfileSelectView from '@/views/ProfileSelectView.vue'
 import SettingsView from '@/views/SettingsView.vue'
+import AdminUsersView from '@/views/admin/AdminUsersView.vue'
 import {
     defaultLibrarySection,
     librarySectionPattern,
@@ -76,6 +77,13 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             meta: { tab: 'playlists' },
         },
         { path: '/settings', name: 'settings', component: SettingsView },
+        { path: '/admin', name: 'admin', redirect: { name: 'admin-users' } },
+        {
+            path: '/admin/users',
+            name: 'admin-users',
+            component: AdminUsersView,
+            meta: { admin: true },
+        },
         ...extra,
         { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
     ]

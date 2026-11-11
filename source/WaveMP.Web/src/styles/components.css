@@ -352,6 +352,38 @@
         max-inline-size: 32rem;
     }
 
+    [data-part='color-picker'] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--wmp-space-s);
+    }
+
+    [data-part='color-swatch'] {
+        position: relative;
+        inline-size: var(--wmp-swatch-size);
+        block-size: var(--wmp-swatch-size);
+        padding: 0;
+        border: 1px solid rgb(0 0 0 / 15%);
+        border-radius: var(--wmp-radius-round);
+        background: var(--wmp-swatch-color);
+        cursor: pointer;
+    }
+
+    [data-part='color-swatch'][aria-checked='true'] {
+        box-shadow:
+            0 0 0 2px var(--wmp-color-surface),
+            0 0 0 4px var(--wmp-color-text);
+    }
+
+    [data-part='color-swatch'] > [data-part='label'] {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
     [data-part='search'] {
         position: relative;
         display: flex;
@@ -599,6 +631,80 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    /* --- Profile administration ----------------------------------------------------------- */
+
+    [data-part='view-actions'] {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: var(--wmp-space-s);
+    }
+
+    [data-part='user-list'] {
+        display: grid;
+        gap: var(--wmp-space-s);
+    }
+
+    [data-part='user-item'] {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--wmp-space-m);
+        padding: var(--wmp-space-s) var(--wmp-space-m);
+        border: 1px solid var(--wmp-color-border);
+        border-radius: var(--wmp-radius-m);
+        background: var(--wmp-color-surface);
+    }
+
+    [data-part='user-info'] {
+        display: grid;
+        gap: 0.125rem;
+        min-inline-size: 0;
+    }
+
+    [data-part='user-name'] {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
+    [data-part='user-meta'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--wmp-space-xs) var(--wmp-space-s);
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+    }
+
+    /* Role badges show their text, unlike the icon badges of the list. */
+    [data-part='user-meta'] > [data-part='badge'] {
+        margin-inline-start: 0;
+        padding: 0 var(--wmp-space-xs);
+        border: 1px solid var(--wmp-color-border);
+        border-radius: var(--wmp-radius-s);
+        font-size: var(--wmp-font-size-xs);
+    }
+
+    [data-part='user-meta'] > [data-part='badge'] > [data-part='label'] {
+        position: static;
+        inline-size: auto;
+        block-size: auto;
+        overflow: visible;
+        clip-path: none;
+    }
+
+    [data-part='user-meta'] > [data-part='badge'][data-state~='admin'] {
+        border-color: var(--wmp-color-accent);
+        color: var(--wmp-color-accent);
+    }
+
+    [data-part='user-actions'] {
+        display: flex;
+        gap: var(--wmp-space-xs);
     }
 
     [data-part='alert'] {

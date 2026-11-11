@@ -56,6 +56,14 @@ describe('createRoutes', () => {
         expect(route.meta.bare).toBeUndefined()
     })
 
+    it('keeps the profile administration for admins', async () => {
+        const route = await resolve('/admin')
+
+        expect(route.name).toBe('admin-users')
+        expect(route.fullPath).toBe('/admin/users')
+        expect(route.meta.admin).toBe(true)
+    })
+
     it('protects the pages of the app', async () => {
         for (const path of [
             '/now-playing',

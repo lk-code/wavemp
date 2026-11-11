@@ -7,6 +7,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
+import BaseColorPicker from '@/components/base/BaseColorPicker.vue'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
@@ -18,6 +19,7 @@ import BaseTabs from '@/components/base/BaseTabs.vue'
 import BaseTextField from '@/components/base/BaseTextField.vue'
 import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
+import UserList, { type UserListItem } from '@/components/admin/UserList.vue'
 import AlbumGroupList from '@/components/library/AlbumGroupList.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
@@ -32,6 +34,7 @@ import { useFormat } from '@/composables/useFormat'
 import { setLocale } from '@/i18n'
 import { supportedLocales, type SupportedLocale } from '@/i18n/locales'
 import { libraryTree, mainNavigation, type NavigationTreeNode } from '@/navigation/libraryTree'
+import { profileColorOptions } from '@/profiles/presentation'
 import { iconSlotNames, iconSlots } from '@/themes/iconSlots'
 import { parts } from '@/themes/parts'
 import LibraryView from '@/views/LibraryView.vue'
@@ -207,7 +210,18 @@ const sampleProfiles = computed<ProfileTileData[]>(() => [
     },
     adminProfile.value,
 ])
-const firstProfile = computed(() => sampleProfiles.value[0]!)
+const firstProfile = computed(() => ({ ...sampleProfiles.value[0]!, role: 'Admin' as const }))
+const color = ref<string | null>('#2e7d32')
+const colorOptions = computed(() =>
+    profileColorOptions.map((option) => ({ value: option.value, label: t(option.labelKey) })),
+)
+const sampleUsers = computed<UserListItem[]>(() =>
+    sampleProfiles.value.map((profile, index) => ({
+        ...profile,
+        isAdmin: profile.isBuiltIn || index === 1,
+        createdAt: new Date(Date.UTC(2026, 10, 1 + index)),
+    })),
+)
 </script>
 
 <template>
@@ -373,7 +387,22 @@ const firstProfile = computed(() => sampleProfiles.value[0]!)
                     :options="selectOptions"
                     :error="t('dev.samples.error')"
                 />
+                <BaseColorPicker
+                    v-model="color"
+                    :label="t('dev.samples.colorLabel')"
+                    :options="colorOptions"
+                />
             </form>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.admin') }}</h2>
+            <div data-part="view" data-view="admin-users">
+                <div data-part="view-actions">
+                    <BaseButton variant="primary" icon="add" :label="t('adminUsers.add')" />
+                </div>
+                <UserList :users="sampleUsers" />
+            </div>
         </section>
 
         <section data-part="dev-section">

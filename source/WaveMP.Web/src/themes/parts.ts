@@ -110,6 +110,15 @@ export const parts = [
     'btn-profile',
     'profile-summary',
 
+    // Profile administration
+    'view-actions',
+    'user-list',
+    'user-item',
+    'user-info',
+    'user-name',
+    'user-meta',
+    'user-actions',
+
     // Base components
     'button',
     'icon',
@@ -125,6 +134,8 @@ export const parts = [
     'select',
     'field-hint',
     'field-error',
+    'color-picker',
+    'color-swatch',
     'dialog',
     'dialog-header',
     'dialog-title',

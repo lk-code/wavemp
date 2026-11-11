@@ -144,7 +144,8 @@
       "previews": "Layouts",
       "profiles": "Profilauswahl",
       "alerts": "Meldungen",
-      "forms": "Formulare"
+      "forms": "Formulare",
+      "admin": "Profilverwaltung"
     },
     "samples": {
       "button": "Button",
@@ -176,7 +177,8 @@
       "optionOne": "Erste Option",
       "optionTwo": "Zweite Option",
       "hint": "Hilfetext zum Feld.",
-      "error": "Dieser Wert ist ungültig."
+      "error": "Dieser Wert ist ungültig.",
+      "colorLabel": "Farbe"
     },
     "transportStates": {
       "idle": "Leerlauf",
@@ -214,7 +216,8 @@
     "label": "Profilmenü",
     "open": "Profil: {name}",
     "settings": "Einstellungen",
-    "switchProfile": "Profil wechseln"
+    "switchProfile": "Profil wechseln",
+    "manageProfiles": "Profile verwalten"
   },
   "settings": {
     "title": "Einstellungen",
@@ -224,6 +227,56 @@
     "languages": {
       "en": "English",
       "de": "Deutsch"
+    }
+  },
+  "adminUsers": {
+    "title": "Profile verwalten",
+    "list": "Profile",
+    "add": "Profil hinzufügen",
+    "edit": "{name} bearbeiten",
+    "delete": "{name} löschen",
+    "builtIn": "Integriert",
+    "builtInNotDeletable": "Das integrierte Admin-Profil kann nicht gelöscht werden.",
+    "created": "Erstellt am {date}",
+    "loadError": "Die Profile konnten nicht geladen werden.",
+    "roles": {
+      "admin": "Admin",
+      "user": "Benutzer"
+    },
+    "dialog": {
+      "createTitle": "Profil hinzufügen",
+      "editTitle": "Profil bearbeiten",
+      "name": "Name",
+      "initials": "Kürzel",
+      "initialsHint": "Leer lassen, um es aus dem Namen zu bilden.",
+      "color": "Farbe",
+      "currentColor": "Aktuelle Farbe",
+      "role": "Rolle",
+      "roleBuiltInHint": "Das integrierte Admin-Profil bleibt immer Admin.",
+      "save": "Speichern"
+    },
+    "colors": {
+      "blue": "Blau",
+      "teal": "Petrol",
+      "green": "Grün",
+      "purple": "Lila",
+      "pink": "Pink",
+      "orange": "Orange",
+      "brown": "Braun",
+      "slate": "Schiefergrau"
+    },
+    "errors": {
+      "nameRequired": "Bitte gib einen Namen ein.",
+      "nameTaken": "Ein Profil mit diesem Namen existiert bereits.",
+      "invalid": "Bitte prüfe deine Eingaben.",
+      "saveFailed": "Das Profil konnte nicht gespeichert werden.",
+      "deleteFailed": "Das Profil konnte nicht gelöscht werden.",
+      "notFound": "Dieses Profil existiert nicht mehr."
+    },
+    "deleteDialog": {
+      "title": "Profil löschen",
+      "text": "Das Profil {name} löschen? Das kann nicht rückgängig gemacht werden.",
+      "confirm": "Löschen"
     }
   }
 }

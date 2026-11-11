@@ -74,6 +74,7 @@ export const iconSlots = {
     settings: { file: regular('gear-six'), area: 'general' },
     profile: { file: regular('user-circle'), area: 'general' },
     'switch-profile': { file: regular('user-switch'), area: 'general' },
+    'manage-profiles': { file: regular('users'), area: 'general' },
     edit: { file: regular('pencil-simple'), area: 'general' },
     delete: { file: regular('trash'), area: 'general' },
     add: { file: regular('plus'), area: 'general' },

@@ -21,6 +21,7 @@ const runtimeVariables = [
     '--wmp-menu-x',
     '--wmp-menu-y',
     '--wmp-profile-color',
+    '--wmp-swatch-color',
 ]
 
 function read(file: string): string {

@@ -66,6 +66,7 @@ const icons: Record<IconStyle, string[]> = {
         'trash',
         'user-circle',
         'user-switch',
+        'users',
         'video-camera',
         'waveform',
         'x',

@@ -30,3 +30,21 @@ export function profileTileStates(
 export function isFirstStart(all: readonly ProfileLike[]): boolean {
     return all.length === 1 && !!all[0]?.isBuiltIn
 }
+
+export interface ProfileColor {
+    /** Color as #rrggbb, the same palette as the server uses for new profiles. */
+    readonly value: string
+    readonly labelKey: string
+}
+
+/** Palette of the color selection; every color has a contrast of at least 4.5:1 to white. */
+export const profileColorOptions: readonly ProfileColor[] = [
+    { value: '#1f6fd6', labelKey: 'adminUsers.colors.blue' },
+    { value: '#0b7a8a', labelKey: 'adminUsers.colors.teal' },
+    { value: '#2e7d32', labelKey: 'adminUsers.colors.green' },
+    { value: '#6a3fb5', labelKey: 'adminUsers.colors.purple' },
+    { value: '#c2185b', labelKey: 'adminUsers.colors.pink' },
+    { value: '#c4441c', labelKey: 'adminUsers.colors.orange' },
+    { value: '#8a5a00', labelKey: 'adminUsers.colors.brown' },
+    { value: '#4a5a6a', labelKey: 'adminUsers.colors.slate' },
+]
