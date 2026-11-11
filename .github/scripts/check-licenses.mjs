@@ -12,7 +12,7 @@
 // Exits with 0 if every dependency has an allowed license, otherwise with 1.
 
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
@@ -365,11 +365,55 @@ export function checkNuGet(policy) {
     }
 }
 
-function readToolLicense(packagesDirectory, id, version) {
+/**
+ * Returns the path of the directory entry whose name equals the given name ignoring case, or
+ * undefined if there is none. An entry with exactly that name is preferred.
+ */
+function findEntryIgnoringCase(directory, name) {
+    const exact = path.join(directory, name)
+    if (existsSync(exact)) {
+        return exact
+    }
+
+    let entries
+    try {
+        entries = readdirSync(directory)
+    } catch {
+        return undefined
+    }
+    const lowerName = name.toLowerCase()
+    const entry = entries.find((item) => item.toLowerCase() === lowerName)
+
+    return entry === undefined ? undefined : path.join(directory, entry)
+}
+
+/**
+ * Returns the path of the nuspec file of a restored package, or undefined if it is missing.
+ * NuGet names the package and version folders in lowercase, but `dotnet tool restore` keeps the
+ * original case of the package ID in the nuspec file name (e.g. Microsoft.OpenApi.Kiota.nuspec).
+ * Linux file systems are case-sensitive, so every part of the path is matched ignoring case.
+ */
+function findPackageNuspec(packagesDirectory, id, version) {
     const lowerId = id.toLowerCase()
-    const file = path.join(packagesDirectory, lowerId, version.toLowerCase(), `${lowerId}.nuspec`)
-    if (!existsSync(file)) {
-        throw new Error(`The .NET tool ${id} ${version} is not restored (${file} is missing)`)
+    let file = packagesDirectory
+    for (const name of [lowerId, version.toLowerCase(), `${lowerId}.nuspec`]) {
+        file = findEntryIgnoringCase(file, name)
+        if (file === undefined) {
+            return undefined
+        }
+    }
+
+    return file
+}
+
+function readToolLicense(packagesDirectory, id, version) {
+    const file = findPackageNuspec(packagesDirectory, id, version)
+    if (file === undefined) {
+        const lowerId = id.toLowerCase()
+        const folder = path.join(packagesDirectory, lowerId, version.toLowerCase())
+        throw new Error(
+            `The .NET tool ${id} ${version} is not restored (no ${lowerId}.nuspec in ${folder})`,
+        )
     }
     const match = /<license\b[^>]*\btype="expression"[^>]*>([^<]+)<\/license>/.exec(
         readFileSync(file, 'utf8'),

@@ -51,7 +51,10 @@ function createProject(name, packages) {
 
 /**
  * Creates a .NET tool manifest and the restored tool packages (nuspec files) in a NuGet packages
- * folder. Each tool has an id and the license element of its nuspec (or none).
+ * folder. Each tool has an id and the license element of its nuspec (or none). Package and version
+ * folders are lowercase like in the NuGet packages folder. The nuspec file name is lowercase as
+ * well, unless the tool sets originalCase: then it keeps the case of the id, like
+ * `dotnet tool restore` does.
  */
 function createTools(name, tools) {
     const directory = path.join(temporaryDirectory, name)
@@ -66,7 +69,8 @@ function createTools(name, tools) {
     })
     for (const tool of tools) {
         const id = tool.id.toLowerCase()
-        const nuspec = path.join(packagesDirectory, id, '1.0.0', `${id}.nuspec`)
+        const fileName = `${tool.originalCase ? tool.id : id}.nuspec`
+        const nuspec = path.join(packagesDirectory, id, '1.0.0', fileName)
         mkdirSync(path.dirname(nuspec), { recursive: true })
         writeFileSync(
             nuspec,
@@ -312,6 +316,33 @@ describe('.NET tool license check', () => {
             'file.tool': false,
             'gpl.tool': false,
             'unlicensed.tool': false,
+        })
+    })
+
+    test('reads nuspec files that keep the case of the package ID', () => {
+        const { manifest, packagesDirectory } = createTools('tools-original-case', [
+            { id: 'Microsoft.OpenApi.Kiota', license: expression('MIT'), originalCase: true },
+            { id: 'Mixed.Gpl.Tool', license: expression('GPL-3.0-only'), originalCase: true },
+            { id: 'lower-case-tool', license: expression('Apache-2.0') },
+        ])
+
+        const results = checkDotnetTools(
+            withToolManifest(loadPolicy(), manifest),
+            packagesDirectory,
+        )
+
+        assert.deepEqual(
+            Object.fromEntries(results.map((result) => [result.name, result.license])),
+            {
+                'lower-case-tool': 'Apache-2.0',
+                'microsoft.openapi.kiota': 'MIT',
+                'mixed.gpl.tool': 'GPL-3.0-only',
+            },
+        )
+        assert.deepEqual(byName(results), {
+            'lower-case-tool': true,
+            'microsoft.openapi.kiota': true,
+            'mixed.gpl.tool': false,
         })
     })
 
