@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="WaveMP.Data.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- snake_case names for tables, columns, keys and indexes (PostgreSQL convention). -->
     <PackageReference Include="EFCore.NamingConventions" />
     <!--
