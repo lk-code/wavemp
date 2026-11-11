@@ -477,6 +477,11 @@ a[data-part='breadcrumb-link']:hover {
     color: inherit;
 }
 
+/* Actions of a detail page, e.g. "Edit metadata", carry a blue icon like the job actions. */
+[data-part='detail-actions'] [data-part='icon'] {
+    --wmp-icon-fill: linear-gradient(#4aa8ff, #1f6fd6);
+}
+
 [data-part='meta-value'] > [data-part='link']:hover {
     color: #1f6fd6;
 }
@@ -789,6 +794,18 @@ a[data-part='breadcrumb-link']:hover {
 
 [data-part='field-error'] {
     color: #c62828;
+}
+
+/* Greyed-out fields, e.g. in the metadata editor of a song with a video only. */
+[data-part='field'] > [data-part='input']:disabled {
+    border-color: #c9d0d8;
+    background: linear-gradient(#f4f6f8, #eceff2);
+    box-shadow: none;
+    color: #8a929c;
+}
+
+[data-part='form-note'] {
+    color: #6b737e;
 }
 
 [data-part='alert'] {
