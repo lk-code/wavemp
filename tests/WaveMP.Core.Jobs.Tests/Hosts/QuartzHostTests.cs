@@ -107,6 +107,28 @@ public class QuartzHostTests
     }
 
     [Test]
+    public async Task ScheduledRun_DueWhileAnotherRunHoldsTheJob_IsSkipped()
+    {
+        TestScheduleProvider provider = new() { Interval = TimeSpan.FromHours(1), StartupDelay = TimeSpan.FromSeconds(3) };
+        await using TestHost host = await TestHost.StartAsync(provider);
+        IJobScheduler scheduler = host.Services.GetRequiredService<IJobScheduler>();
+        DateTimeOffset due = (await scheduler.GetNextRunAsync(GatedJobId))!.Value;
+
+        await scheduler.TriggerAsync(GatedJobId, new Dictionary<string, string>());
+        await host.Probe.WaitForStartsAsync(1);
+        DateTimeOffset manualRunStarted = DateTimeOffset.UtcNow;
+        await WaitUntilAsync(() => DateTimeOffset.UtcNow
+            > due + JobScheduler.ScheduledMisfireThreshold + TimeSpan.FromMilliseconds(500));
+        host.Probe.Open();
+        await host.Probe.WaitForEndsAsync(1);
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        manualRunStarted.Should().BeBefore(due, "the manual run must hold the job when the scheduled run is due");
+        host.Probe.Starts.Should().Be(1);
+        (await scheduler.GetNextRunAsync(GatedJobId)).Should().Be(due + provider.Interval);
+    }
+
+    [Test]
     public async Task TwoHosts_InOneProcess_RunTheirJobsIndependently()
     {
         await using TestHost first = await TestHost.StartAsync();
@@ -234,11 +256,13 @@ public class QuartzHostTests
     {
         public TimeSpan Interval { get; set; }
 
+        public TimeSpan StartupDelay { get; init; } = TimeSpan.FromHours(1);
+
         public string JobId => GatedJobId;
 
         public JobSchedule? GetSchedule(JobScheduleReason reason)
         {
-            return new JobSchedule(Interval, reason == JobScheduleReason.Startup ? TimeSpan.FromHours(1) : Interval);
+            return new JobSchedule(Interval, reason == JobScheduleReason.Startup ? StartupDelay : Interval);
         }
     }
 

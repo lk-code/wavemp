@@ -11,6 +11,12 @@ internal sealed class JobScheduler(
     TimeProvider timeProvider,
     ILogger<JobScheduler> logger) : IJobScheduler
 {
+    /// <summary>
+    /// How late a scheduled run may start before it counts as missed and is skipped. Quartz' default of one minute
+    /// would start a scheduled run right after a manual or file watcher run that held the job for less than that.
+    /// </summary>
+    internal static readonly TimeSpan ScheduledMisfireThreshold = TimeSpan.FromSeconds(1);
+
     private readonly JobRegistration[] _registrations = [.. registrations];
     private readonly IJobScheduleProvider[] _scheduleProviders = [.. scheduleProviders];
 
@@ -95,11 +101,13 @@ internal sealed class JobScheduler(
         }
 
         // A run that was missed, e.g. while a manual run of the same job was running, is skipped instead of being
-        // made up right after.
+        // made up right after: once the job is free again more than the threshold after the scheduled time, the
+        // trigger moves on to its next scheduled time.
         ITrigger trigger = TriggerBuilder.Create(timeProvider)
             .WithIdentity(key)
             .ForJob(JobKeyOf(provider.JobId))
             .StartAt(timeProvider.GetUtcNow() + schedule.FirstRunDelay)
+            .WithMisfireThreshold(ScheduledMisfireThreshold)
             .WithSchedule(SimpleScheduleBuilder.Create()
                 .WithInterval(schedule.Interval)
                 .RepeatForever()
