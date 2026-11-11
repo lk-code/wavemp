@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WaveMP.Core.Jobs.Runs;
+using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Metadata.Probes;
 using WaveMP.Core.Metadata.Readers;
 using WaveMP.Core.Scanning.Discoveries;

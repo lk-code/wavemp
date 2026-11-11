@@ -1,7 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using WaveMP.Core.Jobs.Definitions;
 using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Scanning.Jobs;
@@ -17,24 +15,13 @@ namespace WaveMP.Core.Scanning.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the library scan. The media folder comes from <c>MEDIA_PATH</c> (default <c>/media</c>; relative
-    /// paths against the content root), further settings from the section <c>Scanning</c>. Needs <c>AddWaveMpData</c>,
-    /// <c>AddWaveMpSettings</c>, <c>AddWaveMpMetadata</c> and <c>AddWaveMpJobs</c>. Includes the scan job, its periodic
-    /// schedule and the file watcher (hosted service).
+    /// Registers the library scan, with settings from the section <c>Scanning</c>. Needs <c>AddWaveMpData</c>,
+    /// <c>AddWaveMpSettings</c>, <c>AddWaveMpMetadata</c> (which also provides the media folder) and
+    /// <c>AddWaveMpJobs</c>. Includes the scan job, its periodic schedule and the file watcher (hosted service).
     /// </summary>
     public static IServiceCollection AddWaveMpScanning(this IServiceCollection services)
     {
         services.TryAddSingleton(TimeProvider.System);
-        services.AddOptions<MediaLibraryOptions>()
-            .Configure<IConfiguration, IServiceProvider>((options, configuration, provider) =>
-            {
-                string path = configuration[MediaLibraryOptions.PathVariable] is { Length: > 0 } configured
-                    ? configured
-                    : MediaLibraryOptions.DefaultPath;
-                string contentRoot = provider.GetService<IHostEnvironment>()?.ContentRootPath
-                    ?? Directory.GetCurrentDirectory();
-                options.RootPath = Path.GetFullPath(path, contentRoot);
-            });
         services.AddOptions<ScanOptions>().BindConfiguration(ScanOptions.SectionName);
 
         services.AddSingleton<IScanProgressTracker, ScanProgressTracker>();

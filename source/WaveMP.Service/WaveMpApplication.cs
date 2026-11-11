@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
 using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Metadata.Extensions;
+using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Scanning.Extensions;
-using WaveMP.Core.Scanning.Options;
 using WaveMP.Core.Settings.Extensions;
 using WaveMP.Core.Users.Extensions;
 using WaveMP.Data;

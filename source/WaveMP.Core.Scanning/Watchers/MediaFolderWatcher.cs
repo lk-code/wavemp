@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using WaveMP.Core.Jobs.Definitions;
 using WaveMP.Core.Jobs.Runs;
 using WaveMP.Core.Jobs.Services;
+using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Scanning.Discoveries;
 using WaveMP.Core.Scanning.Jobs;
 using WaveMP.Core.Scanning.Options;

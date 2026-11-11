@@ -6,6 +6,7 @@ using NSubstitute;
 using WaveMP.Core.Jobs.Definitions;
 using WaveMP.Core.Jobs.Runs;
 using WaveMP.Core.Jobs.Services;
+using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Scanning.Options;
 using WaveMP.Core.Scanning.Watchers;
 using WaveMP.Core.Settings.Groups;

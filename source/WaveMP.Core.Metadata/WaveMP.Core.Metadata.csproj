@@ -5,6 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- IHostEnvironment: relative media folders are resolved against the content root. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <!-- LGPL-2.1-only: used unchanged as a separate assembly (dynamic linking), see assets/licenses/taglibsharp. -->
     <PackageReference Include="TagLibSharp" />

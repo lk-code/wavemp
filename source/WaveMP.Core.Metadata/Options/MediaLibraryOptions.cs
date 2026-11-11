@@ -1,4 +1,4 @@
-namespace WaveMP.Core.Scanning.Options;
+namespace WaveMP.Core.Metadata.Options;
 
 /// <summary>
 /// The media folder, read from the environment variable <c>MEDIA_PATH</c> (default <c>/media</c>, the mount point
