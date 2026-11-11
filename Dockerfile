@@ -19,9 +19,11 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY .editorconfig global.json Directory.Build.props Directory.Packages.props ./
+COPY source/WaveMP.Core.Users/WaveMP.Core.Users.csproj source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/WaveMP.Data.csproj source/WaveMP.Data/
 COPY source/WaveMP.Service/WaveMP.Service.csproj source/WaveMP.Service/
 RUN dotnet restore source/WaveMP.Service/WaveMP.Service.csproj -a "$TARGETARCH"
+COPY source/WaveMP.Core.Users/ source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/ source/WaveMP.Data/
 COPY source/WaveMP.Service/ source/WaveMP.Service/
 # The built web app becomes part of the service's static assets.
