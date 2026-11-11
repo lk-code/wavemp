@@ -17,6 +17,8 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     public DbSet<ServerSecret> ServerSecrets => Set<ServerSecret>();
 
+    public DbSet<ServerSetting> ServerSettings => Set<ServerSetting>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Applied one by one instead of scanning the assembly: a scan also loads the design-time types, whose
@@ -26,5 +28,6 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
         modelBuilder.ApplyConfiguration(new UserSettingsConfiguration());
         modelBuilder.ApplyConfiguration(new SessionConfiguration());
         modelBuilder.ApplyConfiguration(new ServerSecretConfiguration());
+        modelBuilder.ApplyConfiguration(new ServerSettingConfiguration());
     }
 }

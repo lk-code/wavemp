@@ -44,6 +44,28 @@ namespace WaveMP.Data.Migrations
                     b.ToTable("server_secrets", (string)null);
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.ServerSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("value");
+
+                    b.HasKey("Key")
+                        .HasName("pk_server_settings");
+
+                    b.ToTable("server_settings", (string)null);
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.Session", b =>
                 {
                     b.Property<Guid>("Id")

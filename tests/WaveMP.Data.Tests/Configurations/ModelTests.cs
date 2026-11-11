@@ -30,6 +30,7 @@ public class ModelTests
     [TestCase(typeof(UserSettings), "user_settings")]
     [TestCase(typeof(Session), "sessions")]
     [TestCase(typeof(ServerSecret), "server_secrets")]
+    [TestCase(typeof(ServerSetting), "server_settings")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);
@@ -90,6 +91,14 @@ public class ModelTests
         IProperty role = GetEntity(typeof(User)).FindProperty(nameof(User.Role))!;
 
         role.GetProviderClrType().Should().Be<string>();
+    }
+
+    [Test]
+    public void ServerSetting_Value_IsStoredAsJsonb()
+    {
+        IProperty value = GetEntity(typeof(ServerSetting)).FindProperty(nameof(ServerSetting.Value))!;
+
+        value.GetColumnType().Should().Be("jsonb");
     }
 
     private IEntityType GetEntity(Type type)
