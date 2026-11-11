@@ -16,6 +16,7 @@ vi.mock('@/library/api', () => covers)
 
 const LibraryCover = (await import('../LibraryCover.vue')).default
 const TileList = (await import('../TileList.vue')).default
+const TrackFileList = (await import('../TrackFileList.vue')).default
 const TrackGroupList = (await import('../TrackGroupList.vue')).default
 
 const alpha = { id: 'alpha', name: 'Alpha Band' }
@@ -236,6 +237,73 @@ describe('LibraryCover', () => {
         expect(wrapper.find('[data-part="cover-image"]').exists()).toBe(false)
         expect(wrapper.get('[data-part="cover"]').attributes('data-state')).toBe('placeholder')
         expect(covers.fetchAlbumCover).not.toHaveBeenCalled()
+        wrapper.unmount()
+    })
+})
+
+describe('TrackFileList', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia())
+    })
+
+    it('shows path, kind, use and technical details of every file', async () => {
+        const { wrapper } = await mountWith(TrackFileList, {
+            label: 'Files',
+            files: [
+                {
+                    id: 'flac',
+                    kind: 'Audio',
+                    relativePath: 'Band/Album/02 - Song.flac',
+                    isPrimary: true,
+                    isLossless: true,
+                    isWritable: true,
+                    codec: 'flac',
+                    bitrate: 912_400,
+                    sampleRate: 44_100,
+                    bitDepth: 16,
+                    channels: 2,
+                    durationMilliseconds: 61_000,
+                    size: 4_200_000,
+                },
+                {
+                    id: 'mkv',
+                    kind: 'Video',
+                    relativePath: 'Band/Album/02 - Song.mkv',
+                    isPrimary: false,
+                    width: 1920,
+                    height: 1080,
+                    size: 999,
+                    issue: 'file.probe_failed',
+                },
+            ],
+        })
+
+        const items = wrapper.findAll('[data-part="file-item"]')
+        expect(items.map((item) => item.attributes('data-state'))).toEqual([
+            'audio primary',
+            'video',
+        ])
+        expect(items[0]!.get('[data-part="file-path"]').text()).toBe('Band/Album/02 - Song.flac')
+        const badges = items[0]!
+            .findAll('[data-part="badge"]')
+            .map((badge) => badge.attributes('data-state'))
+        expect(badges).toEqual(['audio', 'primary', 'lossless', 'writable'])
+        const details = items[0]!
+            .findAll('[data-part="file-meta"] > [data-part="label"]')
+            .map((label) => label.text())
+        expect(details).toEqual([
+            'FLAC',
+            '912 kbit/s',
+            '44.1 kHz',
+            '16 bit',
+            'Channels: 2',
+            '1:01',
+            '4.2 MB',
+        ])
+        expect(items[1]!.get('[data-part="badge"][data-state="issue"]').text()).toBe(
+            'No media information',
+        )
+        expect(items[1]!.text()).toContain('1920 × 1080')
         wrapper.unmount()
     })
 })

@@ -36,6 +36,7 @@ import LibraryEmpty from '@/components/library/LibraryEmpty.vue'
 import LoadMore from '@/components/library/LoadMore.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
 import TileList from '@/components/library/TileList.vue'
+import TrackFileList from '@/components/library/TrackFileList.vue'
 import TrackGroupList from '@/components/library/TrackGroupList.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
@@ -58,7 +59,7 @@ import { parts } from '@/themes/parts'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
-import { sampleTiles, sampleTracks } from './samples'
+import { sampleFiles, sampleTiles, sampleTracks } from './samples'
 
 const i18n = useI18n({ useScope: 'global' })
 const { t } = i18n
@@ -101,6 +102,7 @@ const treeCollapsed = ref<string[]>([])
 const selectedTrack = ref<string | undefined>('sample-track-2')
 const sampleGroups = computed(() => groupTracksByAlbum(sampleTracks(t)))
 const tiles = computed(() => sampleTiles(t))
+const files = sampleFiles()
 const sortSampleMenu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
 const sortSampleItems = computed<MenuItem[]>(() => [
     ...sortOptions('tracks', true).map((key) => ({
@@ -489,6 +491,10 @@ const sampleRunningJob: Job[] = [
                         format.number(4)
                     }}</MetaItem>
                 </DetailHeader>
+                <section data-part="section" data-item="files">
+                    <h2 data-part="section-title">{{ t('track.filesTitle') }}</h2>
+                    <TrackFileList :files="files" :label="t('files.label')" />
+                </section>
             </div>
             <div data-part="dev-samples">
                 <BaseButton

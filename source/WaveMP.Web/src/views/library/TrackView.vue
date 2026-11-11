@@ -1,19 +1,25 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Track } from '@/api/generated/models'
+import type { MediaFile, Track } from '@/api/generated/models'
+import { fetchAllPages } from '@/api/paging'
 import { statusOf } from '@/api/problems'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
 import DetailHeader from '@/components/library/DetailHeader.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
+import TrackFileList from '@/components/library/TrackFileList.vue'
 import { useFormat } from '@/composables/useFormat'
-import { getTrack } from '@/library/api'
+import { getTrack, listTrackFiles } from '@/library/api'
 import { artistLabelKey, durationSeconds, mediaKey } from '@/library/presentation'
 import { usePageTitleStore } from '@/stores/pageTitle'
+import { useSessionStore } from '@/stores/session'
 
-/** The details of a track: its cover, artist, album, numbers, year, genre, length and media. */
+/**
+ * The details of a track: its cover, artist, album, numbers, year, genre, length and media. Admins
+ * also see all its files.
+ */
 const props = defineProps<{
     id: string
 }>()
@@ -21,9 +27,13 @@ const props = defineProps<{
 const { t } = useI18n()
 const format = useFormat()
 const pageTitle = usePageTitleStore()
+const session = useSessionStore()
+const filesTitleId = useId()
 
 const track = ref<Track | null>(null)
 const status = ref<'loading' | 'ready' | 'notFound' | 'error'>('loading')
+const files = ref<MediaFile[]>([])
+const filesStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
 let generation = 0
 
 const duration = computed(() => durationSeconds(track.value?.durationMilliseconds))
@@ -49,7 +59,40 @@ async function load(): Promise<void> {
     }
 }
 
-watch(() => props.id, load, { immediate: true })
+async function reload(): Promise<void> {
+    await load()
+    if (status.value === 'ready' && session.isAdmin) {
+        await loadFiles()
+    }
+}
+
+async function loadFiles(): Promise<void> {
+    const current = generation
+    filesStatus.value = 'loading'
+    try {
+        const loaded = await fetchAllPages((offset, limit) =>
+            listTrackFiles(props.id, { offset, limit }),
+        )
+        if (current === generation) {
+            files.value = loaded
+            filesStatus.value = 'ready'
+        }
+    } catch {
+        if (current === generation) {
+            filesStatus.value = 'error'
+        }
+    }
+}
+
+watch(
+    () => props.id,
+    () => {
+        files.value = []
+        filesStatus.value = 'idle'
+        void reload()
+    },
+    { immediate: true },
+)
 onBeforeUnmount(() => pageTitle.clear())
 </script>
 
@@ -67,7 +110,7 @@ onBeforeUnmount(() => pageTitle.clear())
         </div>
         <div v-else-if="status === 'error'" data-part="empty-state">
             <p data-part="empty-state-title">{{ t('library.loadError') }}</p>
-            <BaseButton :label="t('library.retry')" @click="load" />
+            <BaseButton :label="t('library.retry')" @click="reload" />
         </div>
         <template v-else-if="track">
             <DetailHeader :title="track.title ?? ''">
@@ -121,6 +164,23 @@ onBeforeUnmount(() => pageTitle.clear())
                     {{ t(mediaKey({ hasAudio: track.hasAudio, hasVideo: track.hasVideo })) }}
                 </MetaItem>
             </DetailHeader>
+            <section
+                v-if="session.isAdmin"
+                data-part="section"
+                data-item="files"
+                :aria-labelledby="filesTitleId"
+            >
+                <h2 :id="filesTitleId" data-part="section-title">{{ t('track.filesTitle') }}</h2>
+                <div v-if="filesStatus === 'error'" data-part="empty-state">
+                    <p data-part="empty-state-title">{{ t('track.filesError') }}</p>
+                    <BaseButton :label="t('library.retry')" @click="loadFiles" />
+                </div>
+                <TrackFileList
+                    v-else-if="files.length > 0"
+                    :files="files"
+                    :label="t('files.label')"
+                />
+            </section>
         </template>
     </div>
 </template>

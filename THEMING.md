@@ -130,7 +130,7 @@ Example of a desktop layout with the sidebar on the right:
 | `list-group-rows` | `div` (`role="presentation"`) | `list-group` | Rows of the group |
 | `list-row` | `div` (`role="row"`, `aria-selected`) | `list-group-rows` | Row of a track |
 | `list-cell` | `span` (`role="gridcell"`) | `list-row` | Cell of a row |
-| `badge` | `span` | `list-cell`, `user-meta`, `scan-status`, `run-item`, `run-meta`, `job-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role, in `scan-status`, `run-item`, `run-meta` and `job-meta` a state, each with a visible `label` |
+| `badge` | `span` | `list-cell`, `user-meta`, `scan-status`, `run-item`, `run-meta`, `job-meta`, `file-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role, in `scan-status`, `run-item`, `run-meta` and `job-meta` a state, in `file-meta` the kind and use of a file, each with a visible `label` |
 | `tile-list` | `ul` | `view`, `section` | Albums, artists, genres or years as tiles |
 | `tile-item` | `li` | `tile-list` | One tile |
 | `tile` | `a` | `tile-item` | Link to the page of the entry with `cover`, `tile-title` and optionally `tile-subtitle`, see `data-kind` in [States](#states) |
@@ -140,6 +140,10 @@ Example of a desktop layout with the sidebar on the right:
 | `detail-info` | `div` | `detail-header` | `detail-title` and the details as `meta-item` |
 | `detail-title` | `h2` | `detail-info` | Name of the album, artist, genre, year or song |
 | `load-more` | `button` | `view`, `section` | Loads the next page of a list; also loads by itself when it scrolls into view |
+| `file-list` | `ul` | `section` | Files of a song on its page, for admins |
+| `file-item` | `li` | `file-list` | One file with `file-path` and `file-meta` |
+| `file-path` | `span` | `file-item` | Path of the file relative to the media folder |
+| `file-meta` | `span` | `file-item` | Kind, use and problem of the file as `badge` with a visible `label`, and its technical details (format, bitrate, resolution, size, ...) as `label`s |
 | `transport` | `section` | `app` | Transport bar; mini player and full-screen player on mobile |
 | `seek` | `div` | `transport` | Progress bar with a `slider` |
 | `now-playing-mini` | `button` | `transport` | Cover and title of the current track; opens Now Playing (desktop) or the full-screen player (mobile) |
@@ -257,7 +261,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `server-status` | `checking`, `healthy`, `degraded`, `unhealthy` or `unreachable` |
 | `search` | `empty` or `filled` |
 | `context-menu` | `open` or `closed` |
-| `badge` | the kind of hint, for example `has-video` or `video-only`; in `user-meta` `admin` or `user`, and `built-in`; in `scan-status` `idle`, `queued` or `running`; in `run-item`, `run-meta` and `job-meta` the status of the run: `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
+| `badge` | the kind of hint, for example `has-video` or `video-only`; in `file-meta` `audio`, `video`, `image`, `primary`, `lossless`, `writable` or `issue`; in `user-meta` `admin` or `user`, and `built-in`; in `scan-status` `idle`, `queued` or `running`; in `run-item`, `run-meta` and `job-meta` the status of the run: `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
 | `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
 | `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
 | `alert` | `error`, `success` or `info` |
@@ -268,6 +272,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `run-item` | `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
 | `progress` | `indeterminate` while the share done is unknown |
 | `load-more` | `loading` while the next page loads |
+| `file-item` | `audio`, `video` or `image`; additionally `primary` for the file the song plays |
 
 ### ARIA attributes and native states
 
@@ -302,7 +307,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`), the job (`library-scan`) or the section of the search and of an artist (`artists`, `albums`, `tracks`) |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`), the job (`library-scan`) or the section of the search and of an artist (`artists`, `albums`, `tracks`) and of a song (`files`) |
 
 ## Variables
 
@@ -607,4 +612,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
     - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.
     - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item` (`menu-item` already carried it, now it is documented), the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.
-    - Additions without a version change: the library with tiles (`tile-list`, `tile-item`, `tile`, `tile-title`, `tile-subtitle`, attribute `data-kind`), detail pages (`detail-header`, `detail-info`, `detail-title`, `data-view` `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`) and the search (`data-view="library-search"`), the part `cover-image`, the button `load-more` with the state `loading`, the state `video-only` of `list-row` and `badge`, `aria-busy` on `view`, `menuitemradio` entries with `aria-checked` in the sort options, further values of `data-field` and `data-item` (also on `section`), `link` in `meta-value`, `view` and `section`, the icon slots `album`, `artist`, `genre` and `year` and the variables `--wmp-cover-size-l` and `--wmp-tile-width`. The sort button `sort` is active where a list can be sorted.
+    - Additions without a version change: the library with tiles (`tile-list`, `tile-item`, `tile`, `tile-title`, `tile-subtitle`, attribute `data-kind`), detail pages (`detail-header`, `detail-info`, `detail-title`, `data-view` `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`) and the search (`data-view="library-search"`), the part `cover-image`, the button `load-more` with the state `loading`, the files of a song for admins (`file-list`, `file-item`, `file-path`, `file-meta` and their states), the state `video-only` of `list-row` and `badge`, `aria-busy` on `view`, `menuitemradio` entries with `aria-checked` in the sort options, further values of `data-field` and `data-item` (also on `section`), `link` in `meta-value`, `view` and `section`, the icon slots `album`, `artist`, `genre` and `year` and the variables `--wmp-cover-size-l` and `--wmp-tile-width`. The sort button `sort` is active where a list can be sorted.

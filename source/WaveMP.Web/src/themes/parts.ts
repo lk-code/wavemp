@@ -83,6 +83,10 @@ export const parts = [
     'detail-info',
     'detail-title',
     'load-more',
+    'file-list',
+    'file-item',
+    'file-path',
+    'file-meta',
 
     // Transport
     'transport',

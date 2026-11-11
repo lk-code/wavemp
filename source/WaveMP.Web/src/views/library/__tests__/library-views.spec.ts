@@ -30,6 +30,7 @@ vi.mock('@/library/api', () => api)
 const LibraryView = (await import('../LibraryView.vue')).default
 const AlbumView = (await import('../AlbumView.vue')).default
 const SearchView = (await import('../SearchView.vue')).default
+const TrackView = (await import('../TrackView.vue')).default
 
 const alpha = { id: 'alpha', name: 'Alpha Band' }
 const album = { id: 'first', title: 'First Album', artist: alpha, isCompilation: false }
@@ -277,6 +278,73 @@ describe('SearchView', () => {
         const { wrapper } = await mountView(SearchView, '/library/search?q=xyz')
 
         expect(wrapper.get('[data-part="empty-state-text"]').text()).toBe('Nothing matches “xyz”.')
+        wrapper.unmount()
+    })
+})
+
+describe('TrackView', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia())
+        for (const mock of Object.values(api)) {
+            mock.mockReset()
+        }
+        api.getTrack.mockResolvedValue(
+            track('Closing', {
+                trackNumber: 2,
+                year: 2001,
+                hasVideo: true,
+                durationMilliseconds: 61_000,
+            }),
+        )
+        api.listTrackFiles.mockResolvedValue({
+            items: [
+                { id: 'f', kind: 'Audio', relativePath: 'Band/Album/02 - Closing.flac', size: 10 },
+            ],
+            total: 1,
+        })
+    })
+
+    function signIn(role: 'Admin' | 'User') {
+        useSessionStore().$patch({
+            token: 'token',
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            profile: {
+                id: 'p',
+                name: 'Profile',
+                initials: 'P',
+                color: '#1f6fd6',
+                role,
+                isBuiltIn: false,
+            },
+        })
+    }
+
+    it('shows the details of the song and its files to admins', async () => {
+        signIn('Admin')
+
+        const { wrapper } = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+
+        expect(wrapper.get('[data-part="detail-title"]').text()).toBe('Closing')
+        expect(wrapper.get('[data-field="media"] [data-part="meta-value"]').text()).toBe(
+            'Audio and video',
+        )
+        expect(wrapper.get('[data-field="album"] [data-part="link"]').attributes('href')).toBe(
+            '/library/albums/first',
+        )
+        expect(api.listTrackFiles).toHaveBeenCalledWith('Closing', { offset: 0, limit: 100 })
+        expect(wrapper.get('[data-part="section"][data-item="files"]').text()).toContain(
+            '02 - Closing.flac',
+        )
+        wrapper.unmount()
+    })
+
+    it('hides the files from other profiles', async () => {
+        signIn('User')
+
+        const { wrapper } = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+
+        expect(wrapper.find('[data-item="files"]').exists()).toBe(false)
+        expect(api.listTrackFiles).not.toHaveBeenCalled()
         wrapper.unmount()
     })
 })
