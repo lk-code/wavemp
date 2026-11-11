@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <UserSecretsId>wavemp-service</UserSecretsId>
+    <!--
+      Full globalization with ICU (Unicode normalization, culture-aware comparisons). Written to the
+      runtimeconfig, where it takes precedence over DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: without
+      ICU the service fails at start instead of silently skipping the normalization.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 
   <PropertyGroup Label="Build-time OpenAPI document">

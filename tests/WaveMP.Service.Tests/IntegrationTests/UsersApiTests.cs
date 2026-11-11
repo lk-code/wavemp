@@ -124,6 +124,31 @@ public class UsersApiTests
         await response.ShouldBeProblemAsync(HttpStatusCode.Conflict, "user.name_taken");
     }
 
+    [Test]
+    public async Task CreateUser_WithTakenNameWithCombiningAccent_ReturnsConflict()
+    {
+        string unique = HttpClientExtensions.Unique();
+        UserDto user = await _admin.CreateUserAsync(new { name = $"José {unique}" });
+
+        HttpResponseMessage response = await _admin.PostAsJsonAsync(
+            "/api/v1/users",
+            new { name = $"josé {unique}" },
+            HttpClientExtensions.JsonOptions);
+
+        user.Name.Should().Be($"José {unique}");
+        await response.ShouldBeProblemAsync(HttpStatusCode.Conflict, "user.name_taken");
+    }
+
+    [Test]
+    public async Task CreateUser_WithCombiningAccents_StoresThePrecomposedName()
+    {
+        string unique = HttpClientExtensions.Unique();
+
+        UserDto user = await _admin.CreateUserAsync(new { name = $"Renée Müller {unique}" });
+
+        user.Name.Should().Be($"Renée Müller {unique}");
+    }
+
     [TestCase("{\"name\":\"\"}")]
     [TestCase("{\"name\":\"   \"}")]
     [TestCase("{}")]

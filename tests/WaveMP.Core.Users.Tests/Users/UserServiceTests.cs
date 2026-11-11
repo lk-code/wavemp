@@ -118,6 +118,28 @@ public class UserServiceTests
     }
 
     [Test]
+    public async Task CreateAsync_WithTakenNameWithCombiningAccent_FailsWithNameTaken()
+    {
+        // "José" exists; "Jose" with a combining acute accent is the same name.
+        _users.NameExistsAsync("JOSÉ", null, Arg.Any<CancellationToken>()).Returns(true);
+
+        UserResult result = await _service.CreateAsync(new CreateUserCommand("José"));
+
+        result.Error.Should().Be(UserError.NameTaken);
+        await _users.DidNotReceive().AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task CreateAsync_WithCombiningAccent_StoresThePrecomposedName()
+    {
+        UserResult result = await _service.CreateAsync(new CreateUserCommand("José"));
+
+        result.User!.Name.Should().Be("José");
+        result.User.NormalizedName.Should().Be("JOSÉ");
+        result.User.Initials.Should().Be("J");
+    }
+
+    [Test]
     public async Task CreateAsync_WithConflictWhileSaving_FailsWithNameTaken()
     {
         _users.AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>())
@@ -234,6 +256,18 @@ public class UserServiceTests
         _users.NameExistsAsync("CARLA", user.Id, Arg.Any<CancellationToken>()).Returns(true);
 
         UserResult result = await _service.UpdateAsync(user.Id, new UpdateUserCommand(Name: "Carla"));
+
+        result.Error.Should().Be(UserError.NameTaken);
+        user.Name.Should().Be("Anna");
+    }
+
+    [Test]
+    public async Task UpdateAsync_WithNameOfAnotherUserWithCombiningAccent_FailsWithNameTaken()
+    {
+        User user = Given(CreateUser("Anna"));
+        _users.NameExistsAsync("JOSÉ", user.Id, Arg.Any<CancellationToken>()).Returns(true);
+
+        UserResult result = await _service.UpdateAsync(user.Id, new UpdateUserCommand(Name: "josé"));
 
         result.Error.Should().Be(UserError.NameTaken);
         user.Name.Should().Be("Anna");

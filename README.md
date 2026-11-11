@@ -351,4 +351,4 @@ All foreign Docker images in the `Dockerfile`, in `docker-compose.dev.yml` and i
 ## License
 
 WaveMP is licensed under the [MIT License](LICENSE).
-It uses [ffmpeg](https://ffmpeg.org) as a separate process and [TagLib#](https://github.com/mono/taglib-sharp) (LGPL-2.1, used unchanged as a separate assembly), which are licensed separately; see the notices shipped with the image under `/licenses`.
+It uses [ffmpeg](https://ffmpeg.org) as a separate process, [TagLib#](https://github.com/mono/taglib-sharp) (LGPL-2.1, used unchanged as a separate assembly) and, in the Docker image, [ICU](https://icu.unicode.org) (Unicode-3.0) for Unicode normalization and culture-aware text handling, which are licensed separately; see the notices shipped with the image under `/licenses`.

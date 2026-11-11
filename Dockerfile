@@ -54,15 +54,22 @@ RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -a "$T
 # --- Runtime --------------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:21c3f9798416cba4c0576a947c286231cb71ea2884896cb968253f5c9668f930 AS runtime
 
+# The Alpine base image runs .NET in invariant globalization mode, without ICU. WaveMP needs ICU
+# for Unicode normalization (profile names, tags) and culture-aware comparisons, so ICU with the
+# data of all cultures is installed and the invariant mode is turned off (the service also sets
+# InvariantGlobalization=false, so it fails at start instead of running without ICU).
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 # ffmpeg and ffprobe are used as external processes only (never linked); the cache scales covers
 # to WebP with the libwebp encoder of the Alpine ffmpeg package.
-RUN apk add --no-cache ffmpeg \
-    && mkdir -p /licenses/ffmpeg /licenses/phosphor-icons /licenses/taglibsharp /licenses/wavemp /data /media \
+RUN apk add --no-cache ffmpeg icu-data-full icu-libs \
+    && mkdir -p /licenses/ffmpeg /licenses/icu /licenses/phosphor-icons /licenses/taglibsharp /licenses/wavemp /data /media \
     && ffmpeg -hide_banner -version > /licenses/ffmpeg/VERSION \
     && chown "$APP_UID" /data
 
 COPY LICENSE /licenses/wavemp/LICENSE
 COPY assets/licenses/ffmpeg/ /licenses/ffmpeg/
+COPY assets/licenses/icu/ /licenses/icu/
 COPY assets/licenses/taglibsharp/ /licenses/taglibsharp/
 COPY assets/web/icons/phosphor/LICENSE /licenses/phosphor-icons/LICENSE
 

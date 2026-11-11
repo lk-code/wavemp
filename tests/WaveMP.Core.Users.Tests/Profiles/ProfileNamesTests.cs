@@ -27,6 +27,27 @@ public class ProfileNamesTests
         name.Should().Be("Krämer");
     }
 
+    [Test]
+    public void TryNormalize_WithCombiningAndPrecomposedAccent_ReturnsTheSamePrecomposedName()
+    {
+        ProfileNames.TryNormalize("José", out string combining).Should().BeTrue();
+        ProfileNames.TryNormalize("José", out string precomposed).Should().BeTrue();
+
+        combining.Should().Be("José");
+        precomposed.Should().Be("José");
+    }
+
+    [TestCase("José", "josé")]
+    [TestCase("JOSÉ", "José")]
+    [TestCase("Renée Müller", "RENÉE MÜLLER")]
+    public void ToNormalized_WithCombiningAndPrecomposedAccents_ReturnsTheSameValue(string first, string second)
+    {
+        ProfileNames.TryNormalize(first, out string firstName).Should().BeTrue();
+        ProfileNames.TryNormalize(second, out string secondName).Should().BeTrue();
+
+        ProfileNames.ToNormalized(firstName).Should().Be(ProfileNames.ToNormalized(secondName));
+    }
+
     [TestCase(null)]
     [TestCase("")]
     [TestCase("   ")]
