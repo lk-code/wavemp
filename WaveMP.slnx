@@ -6,6 +6,7 @@
     <Project Path="source/WaveMP.Core.Metadata/WaveMP.Core.Metadata.csproj" />
     <Project Path="source/WaveMP.Core.Scanning/WaveMP.Core.Scanning.csproj" />
     <Project Path="source/WaveMP.Core.Settings/WaveMP.Core.Settings.csproj" />
+    <Project Path="source/WaveMP.Core.Streaming/WaveMP.Core.Streaming.csproj" />
     <Project Path="source/WaveMP.Core.Users/WaveMP.Core.Users.csproj" />
     <Project Path="source/WaveMP.Data/WaveMP.Data.csproj" />
     <Project Path="source/WaveMP.Service/WaveMP.Service.csproj" />
@@ -17,6 +18,7 @@
     <Project Path="tests/WaveMP.Core.Metadata.Tests/WaveMP.Core.Metadata.Tests.csproj" />
     <Project Path="tests/WaveMP.Core.Scanning.Tests/WaveMP.Core.Scanning.Tests.csproj" />
     <Project Path="tests/WaveMP.Core.Settings.Tests/WaveMP.Core.Settings.Tests.csproj" />
+    <Project Path="tests/WaveMP.Core.Streaming.Tests/WaveMP.Core.Streaming.Tests.csproj" />
     <Project Path="tests/WaveMP.Core.Users.Tests/WaveMP.Core.Users.Tests.csproj" />
     <Project Path="tests/WaveMP.Data.Tests/WaveMP.Data.Tests.csproj" />
     <Project Path="tests/WaveMP.Service.Tests/WaveMP.Service.Tests.csproj" />
