@@ -5494,6 +5494,12 @@
         "description": "Token of a session, created with POST /api/v1/sessions.",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "MediaSignature": {
+        "type": "apiKey",
+        "description": "Signed media URL for players that cannot send a token header. Use the URL as issued (for example streamUrl of GetTrackPlayback): its query carries uid, sid, exp and sig. It is only valid for one kind of media of one track, until it expires and while the session is active.",
+        "name": "sig",
+        "in": "query"
       }
     }
   },

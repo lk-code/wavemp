@@ -6,6 +6,7 @@ using WaveMP.Core.Metadata.Extensions;
 using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Scanning.Extensions;
 using WaveMP.Core.Settings.Extensions;
+using WaveMP.Core.Streaming.Extensions;
 using WaveMP.Core.Users.Extensions;
 using WaveMP.Data;
 using WaveMP.Data.Extensions;
@@ -48,6 +49,7 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpScanning();
         builder.Services.AddWaveMpLibrary();
         builder.Services.AddWaveMpCaching();
+        builder.Services.AddWaveMpStreaming();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<WaveMpDbContext>("database");
@@ -77,8 +79,8 @@ public static class WaveMpApplication
 
     /// <summary>
     /// Validates the database configuration, applies pending migrations, creates the built-in admin profile on the
-    /// first start, loads the key that signs the session tokens and the server settings, prepares the cache folder,
-    /// and plans the background jobs (they start to run once the application has started).
+    /// first start, loads the keys that sign the session tokens and the media URLs and the server settings, prepares
+    /// the cache folder, and plans the background jobs (they start to run once the application has started).
     /// Returns <c>false</c> if the configuration is invalid; the reason is logged.
     /// </summary>
     public static async Task<bool> InitializeAsync(WebApplication app, CancellationToken cancellationToken = default)
@@ -96,6 +98,7 @@ public static class WaveMpApplication
         await app.Services.MigrateWaveMpDatabaseAsync(cancellationToken);
         await app.Services.InitializeWaveMpUsersAsync(cancellationToken);
         await app.Services.GetRequiredService<SigningKeyStore>().InitializeAsync(cancellationToken);
+        await app.Services.InitializeWaveMpStreamingAsync(cancellationToken);
         await app.Services.InitializeWaveMpSettingsAsync(cancellationToken);
         await app.Services.InitializeWaveMpCacheAsync(cancellationToken);
         await app.Services.InitializeWaveMpJobsAsync(cancellationToken);

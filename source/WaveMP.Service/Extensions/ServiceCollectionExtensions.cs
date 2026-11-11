@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
@@ -12,6 +13,7 @@ using WaveMP.Service.Dtos;
 using WaveMP.Service.Filters;
 using WaveMP.Service.OpenApiTransformers;
 using WaveMP.Service.Problems;
+using WaveMP.Service.Signatures;
 using WaveMP.Service.Tokens;
 using WaveMP.Service.Validators;
 
@@ -94,8 +96,10 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the token-based authentication: every request with a valid session token (JWT, see
-    /// <see cref="JwtTokenIssuer"/>) is authenticated while its session is active, and the policy
-    /// <see cref="AuthorizationPolicies.Admin"/> for admin endpoints. The signing key is loaded on start by
+    /// <see cref="JwtTokenIssuer"/>) is authenticated while its session is active, the policy
+    /// <see cref="AuthorizationPolicies.Admin"/> for admin endpoints and the policy
+    /// <see cref="AuthorizationPolicies.Media"/> for media endpoints, which also accept signed media URLs (see
+    /// <see cref="MediaSignatureAuthenticationHandler"/>). The signing key is loaded on start by
     /// <see cref="SigningKeyStore.InitializeAsync"/>.
     /// </summary>
     public static IServiceCollection AddWaveMpAuthentication(this IServiceCollection services)
@@ -103,8 +107,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<SigningKeyStore>();
         services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
         services.AddScoped<SessionPrincipalValidator>();
+        services.AddScoped<MediaUrlFactory>();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer()
+            .AddScheme<AuthenticationSchemeOptions, MediaSignatureAuthenticationHandler>(
+                MediaSignatureDefaults.AuthenticationScheme,
+                configureOptions: null);
         services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
             .Configure<SigningKeyStore>((options, keys) =>
             {
@@ -132,7 +141,12 @@ public static class ServiceCollectionExtensions
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.Admin, policy => policy
                 .RequireAuthenticatedUser()
-                .RequireRole(nameof(UserRole.Admin)));
+                .RequireRole(nameof(UserRole.Admin)))
+            .AddPolicy(AuthorizationPolicies.Media, policy => policy
+                .AddAuthenticationSchemes(
+                    JwtBearerDefaults.AuthenticationScheme,
+                    MediaSignatureDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
 
         return services;
     }
@@ -155,6 +169,9 @@ public static class ServiceCollectionExtensions
             options.AddDocumentTransformer<BinaryContentSchemaTransformer>();
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
+            options.AddDocumentTransformer<MediaSignatureSecuritySchemeTransformer>();
+            // After the bearer requirement, which it replaces with the alternatives of media endpoints.
+            options.AddOperationTransformer<SignedMediaUrlTransformer>();
 
             options.AddDocumentTransformer((document, _, _) =>
             {
