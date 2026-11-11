@@ -215,6 +215,10 @@ public class ApiIntegrationTests
     [TestCase("ListJobs", true)]
     [TestCase("StartJobRun", true)]
     [TestCase("UpdateLibrarySettings", true)]
+    [TestCase("GetCacheSettings", true)]
+    [TestCase("UpdateCacheSettings", true)]
+    [TestCase("GetCache", true)]
+    [TestCase("ClearCache", true)]
     [TestCase("ListTracks", true)]
     [TestCase("SearchLibrary", true)]
     [TestCase("GetAlbumCover", true)]
@@ -243,7 +247,8 @@ public class ApiIntegrationTests
     [TestCase("Users", 5)]
     [TestCase("Scans", 4)]
     [TestCase("Jobs", 4)]
-    [TestCase("Settings", 2)]
+    [TestCase("Settings", 4)]
+    [TestCase("Cache", 2)]
     public async Task GetOpenApiDocument_Always_DescribesUnauthorizedAndForbiddenResponses(string tag, int operations)
     {
         JsonNode document = await GetOpenApiDocumentAsync();

@@ -88,4 +88,63 @@ public class SettingsApiTests
         unchanged.AudioExtensions.Should().Contain("mp3");
         await factory.DeleteDatabaseAsync();
     }
+
+    [Test]
+    public async Task CacheSettings_OfANewInstallation_AreTheDefaults()
+    {
+        await using WaveMpWebApplicationFactory factory = new(DatabaseName + "_cache", freshDatabase: true);
+        using HttpClient admin = await factory.CreateAdminClientAsync();
+
+        CacheSettingsDto settings = await admin.GetJsonAsync<CacheSettingsDto>("/api/v1/settings/cache");
+
+        settings.MaxSizeMegabytes.Should().Be(2000);
+        await factory.DeleteDatabaseAsync();
+    }
+
+    [Test]
+    public async Task UpdateCacheSettings_WithValidValue_KeepsItOverARestartAndLimitsTheCache()
+    {
+        CacheSettingsDto updated;
+        CacheSettingsDto unchanged;
+        await using (WaveMpWebApplicationFactory first = new(DatabaseName + "_cache", freshDatabase: true))
+        {
+            using HttpClient admin = await first.CreateAdminClientAsync();
+            HttpResponseMessage response = await admin.PatchAsJsonAsync(
+                "/api/v1/settings/cache",
+                new { maxSizeMegabytes = 5000 },
+                HttpClientExtensions.JsonOptions);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+            updated = (await response.Content.ReadFromJsonAsync<CacheSettingsDto>(HttpClientExtensions.JsonOptions))!;
+            HttpResponseMessage empty = await admin.SendJsonAsync("PATCH", "/api/v1/settings/cache", "{}");
+            unchanged = (await empty.Content.ReadFromJsonAsync<CacheSettingsDto>(HttpClientExtensions.JsonOptions))!;
+        }
+
+        await using WaveMpWebApplicationFactory second = new(DatabaseName + "_cache");
+        using HttpClient restarted = await second.CreateAdminClientAsync();
+        CacheSettingsDto loaded = await restarted.GetJsonAsync<CacheSettingsDto>("/api/v1/settings/cache");
+        CacheUsageDto usage = await restarted.GetJsonAsync<CacheUsageDto>("/api/v1/cache");
+
+        updated.MaxSizeMegabytes.Should().Be(5000);
+        unchanged.MaxSizeMegabytes.Should().Be(5000);
+        loaded.MaxSizeMegabytes.Should().Be(5000);
+        usage.MaxSizeBytes.Should().Be(5_000_000_000);
+        await second.DeleteDatabaseAsync();
+    }
+
+    [TestCase("{\"maxSizeMegabytes\":99}")]
+    [TestCase("{\"maxSizeMegabytes\":1000001}")]
+    [TestCase("{\"maxSizeMegabytes\":\"big\"}")]
+    public async Task UpdateCacheSettings_WithInvalidValue_ReportsTheField(string body)
+    {
+        await using WaveMpWebApplicationFactory factory = new(DatabaseName + "_cache_invalid", freshDatabase: true);
+        using HttpClient admin = await factory.CreateAdminClientAsync();
+
+        HttpResponseMessage response = await admin.SendJsonAsync("PATCH", "/api/v1/settings/cache", body);
+        CacheSettingsDto unchanged = await admin.GetJsonAsync<CacheSettingsDto>("/api/v1/settings/cache");
+
+        JsonObject errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Key).Should().Contain(key => key.Contains("maxSizeMegabytes"));
+        unchanged.MaxSizeMegabytes.Should().Be(2000);
+        await factory.DeleteDatabaseAsync();
+    }
 }

@@ -17,7 +17,9 @@ namespace WaveMP.Service.Controllers;
 [Route("api/v1/settings")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
-public sealed class SettingsController(ILibrarySettingsService librarySettings) : ControllerBase
+public sealed class SettingsController(
+    ILibrarySettingsService librarySettings,
+    ICacheSettingsService cacheSettings) : ControllerBase
 {
     /// <summary>
     /// Returns the settings of the media library.
@@ -55,6 +57,49 @@ public sealed class SettingsController(ILibrarySettingsService librarySettings) 
         }
 
         foreach (SettingsValidationError error in result.Errors)
+        {
+            ModelState.AddModelError(error.Field.ToJsonName(), error.Reason.ToMessage());
+        }
+
+        return ValidationProblem();
+    }
+
+    /// <summary>
+    /// Returns the settings of the cache.
+    /// </summary>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The cache settings.</response>
+    [HttpGet("cache", Name = "GetCacheSettings")]
+    [ProducesResponseType<CacheSettingsDto>(StatusCodes.Status200OK, "application/json")]
+    public async Task<ActionResult<CacheSettingsDto>> GetCacheSettingsAsync(CancellationToken cancellationToken)
+    {
+        CacheSettings settings = await cacheSettings.GetAsync(cancellationToken);
+        return Ok(settings.ToDto());
+    }
+
+    /// <summary>
+    /// Changes the settings of the cache. Missing or null values stay unchanged. A lower size limit cleans up the cache
+    /// in the background at once.
+    /// </summary>
+    /// <param name="request">The changes.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The changed settings.</response>
+    /// <response code="400">The request is invalid (code <c>request.invalid</c>, errors by field).</response>
+    [HttpPatch("cache", Name = "UpdateCacheSettings")]
+    [Consumes("application/json")]
+    [ProducesResponseType<CacheSettingsDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    public async Task<ActionResult<CacheSettingsDto>> UpdateCacheSettingsAsync(
+        UpdateCacheSettingsDto request,
+        CancellationToken cancellationToken)
+    {
+        CacheSettingsResult result = await cacheSettings.UpdateAsync(request.ToCommand(), cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Settings.ToDto());
+        }
+
+        foreach (CacheSettingsValidationError error in result.Errors)
         {
             ModelState.AddModelError(error.Field.ToJsonName(), error.Reason.ToMessage());
         }

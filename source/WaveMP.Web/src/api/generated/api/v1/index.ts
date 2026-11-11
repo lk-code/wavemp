@@ -6,6 +6,8 @@ import { AlbumsRequestBuilderNavigationMetadata, AlbumsRequestBuilderRequestsMet
 // @ts-ignore
 import { ArtistsRequestBuilderNavigationMetadata, ArtistsRequestBuilderRequestsMetadata, type ArtistsRequestBuilder } from './artists/index.js';
 // @ts-ignore
+import { CacheRequestBuilderRequestsMetadata, type CacheRequestBuilder } from './cache/index.js';
+// @ts-ignore
 import { GenresRequestBuilderRequestsMetadata, type GenresRequestBuilder } from './genres/index.js';
 // @ts-ignore
 import { HealthRequestBuilderRequestsMetadata, type HealthRequestBuilder } from './health/index.js';
@@ -44,6 +46,10 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      * The artists property
      */
     get artists(): ArtistsRequestBuilder;
+    /**
+     * The cache property
+     */
+    get cache(): CacheRequestBuilder;
     /**
      * The genres property
      */
@@ -108,6 +114,9 @@ export const V1RequestBuilderNavigationMetadata: Record<Exclude<keyof V1RequestB
     artists: {
         requestsMetadata: ArtistsRequestBuilderRequestsMetadata,
         navigationMetadata: ArtistsRequestBuilderNavigationMetadata,
+    },
+    cache: {
+        requestsMetadata: CacheRequestBuilderRequestsMetadata,
     },
     genres: {
         requestsMetadata: GenresRequestBuilderRequestsMetadata,

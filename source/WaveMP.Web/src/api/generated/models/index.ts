@@ -153,6 +153,57 @@ export interface ArtistReference extends AdditionalDataHolder, Parsable {
 }
 export type ArtistSort = (typeof ArtistSortObject)[keyof typeof ArtistSortObject];
 /**
+ * The space an area of the cache uses.
+ */
+export interface CacheAreaUsage extends AdditionalDataHolder, Parsable {
+    /**
+     * Number of its files.
+     */
+    entryCount?: number | null;
+    /**
+     * Size of its files in bytes.
+     */
+    sizeBytes?: number | null;
+}
+/**
+ * Settings of the cache.
+ */
+export interface CacheSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Largest size of the cache in megabytes (1 MB = 1,000,000 bytes; 100 to 1,000,000). When the cache grows larger, the files used least recently are removed.
+     */
+    maxSizeMegabytes?: number | null;
+}
+/**
+ * The space the cache uses, in total and per area, and its size limit.
+ */
+export interface CacheUsage extends AdditionalDataHolder, Parsable {
+    /**
+     * Scaled covers.
+     */
+    covers?: CacheAreaUsage | null;
+    /**
+     * Number of all files of the cache.
+     */
+    entryCount?: number | null;
+    /**
+     * Whether the cache folder can be written. Without it nothing is cached and covers are delivered unscaled.
+     */
+    isAvailable?: boolean | null;
+    /**
+     * Size limit of the cache settings in bytes; beyond it the files used least recently are removed.
+     */
+    maxSizeBytes?: number | null;
+    /**
+     * Size of all files of the cache in bytes.
+     */
+    sizeBytes?: number | null;
+    /**
+     * Transcoded media.
+     */
+    transcodes?: CacheAreaUsage | null;
+}
+/**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {Album}
@@ -205,6 +256,33 @@ export function createArtistPageFromDiscriminatorValue(parseNode: ParseNode | un
 // @ts-ignore
 export function createArtistReferenceFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoArtistReference;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CacheAreaUsage}
+ */
+// @ts-ignore
+export function createCacheAreaUsageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCacheAreaUsage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CacheSettings}
+ */
+// @ts-ignore
+export function createCacheSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCacheSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CacheUsage}
+ */
+// @ts-ignore
+export function createCacheUsageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCacheUsage;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -465,6 +543,15 @@ export function createTrackPageFromDiscriminatorValue(parseNode: ParseNode | und
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateCacheSettings}
+ */
+// @ts-ignore
+export function createUpdateCacheSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateCacheSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {UpdateLibrarySettings}
  */
 // @ts-ignore
@@ -669,6 +756,45 @@ export function deserializeIntoArtistReference(artistReference: Partial<ArtistRe
     return {
         "id": n => { artistReference.id = n.getGuidValue(); },
         "name": n => { artistReference.name = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param CacheAreaUsage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCacheAreaUsage(cacheAreaUsage: Partial<CacheAreaUsage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "entryCount": n => { cacheAreaUsage.entryCount = n.getNumberValue(); },
+        "sizeBytes": n => { cacheAreaUsage.sizeBytes = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param CacheSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCacheSettings(cacheSettings: Partial<CacheSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "maxSizeMegabytes": n => { cacheSettings.maxSizeMegabytes = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param CacheUsage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCacheUsage(cacheUsage: Partial<CacheUsage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "covers": n => { cacheUsage.covers = n.getObjectValue<CacheAreaUsage>(createCacheAreaUsageFromDiscriminatorValue); },
+        "entryCount": n => { cacheUsage.entryCount = n.getNumberValue(); },
+        "isAvailable": n => { cacheUsage.isAvailable = n.getBooleanValue(); },
+        "maxSizeBytes": n => { cacheUsage.maxSizeBytes = n.getNumberValue(); },
+        "sizeBytes": n => { cacheUsage.sizeBytes = n.getNumberValue(); },
+        "transcodes": n => { cacheUsage.transcodes = n.getObjectValue<CacheAreaUsage>(createCacheAreaUsageFromDiscriminatorValue); },
     }
 }
 /**
@@ -1090,6 +1216,17 @@ export function deserializeIntoTrackPage(trackPage: Partial<TrackPage> | undefin
         "limit": n => { trackPage.limit = n.getNumberValue(); },
         "offset": n => { trackPage.offset = n.getNumberValue(); },
         "total": n => { trackPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateCacheSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateCacheSettings(updateCacheSettings: Partial<UpdateCacheSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "maxSizeMegabytes": n => { updateCacheSettings.maxSizeMegabytes = n.getNumberValue(); },
     }
 }
 /**
@@ -1938,6 +2075,48 @@ export function serializeArtistReference(writer: SerializationWriter, artistRefe
 }
 /**
  * Serializes information the current object
+ * @param CacheAreaUsage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCacheAreaUsage(writer: SerializationWriter, cacheAreaUsage: Partial<CacheAreaUsage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!cacheAreaUsage || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("entryCount", cacheAreaUsage.entryCount);
+    writer.writeNumberValue("sizeBytes", cacheAreaUsage.sizeBytes);
+    writer.writeAdditionalData(cacheAreaUsage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param CacheSettings The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCacheSettings(writer: SerializationWriter, cacheSettings: Partial<CacheSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!cacheSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("maxSizeMegabytes", cacheSettings.maxSizeMegabytes);
+    writer.writeAdditionalData(cacheSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param CacheUsage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCacheUsage(writer: SerializationWriter, cacheUsage: Partial<CacheUsage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!cacheUsage || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<CacheAreaUsage>("covers", cacheUsage.covers, serializeCacheAreaUsage);
+    writer.writeNumberValue("entryCount", cacheUsage.entryCount);
+    writer.writeBooleanValue("isAvailable", cacheUsage.isAvailable);
+    writer.writeNumberValue("maxSizeBytes", cacheUsage.maxSizeBytes);
+    writer.writeNumberValue("sizeBytes", cacheUsage.sizeBytes);
+    writer.writeObjectValue<CacheAreaUsage>("transcodes", cacheUsage.transcodes, serializeCacheAreaUsage);
+    writer.writeAdditionalData(cacheUsage.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param CreatedSession The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -2386,6 +2565,18 @@ export function serializeTrackPage(writer: SerializationWriter, trackPage: Parti
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateCacheSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateCacheSettings(writer: SerializationWriter, updateCacheSettings: Partial<UpdateCacheSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateCacheSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("maxSizeMegabytes", updateCacheSettings.maxSizeMegabytes);
+    writer.writeAdditionalData(updateCacheSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param UpdateLibrarySettings The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -2700,6 +2891,15 @@ export interface TrackPage extends AdditionalDataHolder, Parsable {
     total?: number | null;
 }
 export type TrackSort = (typeof TrackSortObject)[keyof typeof TrackSortObject];
+/**
+ * Changes the settings of the cache. Missing or null values stay unchanged.
+ */
+export interface UpdateCacheSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Largest size of the cache in megabytes (1 MB = 1,000,000 bytes); a lower limit cleans up the cache at once.
+     */
+    maxSizeMegabytes?: number | null;
+}
 /**
  * Changes the settings of the media library. Missing or null values stay unchanged.
  */

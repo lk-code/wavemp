@@ -725,6 +725,89 @@
         ]
       }
     },
+    "/api/v1/cache": {
+      "get": {
+        "tags": [
+          "Cache"
+        ],
+        "summary": "Returns how much space the cache uses, in total and per area, and its size limit.",
+        "operationId": "GetCache",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The usage of the cache.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheUsage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Cache"
+        ],
+        "summary": "Removes all files of the cache. Covers are created again the next time they are shown or after the next scan.",
+        "operationId": "ClearCache",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The cache is empty."
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/genres": {
       "get": {
         "tags": [
@@ -1969,6 +2052,122 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LibrarySettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid (code `request.invalid`, errors by field).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/settings/cache": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Returns the settings of the cache.",
+        "operationId": "GetCacheSettings",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The cache settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheSettings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Changes the settings of the cache. Missing or null values stay unchanged. A lower size limit cleans up the cache in the background at once.",
+        "operationId": "UpdateCacheSettings",
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCacheSettings"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCacheSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The changed settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheSettings"
                 }
               }
             }
@@ -3353,6 +3552,81 @@
         ],
         "type": "string"
       },
+      "CacheAreaUsage": {
+        "required": [
+          "sizeBytes",
+          "entryCount"
+        ],
+        "type": "object",
+        "properties": {
+          "sizeBytes": {
+            "type": "integer",
+            "description": "Size of its files in bytes.",
+            "format": "int64"
+          },
+          "entryCount": {
+            "type": "integer",
+            "description": "Number of its files.",
+            "format": "int32"
+          }
+        },
+        "description": "The space an area of the cache uses."
+      },
+      "CacheSettings": {
+        "required": [
+          "maxSizeMegabytes"
+        ],
+        "type": "object",
+        "properties": {
+          "maxSizeMegabytes": {
+            "type": "integer",
+            "description": "Largest size of the cache in megabytes (1 MB = 1,000,000 bytes; 100 to 1,000,000). When the cache grows larger, the files used least recently are removed.",
+            "format": "int32"
+          }
+        },
+        "description": "Settings of the cache."
+      },
+      "CacheUsage": {
+        "required": [
+          "isAvailable",
+          "sizeBytes",
+          "entryCount",
+          "maxSizeBytes",
+          "covers",
+          "transcodes"
+        ],
+        "type": "object",
+        "properties": {
+          "isAvailable": {
+            "type": "boolean",
+            "description": "Whether the cache folder can be written. Without it nothing is cached and covers are delivered unscaled."
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "description": "Size of all files of the cache in bytes.",
+            "format": "int64"
+          },
+          "entryCount": {
+            "type": "integer",
+            "description": "Number of all files of the cache.",
+            "format": "int32"
+          },
+          "maxSizeBytes": {
+            "type": "integer",
+            "description": "Size limit of the cache settings in bytes; beyond it the files used least recently are removed.",
+            "format": "int64"
+          },
+          "covers": {
+            "description": "Scaled covers.",
+            "$ref": "#/components/schemas/CacheAreaUsage"
+          },
+          "transcodes": {
+            "description": "Transcoded media.",
+            "$ref": "#/components/schemas/CacheAreaUsage"
+          }
+        },
+        "description": "The space the cache uses, in total and per area, and its size limit."
+      },
       "CreatedSession": {
         "required": [
           "token",
@@ -4734,6 +5008,22 @@
         ],
         "type": "string"
       },
+      "UpdateCacheSettings": {
+        "type": "object",
+        "properties": {
+          "maxSizeMegabytes": {
+            "maximum": 1000000,
+            "minimum": 100,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Largest size of the cache in megabytes (1 MB = 1,000,000 bytes); a lower limit cleans up the cache at once.",
+            "format": "int32"
+          }
+        },
+        "description": "Changes the settings of the cache. Missing or null values stay unchanged."
+      },
       "UpdateLibrarySettings": {
         "type": "object",
         "properties": {
@@ -5165,6 +5455,9 @@
     },
     {
       "name": "Artists"
+    },
+    {
+      "name": "Cache"
     },
     {
       "name": "Genres"
