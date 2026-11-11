@@ -53,10 +53,10 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur, we
 ### .NET
 - Projekt-Suffixe: `.Service` für den REST-Host, `.Data` für EF Core und Datenzugriff, `.Core.<Bereich>` für Geschäftslogik, aufgeteilt nach Aufgaben. Kein `.Application`.
 - Klassen, die nur Extension-Methoden enthalten, heißen `*Extensions.cs` (Plural), z. B. `ServiceCollectionExtensions.cs`.
-- Ordnernamen immer im Plural, außer Ordner, die Projektnamen abbilden.
-- Tests: ausschließlich NUnit, AwesomeAssertions und NSubstitute. Keine weiteren Test-NuGets (z. B. kein Testcontainers, kein xUnit, kein Moq, kein FluentAssertions).
+- Ordnernamen immer im Plural, außer Ordner, die Projektnamen abbilden. Die Regel gilt für die .NET-Projekte; im Frontend gelten die üblichen Vue-Konventionen.
+- Tests: NUnit, AwesomeAssertions und NSubstitute. Dazu erlaubt ist die nötige Infrastruktur: `Microsoft.NET.Test.Sdk`, `NUnit3TestAdapter`, `NUnit.Analyzers` und `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory` für API-Integrationstests, der offizielle Weg). Keine weiteren Test-Frameworks, Assertion- oder Mocking-Bibliotheken (z. B. kein Testcontainers, kein xUnit, kein Moq, kein FluentAssertions).
 - API-Integrationstests laufen gegen eine echte PostgreSQL-Instanz, die lokal per docker compose und in der CI als Service-Container bereitgestellt wird.
-- E2E-Tests der Web-App mit Playwright (npm).
+- Frontend-Unit-Tests mit Vitest, abgelegt neben dem Code unter `source/WaveMP.Web/src/**/__tests__` (Vite-Standard). E2E-Tests der Web-App mit Playwright (npm) unter `/tests/WaveMP.E2E`.
 - Etablierte, verbreitete NuGet-Pakete mit permissiver Lizenz sind Eigenbauten vorzuziehen.
 
 ### Frontend
