@@ -66,6 +66,10 @@ export default defineConfig({
                     /\/[^/?]+\.[^/?]+$/,
                 ],
                 cleanupOutdatedCaches: true,
+                // A new service worker takes over at once (the registration script sends no
+                // message for that); the app shell of the new version is used on the next load.
+                skipWaiting: true,
+                clientsClaim: true,
                 // No runtime caching: API responses and media are never cached.
                 runtimeCaching: [],
             },
