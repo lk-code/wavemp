@@ -223,6 +223,7 @@ public class ApiIntegrationTests
     [TestCase("SearchLibrary", true)]
     [TestCase("GetAlbumCover", true)]
     [TestCase("ListTrackFiles", true)]
+    [TestCase("GetTrackPlayback", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -283,6 +284,47 @@ public class ApiIntegrationTests
             .Should().BeEquivalentTo(["items", "offset", "limit", "total"]);
         page["properties"]!["items"]!["items"]!["$ref"]!.GetValue<string>()
             .Should().Be($"#/components/schemas/{itemSchema}");
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesSignedMediaUrlsAsAlternativeToTheSession()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode scheme = document["components"]!["securitySchemes"]!["MediaSignature"]!;
+        JsonNode operation = FindOperations(document)
+            .Single(node => node["operationId"]!.GetValue<string>() == "StreamTrack");
+
+        scheme["type"]!.GetValue<string>().Should().Be("apiKey");
+        scheme["in"]!.GetValue<string>().Should().Be("query");
+        scheme["name"]!.GetValue<string>().Should().Be("sig");
+        operation["security"]!.AsArray().Select(requirement => requirement!.AsObject().Single().Key)
+            .Should().Equal("Bearer", "MediaSignature");
+        operation["parameters"]!.AsArray()
+            .Where(parameter => parameter!["in"]!.GetValue<string>() == "query")
+            .Select(parameter => parameter!["name"]!.GetValue<string>())
+            .Should().Equal("audioFormats", "uid", "sid", "exp", "sig");
+        operation["responses"]!["401"].Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesTheStreamAsBinaryAudioWithRanges()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode responses = FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == "StreamTrack")["responses"]!;
+
+        foreach (string status in new[] { "200", "206" })
+        {
+            JsonObject content = responses[status]!["content"]!.AsObject();
+            content.Select(entry => entry.Key).Should().Contain(["audio/mpeg", "audio/flac", "audio/ogg"]);
+            content.Should().AllSatisfy(entry =>
+                entry.Value!["schema"]!["format"]!.GetValue<string>().Should().Be("binary"));
+        }
+
+        responses["406"]!["content"]!["application/problem+json"].Should().NotBeNull();
+        responses["416"].Should().NotBeNull();
     }
 
     [TestCase("GetAlbumCover")]

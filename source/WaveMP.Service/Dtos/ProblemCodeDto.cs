@@ -136,7 +136,8 @@ public enum ProblemCodeDto
     TrackNotFound,
 
     /// <summary>
-    /// The track has no audio file; tags are only written to audio files, never to videos (409).
+    /// The track has no audio file: writing tags (409; tags are only written to audio files, never to videos) or
+    /// playing its audio (404).
     /// </summary>
     [JsonStringEnumMemberName("track.no_audio")]
     TrackNoAudio,
@@ -153,4 +154,17 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("cover.not_found")]
     CoverNotFound,
+
+    /// <summary>
+    /// The client supports none of the formats the audio file of the track could be streamed in; it has to be
+    /// transcoded, which is not available yet (406).
+    /// </summary>
+    [JsonStringEnumMemberName("stream.transcoding_required")]
+    StreamTranscodingRequired,
+
+    /// <summary>
+    /// The audio file of the track is gone since the last scan (404).
+    /// </summary>
+    [JsonStringEnumMemberName("stream.file_missing")]
+    StreamFileMissing,
 }

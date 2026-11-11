@@ -9,7 +9,7 @@ public static class AudioFormats
     /// <summary>
     /// MIME type of files whose format clients cannot play directly.
     /// </summary>
-    public const string UnknownContentType = "application/octet-stream";
+    public const string UnknownContentType = AudioContentTypes.Unknown;
 
     private static readonly HashSet<string> _wavCodecs =
         new(["pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le", "pcm_f32le"], StringComparer.Ordinal);
@@ -101,14 +101,14 @@ public static class AudioFormats
     {
         return format switch
         {
-            AudioFormat.Mp3 => "audio/mpeg",
-            AudioFormat.Flac => "audio/flac",
-            AudioFormat.OggFlac or AudioFormat.OggOpus or AudioFormat.OggVorbis => "audio/ogg",
-            AudioFormat.AdtsAac => "audio/aac",
-            AudioFormat.Mp4Aac or AudioFormat.Mp4Alac => "audio/mp4",
-            AudioFormat.WebmOpus or AudioFormat.WebmVorbis => "audio/webm",
-            AudioFormat.WavPcm => "audio/wav",
-            AudioFormat.AiffPcm => "audio/aiff",
+            AudioFormat.Mp3 => AudioContentTypes.Mpeg,
+            AudioFormat.Flac => AudioContentTypes.Flac,
+            AudioFormat.OggFlac or AudioFormat.OggOpus or AudioFormat.OggVorbis => AudioContentTypes.Ogg,
+            AudioFormat.AdtsAac => AudioContentTypes.Aac,
+            AudioFormat.Mp4Aac or AudioFormat.Mp4Alac => AudioContentTypes.Mp4,
+            AudioFormat.WebmOpus or AudioFormat.WebmVorbis => AudioContentTypes.Webm,
+            AudioFormat.WavPcm => AudioContentTypes.Wav,
+            AudioFormat.AiffPcm => AudioContentTypes.Aiff,
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unknown audio format."),
         };
     }

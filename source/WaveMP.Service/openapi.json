@@ -2801,6 +2801,340 @@
         ]
       }
     },
+    "/api/v1/tracks/{id}/playback": {
+      "get": {
+        "tags": [
+          "TrackStreams"
+        ],
+        "summary": "Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element. It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.",
+        "operationId": "GetTrackPlayback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audioFormats",
+            "in": "query",
+            "description": "The audio formats the client plays (1 to 20, repeated query parameter).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AudioFormat"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "How the client plays the track.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackPlayback"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing, too many or invalid formats (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`), has no audio file (code `track.no_audio`) or its audio file is gone since the last scan (code `stream.file_missing`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/stream": {
+      "get": {
+        "tags": [
+          "TrackStreams"
+        ],
+        "summary": "Streams the audio file of a track as it is, with HTTP range requests (Accept-Ranges: bytes, 206 Partial Content), a strong ETag of the file version, Last-Modified and Cache-Control: private, no-cache. Besides the session token, it accepts the signed URL of GetTrackPlayback (query uid, sid, exp and sig), because audio elements, casting devices and players cannot send a token header. With audioFormats, it answers 406 instead of a file the client cannot play.",
+        "operationId": "StreamTrack",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "audioFormats",
+            "in": "query",
+            "description": "The audio formats the client plays (at most 20, repeated query parameter); optional.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AudioFormat"
+              }
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "description": "Signed media URL: id of the user the URL was issued to.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "query",
+            "description": "Signed media URL: id of the session the URL was issued in.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "description": "Signed media URL: expiry in Unix seconds.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sig",
+            "in": "query",
+            "description": "Signed media URL: Base64Url-encoded signature.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The whole file.",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/flac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/ogg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/aac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/webm": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/aiff": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "The requested range of the file.",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/flac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/ogg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/aac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/webm": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/aiff": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Too many or invalid formats (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`), has no audio file (code `track.no_audio`) or its audio file is gone since the last scan (code `stream.file_missing`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "The client supports none of the formats of the file (code `stream.transcoding_required`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "The requested range is outside the file; as usual for range requests, without body and with Content-Range: bytes */length.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          },
+          {
+            "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/users": {
       "get": {
         "tags": [
@@ -3552,6 +3886,23 @@
         ],
         "type": "string"
       },
+      "AudioFormat": {
+        "enum": [
+          "Mp3",
+          "Flac",
+          "OggFlac",
+          "AdtsAac",
+          "Mp4Aac",
+          "Mp4Alac",
+          "OggOpus",
+          "OggVorbis",
+          "WebmOpus",
+          "WebmVorbis",
+          "WavPcm",
+          "AiffPcm"
+        ],
+        "type": "string"
+      },
       "CacheAreaUsage": {
         "required": [
           "sizeBytes",
@@ -4282,6 +4633,14 @@
         ],
         "type": "string"
       },
+      "PlaybackMethod": {
+        "enum": [
+          "DirectPlay",
+          "Transcode"
+        ],
+        "type": "string",
+        "description": "How a client plays a track."
+      },
       "ProblemCode": {
         "enum": [
           "request.invalid",
@@ -4307,7 +4666,9 @@
           "track.not_found",
           "track.no_audio",
           "track.not_writable",
-          "cover.not_found"
+          "cover.not_found",
+          "stream.transcoding_required",
+          "stream.file_missing"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -4424,6 +4785,44 @@
           }
         },
         "description": "One page of a collection."
+      },
+      "ReplayGain": {
+        "type": "object",
+        "properties": {
+          "trackGain": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Gain of the track in dB.",
+            "format": "double"
+          },
+          "trackPeak": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Peak of the track, linear (1.0 is full scale).",
+            "format": "double"
+          },
+          "albumGain": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Gain of the album in dB.",
+            "format": "double"
+          },
+          "albumPeak": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Peak of the album, linear (1.0 is full scale).",
+            "format": "double"
+          }
+        },
+        "description": "The ReplayGain tags of the audio file of a track. Missing tags are null; clients then leave the volume as it is."
       },
       "Role": {
         "enum": [
@@ -4994,6 +5393,82 @@
         },
         "description": "One page of a collection."
       },
+      "TrackPlayback": {
+        "required": [
+          "trackId",
+          "method",
+          "replayGain"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track.",
+            "format": "uuid"
+          },
+          "method": {
+            "description": "Direct play or transcoding.",
+            "$ref": "#/components/schemas/PlaybackMethod"
+          },
+          "format": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Format of the audio file; null if it is none of the formats clients play directly.",
+                "$ref": "#/components/schemas/AudioFormat"
+              }
+            ]
+          },
+          "transcodeReason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Why the track has to be transcoded; null for direct play.",
+                "$ref": "#/components/schemas/TranscodeReason"
+              }
+            ]
+          },
+          "contentType": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "MIME type the stream is delivered with; null without stream."
+          },
+          "streamUrl": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token; null if the track has to be transcoded. It stays valid until expiresAt and while the session is active."
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the stream URL expires; null without stream.",
+            "format": "date-time"
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Duration of the audio file in milliseconds, if known.",
+            "format": "int64"
+          },
+          "replayGain": {
+            "description": "The ReplayGain tags of the audio file.",
+            "$ref": "#/components/schemas/ReplayGain"
+          }
+        },
+        "description": "How the client plays the audio of a track, and the signed URL of its stream."
+      },
       "TrackSort": {
         "enum": [
           "AlbumArtist",
@@ -5005,6 +5480,13 @@
           "Genre",
           "FirstSeenAt",
           "Relevance"
+        ],
+        "type": "string"
+      },
+      "TranscodeReason": {
+        "enum": [
+          "format_unsupported",
+          "format_unknown"
         ],
         "type": "string"
       },
@@ -5542,6 +6024,9 @@
     },
     {
       "name": "Tracks"
+    },
+    {
+      "name": "TrackStreams"
     },
     {
       "name": "Users"
