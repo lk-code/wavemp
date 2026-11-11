@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <!-- snake_case names for tables, columns, keys and indexes (PostgreSQL convention). -->
+    <PackageReference Include="EFCore.NamingConventions" />
     <!--
       Design-time only (dotnet ef). Compile assets are needed for WaveMpDesignTimeServices; PrivateAssets keeps the
       package out of the service and its image.

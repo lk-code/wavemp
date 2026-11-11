@@ -1,17 +1,17 @@
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using WaveMP.Data.Options;
+using WaveMP.Data.Repositories;
 
 namespace WaveMP.Data.Extensions;
 
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers <see cref="WaveMpDbContext"/> with PostgreSQL. The connection settings are read from
-    /// <c>DB_HOST</c>, <c>DB_PORT</c>, <c>DB_NAME</c>, <c>DB_USER</c> and <c>DB_PASSWORD</c> and validated when
+    /// Registers <see cref="WaveMpDbContext"/> with PostgreSQL and the repositories. The connection settings are read
+    /// from <c>DB_HOST</c>, <c>DB_PORT</c>, <c>DB_NAME</c>, <c>DB_USER</c> and <c>DB_PASSWORD</c> and validated when
     /// the options are first resolved.
     /// </summary>
     public static IServiceCollection AddWaveMpData(this IServiceCollection services)
@@ -23,10 +23,14 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<WaveMpDbContext>((serviceProvider, options) =>
         {
             DatabaseOptions databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            options.UseNpgsql(
+            options.UseWaveMpNpgsql(
                 databaseOptions.BuildConnectionString(),
                 npgsql => npgsql.EnableRetryOnFailure());
         });
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<IServerSecretRepository, ServerSecretRepository>();
 
         return services;
     }

@@ -17,10 +17,9 @@ public sealed class WaveMpDbContextFactory : IDesignTimeDbContextFactory<WaveMpD
         DatabaseOptions options = new() { Password = "design-time" };
         ServiceCollectionExtensions.BindDatabaseOptions(options, Environment.GetEnvironmentVariable);
 
-        DbContextOptions<WaveMpDbContext> dbContextOptions = new DbContextOptionsBuilder<WaveMpDbContext>()
-            .UseNpgsql(options.BuildConnectionString())
-            .Options;
+        DbContextOptionsBuilder<WaveMpDbContext> builder = new();
+        builder.UseWaveMpNpgsql(options.BuildConnectionString());
 
-        return new WaveMpDbContext(dbContextOptions);
+        return new WaveMpDbContext(builder.Options);
     }
 }
