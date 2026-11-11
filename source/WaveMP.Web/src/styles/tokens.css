@@ -1,0 +1,188 @@
+/*
+ * Variables of the theme API with neutral defaults. Themes override them (THEMING.md, section
+ * "Variables"). Graphics and backgrounds take any value of the CSS background shorthand: a color,
+ * a gradient or a root-absolute url() with position and size. Icon slots take a root-absolute
+ * url() of an SVG used as mask, so only its shape counts, never its color.
+ */
+@layer wavemp.base {
+    :root {
+        color-scheme: light;
+
+        /* Colors */
+        --wmp-color-accent: #1f6fd6;
+        --wmp-color-accent-contrast: #ffffff;
+        --wmp-color-focus: #1f6fd6;
+        --wmp-color-text: #1b1d21;
+        --wmp-color-text-muted: #5b6270;
+        --wmp-color-text-disabled: #9aa0aa;
+        --wmp-color-surface: #ffffff;
+        --wmp-color-surface-raised: #f1f3f6;
+        --wmp-color-border: #d3d8df;
+        --wmp-color-hover: #e7f0fb;
+        --wmp-color-selection: #cfe2fa;
+        --wmp-color-selection-text: #1b1d21;
+        --wmp-color-success: #2e9d4f;
+        --wmp-color-warning: #c98a12;
+        --wmp-color-danger: #c83737;
+        --wmp-backdrop-color: rgb(0 0 0 / 45%);
+
+        /* Areas: text color and background */
+        --wmp-header-color: var(--wmp-color-text);
+        --wmp-header-background: var(--wmp-color-surface-raised);
+        --wmp-toolbar-color: var(--wmp-color-text);
+        --wmp-toolbar-background: var(--wmp-color-surface);
+        --wmp-sidebar-color: var(--wmp-color-text);
+        --wmp-sidebar-background: var(--wmp-color-surface);
+        --wmp-content-color: var(--wmp-color-text);
+        --wmp-content-background: var(--wmp-color-surface);
+        --wmp-transport-color: var(--wmp-color-text);
+        --wmp-transport-background: var(--wmp-color-surface-raised);
+        --wmp-bottom-nav-color: var(--wmp-color-text);
+        --wmp-bottom-nav-background: var(--wmp-color-surface-raised);
+        --wmp-dialog-color: var(--wmp-color-text);
+        --wmp-dialog-background: var(--wmp-color-surface);
+        --wmp-menu-color: var(--wmp-color-text);
+        --wmp-menu-background: var(--wmp-color-surface);
+
+        /* Graphics (values of the background shorthand) */
+        --wmp-image-logo: url('/brand/logo.svg') center / contain no-repeat;
+        --wmp-image-cover-placeholder: var(--wmp-color-surface-raised);
+        --wmp-image-default-button: var(--wmp-color-surface);
+        --wmp-image-default-button-hover: var(--wmp-color-hover);
+        --wmp-image-default-button-active: var(--wmp-color-selection);
+        --wmp-image-default-button-disabled: var(--wmp-color-surface-raised);
+        --wmp-image-primary-button: var(--wmp-color-accent);
+        --wmp-image-primary-button-hover: color-mix(in srgb, var(--wmp-color-accent), #ffffff 15%);
+        --wmp-image-primary-button-active: color-mix(in srgb, var(--wmp-color-accent), #000000 15%);
+        --wmp-image-primary-button-disabled: var(--wmp-color-border);
+        --wmp-image-icon-button: transparent;
+        --wmp-image-icon-button-hover: var(--wmp-color-hover);
+        --wmp-image-icon-button-active: var(--wmp-color-selection);
+        --wmp-image-icon-button-disabled: transparent;
+        --wmp-image-round-button: var(--wmp-color-surface);
+        --wmp-image-round-button-hover: var(--wmp-color-hover);
+        --wmp-image-round-button-active: var(--wmp-color-selection);
+        --wmp-image-round-button-disabled: var(--wmp-color-surface-raised);
+        --wmp-image-play-button: var(--wmp-color-accent);
+        --wmp-image-play-button-hover: color-mix(in srgb, var(--wmp-color-accent), #ffffff 15%);
+        --wmp-image-play-button-active: color-mix(in srgb, var(--wmp-color-accent), #000000 15%);
+        --wmp-image-play-button-disabled: var(--wmp-color-border);
+        --wmp-image-transport-controls: transparent;
+        --wmp-image-tab-active: var(--wmp-color-selection);
+        --wmp-image-tab-hover: var(--wmp-color-hover);
+        --wmp-image-slider-thumb: var(--wmp-color-accent);
+        --wmp-slider-track-background: var(--wmp-color-border);
+        --wmp-slider-fill-background: var(--wmp-color-accent);
+
+        /* Icons */
+        --wmp-icon-fill: currentColor;
+        --wmp-icon-size: 1.25rem;
+        --wmp-icon-size-s: 1rem;
+        --wmp-icon-size-l: 2rem;
+
+        /* Icon slots (src/themes/iconSlots.ts) */
+        --wmp-icon-back: url('/icons/phosphor/fill/arrow-left-fill.svg');
+        --wmp-icon-forward: url('/icons/phosphor/fill/arrow-right-fill.svg');
+        --wmp-icon-tab-indicator: url('/icons/phosphor/fill/caret-down-fill.svg');
+        --wmp-icon-menu: url('/icons/phosphor/fill/list-fill.svg');
+        --wmp-icon-now-playing: url('/icons/phosphor/fill/music-notes-fill.svg');
+        --wmp-icon-library: url('/icons/phosphor/fill/books-fill.svg');
+        --wmp-icon-playlists: url('/icons/phosphor/fill/playlist-fill.svg');
+        --wmp-icon-breadcrumb-root: url('/icons/phosphor/fill/music-notes-fill.svg');
+        --wmp-icon-breadcrumb-separator: url('/icons/phosphor/fill/caret-right-fill.svg');
+        --wmp-icon-view-tiles: url('/icons/phosphor/fill/squares-four-fill.svg');
+        --wmp-icon-view-details: url('/icons/phosphor/fill/rows-fill.svg');
+        --wmp-icon-sort: url('/icons/phosphor/fill/sort-ascending-fill.svg');
+        --wmp-icon-dropdown: url('/icons/phosphor/fill/caret-down-fill.svg');
+        --wmp-icon-search: url('/icons/phosphor/fill/magnifying-glass-fill.svg');
+        --wmp-icon-clear: url('/icons/phosphor/fill/x-fill.svg');
+        --wmp-icon-tree-playlists: url('/icons/phosphor/duotone/playlist-duotone.svg');
+        --wmp-icon-tree-create-playlist: url('/icons/phosphor/duotone/list-plus-duotone.svg');
+        --wmp-icon-tree-library: url('/icons/phosphor/duotone/books-duotone.svg');
+        --wmp-icon-tree-recently-added: url('/icons/phosphor/duotone/clock-counter-clockwise-duotone.svg');
+        --wmp-icon-tree-artists: url('/icons/phosphor/duotone/microphone-stage-duotone.svg');
+        --wmp-icon-tree-albums: url('/icons/phosphor/duotone/vinyl-record-duotone.svg');
+        --wmp-icon-tree-songs: url('/icons/phosphor/duotone/music-note-duotone.svg');
+        --wmp-icon-tree-genres: url('/icons/phosphor/duotone/guitar-duotone.svg');
+        --wmp-icon-tree-years: url('/icons/phosphor/duotone/calendar-blank-duotone.svg');
+        --wmp-icon-tree-favorites: url('/icons/phosphor/duotone/heart-duotone.svg');
+        --wmp-icon-tree-expand: url('/icons/phosphor/regular/plus-square.svg');
+        --wmp-icon-tree-collapse: url('/icons/phosphor/regular/minus-square.svg');
+        --wmp-icon-has-video: url('/icons/phosphor/regular/video-camera.svg');
+        --wmp-icon-info: url('/icons/phosphor/regular/info.svg');
+        --wmp-icon-cover-placeholder: url('/icons/phosphor/fill/music-notes-fill.svg');
+        --wmp-icon-shuffle: url('/icons/phosphor/fill/shuffle-fill.svg');
+        --wmp-icon-repeat: url('/icons/phosphor/fill/repeat-fill.svg');
+        --wmp-icon-repeat-one: url('/icons/phosphor/fill/repeat-once-fill.svg');
+        --wmp-icon-stop: url('/icons/phosphor/fill/stop-fill.svg');
+        --wmp-icon-previous: url('/icons/phosphor/fill/skip-back-fill.svg');
+        --wmp-icon-play: url('/icons/phosphor/fill/play-fill.svg');
+        --wmp-icon-pause: url('/icons/phosphor/fill/pause-fill.svg');
+        --wmp-icon-next: url('/icons/phosphor/fill/skip-forward-fill.svg');
+        --wmp-icon-volume: url('/icons/phosphor/fill/speaker-high-fill.svg');
+        --wmp-icon-muted: url('/icons/phosphor/fill/speaker-x-fill.svg');
+        --wmp-icon-compact: url('/icons/phosphor/fill/corners-in-fill.svg');
+        --wmp-icon-fullscreen: url('/icons/phosphor/fill/corners-out-fill.svg');
+        --wmp-icon-collapse-player: url('/icons/phosphor/fill/caret-down-fill.svg');
+        --wmp-icon-settings: url('/icons/phosphor/regular/gear-six.svg');
+        --wmp-icon-profile: url('/icons/phosphor/regular/user-circle.svg');
+        --wmp-icon-edit: url('/icons/phosphor/regular/pencil-simple.svg');
+        --wmp-icon-delete: url('/icons/phosphor/regular/trash.svg');
+        --wmp-icon-add: url('/icons/phosphor/regular/plus.svg');
+        --wmp-icon-view-video: url('/icons/phosphor/regular/film-strip.svg');
+        --wmp-icon-view-visualization: url('/icons/phosphor/regular/waveform.svg');
+        --wmp-icon-view-cover: url('/icons/phosphor/regular/image.svg');
+        --wmp-icon-close: url('/icons/phosphor/regular/x.svg');
+
+        /* Spacing and radii */
+        --wmp-space-xs: 0.25rem;
+        --wmp-space-s: 0.5rem;
+        --wmp-space-m: 0.75rem;
+        --wmp-space-l: 1rem;
+        --wmp-space-xl: 1.5rem;
+        --wmp-radius-s: 0.25rem;
+        --wmp-radius-m: 0.5rem;
+        --wmp-radius-l: 0.75rem;
+        --wmp-radius-round: 999px;
+
+        /* Fonts */
+        --wmp-font-family: system-ui, sans-serif;
+        --wmp-font-size-xs: 0.75rem;
+        --wmp-font-size-s: 0.8125rem;
+        --wmp-font-size-m: 0.9375rem;
+        --wmp-font-size-l: 1.125rem;
+        --wmp-font-size-xl: 1.5rem;
+        --wmp-font-weight-normal: 400;
+        --wmp-font-weight-bold: 600;
+        --wmp-line-height: 1.4;
+
+        /* Sizes */
+        --wmp-header-height: 3rem;
+        --wmp-toolbar-height: 2.75rem;
+        --wmp-sidebar-width: 15rem;
+        --wmp-transport-height: 4.5rem;
+        --wmp-seek-height: 0.25rem;
+        --wmp-bottom-nav-height: 3.5rem;
+        --wmp-mini-player-height: 3.5rem;
+        --wmp-button-height: 2rem;
+        --wmp-field-height: 2rem;
+        --wmp-round-button-size: 2rem;
+        --wmp-play-button-size: 3rem;
+        --wmp-slider-thumb-size: 0.875rem;
+        --wmp-cover-size: 8rem;
+        --wmp-cover-size-mini: 2.5rem;
+        --wmp-list-row-height: 2rem;
+        --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr);
+        --wmp-list-group-info-width: 11rem;
+    }
+
+    /* Document defaults */
+    body {
+        font-family: var(--wmp-font-family);
+        font-size: var(--wmp-font-size-m);
+        font-weight: var(--wmp-font-weight-normal);
+        line-height: var(--wmp-line-height);
+        color: var(--wmp-color-text);
+        background: var(--wmp-content-background);
+    }
+}

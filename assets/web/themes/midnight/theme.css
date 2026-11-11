@@ -1,0 +1,14 @@
+/*
+ * Theme "Midnight" for WaveMP (theme API version 1, see THEMING.md).
+ * A dark, glossy glass look: black header and transport bar, light toolbar, white library.
+ */
+:root {
+    --wmp-color-accent: #1f6fd6;
+    --wmp-color-focus: #3b9bff;
+    --wmp-header-color: #e6eaf0;
+    --wmp-header-background: linear-gradient(#3b3f45, #17191c 50%, #000000 51%, #0c0d0f);
+    --wmp-transport-color: #e6eaf0;
+    --wmp-transport-background: linear-gradient(#2f3338, #121416 50%, #000000 51%, #0a0b0d);
+    --wmp-bottom-nav-color: #c9d0da;
+    --wmp-bottom-nav-background: linear-gradient(#2f3338, #0a0b0d);
+}

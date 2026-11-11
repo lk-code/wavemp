@@ -1,0 +1,174 @@
+/*
+ * Layout with CSS Grid and grid-template-areas; the area names are the part names. Below the
+ * desktop breakpoint, the fixed mobile base in mobile.css applies. From (width >= 64rem) on, this
+ * neutral desktop layout applies until a theme replaces it: themes may rearrange, show and hide
+ * the areas in their own @media (width >= 64rem) rules.
+ */
+@layer wavemp.layout {
+    [data-part='app'] {
+        display: grid;
+        block-size: 100dvh;
+        overflow: hidden;
+    }
+
+    [data-part='app'] > [data-part='header'] {
+        grid-area: header;
+    }
+
+    [data-part='app'] > [data-part='toolbar'] {
+        grid-area: toolbar;
+    }
+
+    [data-part='app'] > [data-part='sidebar'] {
+        grid-area: sidebar;
+        min-block-size: 0;
+        overflow: auto;
+    }
+
+    [data-part='app'] > [data-part='content'] {
+        grid-area: content;
+        min-inline-size: 0;
+        min-block-size: 0;
+        overflow: auto;
+    }
+
+    [data-part='app'] > [data-part='transport'] {
+        grid-area: transport;
+    }
+
+    [data-part='app'] > [data-part='bottom-nav'] {
+        grid-area: bottom-nav;
+    }
+
+    [data-part='header'] > [data-part='btn-menu'] {
+        grid-area: btn-menu;
+    }
+
+    [data-part='header'] > [data-part='logo'] {
+        grid-area: logo;
+    }
+
+    [data-part='header'] > [data-part='nav-history'] {
+        grid-area: nav-history;
+    }
+
+    [data-part='header'] > [data-part='tabs'] {
+        grid-area: tabs;
+    }
+
+    [data-part='header'] > [data-part='server-status'] {
+        grid-area: server-status;
+    }
+
+    [data-part='toolbar'] > [data-part='breadcrumb'] {
+        grid-area: breadcrumb;
+    }
+
+    [data-part='toolbar'] > [data-part='view-switch'] {
+        grid-area: view-switch;
+    }
+
+    [data-part='toolbar'] > [data-part='sort'] {
+        grid-area: sort;
+    }
+
+    [data-part='toolbar'] > [data-part='search'] {
+        grid-area: search;
+    }
+
+    [data-part='transport'] > [data-part='seek'] {
+        grid-area: seek;
+    }
+
+    [data-part='transport'] > [data-part='now-playing-mini'] {
+        grid-area: now-playing-mini;
+    }
+
+    [data-part='transport'] > [data-part='transport-controls'] {
+        grid-area: transport-controls;
+    }
+
+    [data-part='transport'] > [data-part='mode-switch'] {
+        grid-area: mode-switch;
+    }
+
+    [data-part='transport'] > [data-part='btn-collapse'] {
+        grid-area: btn-collapse;
+    }
+
+    [data-part='nav-history'] {
+        display: flex;
+        align-items: center;
+        gap: var(--wmp-space-xs);
+    }
+
+    @media (width >= 64rem) {
+        [data-part='app'] {
+            grid-template-areas:
+                'header header'
+                'toolbar toolbar'
+                'sidebar content'
+                'transport transport';
+            grid-template-columns: var(--wmp-sidebar-width) minmax(0, 1fr);
+            grid-template-rows: auto auto minmax(0, 1fr) auto;
+        }
+
+        [data-part='bottom-nav'],
+        [data-part='btn-menu'],
+        [data-part='sidebar-backdrop'],
+        [data-part='btn-collapse'] {
+            display: none;
+        }
+
+        [data-part='header'] {
+            display: grid;
+            grid-template-areas: 'logo nav-history tabs server-status';
+            grid-template-columns: auto auto minmax(0, 1fr) auto;
+            align-items: stretch;
+            gap: var(--wmp-space-l);
+            min-block-size: var(--wmp-header-height);
+            padding-inline: var(--wmp-space-l);
+        }
+
+        [data-part='header'] > * {
+            align-self: center;
+        }
+
+        [data-part='header'] > [data-part='tabs'] {
+            align-self: stretch;
+        }
+
+        [data-part='toolbar'] {
+            display: grid;
+            grid-template-areas: 'breadcrumb view-switch sort search';
+            grid-template-columns: minmax(0, 1fr) auto auto minmax(10rem, 16rem);
+            align-items: center;
+            gap: var(--wmp-space-s);
+            min-block-size: var(--wmp-toolbar-height);
+            padding-inline: var(--wmp-space-s);
+        }
+
+        [data-part='transport'] {
+            display: grid;
+            grid-template-areas:
+                'seek seek seek'
+                'now-playing-mini transport-controls mode-switch';
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            align-items: center;
+            column-gap: var(--wmp-space-l);
+            min-block-size: var(--wmp-transport-height);
+            padding: 0 var(--wmp-space-l) var(--wmp-space-s);
+        }
+
+        [data-part='list-group'] {
+            grid-template-areas:
+                'list-group-header list-group-header'
+                'list-group-info list-group-rows';
+            grid-template-columns: var(--wmp-list-group-info-width) minmax(0, 1fr);
+        }
+
+        [data-part='list-header'] {
+            margin-inline-start: var(--wmp-list-group-info-width);
+        }
+    }
+}

@@ -1,0 +1,370 @@
+/*
+ * Fixed mobile base for all themes: header with menu button, search toolbar, the sidebar as a
+ * drawer, the transport as a mini player above the bottom navigation and as a full-screen player
+ * when expanded. The layout properties of these areas are !important inside this layer: a
+ * layered !important wins over every theme rule, also over an !important without layer, so a
+ * theme cannot change the mobile layout. Colors, graphics and fonts still come from the theme.
+ */
+@layer wavemp.mobile {
+    @media (width < 64rem) {
+        /* --- App grid -------------------------------------------------------------------- */
+
+        [data-part='app'] {
+            --wmp-button-height: 2.75rem;
+            --wmp-round-button-size: 2.75rem;
+            --wmp-field-height: 2.5rem;
+
+            display: grid !important;
+            grid-template-areas:
+                'header'
+                'toolbar'
+                'content'
+                'transport'
+                'bottom-nav' !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-rows: auto auto minmax(0, 1fr) auto auto !important;
+            block-size: 100dvh !important;
+            overflow: hidden !important;
+        }
+
+        [data-part='app']
+            > :is(
+                [data-part='header'],
+                [data-part='toolbar'],
+                [data-part='content'],
+                [data-part='transport'],
+                [data-part='bottom-nav']
+            ) {
+            position: relative !important;
+            inset: auto !important;
+            visibility: visible !important;
+            transform: none !important;
+        }
+
+        /* --- Header ---------------------------------------------------------------------- */
+
+        [data-part='app'] > [data-part='header'] {
+            grid-area: header !important;
+            display: grid !important;
+            grid-template-areas: 'btn-menu logo server-status' !important;
+            grid-template-columns: auto minmax(0, 1fr) auto !important;
+            grid-template-rows: auto !important;
+            align-items: center;
+            gap: var(--wmp-space-s);
+            min-block-size: var(--wmp-header-height);
+            padding: env(safe-area-inset-top) var(--wmp-space-m) 0 var(--wmp-space-xs);
+        }
+
+        [data-part='header'] > :is([data-part='nav-history'], [data-part='tabs']) {
+            display: none !important;
+        }
+
+        [data-part='header'] > [data-part='btn-menu'] {
+            grid-area: btn-menu !important;
+            display: inline-flex !important;
+        }
+
+        [data-part='header'] > [data-part='logo'] {
+            grid-area: logo !important;
+            display: inline-flex !important;
+        }
+
+        [data-part='header'] > [data-part='server-status'] {
+            grid-area: server-status !important;
+            display: inline-flex !important;
+        }
+
+        /* --- Toolbar --------------------------------------------------------------------- */
+
+        [data-part='app'] > [data-part='toolbar'] {
+            grid-area: toolbar !important;
+            display: grid !important;
+            grid-template-areas: 'search' !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-rows: auto !important;
+            padding: var(--wmp-space-xs) var(--wmp-space-s);
+        }
+
+        [data-part='toolbar']
+            > :is([data-part='breadcrumb'], [data-part='view-switch'], [data-part='sort']) {
+            display: none !important;
+        }
+
+        [data-part='toolbar'] > [data-part='search'] {
+            grid-area: search !important;
+            display: flex !important;
+        }
+
+        /* --- Content --------------------------------------------------------------------- */
+
+        [data-part='app'] > [data-part='content'] {
+            grid-area: content !important;
+            display: block !important;
+            min-block-size: 0 !important;
+            overflow: auto !important;
+        }
+
+        /* --- Sidebar as drawer ----------------------------------------------------------- */
+
+        [data-part='app'] > [data-part='sidebar'] {
+            position: fixed !important;
+            inset: 0 auto 0 0 !important;
+            z-index: 30 !important;
+            display: block !important;
+            inline-size: min(20rem, 85vw) !important;
+            max-block-size: none !important;
+            overflow: auto !important;
+            padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
+            box-shadow: 0 0 2rem rgb(0 0 0 / 35%);
+            transition:
+                transform 0.2s ease,
+                visibility 0.2s;
+        }
+
+        [data-part='app'] > [data-part='sidebar'][data-state~='closed'] {
+            visibility: hidden !important;
+            transform: translateX(-100%) !important;
+        }
+
+        [data-part='app'] > [data-part='sidebar'][data-state~='open'] {
+            visibility: visible !important;
+            transform: none !important;
+        }
+
+        [data-part='app'] > [data-part='sidebar-backdrop'] {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 29 !important;
+            display: block !important;
+        }
+
+        [data-part='app'] > [data-part='sidebar-backdrop'][data-state~='closed'] {
+            display: none !important;
+        }
+
+        /* --- Transport as mini player ---------------------------------------------------- */
+
+        [data-part='app'] > [data-part='transport'] {
+            grid-area: transport !important;
+            display: grid !important;
+            grid-template-areas: 'now-playing-mini transport-controls' !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            grid-template-rows: auto !important;
+            align-items: center;
+            column-gap: var(--wmp-space-s);
+            min-block-size: var(--wmp-mini-player-height);
+            padding: var(--wmp-space-xs) var(--wmp-space-s);
+        }
+
+        [data-part='transport'] > [data-part='now-playing-mini'] {
+            grid-area: now-playing-mini !important;
+            display: flex !important;
+        }
+
+        [data-part='transport'] > [data-part='seek'] {
+            position: absolute !important;
+            inset: 0 0 auto !important;
+            display: block !important;
+            pointer-events: none;
+        }
+
+        [data-part='transport'] > [data-part='seek'] [data-part='slider'] {
+            min-block-size: var(--wmp-seek-height);
+        }
+
+        [data-part='transport'] > [data-part='seek'] [data-part='slider-track'] {
+            block-size: var(--wmp-seek-height);
+            border-radius: 0;
+        }
+
+        [data-part='transport'] > [data-part='seek'] [data-part='slider-thumb'] {
+            display: none;
+        }
+
+        [data-part='transport'] > [data-part='transport-controls'] {
+            grid-area: transport-controls !important;
+            display: flex !important;
+        }
+
+        [data-part='transport-controls'] > :not([data-part='btn-play']) {
+            display: none !important;
+        }
+
+        [data-part='transport'] > :is([data-part='mode-switch'], [data-part='btn-collapse']) {
+            display: none !important;
+        }
+
+        /* --- Transport as full-screen player --------------------------------------------- */
+
+        [data-part='app'] > [data-part='transport'][data-state~='expanded'] {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 40 !important;
+            grid-template-areas:
+                'btn-collapse'
+                'now-playing-mini'
+                'seek'
+                'transport-controls' !important;
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+            row-gap: var(--wmp-space-l);
+            padding: max(var(--wmp-space-s), env(safe-area-inset-top)) var(--wmp-space-l)
+                max(var(--wmp-space-xl), env(safe-area-inset-bottom));
+            overflow: auto !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='btn-collapse'] {
+            grid-area: btn-collapse !important;
+            display: inline-flex !important;
+            justify-self: start;
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='now-playing-mini'] {
+            flex-direction: column;
+            justify-content: center;
+            gap: var(--wmp-space-l);
+            text-align: center;
+            cursor: default;
+        }
+
+        [data-part='transport'][data-state~='expanded']
+            [data-part='now-playing-mini']
+            [data-part='cover'] {
+            inline-size: min(80vw, 45dvh);
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='now-playing-meta'] {
+            justify-items: center;
+            max-inline-size: 100%;
+            font-size: var(--wmp-font-size-l);
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='seek'] {
+            grid-area: seek !important;
+            position: relative !important;
+            inset: auto !important;
+            pointer-events: auto;
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='seek'] [data-part='slider'] {
+            min-block-size: calc(var(--wmp-slider-thumb-size) + 0.25rem);
+        }
+
+        [data-part='transport'][data-state~='expanded']
+            > [data-part='seek']
+            [data-part='slider-track'] {
+            block-size: 0.25rem;
+            border-radius: var(--wmp-radius-round);
+        }
+
+        [data-part='transport'][data-state~='expanded']
+            > [data-part='seek']
+            [data-part='slider-thumb'] {
+            display: block;
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='transport-controls'] {
+            display: grid !important;
+            grid-template-areas:
+                'btn-shuffle btn-prev btn-play btn-next btn-repeat'
+                'btn-mute volume volume volume btn-stop' !important;
+            grid-template-columns: repeat(5, auto) !important;
+            justify-content: center !important;
+            justify-items: center;
+            align-items: center;
+            gap: var(--wmp-space-m) var(--wmp-space-l);
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='transport-controls'] > * {
+            display: inline-flex !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-shuffle'] {
+            grid-area: btn-shuffle !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-prev'] {
+            grid-area: btn-prev !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-play'] {
+            grid-area: btn-play !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-next'] {
+            grid-area: btn-next !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-repeat'] {
+            grid-area: btn-repeat !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-mute'] {
+            grid-area: btn-mute !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-stop'] {
+            grid-area: btn-stop !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='volume'] {
+            grid-area: volume !important;
+            display: block !important;
+            inline-size: 100%;
+        }
+
+        /* --- Bottom navigation ----------------------------------------------------------- */
+
+        [data-part='app'] > [data-part='bottom-nav'] {
+            grid-area: bottom-nav !important;
+            display: grid !important;
+            grid-auto-flow: column !important;
+            grid-auto-columns: minmax(0, 1fr) !important;
+            padding-block-end: env(safe-area-inset-bottom);
+        }
+
+        [data-part='bottom-nav'] > [data-part='bottom-nav-item'] {
+            display: grid !important;
+        }
+
+        /* --- Content details (not protected, themes may adjust them) ---------------------- */
+
+        [data-part='list'] {
+            --wmp-list-columns: 2rem minmax(0, 1fr) auto;
+        }
+
+        [data-part='list-header'] {
+            display: none;
+        }
+
+        [data-part='list']
+            :is([data-part='list-column'], [data-part='list-cell'])[data-column='artist'] {
+            display: none;
+        }
+
+        [data-part='list-row'] {
+            min-block-size: 2.75rem;
+        }
+
+        [data-part='list-group'] {
+            grid-template-areas:
+                'list-group-header'
+                'list-group-info'
+                'list-group-rows';
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        [data-part='list-group-info'] {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        [data-part='list-group-info'] [data-part='cover'] {
+            inline-size: 4rem;
+        }
+
+        [data-part='view'] {
+            padding: var(--wmp-space-s);
+        }
+    }
+}

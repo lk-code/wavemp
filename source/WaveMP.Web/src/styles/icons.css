@@ -1,0 +1,237 @@
+/*
+ * Icons are masks: the wrapper (data-part="icon") carries the slot (data-icon) and effects such
+ * as filter: drop-shadow(), the glyph (data-part="icon-glyph") is masked with the SVG of the slot
+ * and filled with --wmp-icon-fill, which can be a color or a gradient. The color never comes from
+ * the SVG file. Glows belong on the wrapper: on the masked glyph, the mask would cut them off.
+ * Longhands only: some browsers mishandle var() next to url() in the mask shorthand.
+ */
+@layer wavemp.components {
+    [data-part='icon'] {
+        display: inline-grid;
+        flex: none;
+        inline-size: var(--wmp-icon-size);
+        block-size: var(--wmp-icon-size);
+        vertical-align: middle;
+    }
+
+    [data-part='icon-glyph'] {
+        background: var(--wmp-icon-fill, currentColor);
+        -webkit-mask-image: var(--_icon);
+        mask-image: var(--_icon);
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    /* Slots: --wmp-icon-<slot> decides the graphic of data-icon="<slot>". */
+    [data-icon='back'] {
+        --_icon: var(--wmp-icon-back);
+    }
+
+    [data-icon='forward'] {
+        --_icon: var(--wmp-icon-forward);
+    }
+
+    [data-icon='tab-indicator'] {
+        --_icon: var(--wmp-icon-tab-indicator);
+    }
+
+    [data-icon='menu'] {
+        --_icon: var(--wmp-icon-menu);
+    }
+
+    [data-icon='now-playing'] {
+        --_icon: var(--wmp-icon-now-playing);
+    }
+
+    [data-icon='library'] {
+        --_icon: var(--wmp-icon-library);
+    }
+
+    [data-icon='playlists'] {
+        --_icon: var(--wmp-icon-playlists);
+    }
+
+    [data-icon='breadcrumb-root'] {
+        --_icon: var(--wmp-icon-breadcrumb-root);
+    }
+
+    [data-icon='breadcrumb-separator'] {
+        --_icon: var(--wmp-icon-breadcrumb-separator);
+    }
+
+    [data-icon='view-tiles'] {
+        --_icon: var(--wmp-icon-view-tiles);
+    }
+
+    [data-icon='view-details'] {
+        --_icon: var(--wmp-icon-view-details);
+    }
+
+    [data-icon='sort'] {
+        --_icon: var(--wmp-icon-sort);
+    }
+
+    [data-icon='dropdown'] {
+        --_icon: var(--wmp-icon-dropdown);
+    }
+
+    [data-icon='search'] {
+        --_icon: var(--wmp-icon-search);
+    }
+
+    [data-icon='clear'] {
+        --_icon: var(--wmp-icon-clear);
+    }
+
+    [data-icon='tree-playlists'] {
+        --_icon: var(--wmp-icon-tree-playlists);
+    }
+
+    [data-icon='tree-create-playlist'] {
+        --_icon: var(--wmp-icon-tree-create-playlist);
+    }
+
+    [data-icon='tree-library'] {
+        --_icon: var(--wmp-icon-tree-library);
+    }
+
+    [data-icon='tree-recently-added'] {
+        --_icon: var(--wmp-icon-tree-recently-added);
+    }
+
+    [data-icon='tree-artists'] {
+        --_icon: var(--wmp-icon-tree-artists);
+    }
+
+    [data-icon='tree-albums'] {
+        --_icon: var(--wmp-icon-tree-albums);
+    }
+
+    [data-icon='tree-songs'] {
+        --_icon: var(--wmp-icon-tree-songs);
+    }
+
+    [data-icon='tree-genres'] {
+        --_icon: var(--wmp-icon-tree-genres);
+    }
+
+    [data-icon='tree-years'] {
+        --_icon: var(--wmp-icon-tree-years);
+    }
+
+    [data-icon='tree-favorites'] {
+        --_icon: var(--wmp-icon-tree-favorites);
+    }
+
+    [data-icon='tree-expand'] {
+        --_icon: var(--wmp-icon-tree-expand);
+    }
+
+    [data-icon='tree-collapse'] {
+        --_icon: var(--wmp-icon-tree-collapse);
+    }
+
+    [data-icon='has-video'] {
+        --_icon: var(--wmp-icon-has-video);
+    }
+
+    [data-icon='info'] {
+        --_icon: var(--wmp-icon-info);
+    }
+
+    [data-icon='cover-placeholder'] {
+        --_icon: var(--wmp-icon-cover-placeholder);
+    }
+
+    [data-icon='shuffle'] {
+        --_icon: var(--wmp-icon-shuffle);
+    }
+
+    [data-icon='repeat'] {
+        --_icon: var(--wmp-icon-repeat);
+    }
+
+    [data-icon='repeat-one'] {
+        --_icon: var(--wmp-icon-repeat-one);
+    }
+
+    [data-icon='stop'] {
+        --_icon: var(--wmp-icon-stop);
+    }
+
+    [data-icon='previous'] {
+        --_icon: var(--wmp-icon-previous);
+    }
+
+    [data-icon='play'] {
+        --_icon: var(--wmp-icon-play);
+    }
+
+    [data-icon='pause'] {
+        --_icon: var(--wmp-icon-pause);
+    }
+
+    [data-icon='next'] {
+        --_icon: var(--wmp-icon-next);
+    }
+
+    [data-icon='volume'] {
+        --_icon: var(--wmp-icon-volume);
+    }
+
+    [data-icon='muted'] {
+        --_icon: var(--wmp-icon-muted);
+    }
+
+    [data-icon='compact'] {
+        --_icon: var(--wmp-icon-compact);
+    }
+
+    [data-icon='fullscreen'] {
+        --_icon: var(--wmp-icon-fullscreen);
+    }
+
+    [data-icon='collapse-player'] {
+        --_icon: var(--wmp-icon-collapse-player);
+    }
+
+    [data-icon='settings'] {
+        --_icon: var(--wmp-icon-settings);
+    }
+
+    [data-icon='profile'] {
+        --_icon: var(--wmp-icon-profile);
+    }
+
+    [data-icon='edit'] {
+        --_icon: var(--wmp-icon-edit);
+    }
+
+    [data-icon='delete'] {
+        --_icon: var(--wmp-icon-delete);
+    }
+
+    [data-icon='add'] {
+        --_icon: var(--wmp-icon-add);
+    }
+
+    [data-icon='view-video'] {
+        --_icon: var(--wmp-icon-view-video);
+    }
+
+    [data-icon='view-visualization'] {
+        --_icon: var(--wmp-icon-view-visualization);
+    }
+
+    [data-icon='view-cover'] {
+        --_icon: var(--wmp-icon-view-cover);
+    }
+
+    [data-icon='close'] {
+        --_icon: var(--wmp-icon-close);
+    }
+}

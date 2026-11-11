@@ -1,0 +1,14 @@
+/*
+ * Base CSS of the web app. Everything lives in cascade layers, the theme stylesheet has no layer
+ * and therefore always wins, independent of specificity and of the loading order. Only the
+ * !important rules of the mobile base (mobile.css) cannot be overridden by a theme.
+ * Every partial wraps its rules in its own @layer block.
+ */
+@layer wavemp.reset, wavemp.base, wavemp.components, wavemp.layout, wavemp.dev, wavemp.mobile;
+
+@import './reset.css';
+@import './tokens.css';
+@import './icons.css';
+@import './components.css';
+@import './layout.css';
+@import './mobile.css';
