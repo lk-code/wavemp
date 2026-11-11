@@ -41,13 +41,13 @@ LICENSE
 CLAUDE.md
 ```
 
-Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur nach Rückfrage. Es gibt keinen `/docs`-Ordner: Nutzerdokumentation steht in der README bzw. in den genannten Dateien im Root, Hinweise für den Maintainer kommen in die Abschlussmeldung des Schritts.
+Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur, wenn es nicht anders geht, und dann in der Abschlussmeldung begründen. Es gibt keinen `/docs`-Ordner: Nutzerdokumentation steht in der README bzw. in den genannten Dateien im Root, Hinweise für den Maintainer kommen in die Abschlussmeldung des Schritts.
 
 ## Konventionen
 
 ### Code-Stil
 - Im Repo-Root liegt eine `.editorconfig` des Maintainers. Sie ist verbindlich für allen Code (C#, TypeScript, Vue, JSON, YAML …).
-- Die `.editorconfig` wird **nicht verändert**. Wenn eine Regel im Weg ist oder fehlt, nachfragen.
+- Die `.editorconfig` wird **nicht verändert**. Ist eine Regel im Weg oder fehlt eine, wird das in der Abschlussmeldung als Vorschlag genannt. Generierter Code (z. B. EF-Core-Migrationen) wird über `<Compile>`-Einstellungen oder `[GeneratedCode]`-Kennzeichnung von den Stilregeln ausgenommen, nicht über Änderungen an der `.editorconfig`.
 - Vor jedem Commit `dotnet format` ausführen; im Frontend die Formatierung an der `.editorconfig` ausrichten.
 
 ### .NET
@@ -110,11 +110,12 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur nac
 
 ## Git
 
-- Lokal committen. Commit-Nachrichten auf Englisch im Format `WMP-{Roadmap-Punkt}: {Nachricht}`, z. B. `WMP-5: add scan logic`. Die Nummer entspricht dem Roadmap-Schritt, an dem gerade gearbeitet wird.
-- Jeder Roadmap-Schritt bekommt einen eigenen Branch, abgezweigt vom aktuellen `main`: `feature/WMP-{Roadmap-Punkt}-{kurze-beschreibung}`, z. B. `feature/WMP-5-scan-logic`. Alle Commits des Schritts landen auf diesem Branch.
-- Vor dem Anlegen prüfen, ob `main` sauber ist und der vorige Feature-Branch bereits gemergt wurde. Wenn nicht, nachfragen statt weiterzumachen.
-- Am Ende eines Schritts dem Maintainer Bescheid geben mit: Branch-Name, Liste der Commits, kurze Zusammenfassung der Änderungen, wie man das Ergebnis testet, und offene Punkte.
-- **Niemals pushen, niemals mergen.** Push und Merge nach `main` macht immer der Maintainer.
+- Es gibt keine Feature-Branches. Gearbeitet, committet und gepusht wird direkt auf `main`.
+- Commit-Nachrichten auf Englisch im Format `WMP-{Roadmap-Punkt}: {Nachricht}`, z. B. `WMP-5: add scan logic`. Die Nummer entspricht dem Roadmap-Schritt, an dem gerade gearbeitet wird.
+- Gepusht wird einmal pro abgeschlossenem Roadmap-Schritt, und nur wenn Build und alle Tests lokal grün sind. Schlagen Tests fehl, wird nicht gepusht und der Schritt gilt als nicht abgeschlossen.
+- Nach dem Push auf das Ergebnis der CI warten (`gh run watch`). Schlägt die CI fehl, den Fehler beheben, als neuen Commit pushen und erst danach mit dem nächsten Schritt weitermachen.
+- Niemals `push --force`, niemals die Historie von `main` umschreiben (kein `rebase`, kein `reset` auf bereits gepushte Commits).
+- Am Ende eines Schritts eine Abschlussmeldung mit: Liste der Commits, kurze Zusammenfassung der Änderungen, wie man das Ergebnis testet, und offene Punkte.
 - `ROADMAP.md` existiert nur lokal und steht in der `.gitignore`. Niemals committen.
 
 ## Arbeitsweise
@@ -124,4 +125,5 @@ Neue Projekte und Ordner fügen sich in diese Struktur ein. Abweichungen nur nac
 - Jedes Feature enthält Tests für seine Geschäftslogik.
 - `README.md` aktuell halten, wenn sich Setup oder Bedienung ändern.
 - Keine Emojis in Dokumentation (README, CLAUDE.md, ROADMAP, THEMING.md, CHANGELOG), Commit-Nachrichten und Code-Kommentaren.
-- Bei Unklarheiten nachfragen statt raten.
+- **Selbstständig entscheiden:** Bei Unklarheiten nicht nachfragen, sondern die bestmögliche Entscheidung nach dieser CLAUDE.md, der Roadmap und dem üblichen Vorgehen treffen und weiterarbeiten. Jede solche Entscheidung wird in der Abschlussmeldung unter "Annahmen" aufgeführt (Frage, Entscheidung, kurze Begründung), damit der Maintainer sie nachträglich korrigieren kann.
+- Ausnahme: Ein Roadmap-Prompt verlangt ausdrücklich eine Entscheidung des Maintainers. Dann vor der Umsetzung anhalten.
