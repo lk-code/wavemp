@@ -56,10 +56,10 @@ export const iconSlots = {
     'cover-placeholder': { file: fill('music-notes'), area: 'content' },
     'admin-library': { file: regular('folder-open'), area: 'content' },
     'admin-jobs': { file: regular('clock-clockwise'), area: 'content' },
-    album: { file: regular('vinyl-record'), area: 'content' },
-    artist: { file: regular('microphone-stage'), area: 'content' },
-    genre: { file: regular('guitar'), area: 'content' },
-    year: { file: regular('calendar-blank'), area: 'content' },
+    album: { file: fill('vinyl-record'), area: 'content' },
+    artist: { file: fill('microphone-stage'), area: 'content' },
+    genre: { file: fill('guitar'), area: 'content' },
+    year: { file: fill('calendar-blank'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },
@@ -90,6 +90,8 @@ export const iconSlots = {
     'view-video': { file: regular('film-strip'), area: 'general' },
     'view-visualization': { file: regular('waveform'), area: 'general' },
     'view-cover': { file: regular('image'), area: 'general' },
+    'go-to-album': { file: regular('vinyl-record'), area: 'general' },
+    'go-to-artist': { file: regular('microphone-stage'), area: 'general' },
     close: { file: regular('x'), area: 'general' },
 } as const satisfies Record<string, IconSlot>
 

@@ -121,10 +121,10 @@
         --wmp-icon-cover-placeholder: url('/icons/phosphor/fill/music-notes-fill.svg');
         --wmp-icon-admin-library: url('/icons/phosphor/regular/folder-open.svg');
         --wmp-icon-admin-jobs: url('/icons/phosphor/regular/clock-clockwise.svg');
-        --wmp-icon-album: url('/icons/phosphor/regular/vinyl-record.svg');
-        --wmp-icon-artist: url('/icons/phosphor/regular/microphone-stage.svg');
-        --wmp-icon-genre: url('/icons/phosphor/regular/guitar.svg');
-        --wmp-icon-year: url('/icons/phosphor/regular/calendar-blank.svg');
+        --wmp-icon-album: url('/icons/phosphor/fill/vinyl-record-fill.svg');
+        --wmp-icon-artist: url('/icons/phosphor/fill/microphone-stage-fill.svg');
+        --wmp-icon-genre: url('/icons/phosphor/fill/guitar-fill.svg');
+        --wmp-icon-year: url('/icons/phosphor/fill/calendar-blank-fill.svg');
         --wmp-icon-shuffle: url('/icons/phosphor/fill/shuffle-fill.svg');
         --wmp-icon-repeat: url('/icons/phosphor/fill/repeat-fill.svg');
         --wmp-icon-repeat-one: url('/icons/phosphor/fill/repeat-once-fill.svg');
@@ -151,6 +151,8 @@
         --wmp-icon-view-video: url('/icons/phosphor/regular/film-strip.svg');
         --wmp-icon-view-visualization: url('/icons/phosphor/regular/waveform.svg');
         --wmp-icon-view-cover: url('/icons/phosphor/regular/image.svg');
+        --wmp-icon-go-to-album: url('/icons/phosphor/regular/vinyl-record.svg');
+        --wmp-icon-go-to-artist: url('/icons/phosphor/regular/microphone-stage.svg');
         --wmp-icon-close: url('/icons/phosphor/regular/x.svg');
 
         /* Spacing and radii */

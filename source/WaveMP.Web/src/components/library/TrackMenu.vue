@@ -16,10 +16,10 @@ const items = computed<MenuItem[]>(() => {
     return [
         { id: 'details', label: t('trackMenu.details'), icon: 'info' },
         ...(current?.album?.id
-            ? [{ id: 'album', label: t('trackMenu.album'), icon: 'album' } as const]
+            ? [{ id: 'album', label: t('trackMenu.album'), icon: 'go-to-album' } as const]
             : []),
         ...(current?.artist?.id
-            ? [{ id: 'artist', label: t('trackMenu.artist'), icon: 'artist' } as const]
+            ? [{ id: 'artist', label: t('trackMenu.artist'), icon: 'go-to-artist' } as const]
             : []),
     ]
 })

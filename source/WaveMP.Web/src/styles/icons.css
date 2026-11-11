@@ -275,6 +275,14 @@
         --_icon: var(--wmp-icon-view-cover);
     }
 
+    [data-icon='go-to-album'] {
+        --_icon: var(--wmp-icon-go-to-album);
+    }
+
+    [data-icon='go-to-artist'] {
+        --_icon: var(--wmp-icon-go-to-artist);
+    }
+
     [data-icon='close'] {
         --_icon: var(--wmp-icon-close);
     }
