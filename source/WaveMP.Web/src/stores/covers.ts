@@ -42,6 +42,13 @@ export const useCoversStore = defineStore('covers', () => {
         }
     }
 
+    /** Forgets an entry whose cover failed to load once no component shows it any more. */
+    function forgetFailed(key: string, entry: Entry): void {
+        if (entry.refs === 0 && !entry.loaded && !entry.pending && entries.get(key) === entry) {
+            entries.delete(key)
+        }
+    }
+
     function evict(): void {
         const idle = [...entries].filter(([, entry]) => entry.refs === 0 && entry.loaded)
         if (idle.length <= maxCachedCovers) {
@@ -86,6 +93,7 @@ export const useCoversStore = defineStore('covers', () => {
                 },
                 () => {
                     current.pending = null
+                    forgetFailed(key, current)
                     return null
                 },
             )
@@ -96,13 +104,15 @@ export const useCoversStore = defineStore('covers', () => {
     }
 
     function release(kind: CoverKind, id: string): void {
-        const entry = entries.get(keyOf(kind, id))
+        const key = keyOf(kind, id)
+        const entry = entries.get(key)
         if (!entry) {
             return
         }
 
         entry.refs = Math.max(0, entry.refs - 1)
         entry.used = ++clock
+        forgetFailed(key, entry)
         evict()
     }
 

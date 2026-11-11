@@ -67,6 +67,26 @@ describe('covers store', () => {
         expect(api.fetchAlbumCover).toHaveBeenCalledTimes(3)
     })
 
+    it('forgets a cover that failed to load once it is not shown', async () => {
+        let fail: (reason: unknown) => void = () => {}
+        api.fetchAlbumCover
+            .mockRejectedValueOnce(new Error('offline'))
+            .mockReturnValueOnce(new Promise((_, reject) => (fail = reject)))
+        const store = useCoversStore()
+
+        expect(await store.acquire('album', 'shown')).toBeNull()
+        expect(store.size()).toBe(1)
+        store.release('album', 'shown')
+        expect(store.size()).toBe(0)
+
+        const released = store.acquire('album', 'released')
+        store.release('album', 'released')
+        expect(store.size()).toBe(1)
+        fail(new Error('offline'))
+        expect(await released).toBeNull()
+        expect(store.size()).toBe(0)
+    })
+
     it('frees the least recently used covers that are not shown', async () => {
         const store = useCoversStore()
         const shown = await store.acquire('album', 'shown')
