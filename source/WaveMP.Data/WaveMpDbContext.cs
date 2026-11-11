@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WaveMP.Data.Configurations;
 using WaveMP.Data.Entities;
 
 namespace WaveMP.Data;
@@ -18,6 +19,12 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(WaveMpDbContext).Assembly);
+        // Applied one by one instead of scanning the assembly: a scan also loads the design-time types, whose
+        // dependency (Microsoft.EntityFrameworkCore.Design) is not part of the published service. A configuration
+        // that is missing here shows up as a pending model change in the tests.
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new UserSettingsConfiguration());
+        modelBuilder.ApplyConfiguration(new SessionConfiguration());
+        modelBuilder.ApplyConfiguration(new ServerSecretConfiguration());
     }
 }
