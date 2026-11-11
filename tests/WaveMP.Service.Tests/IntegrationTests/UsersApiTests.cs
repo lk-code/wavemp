@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json.Nodes;
 using AwesomeAssertions;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
@@ -149,8 +148,8 @@ public class UsersApiTests
     {
         HttpResponseMessage response = await SendAsync(_admin, "POST", "/api/v1/users", body);
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().Equal(field);
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Equal(field);
     }
 
     [Test]
@@ -249,8 +248,8 @@ public class UsersApiTests
     {
         HttpResponseMessage response = await _admin.GetAsync($"/api/v1/users?{query}");
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().Equal(parameter);
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Equal(parameter);
     }
 
     [Test]
@@ -258,8 +257,8 @@ public class UsersApiTests
     {
         HttpResponseMessage response = await _admin.GetAsync("/api/v1/users?sort=5&direction=9&role=9");
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().BeEquivalentTo("sort", "direction", "role");
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().BeEquivalentTo("sort", "direction", "role");
     }
 
     [Test]

@@ -121,7 +121,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -303,7 +303,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -407,7 +407,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -515,7 +515,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -702,7 +702,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -893,7 +893,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1006,7 +1006,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1197,7 +1197,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1390,7 +1390,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1462,7 +1462,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1618,7 +1618,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1825,7 +1825,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -1877,7 +1877,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2061,7 +2061,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2177,7 +2177,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2330,7 +2330,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2482,7 +2482,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2598,7 +2598,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2758,7 +2758,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2896,7 +2896,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -2966,7 +2966,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -3126,7 +3126,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -3295,7 +3295,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -5330,8 +5330,57 @@
         "type": "string",
         "description": "Sort key of the user list; ties are sorted by id."
       },
-      "ValidationProblemDetails": {
+      "ValidationError": {
         "required": [
+          "field",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "The field: the JSON name of a member of the body (nested members as `a.b`, entries of a list as `a[0]`) or the name of a query parameter. Empty for the body as a whole, e.g. a missing body or malformed JSON."
+          },
+          "code": {
+            "$ref": "#/components/schemas/ValidationErrorCode"
+          },
+          "min": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Lower limit for `min_length`, `min_items` and `out_of_range`; missing for other codes.",
+            "format": "int32"
+          },
+          "max": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Upper limit for `max_length`, `max_items` and `out_of_range`; missing for other codes.",
+            "format": "int32"
+          }
+        },
+        "description": "A rejected field of a request: where, why, and the limits that apply."
+      },
+      "ValidationErrorCode": {
+        "enum": [
+          "required",
+          "min_length",
+          "max_length",
+          "min_items",
+          "max_items",
+          "out_of_range",
+          "invalid_format",
+          "invalid_value",
+          "duplicate"
+        ],
+        "type": "string",
+        "description": "Machine-readable reason why a field of a request was rejected, part of every validation problem. Clients translate it; the parameters `min` and `max` of the error complete it where stated."
+      },
+      "ValidationProblem": {
+        "required": [
+          "errors",
           "code"
         ],
         "type": "object",
@@ -5368,18 +5417,17 @@
             ]
           },
           "errors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "description": "The errors, at least one; a field can have more than one."
           },
           "code": {
             "$ref": "#/components/schemas/ProblemCode"
           }
-        }
+        },
+        "description": "Problem Details (RFC 9457) of a request that failed validation (400, code `request.invalid`). Instead of texts, every error names its field and a machine-readable code with its limits; clients translate them."
       },
       "Year": {
         "required": [

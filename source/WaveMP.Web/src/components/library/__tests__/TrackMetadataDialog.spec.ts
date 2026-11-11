@@ -176,7 +176,11 @@ describe('TrackMetadataDialog', () => {
         api.updateTrackMetadata.mockRejectedValue({
             code: 'request.invalid',
             responseStatusCode: 400,
-            errors: { additionalData: { title: ['Too long'], '$.year': ['Invalid'] } },
+            errors: [
+                { field: 'title', code: 'max_length', max: 512 },
+                { field: 'year', code: 'invalid_format' },
+                { field: '', code: 'required' },
+            ],
         })
         const wrapper = await mountDialog()
 
@@ -187,7 +191,13 @@ describe('TrackMetadataDialog', () => {
             'Please check the marked fields.',
         )
         expect(wrapper.get('[data-field="title"]').attributes('data-state')).toBe('invalid')
+        expect(wrapper.get('[data-field="title"] [data-part="field-error"]').text()).toBe(
+            'This text is too long (maximum length: 512).',
+        )
         expect(wrapper.get('[data-field="year"]').attributes('data-state')).toBe('invalid')
+        expect(wrapper.get('[data-field="year"] [data-part="field-error"]').text()).toBe(
+            'This value has an invalid format.',
+        )
         expect(wrapper.get('[data-field="artist"]').attributes('data-state')).toBeUndefined()
         wrapper.unmount()
     })

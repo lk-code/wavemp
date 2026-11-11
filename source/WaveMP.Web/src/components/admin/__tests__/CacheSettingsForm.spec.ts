@@ -70,7 +70,7 @@ describe('CacheSettingsForm', () => {
         update.mockRejectedValue({
             responseStatusCode: 400,
             code: 'request.invalid',
-            errors: { additionalData: { maxSizeMegabytes: ['The value is out of range.'] } },
+            errors: [{ field: 'maxSizeMegabytes', code: 'out_of_range', min: 100, max: 1_000_000 }],
         })
 
         await wrapper.get('form').trigger('submit')

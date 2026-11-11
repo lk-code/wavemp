@@ -346,15 +346,15 @@ public class TrackMetadataApiTests
     [TestCase("""{ "year": 0 }""", "year")]
     [TestCase("""{ "trackNumber": 10000 }""", "trackNumber")]
     [TestCase("""{ "discNumber": 0 }""", "discNumber")]
-    [TestCase("""{ "year": "2001" }""", "$.year")]
+    [TestCase("""{ "year": "2001" }""", "year")]
     public async Task UpdateTrackMetadata_InvalidValue_ReturnsAValidationProblem(string body, string field)
     {
         HttpResponseMessage response = await PatchAsync("Empty", body);
 
-        // A value of the wrong type also makes the framework report the whole request as missing ("request").
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().Contain(field);
-        errors.Select(error => error.Key).Should().BeSubsetOf([field, "request"]);
+        // A value of the wrong type also makes the framework report the whole body as missing (field "").
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Contain(field);
+        errors.Select(error => error.Field).Should().BeSubsetOf([field, string.Empty]);
     }
 
     [Test]
@@ -364,8 +364,8 @@ public class TrackMetadataApiTests
 
         HttpResponseMessage response = await PatchAsync("Empty", body);
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().BeEquivalentTo("title", "genre");
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().BeEquivalentTo("title", "genre");
     }
 
     [Test]

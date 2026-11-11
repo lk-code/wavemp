@@ -40,7 +40,11 @@ public static partial class LibrarySettingsValidator
 
         if (settings.ScanIntervalMinutes is < MinScanIntervalMinutes or > MaxScanIntervalMinutes)
         {
-            errors.Add(new(LibrarySettingsField.ScanIntervalMinutes, SettingsErrorReason.OutOfRange));
+            errors.Add(new(
+                LibrarySettingsField.ScanIntervalMinutes,
+                SettingsErrorReason.OutOfRange,
+                MinScanIntervalMinutes,
+                MaxScanIntervalMinutes));
         }
 
         (LibrarySettingsField Field, IReadOnlyList<string> Values)[] extensionLists =
@@ -55,7 +59,7 @@ public static partial class LibrarySettingsValidator
         {
             if (values.Count > MaxEntries)
             {
-                errors.Add(new(field, SettingsErrorReason.TooMany));
+                errors.Add(new(field, SettingsErrorReason.TooMany, Maximum: MaxEntries));
             }
             else if (!values.All(value => ExtensionPattern().IsMatch(value)))
             {
@@ -77,7 +81,7 @@ public static partial class LibrarySettingsValidator
 
         if (settings.AlbumCoverNames.Count > MaxEntries)
         {
-            errors.Add(new(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.TooMany));
+            errors.Add(new(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.TooMany, Maximum: MaxEntries));
         }
         else if (!settings.AlbumCoverNames.All(IsValidCoverName))
         {

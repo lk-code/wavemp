@@ -9,9 +9,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using WaveMP.Data.Entities;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.Filters;
 using WaveMP.Service.OpenApiTransformers;
 using WaveMP.Service.Problems;
 using WaveMP.Service.Tokens;
+using WaveMP.Service.Validators;
 
 namespace WaveMP.Service.Extensions;
 
@@ -20,12 +22,11 @@ public static class ServiceCollectionExtensions
     private const string DtoSuffix = "Dto";
     private const string PageSuffix = "Page";
 
-    // Schemas of all Problem Details types the framework may describe.
+    // Schemas of all Problem Details types of the document.
     private static readonly string[] _problemSchemaIds =
     [
         nameof(ProblemDetails),
-        nameof(ValidationProblemDetails),
-        nameof(HttpValidationProblemDetails),
+        RemoveDtoSuffix(nameof(ValidationProblemDto))!,
     ];
 
     /// <summary>
@@ -34,22 +35,41 @@ public static class ServiceCollectionExtensions
     /// document describes them. Enum DTOs declare <see cref="Converters.StrictStringEnumConverter{TEnum}"/> themselves;
     /// the global converter covers every other enum.
     /// </summary>
+    /// <remarks>
+    /// Request bodies of the controllers ignore the C# keyword <c>required</c>: a missing member stays at its default
+    /// and its data annotation (<c>[Required]</c>) reports it as <c>required</c> under its own field. The serializer would
+    /// only reject the body as a whole. The OpenAPI document still describes these members as required.
+    /// </remarks>
     public static IServiceCollection AddWaveMpJson(this IServiceCollection services)
     {
         services.ConfigureHttpJsonOptions(options => ConfigureSerializer(options.SerializerOptions));
-        services.Configure<JsonOptions>(options => ConfigureSerializer(options.JsonSerializerOptions));
+        services.Configure<JsonOptions>(options =>
+        {
+            ConfigureSerializer(options.JsonSerializerOptions);
+            options.JsonSerializerOptions.TypeInfoResolver =
+                (options.JsonSerializerOptions.TypeInfoResolver ?? new DefaultJsonTypeInfoResolver())
+                .WithAddedModifier(LeaveRequiredMembersToValidation);
+        });
         return services;
     }
 
     /// <summary>
-    /// Registers the controllers. The keys of validation errors (member <c>errors</c> of the Problem Details) are the
-    /// JSON names of the members, e.g. <c>name</c> instead of the C# property <c>Name</c>, so clients can assign every
-    /// error to its field.
+    /// Registers the controllers. Validation errors are written as <see cref="ValidationProblemDto"/>: every error has
+    /// a machine-readable <see cref="ValidationErrorCodeDto"/> instead of a text, and its field is the JSON name of the
+    /// member, e.g. <c>name</c> instead of the C# property <c>Name</c>, so clients can assign every error to its field.
     /// </summary>
     public static IServiceCollection AddWaveMpControllers(this IServiceCollection services)
     {
         services.AddControllers(options =>
-            options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider()));
+            {
+                options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
+                // Before the provider of the framework, which then skips the data annotations.
+                options.ModelValidatorProviders.Insert(0, new CodedModelValidatorProvider());
+                ValidationProblems.UseCodes(options.ModelBindingMessageProvider);
+                options.Filters.Add<ValidationProblemResultFilter>();
+            })
+            .ConfigureApiBehaviorOptions(options =>
+                options.InvalidModelStateResponseFactory = ValidationProblems.CreateResponse);
         return services;
     }
 
@@ -152,6 +172,14 @@ public static class ServiceCollectionExtensions
     {
         options.NumberHandling = JsonNumberHandling.Strict;
         options.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
+    }
+
+    private static void LeaveRequiredMembersToValidation(JsonTypeInfo typeInfo)
+    {
+        foreach (JsonPropertyInfo property in typeInfo.Properties)
+        {
+            property.IsRequired = false;
+        }
     }
 
     private static string? CreateSchemaReferenceId(JsonTypeInfo typeInfo)

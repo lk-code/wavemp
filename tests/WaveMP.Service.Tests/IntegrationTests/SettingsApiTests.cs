@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json.Nodes;
 using AwesomeAssertions;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
@@ -82,8 +81,8 @@ public class SettingsApiTests
         HttpResponseMessage response = await admin.SendJsonAsync("PATCH", "/api/v1/settings/library", body);
         LibrarySettingsDto unchanged = await admin.GetJsonAsync<LibrarySettingsDto>("/api/v1/settings/library");
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().Contain(field);
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Contain(field);
         unchanged.ScanIntervalMinutes.Should().Be(360);
         unchanged.AudioExtensions.Should().Contain("mp3");
         await factory.DeleteDatabaseAsync();
@@ -142,8 +141,8 @@ public class SettingsApiTests
         HttpResponseMessage response = await admin.SendJsonAsync("PATCH", "/api/v1/settings/cache", body);
         CacheSettingsDto unchanged = await admin.GetJsonAsync<CacheSettingsDto>("/api/v1/settings/cache");
 
-        JsonObject errors = await response.ShouldBeValidationProblemAsync();
-        errors.Select(error => error.Key).Should().Contain(key => key.Contains("maxSizeMegabytes"));
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Contain("maxSizeMegabytes");
         unchanged.MaxSizeMegabytes.Should().Be(2000);
         await factory.DeleteDatabaseAsync();
     }

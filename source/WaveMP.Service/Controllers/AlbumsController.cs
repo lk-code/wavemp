@@ -42,7 +42,7 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListAlbums")]
     [ProducesResponseType<PageDto<AlbumDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<AlbumDto>>> ListAlbumsAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,
@@ -104,7 +104,7 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
     /// <response code="404">The album does not exist (code <c>album.not_found</c>).</response>
     [HttpGet("{id:guid}/tracks", Name = "ListAlbumTracks")]
     [ProducesResponseType<PageDto<TrackDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<PageDto<TrackDto>>> ListAlbumTracksAsync(
         Guid id,
@@ -161,7 +161,7 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
         ImageFormats.WebP,
         ImageFormats.Gif,
         ImageFormats.Bmp)]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<IActionResult> GetAlbumCoverAsync(
         Guid id,

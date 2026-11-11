@@ -45,7 +45,7 @@ public sealed class MeController(IUserSettingsService settings) : ControllerBase
     [HttpPatch("settings", Name = "UpdateMySettings")]
     [Consumes("application/json")]
     [ProducesResponseType<UserSettingsDto>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<UserSettingsDto>> UpdateMySettingsAsync(
         UpdateUserSettingsDto request,

@@ -92,15 +92,23 @@ describe('LibrarySettingsForm', () => {
         update.mockRejectedValue({
             responseStatusCode: 400,
             code: 'request.invalid',
-            errors: { additionalData: { videoExtensions: ['Overlap'] } },
+            errors: [
+                { field: 'scanIntervalMinutes', code: 'out_of_range', min: 15, max: 1440 },
+                { field: 'videoExtensions', code: 'duplicate' },
+                { field: 'albumCoverNames', code: 'max_items', max: 50 },
+                { field: '', code: 'required' },
+            ],
         })
 
         await wrapper.get('form').trigger('submit')
         await flushPromises()
 
         const errors = wrapper.findAll('[data-part="field-error"]').map((error) => error.text())
-        expect(errors).toHaveLength(3)
-        expect(errors[0]).toContain('An extension may only be in one list')
+        expect(errors).toEqual([
+            'Choose an interval between 15 and 1,440 minutes.',
+            'An extension may only be in one list.',
+            'This list has too many entries (maximum: 50).',
+        ])
         expect(wrapper.find('[data-part="alert"]').exists()).toBe(false)
         wrapper.unmount()
     })

@@ -115,6 +115,31 @@ describe('UserEditDialog', () => {
         wrapper.unmount()
     })
 
+    it('shows the errors of the server at their fields', async () => {
+        const users = useUsersStore()
+        vi.spyOn(users, 'create').mockRejectedValue({
+            responseStatusCode: 400,
+            code: 'request.invalid',
+            errors: [
+                { field: 'name', code: 'max_length', max: 50 },
+                { field: 'initials', code: 'invalid_value' },
+                { field: 'color', code: 'invalid_format' },
+            ],
+        })
+        const wrapper = await mountDialog(null)
+
+        await wrapper.findAll('input')[0]?.setValue('Carla')
+        await submit(wrapper)
+
+        const errors = wrapper.findAll('[data-part="field-error"]').map((error) => error.text())
+        expect(errors).toEqual([
+            'This text is too long (maximum length: 50).',
+            'This value is not valid.',
+        ])
+        expect(wrapper.get('[data-part="alert"]').text()).toBe('Please check your input.')
+        wrapper.unmount()
+    })
+
     it('reports other errors', async () => {
         const users = useUsersStore()
         vi.spyOn(users, 'create').mockRejectedValue({ responseStatusCode: 400 })

@@ -49,7 +49,11 @@ public class LibrarySettingsValidatorTests
         if (invalid)
         {
             errors.Should().Equal(
-                new SettingsValidationError(LibrarySettingsField.ScanIntervalMinutes, SettingsErrorReason.OutOfRange));
+                new SettingsValidationError(
+                    LibrarySettingsField.ScanIntervalMinutes,
+                    SettingsErrorReason.OutOfRange,
+                    15,
+                    1440));
         }
         else
         {
@@ -109,8 +113,8 @@ public class LibrarySettingsValidatorTests
 
         errors.Should().BeEquivalentTo(
         [
-            new SettingsValidationError(LibrarySettingsField.AudioExtensions, SettingsErrorReason.TooMany),
-            new SettingsValidationError(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.TooMany),
+            new SettingsValidationError(LibrarySettingsField.AudioExtensions, SettingsErrorReason.TooMany, Maximum: 50),
+            new SettingsValidationError(LibrarySettingsField.AlbumCoverNames, SettingsErrorReason.TooMany, Maximum: 50),
         ]);
     }
 

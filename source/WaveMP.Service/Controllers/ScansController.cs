@@ -75,7 +75,7 @@ public sealed class ScansController(IScanService scans) : ControllerBase
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListScans")]
     [ProducesResponseType<PageDto<ScanDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<ScanDto>>> ListScansAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,

@@ -2,12 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { CacheSettings } from '@/api/generated/models'
-import { fieldErrorsOf, problemCodeOf } from '@/api/problems'
+import { problemCodeOf, validationErrorsOf } from '@/api/problems'
 import { bytesPerMegabyte, cacheLimitOptions } from '@/admin/presentation'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseSelect, { type SelectOption } from '@/components/base/BaseSelect.vue'
 import { useFormat } from '@/composables/useFormat'
+import { validationMessagesByField } from '@/i18n/validation'
 import { useCacheSettingsStore } from '@/stores/cacheSettings'
 
 /** Settings of the cache: its largest size. */
@@ -23,7 +24,7 @@ const maxSize = ref('')
 const saving = ref(false)
 const saved = ref(false)
 const failed = ref(false)
-const invalid = ref(false)
+const invalid = ref<string | undefined>(undefined)
 
 function show(settings: CacheSettings | null): void {
     if (settings?.maxSizeMegabytes) {
@@ -55,17 +56,20 @@ async function save(): Promise<void> {
     saving.value = true
     saved.value = false
     failed.value = false
-    invalid.value = false
+    invalid.value = undefined
     try {
         show(await store.update({ maxSizeMegabytes: Number(maxSize.value) }))
         saved.value = true
         emit('saved')
     } catch (error) {
-        if (
-            problemCodeOf(error) === 'request.invalid' &&
-            fieldErrorsOf(error).includes('maxSizeMegabytes')
-        ) {
-            invalid.value = true
+        const messages = validationMessagesByField(
+            validationErrorsOf(error),
+            { maxSizeMegabytes: 'maxSize' },
+            (key, parameters) => t(key, parameters),
+            () => ({ keys: { out_of_range: 'adminCache.errors.maxSize' }, formatLimit: sizeLabel }),
+        )
+        if (problemCodeOf(error) === 'request.invalid' && messages.maxSize) {
+            invalid.value = messages.maxSize
         } else {
             failed.value = true
         }
@@ -97,7 +101,7 @@ onMounted(async () => {
             :label="t('adminCache.maxSize')"
             :options="options"
             :hint="t('adminCache.maxSizeHint')"
-            :error="invalid ? t('adminCache.errors.maxSize') : undefined"
+            :error="invalid"
             :disabled="saving"
         />
         <BaseAlert v-if="saved" tone="success" :message="t('adminCache.saved')" />

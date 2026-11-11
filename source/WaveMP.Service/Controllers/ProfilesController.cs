@@ -28,7 +28,7 @@ public sealed class ProfilesController(IUserService users) : ControllerBase
     /// <response code="400">Invalid paging parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListProfiles")]
     [ProducesResponseType<PageDto<ProfileDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<ProfileDto>>> ListProfilesAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,

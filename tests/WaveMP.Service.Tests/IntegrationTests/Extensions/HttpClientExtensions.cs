@@ -14,6 +14,8 @@ namespace WaveMP.Service.Tests.IntegrationTests.Extensions;
 /// </summary>
 internal static class HttpClientExtensions
 {
+    private static readonly string[] _validationErrorMembers = ["field", "code", "min", "max"];
+
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter() },
@@ -98,13 +100,19 @@ internal static class HttpClientExtensions
     }
 
     /// <summary>
-    /// Checks that the response is a validation problem (400, <c>request.invalid</c>) and returns its errors by field.
+    /// Checks that the response is a validation problem (400, <c>request.invalid</c>) whose errors only consist of
+    /// field, code and limits (no texts), and returns them.
     /// </summary>
-    public static async Task<JsonObject> ShouldBeValidationProblemAsync(this HttpResponseMessage response)
+    public static async Task<IReadOnlyList<ValidationErrorDto>> ShouldBeValidationProblemAsync(
+        this HttpResponseMessage response)
     {
         await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
-        JsonNode problem = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
-        return problem["errors"]!.AsObject();
+        string content = await response.Content.ReadAsStringAsync();
+        JsonArray errors = JsonNode.Parse(content)!["errors"]!.AsArray();
+        errors.Should().NotBeEmpty(content);
+        errors.Should().AllSatisfy(error => error!.AsObject().Select(member => member.Key)
+            .Should().BeSubsetOf(_validationErrorMembers, content));
+        return errors.Deserialize<List<ValidationErrorDto>>(JsonOptions)!;
     }
 
     /// <summary>

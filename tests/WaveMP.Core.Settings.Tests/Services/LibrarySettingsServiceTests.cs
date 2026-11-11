@@ -111,7 +111,11 @@ public class LibrarySettingsServiceTests
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().BeEquivalentTo(
         [
-            new SettingsValidationError(LibrarySettingsField.ScanIntervalMinutes, SettingsErrorReason.OutOfRange),
+            new SettingsValidationError(
+                LibrarySettingsField.ScanIntervalMinutes,
+                SettingsErrorReason.OutOfRange,
+                15,
+                1440),
             new SettingsValidationError(LibrarySettingsField.VideoExtensions, SettingsErrorReason.Overlap),
         ]);
         _snapshot.Current.Should().BeSameAs(previous);

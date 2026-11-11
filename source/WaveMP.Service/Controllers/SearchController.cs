@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaveMP.Core.Library.Searches;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.Extensions;
 using WaveMP.Service.Mappings;
 using WaveMP.Service.Queries;
 
@@ -30,7 +31,7 @@ public sealed class SearchController(ISearchService search) : ControllerBase
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "SearchLibrary")]
     [ProducesResponseType<SearchResultDto>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<SearchResultDto>> SearchLibraryAsync(
         [FromQuery, Required, StringLength(LibraryLimits.TextMaxLength, MinimumLength = 1)] string q,
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
@@ -40,7 +41,8 @@ public sealed class SearchController(ISearchService search) : ControllerBase
         SearchResult? result = await search.SearchAsync(q, offset, limit, cancellationToken);
         if (result is null)
         {
-            ModelState.AddModelError(nameof(q), "The search text is empty.");
+            // White space only, or nothing left after normalization.
+            ModelState.AddValidationError(nameof(q), ValidationErrorCodeDto.Required);
             return ValidationProblem();
         }
 

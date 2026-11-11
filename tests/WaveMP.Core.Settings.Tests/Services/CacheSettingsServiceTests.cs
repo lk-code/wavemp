@@ -94,7 +94,11 @@ public class CacheSettingsServiceTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Equal(
-            new CacheSettingsValidationError(CacheSettingsField.MaxSizeMegabytes, SettingsErrorReason.OutOfRange));
+            new CacheSettingsValidationError(
+                CacheSettingsField.MaxSizeMegabytes,
+                SettingsErrorReason.OutOfRange,
+                100,
+                1_000_000));
         _snapshot.Current.Should().BeSameAs(previous);
         await _store.DidNotReceive()
             .SaveAsync(Arg.Any<string>(), Arg.Any<CacheSettings>(), Arg.Any<CancellationToken>());

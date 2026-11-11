@@ -397,9 +397,11 @@
     "saveError": "The settings could not be saved.",
     "settingsLoadError": "The settings could not be loaded.",
     "errors": {
-      "interval": "Choose an interval between 15 minutes and 24 hours.",
-      "extensions": "Use 1 to 10 letters or digits per extension and at most 50 of them. An extension may only be in one list, and there must be audio or video extensions.",
-      "coverNames": "Use at most 50 names without slashes."
+      "interval": "Choose an interval between {min} and {max} minutes.",
+      "extensionFormat": "Use 1 to 10 letters or digits per extension.",
+      "extensionDuplicate": "An extension may only be in one list.",
+      "extensionsRequired": "Enter audio or video extensions.",
+      "coverNames": "Use names without slashes, without a leading dot and with at most 50 characters."
     }
   },
   "adminJobs": {
@@ -452,7 +454,7 @@
     "saveError": "The settings could not be saved.",
     "settingsLoadError": "The settings could not be loaded.",
     "errors": {
-      "maxSize": "Choose a size between 100 MB and 1 TB."
+      "maxSize": "Choose a size between {min} and {max}."
     }
   },
   "jobRuns": {
@@ -516,7 +518,6 @@
       "notFound": "The song no longer exists.",
       "notWritable": "The changes could not be written to the audio file.",
       "invalid": "Please check the marked fields.",
-      "invalidField": "This value is not valid.",
       "number": "Enter a whole number from 1 to {max}.",
       "saveFailed": "The changes could not be saved."
     }
@@ -574,5 +575,16 @@
     "album": "Go to album",
     "artist": "Go to artist",
     "editMetadata": "Edit metadata"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "minLength": "This text is too short (minimum length: {min}).",
+    "maxLength": "This text is too long (maximum length: {max}).",
+    "minItems": "This list has too few entries (minimum: {min}).",
+    "maxItems": "This list has too many entries (maximum: {max}).",
+    "outOfRange": "Enter a value from {min} to {max}.",
+    "invalidFormat": "This value has an invalid format.",
+    "invalidValue": "This value is not valid.",
+    "duplicate": "This value is already used in another field."
   }
 }

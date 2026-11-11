@@ -36,7 +36,7 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListArtists")]
     [ProducesResponseType<PageDto<ArtistDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<ArtistDto>>> ListArtistsAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,
@@ -95,7 +95,7 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
     /// <response code="404">The artist does not exist (code <c>artist.not_found</c>).</response>
     [HttpGet("{id:guid}/albums", Name = "ListArtistAlbums")]
     [ProducesResponseType<PageDto<AlbumDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<PageDto<AlbumDto>>> ListArtistAlbumsAsync(
         Guid id,

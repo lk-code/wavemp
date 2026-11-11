@@ -35,7 +35,7 @@ public sealed class JobsController(IJobService jobs) : ControllerBase
     /// <response code="400">Invalid paging parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListJobs")]
     [ProducesResponseType<PageDto<JobDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<JobDto>>> ListJobsAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,
@@ -88,7 +88,7 @@ public sealed class JobsController(IJobService jobs) : ControllerBase
     /// <response code="404">The job does not exist (code <c>job.not_found</c>).</response>
     [HttpGet("{id}/runs", Name = "ListJobRuns")]
     [ProducesResponseType<PageDto<JobRunDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<PageDto<JobRunDto>>> ListJobRunsAsync(
         string id,

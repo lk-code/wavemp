@@ -7,12 +7,13 @@ import {
     type TrackMetadata,
     type TrackMetadataStatus,
 } from '@/api/generated/models'
-import { fieldErrorsOf, problemCodeOf, statusOf } from '@/api/problems'
+import { problemCodeOf, statusOf, validationErrorsOf } from '@/api/problems'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseProgress from '@/components/base/BaseProgress.vue'
 import BaseTextField from '@/components/base/BaseTextField.vue'
+import { validationMessagesByField } from '@/i18n/validation'
 import { getTrackMetadata, updateTrackMetadata } from '@/library/api'
 import {
     emptyMetadataForm,
@@ -148,13 +149,15 @@ function report(failure: unknown): void {
     } else if (code === ProblemCodeObject.TrackNot_found) {
         error.value = t('trackMetadata.errors.notFound')
     } else if (statusOf(failure) === 400) {
-        const errors: Partial<Record<MetadataField, string>> = {}
-        for (const field of fieldErrorsOf(failure)) {
-            if (field in metadataDataFields) {
-                errors[field as MetadataField] = t('trackMetadata.errors.invalidField')
-            }
-        }
-        fieldErrors.value = errors
+        // The fields of the form are named like the members of the request.
+        const fields = Object.fromEntries(
+            Object.keys(metadataDataFields).map((field) => [field, field as MetadataField]),
+        )
+        fieldErrors.value = validationMessagesByField(
+            validationErrorsOf(failure),
+            fields,
+            (key, parameters) => t(key, parameters),
+        )
         error.value = t('trackMetadata.errors.invalid')
     } else {
         error.value = t('trackMetadata.errors.saveFailed')

@@ -31,7 +31,7 @@ public sealed class YearsController(ITrackService tracks) : ControllerBase
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListYears")]
     [ProducesResponseType<PageDto<YearDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<YearDto>>> ListYearsAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,

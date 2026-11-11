@@ -49,17 +49,18 @@ public static class LibrarySettingsMappingExtensions
     }
 
     /// <summary>
-    /// Internal English description of a validation error; clients show their own text per field.
+    /// The code of a validation error of the settings; clients translate it.
     /// </summary>
-    public static string ToMessage(this SettingsErrorReason reason)
+    public static ValidationErrorCodeDto ToCode(this SettingsErrorReason reason)
     {
         return reason switch
         {
-            SettingsErrorReason.OutOfRange => "The value is out of range.",
-            SettingsErrorReason.Invalid => "An entry of the list is not valid.",
-            SettingsErrorReason.Overlap => "An extension is already in another list.",
-            SettingsErrorReason.TooMany => "The list has too many entries.",
-            SettingsErrorReason.Empty => "Audio and video extensions must not both be empty.",
+            SettingsErrorReason.OutOfRange => ValidationErrorCodeDto.OutOfRange,
+            SettingsErrorReason.Invalid => ValidationErrorCodeDto.InvalidFormat,
+            SettingsErrorReason.Overlap => ValidationErrorCodeDto.Duplicate,
+            SettingsErrorReason.TooMany => ValidationErrorCodeDto.MaxItems,
+            // Audio and video extensions must not both be empty.
+            SettingsErrorReason.Empty => ValidationErrorCodeDto.Required,
             _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "Unknown reason."),
         };
     }

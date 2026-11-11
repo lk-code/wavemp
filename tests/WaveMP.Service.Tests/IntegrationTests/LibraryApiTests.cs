@@ -192,7 +192,8 @@ public class LibraryApiTests
     {
         HttpResponseMessage response = await _user.GetAsync($"/api/v1/tracks?q={new string('a', 201)}");
 
-        (await response.ShouldBeValidationProblemAsync()).Should().ContainKey("q");
+        (await response.ShouldBeValidationProblemAsync()).Should().ContainSingle()
+            .Which.Should().BeEquivalentTo(new { Field = "q", Code = ValidationErrorCodeDto.MaxLength, Max = 200 });
     }
 
     [Test]

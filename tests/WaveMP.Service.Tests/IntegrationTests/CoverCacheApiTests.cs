@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json.Nodes;
 using AwesomeAssertions;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Tests.IntegrationTests.Extensions;
@@ -138,8 +137,8 @@ public class CoverCacheApiTests
         HttpResponseMessage album = await _user.GetAsync($"/api/v1/albums/{_albums["Big Album"]}/cover?size={size}");
         HttpResponseMessage track = await _user.GetAsync($"/api/v1/tracks/{Guid.NewGuid()}/cover?size={size}");
 
-        JsonObject errors = await album.ShouldBeValidationProblemAsync();
-        errors.Should().ContainKey("size");
+        IReadOnlyList<ValidationErrorDto> errors = await album.ShouldBeValidationProblemAsync();
+        errors.Should().ContainSingle().Which.Field.Should().Be("size");
         await track.ShouldBeValidationProblemAsync();
     }
 

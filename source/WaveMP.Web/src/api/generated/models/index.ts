@@ -636,20 +636,20 @@ export function createUserSettingsFromDiscriminatorValue(parseNode: ParseNode | 
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
- * @returns {ValidationProblemDetails_errors}
+ * @returns {ValidationError}
  */
 // @ts-ignore
-export function createValidationProblemDetails_errorsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
-    return deserializeIntoValidationProblemDetails_errors;
+export function createValidationErrorFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoValidationError;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
- * @returns {ValidationProblemDetails}
+ * @returns {ValidationProblem}
  */
 // @ts-ignore
-export function createValidationProblemDetailsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
-    return deserializeIntoValidationProblemDetails;
+export function createValidationProblemFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoValidationProblem;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -1332,29 +1332,33 @@ export function deserializeIntoUserSettings(userSettings: Partial<UserSettings> 
 }
 /**
  * The deserialization information for the current model
- * @param ValidationProblemDetails The instance to deserialize into.
+ * @param ValidationError The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
 // @ts-ignore
-export function deserializeIntoValidationProblemDetails(validationProblemDetails: Partial<ValidationProblemDetails> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+export function deserializeIntoValidationError(validationError: Partial<ValidationError> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
-        "code": n => { validationProblemDetails.code = n.getEnumValue<ProblemCode>(ProblemCodeObject); },
-        "detail": n => { validationProblemDetails.detail = n.getStringValue(); },
-        "errors": n => { validationProblemDetails.errors = n.getObjectValue<ValidationProblemDetails_errors>(createValidationProblemDetails_errorsFromDiscriminatorValue); },
-        "instance": n => { validationProblemDetails.instance = n.getStringValue(); },
-        "status": n => { validationProblemDetails.status = n.getNumberValue(); },
-        "title": n => { validationProblemDetails.title = n.getStringValue(); },
-        "type": n => { validationProblemDetails.type = n.getStringValue(); },
+        "code": n => { validationError.code = n.getEnumValue<ValidationErrorCode>(ValidationErrorCodeObject); },
+        "field": n => { validationError.field = n.getStringValue(); },
+        "max": n => { validationError.max = n.getNumberValue(); },
+        "min": n => { validationError.min = n.getNumberValue(); },
     }
 }
 /**
  * The deserialization information for the current model
- * @param ValidationProblemDetails_errors The instance to deserialize into.
+ * @param ValidationProblem The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
 // @ts-ignore
-export function deserializeIntoValidationProblemDetails_errors(validationProblemDetails_errors: Partial<ValidationProblemDetails_errors> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+export function deserializeIntoValidationProblem(validationProblem: Partial<ValidationProblem> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
+        "code": n => { validationProblem.code = n.getEnumValue<ProblemCode>(ProblemCodeObject); },
+        "detail": n => { validationProblem.detail = n.getStringValue(); },
+        "errors": n => { validationProblem.errors = n.getCollectionOfObjectValues<ValidationError>(createValidationErrorFromDiscriminatorValue); },
+        "instance": n => { validationProblem.instance = n.getStringValue(); },
+        "status": n => { validationProblem.status = n.getNumberValue(); },
+        "title": n => { validationProblem.title = n.getStringValue(); },
+        "type": n => { validationProblem.type = n.getStringValue(); },
     }
 }
 /**
@@ -2685,31 +2689,35 @@ export function serializeUserSettings(writer: SerializationWriter, userSettings:
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
- * @param ValidationProblemDetails The instance to serialize from.
+ * @param ValidationError The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
 // @ts-ignore
-export function serializeValidationProblemDetails(writer: SerializationWriter, validationProblemDetails: Partial<ValidationProblemDetails> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
-    if (!validationProblemDetails || isSerializingDerivedType) { return; }
-    writer.writeEnumValue<ProblemCode>("code", validationProblemDetails.code);
-    writer.writeStringValue("detail", validationProblemDetails.detail);
-    writer.writeObjectValue<ValidationProblemDetails_errors>("errors", validationProblemDetails.errors, serializeValidationProblemDetails_errors);
-    writer.writeStringValue("instance", validationProblemDetails.instance);
-    writer.writeNumberValue("status", validationProblemDetails.status);
-    writer.writeStringValue("title", validationProblemDetails.title);
-    writer.writeStringValue("type", validationProblemDetails.type);
-    writer.writeAdditionalData(validationProblemDetails.additionalData);
+export function serializeValidationError(writer: SerializationWriter, validationError: Partial<ValidationError> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!validationError || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<ValidationErrorCode>("code", validationError.code);
+    writer.writeStringValue("field", validationError.field);
+    writer.writeNumberValue("max", validationError.max);
+    writer.writeNumberValue("min", validationError.min);
+    writer.writeAdditionalData(validationError.additionalData);
 }
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
- * @param ValidationProblemDetails_errors The instance to serialize from.
+ * @param ValidationProblem The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
 // @ts-ignore
-export function serializeValidationProblemDetails_errors(writer: SerializationWriter, validationProblemDetails_errors: Partial<ValidationProblemDetails_errors> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
-    if (!validationProblemDetails_errors || isSerializingDerivedType) { return; }
-    writer.writeAdditionalData(validationProblemDetails_errors.additionalData);
+export function serializeValidationProblem(writer: SerializationWriter, validationProblem: Partial<ValidationProblem> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!validationProblem || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<ProblemCode>("code", validationProblem.code);
+    writer.writeStringValue("detail", validationProblem.detail);
+    writer.writeCollectionOfObjectValues<ValidationError>("errors", validationProblem.errors, serializeValidationError);
+    writer.writeStringValue("instance", validationProblem.instance);
+    writer.writeNumberValue("status", validationProblem.status);
+    writer.writeStringValue("title", validationProblem.title);
+    writer.writeStringValue("type", validationProblem.type);
+    writer.writeAdditionalData(validationProblem.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3060,7 +3068,32 @@ export interface UserSettings extends AdditionalDataHolder, Parsable {
     language?: Language | null;
 }
 export type UserSort = (typeof UserSortObject)[keyof typeof UserSortObject];
-export interface ValidationProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
+/**
+ * A rejected field of a request: where, why, and the limits that apply.
+ */
+export interface ValidationError extends AdditionalDataHolder, Parsable {
+    /**
+     * Machine-readable reason why a field of a request was rejected, part of every validation problem. Clients translate it; the parameters `min` and `max` of the error complete it where stated.
+     */
+    code?: ValidationErrorCode | null;
+    /**
+     * The field: the JSON name of a member of the body (nested members as `a.b`, entries of a list as `a[0]`) or the name of a query parameter. Empty for the body as a whole, e.g. a missing body or malformed JSON.
+     */
+    field?: string | null;
+    /**
+     * Upper limit for `max_length`, `max_items` and `out_of_range`; missing for other codes.
+     */
+    max?: number | null;
+    /**
+     * Lower limit for `min_length`, `min_items` and `out_of_range`; missing for other codes.
+     */
+    min?: number | null;
+}
+export type ValidationErrorCode = (typeof ValidationErrorCodeObject)[keyof typeof ValidationErrorCodeObject];
+/**
+ * Problem Details (RFC 9457) of a request that failed validation (400, code `request.invalid`). Instead of texts, every error names its field and a machine-readable code with its limits; clients translate them.
+ */
+export interface ValidationProblem extends AdditionalDataHolder, ApiError, Parsable {
     /**
      * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
      */
@@ -3070,9 +3103,9 @@ export interface ValidationProblemDetails extends AdditionalDataHolder, ApiError
      */
     detail?: string | null;
     /**
-     * The errors property
+     * The errors, at least one; a field can have more than one.
      */
-    errors?: ValidationProblemDetails_errors | null;
+    errors?: ValidationError[] | null;
     /**
      * The instance property
      */
@@ -3089,8 +3122,6 @@ export interface ValidationProblemDetails extends AdditionalDataHolder, ApiError
      * The type property
      */
     type?: string | null;
-}
-export interface ValidationProblemDetails_errors extends AdditionalDataHolder, Parsable {
 }
 /**
  * A year of the tracks.
@@ -3304,6 +3335,20 @@ export const TrackSortObject = {
 export const UserSortObject = {
     Name: "Name",
     CreatedAt: "CreatedAt",
+} as const;
+/**
+ * Machine-readable reason why a field of a request was rejected, part of every validation problem. Clients translate it; the parameters `min` and `max` of the error complete it where stated.
+ */
+export const ValidationErrorCodeObject = {
+    Required: "required",
+    Min_length: "min_length",
+    Max_length: "max_length",
+    Min_items: "min_items",
+    Max_items: "max_items",
+    Out_of_range: "out_of_range",
+    Invalid_format: "invalid_format",
+    Invalid_value: "invalid_value",
+    Duplicate: "duplicate",
 } as const;
 /* tslint:enable */
 /* eslint-enable */

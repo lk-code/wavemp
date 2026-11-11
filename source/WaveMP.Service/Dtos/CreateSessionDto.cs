@@ -1,3 +1,5 @@
+using WaveMP.Service.Validators;
+
 namespace WaveMP.Service.Dtos;
 
 /// <summary>
@@ -8,5 +10,6 @@ public sealed class CreateSessionDto
     /// <summary>
     /// Id of the profile to select.
     /// </summary>
+    [RequiredValue]
     public required Guid ProfileId { get; init; }
 }

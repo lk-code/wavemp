@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { isUnauthorized, problemCodeOf, statusOf, fieldErrorsOf } from '../problems'
+import {
+    fieldErrorsOf,
+    isUnauthorized,
+    memberOf,
+    problemCodeOf,
+    statusOf,
+    validationErrorsOf,
+} from '../problems'
 
 describe('problemCodeOf', () => {
     it('returns known problem codes', () => {
@@ -41,19 +48,56 @@ describe('isUnauthorized', () => {
     })
 })
 
-describe('fieldErrorsOf', () => {
-    it('returns the fields of a validation problem by their JSON names', () => {
+describe('validationErrorsOf', () => {
+    it('returns field, code and limits of a validation problem', () => {
         const error = {
             code: 'request.invalid',
-            errors: {
-                additionalData: {
-                    scanIntervalMinutes: ['Out of range'],
-                    '$.audioExtensions': ['x'],
-                },
-            },
+            errors: [
+                { field: 'scanIntervalMinutes', code: 'out_of_range', min: 15, max: 1440 },
+                { field: '', code: 'required', min: null, max: null },
+            ],
         }
 
-        expect(fieldErrorsOf(error)).toEqual(['scanIntervalMinutes', 'audioExtensions'])
+        expect(validationErrorsOf(error)).toEqual([
+            { field: 'scanIntervalMinutes', code: 'out_of_range', min: 15, max: 1440 },
+            { field: '', code: 'required' },
+        ])
+    })
+
+    it('treats unknown codes as invalid values and skips errors without a field', () => {
+        const error = { errors: [{ field: 'name', code: 'too_fancy' }, { code: 'required' }, null] }
+
+        expect(validationErrorsOf(error)).toEqual([{ field: 'name', code: 'invalid_value' }])
+    })
+
+    it('returns nothing for other errors', () => {
+        expect(validationErrorsOf(new Error('offline'))).toEqual([])
+        expect(validationErrorsOf({ errors: { name: ['Required'] } })).toEqual([])
+        expect(validationErrorsOf(undefined)).toEqual([])
+    })
+})
+
+describe('memberOf', () => {
+    it('returns the top-level member of a field', () => {
+        expect(memberOf('audioExtensions[2]')).toBe('audioExtensions')
+        expect(memberOf('name.first')).toBe('name')
+        expect(memberOf('year')).toBe('year')
+        expect(memberOf('')).toBe('')
+    })
+})
+
+describe('fieldErrorsOf', () => {
+    it('returns the members of a validation problem with errors, each once', () => {
+        const error = {
+            code: 'request.invalid',
+            errors: [
+                { field: 'audioExtensions[1]', code: 'invalid_format' },
+                { field: 'audioExtensions', code: 'max_items', max: 50 },
+                { field: 'scanIntervalMinutes', code: 'out_of_range', min: 15, max: 1440 },
+            ],
+        }
+
+        expect(fieldErrorsOf(error)).toEqual(['audioExtensions', 'scanIntervalMinutes'])
     })
 
     it('returns nothing for other errors', () => {

@@ -31,7 +31,11 @@ public class CacheSettingsValidatorTests
         if (invalid)
         {
             errors.Should().Equal(
-                new CacheSettingsValidationError(CacheSettingsField.MaxSizeMegabytes, SettingsErrorReason.OutOfRange));
+                new CacheSettingsValidationError(
+                    CacheSettingsField.MaxSizeMegabytes,
+                    SettingsErrorReason.OutOfRange,
+                    100,
+                    1_000_000));
         }
         else
         {

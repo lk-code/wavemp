@@ -66,7 +66,7 @@ public static class ControllerBaseExtensions
     {
         if (value is { } defined && !Enum.IsDefined(defined))
         {
-            controller.ModelState.AddModelError(name, "The value is not valid.");
+            controller.ModelState.AddValidationError(name, ValidationErrorCodeDto.InvalidValue);
         }
     }
 
@@ -82,17 +82,17 @@ public static class ControllerBaseExtensions
     {
         if (!Enum.IsDefined(direction))
         {
-            controller.ModelState.AddModelError(nameof(direction), "The sort direction is not valid.");
+            controller.ModelState.AddValidationError(nameof(direction), ValidationErrorCodeDto.InvalidValue);
         }
 
         if (status is { } statusValue && !Enum.IsDefined(statusValue))
         {
-            controller.ModelState.AddModelError(nameof(status), "The status is not valid.");
+            controller.ModelState.AddValidationError(nameof(status), ValidationErrorCodeDto.InvalidValue);
         }
 
         if (trigger is { } triggerValue && !Enum.IsDefined(triggerValue))
         {
-            controller.ModelState.AddModelError(nameof(trigger), "The trigger is not valid.");
+            controller.ModelState.AddValidationError(nameof(trigger), ValidationErrorCodeDto.InvalidValue);
         }
 
         return controller.ModelState.IsValid;

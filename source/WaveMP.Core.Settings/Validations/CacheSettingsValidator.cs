@@ -18,7 +18,11 @@ public static class CacheSettingsValidator
         List<CacheSettingsValidationError> errors = [];
         if (settings.MaxSizeMegabytes is < MinMaxSizeMegabytes or > MaxMaxSizeMegabytes)
         {
-            errors.Add(new(CacheSettingsField.MaxSizeMegabytes, SettingsErrorReason.OutOfRange));
+            errors.Add(new(
+                CacheSettingsField.MaxSizeMegabytes,
+                SettingsErrorReason.OutOfRange,
+                MinMaxSizeMegabytes,
+                MaxMaxSizeMegabytes));
         }
 
         return errors;

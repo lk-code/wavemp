@@ -397,9 +397,11 @@
     "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
     "settingsLoadError": "Die Einstellungen konnten nicht geladen werden.",
     "errors": {
-      "interval": "Wähle ein Intervall zwischen 15 Minuten und 24 Stunden.",
-      "extensions": "Pro Endung 1 bis 10 Buchstaben oder Ziffern, höchstens 50 Endungen. Eine Endung darf nur in einer Liste stehen, und es muss Audio- oder Videoendungen geben.",
-      "coverNames": "Höchstens 50 Namen ohne Schrägstriche."
+      "interval": "Wähle ein Intervall zwischen {min} und {max} Minuten.",
+      "extensionFormat": "Pro Endung 1 bis 10 Buchstaben oder Ziffern.",
+      "extensionDuplicate": "Eine Endung darf nur in einer Liste stehen.",
+      "extensionsRequired": "Gib Audio- oder Videoendungen ein.",
+      "coverNames": "Namen ohne Schrägstriche, ohne Punkt am Anfang und mit höchstens 50 Zeichen."
     }
   },
   "adminJobs": {
@@ -452,7 +454,7 @@
     "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
     "settingsLoadError": "Die Einstellungen konnten nicht geladen werden.",
     "errors": {
-      "maxSize": "Wähle eine Größe zwischen 100 MB und 1 TB."
+      "maxSize": "Wähle eine Größe zwischen {min} und {max}."
     }
   },
   "jobRuns": {
@@ -516,7 +518,6 @@
       "notFound": "Diesen Titel gibt es nicht mehr.",
       "notWritable": "Die Änderungen konnten nicht in die Audiodatei geschrieben werden.",
       "invalid": "Bitte prüfe die markierten Felder.",
-      "invalidField": "Dieser Wert ist ungültig.",
       "number": "Gib eine ganze Zahl von 1 bis {max} ein.",
       "saveFailed": "Die Änderungen konnten nicht gespeichert werden."
     }
@@ -574,5 +575,16 @@
     "album": "Zum Album",
     "artist": "Zum Interpreten",
     "editMetadata": "Metadaten bearbeiten"
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich.",
+    "minLength": "Dieser Text ist zu kurz (mindestens {min} Zeichen).",
+    "maxLength": "Dieser Text ist zu lang (höchstens {max} Zeichen).",
+    "minItems": "Diese Liste hat zu wenige Einträge (mindestens {min}).",
+    "maxItems": "Diese Liste hat zu viele Einträge (höchstens {max}).",
+    "outOfRange": "Gib einen Wert von {min} bis {max} ein.",
+    "invalidFormat": "Dieser Wert hat ein ungültiges Format.",
+    "invalidValue": "Dieser Wert ist ungültig.",
+    "duplicate": "Dieser Wert wird bereits in einem anderen Feld verwendet."
   }
 }

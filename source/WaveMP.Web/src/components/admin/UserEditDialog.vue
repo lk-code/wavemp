@@ -10,13 +10,14 @@ import {
     type UpdateUser,
     type User,
 } from '@/api/generated/models'
-import { problemCodeOf, statusOf } from '@/api/problems'
+import { problemCodeOf, statusOf, validationErrorsOf } from '@/api/problems'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseColorPicker, { type ColorOption } from '@/components/base/BaseColorPicker.vue'
 import BaseDialog from '@/components/base/BaseDialog.vue'
 import BaseSelect, { type SelectOption } from '@/components/base/BaseSelect.vue'
 import BaseTextField from '@/components/base/BaseTextField.vue'
+import { validationMessagesByField } from '@/i18n/validation'
 import { profileColorOptions } from '@/profiles/presentation'
 import { useUsersStore } from '@/stores/users'
 
@@ -43,6 +44,7 @@ const initials = ref('')
 const color = ref<string | null>(null)
 const role = ref<Role>(RoleObject.User)
 const nameError = ref<string | undefined>(undefined)
+const initialsError = ref<string | undefined>(undefined)
 const error = ref<string | null>(null)
 const saving = ref(false)
 
@@ -72,6 +74,7 @@ function reset(): void {
     color.value = props.user?.color ?? null
     role.value = props.user?.isAdmin ? RoleObject.Admin : RoleObject.User
     nameError.value = undefined
+    initialsError.value = undefined
     error.value = null
 }
 
@@ -117,6 +120,13 @@ function report(failure: unknown): void {
     } else if (code === ProblemCodeObject.UserNot_found) {
         error.value = t('adminUsers.errors.notFound')
     } else if (statusOf(failure) === 400) {
+        const messages = validationMessagesByField(
+            validationErrorsOf(failure),
+            { name: 'name', initials: 'initials' } as const,
+            (key, parameters) => t(key, parameters),
+        )
+        nameError.value = messages.name
+        initialsError.value = messages.initials
         error.value = t('adminUsers.errors.invalid')
     } else {
         error.value = t('adminUsers.errors.saveFailed')
@@ -129,6 +139,7 @@ async function save(): Promise<void> {
     }
 
     nameError.value = undefined
+    initialsError.value = undefined
     error.value = null
     if (name.value.trim() === '') {
         nameError.value = t('adminUsers.errors.nameRequired')
@@ -180,6 +191,7 @@ async function save(): Promise<void> {
                 v-model="initials"
                 :label="t('adminUsers.dialog.initials')"
                 :hint="t('adminUsers.dialog.initialsHint')"
+                :error="initialsError"
                 :maxlength="16"
                 autocomplete="off"
             />

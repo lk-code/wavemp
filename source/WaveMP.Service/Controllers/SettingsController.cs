@@ -4,6 +4,7 @@ using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Services;
 using WaveMP.Core.Settings.Validations;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.Extensions;
 using WaveMP.Service.Mappings;
 using WaveMP.Service.Tokens;
 
@@ -45,7 +46,7 @@ public sealed class SettingsController(
     [HttpPatch("library", Name = "UpdateLibrarySettings")]
     [Consumes("application/json")]
     [ProducesResponseType<LibrarySettingsDto>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<LibrarySettingsDto>> UpdateLibrarySettingsAsync(
         UpdateLibrarySettingsDto request,
         CancellationToken cancellationToken)
@@ -58,7 +59,11 @@ public sealed class SettingsController(
 
         foreach (SettingsValidationError error in result.Errors)
         {
-            ModelState.AddModelError(error.Field.ToJsonName(), error.Reason.ToMessage());
+            ModelState.AddValidationError(
+                error.Field.ToJsonName(),
+                error.Reason.ToCode(),
+                error.Minimum,
+                error.Maximum);
         }
 
         return ValidationProblem();
@@ -88,7 +93,7 @@ public sealed class SettingsController(
     [HttpPatch("cache", Name = "UpdateCacheSettings")]
     [Consumes("application/json")]
     [ProducesResponseType<CacheSettingsDto>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<CacheSettingsDto>> UpdateCacheSettingsAsync(
         UpdateCacheSettingsDto request,
         CancellationToken cancellationToken)
@@ -101,7 +106,11 @@ public sealed class SettingsController(
 
         foreach (CacheSettingsValidationError error in result.Errors)
         {
-            ModelState.AddModelError(error.Field.ToJsonName(), error.Reason.ToMessage());
+            ModelState.AddValidationError(
+                error.Field.ToJsonName(),
+                error.Reason.ToCode(),
+                error.Minimum,
+                error.Maximum);
         }
 
         return ValidationProblem();

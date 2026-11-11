@@ -29,7 +29,7 @@ public sealed class SessionsController(ISessionService sessions, ITokenIssuer to
     [AllowAnonymous]
     [Consumes("application/json")]
     [ProducesResponseType<CreatedSessionDto>(StatusCodes.Status201Created, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<CreatedSessionDto>> CreateSessionAsync(
         CreateSessionDto request,

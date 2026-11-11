@@ -38,7 +38,7 @@ public sealed class UsersController(IUserService users) : ControllerBase
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
     [HttpGet(Name = "ListUsers")]
     [ProducesResponseType<PageDto<UserDto>>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     public async Task<ActionResult<PageDto<UserDto>>> ListUsersAsync(
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,
@@ -50,17 +50,17 @@ public sealed class UsersController(IUserService users) : ControllerBase
         // Model binding of query parameters also accepts numbers for enums, including undefined ones.
         if (!Enum.IsDefined(sort))
         {
-            ModelState.AddModelError(nameof(sort), "The sort key is not valid.");
+            ModelState.AddValidationError(nameof(sort), ValidationErrorCodeDto.InvalidValue);
         }
 
         if (!Enum.IsDefined(direction))
         {
-            ModelState.AddModelError(nameof(direction), "The sort direction is not valid.");
+            ModelState.AddValidationError(nameof(direction), ValidationErrorCodeDto.InvalidValue);
         }
 
         if (role is { } value && !Enum.IsDefined(value))
         {
-            ModelState.AddModelError(nameof(role), "The role is not valid.");
+            ModelState.AddValidationError(nameof(role), ValidationErrorCodeDto.InvalidValue);
         }
 
         if (!ModelState.IsValid)
@@ -102,7 +102,7 @@ public sealed class UsersController(IUserService users) : ControllerBase
     [HttpPost(Name = "CreateUser")]
     [Consumes("application/json")]
     [ProducesResponseType<UserDto>(StatusCodes.Status201Created, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")]
     public async Task<ActionResult<UserDto>> CreateUserAsync(
         CreateUserDto request,
@@ -131,7 +131,7 @@ public sealed class UsersController(IUserService users) : ControllerBase
     [HttpPatch("{id:guid}", Name = "UpdateUser")]
     [Consumes("application/json")]
     [ProducesResponseType<UserDto>(StatusCodes.Status200OK, "application/json")]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, "application/problem+json")]
     public async Task<ActionResult<UserDto>> UpdateUserAsync(
@@ -169,16 +169,16 @@ public sealed class UsersController(IUserService users) : ControllerBase
             UserError.NotFound => this.Problem(ProblemCodeDto.UserNotFound, StatusCodes.Status404NotFound),
             UserError.NameTaken => this.Problem(ProblemCodeDto.UserNameTaken, StatusCodes.Status409Conflict),
             UserError.BuiltInAdmin => this.Problem(ProblemCodeDto.UserBuiltInAdmin, StatusCodes.Status409Conflict),
-            UserError.InvalidName => Invalid("name", "The name is not valid."),
-            UserError.InvalidInitials => Invalid("initials", "The initials are not valid."),
-            UserError.InvalidColor => Invalid("color", "The color is not valid."),
+            UserError.InvalidName => Invalid("name", ValidationErrorCodeDto.InvalidValue),
+            UserError.InvalidInitials => Invalid("initials", ValidationErrorCodeDto.InvalidValue),
+            UserError.InvalidColor => Invalid("color", ValidationErrorCodeDto.InvalidFormat),
             _ => throw new ArgumentOutOfRangeException(nameof(error), error, "Unknown error."),
         };
     }
 
-    private ActionResult Invalid(string field, string message)
+    private ActionResult Invalid(string field, ValidationErrorCodeDto code)
     {
-        ModelState.AddModelError(field, message);
+        ModelState.AddValidationError(field, code);
         return ValidationProblem();
     }
 }

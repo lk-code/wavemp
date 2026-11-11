@@ -2,19 +2,22 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { LibrarySettings } from '@/api/generated/models'
-import { fieldErrorsOf, problemCodeOf } from '@/api/problems'
+import { problemCodeOf, validationErrorsOf } from '@/api/problems'
 import { customIntervalKey, formatList, intervalOptions, parseList } from '@/admin/presentation'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseCheckbox from '@/components/base/BaseCheckbox.vue'
 import BaseSelect, { type SelectOption } from '@/components/base/BaseSelect.vue'
 import BaseTextField from '@/components/base/BaseTextField.vue'
+import { useFormat } from '@/composables/useFormat'
+import { validationMessagesByField, type ValidationMessageOptions } from '@/i18n/validation'
 import { useLibrarySettingsStore } from '@/stores/librarySettings'
 
-type ErrorGroup = 'interval' | 'extensions' | 'coverNames'
+type Field = 'interval' | 'audio' | 'video' | 'images' | 'coverNames'
 
 /** Settings of the library scan: interval, file watcher, extension lists and album cover names. */
 const { t } = useI18n()
+const format = useFormat()
 const store = useLibrarySettingsStore()
 
 const interval = ref('')
@@ -26,14 +29,29 @@ const coverNames = ref('')
 const saving = ref(false)
 const saved = ref(false)
 const failed = ref(false)
-const errors = ref<Partial<Record<ErrorGroup, boolean>>>({})
+const errors = ref<Partial<Record<Field, string>>>({})
 
-const fieldGroups: Record<string, ErrorGroup> = {
+const fields: Record<string, Field> = {
     scanIntervalMinutes: 'interval',
-    audioExtensions: 'extensions',
-    videoExtensions: 'extensions',
-    imageExtensions: 'extensions',
+    audioExtensions: 'audio',
+    videoExtensions: 'video',
+    imageExtensions: 'images',
     albumCoverNames: 'coverNames',
+}
+
+const extensionKeys = {
+    invalid_format: 'adminLibrary.errors.extensionFormat',
+    duplicate: 'adminLibrary.errors.extensionDuplicate',
+    required: 'adminLibrary.errors.extensionsRequired',
+} as const
+
+/** Texts of the form for single codes; all other codes get the general validation messages. */
+const messageKeys: Record<Field, ValidationMessageOptions['keys']> = {
+    interval: { out_of_range: 'adminLibrary.errors.interval' },
+    audio: extensionKeys,
+    video: extensionKeys,
+    images: extensionKeys,
+    coverNames: { invalid_format: 'adminLibrary.errors.coverNames' },
 }
 
 function show(settings: LibrarySettings | null): void {
@@ -85,11 +103,14 @@ async function save(): Promise<void> {
         show(result)
         saved.value = true
     } catch (error) {
-        const groups = fieldErrorsOf(error)
-            .map((field) => fieldGroups[field])
-            .filter((group) => group !== undefined)
-        if (problemCodeOf(error) === 'request.invalid' && groups.length > 0) {
-            errors.value = Object.fromEntries(groups.map((group) => [group, true]))
+        const messages = validationMessagesByField(
+            validationErrorsOf(error),
+            fields,
+            (key, parameters) => t(key, parameters),
+            (field) => ({ keys: messageKeys[field], formatLimit: format.number }),
+        )
+        if (problemCodeOf(error) === 'request.invalid' && Object.keys(messages).length > 0) {
+            errors.value = messages
         } else {
             failed.value = true
         }
@@ -121,7 +142,7 @@ onMounted(async () => {
             :label="t('adminLibrary.interval')"
             :options="intervalSelectOptions"
             :hint="t('adminLibrary.intervalHint')"
-            :error="errors.interval ? t('adminLibrary.errors.interval') : undefined"
+            :error="errors.interval"
             :disabled="saving"
         />
         <BaseCheckbox
@@ -134,28 +155,28 @@ onMounted(async () => {
             v-model="audio"
             :label="t('adminLibrary.audioExtensions')"
             :hint="t('adminLibrary.listHint')"
-            :error="errors.extensions ? t('adminLibrary.errors.extensions') : undefined"
+            :error="errors.audio"
             :disabled="saving"
         />
         <BaseTextField
             v-model="video"
             :label="t('adminLibrary.videoExtensions')"
             :hint="t('adminLibrary.listHint')"
-            :error="errors.extensions ? t('adminLibrary.errors.extensions') : undefined"
+            :error="errors.video"
             :disabled="saving"
         />
         <BaseTextField
             v-model="images"
             :label="t('adminLibrary.imageExtensions')"
             :hint="t('adminLibrary.listHint')"
-            :error="errors.extensions ? t('adminLibrary.errors.extensions') : undefined"
+            :error="errors.images"
             :disabled="saving"
         />
         <BaseTextField
             v-model="coverNames"
             :label="t('adminLibrary.albumCoverNames')"
             :hint="t('adminLibrary.coverNamesHint')"
-            :error="errors.coverNames ? t('adminLibrary.errors.coverNames') : undefined"
+            :error="errors.coverNames"
             :disabled="saving"
         />
         <BaseAlert v-if="saved" tone="success" :message="t('adminLibrary.saved')" />

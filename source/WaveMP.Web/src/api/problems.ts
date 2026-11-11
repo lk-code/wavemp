@@ -4,11 +4,15 @@
 
 import {
     ProblemCodeObject,
+    ValidationErrorCodeObject,
     type ProblemCode,
-    type ValidationProblemDetails,
+    type ValidationError,
+    type ValidationErrorCode,
+    type ValidationProblem,
 } from './generated/models'
 
 const problemCodes = new Set<string>(Object.values(ProblemCodeObject))
+const validationErrorCodes = new Set<string>(Object.values(ValidationErrorCodeObject))
 
 /** Machine-readable code of a Problem Details error, or undefined. */
 export function problemCodeOf(error: unknown): ProblemCode | undefined {
@@ -28,13 +32,49 @@ export function isUnauthorized(error: unknown): boolean {
     return statusOf(error) === 401 || problemCodeOf(error) === ProblemCodeObject.AuthUnauthorized
 }
 
+/** A field error of a validation problem with a known code; unknown codes become invalid_value. */
+export interface FieldError {
+    /** JSON name of the member or name of the query parameter; empty for the body as a whole. */
+    readonly field: string
+    readonly code: ValidationErrorCode
+    readonly min?: number
+    readonly max?: number
+}
+
 /**
- * The fields of a validation problem (400, request.invalid) that have errors, by their JSON names.
- * Errors of values that could not be read at all are keyed by a JSON path such as "$.name"; the
- * leading "$." is removed.
+ * The errors of a validation problem (400, request.invalid): field, code and limits. The server
+ * sends no texts; validationMessage (src/i18n/validation.ts) translates the codes.
  */
+export function validationErrorsOf(error: unknown): FieldError[] {
+    const errors = (error as ValidationProblem | null | undefined)?.errors
+    if (!Array.isArray(errors)) {
+        return []
+    }
+
+    return errors.filter(isFieldError).map((item) => ({
+        field: item.field,
+        code:
+            typeof item.code === 'string' && validationErrorCodes.has(item.code)
+                ? item.code
+                : ValidationErrorCodeObject.Invalid_value,
+        ...(typeof item.min === 'number' ? { min: item.min } : {}),
+        ...(typeof item.max === 'number' ? { max: item.max } : {}),
+    }))
+}
+
+/**
+ * The top-level member of a field, e.g. "audioExtensions" for "audioExtensions[2]" or "name" for
+ * "name.first".
+ */
+export function memberOf(field: string): string {
+    return field.split(/[.[]/, 1)[0] ?? ''
+}
+
+/** The top-level members of a validation problem that have errors, each once. */
 export function fieldErrorsOf(error: unknown): string[] {
-    const errors = (error as ValidationProblemDetails | null | undefined)?.errors
-    const fields = errors?.additionalData ? Object.keys(errors.additionalData) : []
-    return fields.map((field) => field.replace(/^\$\./, ''))
+    return [...new Set(validationErrorsOf(error).map((item) => memberOf(item.field)))]
+}
+
+function isFieldError(item: unknown): item is ValidationError & { field: string } {
+    return typeof (item as ValidationError | null | undefined)?.field === 'string'
 }
