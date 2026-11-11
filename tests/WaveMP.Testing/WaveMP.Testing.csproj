@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared helpers of the test projects: temporary folders, the settings of the test databases and synthetic media
+    created with ffmpeg. A class library, not a test project of its own.
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\WaveMP.Data\WaveMP.Data.csproj" />
+  </ItemGroup>
+
+</Project>

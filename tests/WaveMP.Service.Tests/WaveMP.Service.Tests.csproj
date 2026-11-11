@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\source\WaveMP.Service\WaveMP.Service.csproj" />
+    <ProjectReference Include="..\WaveMP.Testing\WaveMP.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

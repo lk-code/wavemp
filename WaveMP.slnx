@@ -8,5 +8,6 @@
     <Project Path="tests/WaveMP.Core.Users.Tests/WaveMP.Core.Users.Tests.csproj" />
     <Project Path="tests/WaveMP.Data.Tests/WaveMP.Data.Tests.csproj" />
     <Project Path="tests/WaveMP.Service.Tests/WaveMP.Service.Tests.csproj" />
+    <Project Path="tests/WaveMP.Testing/WaveMP.Testing.csproj" />
   </Folder>
 </Solution>
