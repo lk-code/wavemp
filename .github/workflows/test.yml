@@ -1,6 +1,9 @@
 # Builds and tests everything: .NET with unit, media and integration tests, the web app, the
 # license check and the Docker image with the E2E tests. Called by pull-request.yml, main.yml and
 # release.yml.
+#
+# All Docker images are pinned by the digest of their multi-arch index (image:tag@sha256:...); the
+# tag only documents the version. Resolve a new digest with docker buildx imagetools inspect.
 name: Test
 
 on:
@@ -32,7 +35,7 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:18
+        image: postgres:18@sha256:e3d24f6906d0760bf4da0dae872415391ededefad23fd471c47dc53b0ddf3c42
         env:
           POSTGRES_USER: wavemp
           # Same value as DB_PASSWORD above (the env context is not available for services).
@@ -84,7 +87,7 @@ jobs:
       # the tests where to find them.
       - name: Install ffmpeg
         env:
-          FFMPEG_IMAGE: mwader/static-ffmpeg:9.0.2
+          FFMPEG_IMAGE: mwader/static-ffmpeg:9.0.2@sha256:7d9bdaaf887f7e6ce6151f67325c344074b5ff1fb75316011c3376503e449a7b
         run: |
           mkdir -p "$RUNNER_TEMP/ffmpeg"
           container=$(docker create "$FFMPEG_IMAGE")
@@ -190,6 +193,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          # BuildKit image of the builder, pinned by digest (buildx-stable-1 at the time of pinning).
+          driver-opts: image=moby/buildkit:v0.34.2@sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe
 
       - name: Build image
         uses: docker/build-push-action@v7
@@ -230,22 +236,29 @@ jobs:
         working-directory: tests/WaveMP.E2E
         run: npm ci
 
-      # Runs in the official Playwright image of the installed version, which brings the browser and
-      # its system packages (installing them with --with-deps needs the Ubuntu package mirror, which
-      # is not always reachable from the runners). Host network, so localhost:8080 reaches the app.
+      # Runs in the official Playwright image, which brings the browser and its system packages
+      # (installing them with --with-deps needs the Ubuntu package mirror, which is not always
+      # reachable from the runners). Host network, so localhost:8080 reaches the app. The image is
+      # pinned by digest, so its tag must be updated together with @playwright/test; the check
+      # below fails the job if the two versions differ.
       - name: E2E tests
         working-directory: tests/WaveMP.E2E
         env:
           E2E_BASE_URL: http://localhost:8080
           E2E_EXPECTED_VERSION: ${{ inputs.version }}
           E2E_EXPECTED_TRACKS: '4'
+          PLAYWRIGHT_IMAGE: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
         run: |
           version=$(node -p "require('./node_modules/@playwright/test/package.json').version")
+          if [[ "$PLAYWRIGHT_IMAGE" != *":v$version-noble@sha256:"* ]]; then
+            echo "::error::PLAYWRIGHT_IMAGE does not match the installed @playwright/test $version."
+            exit 1
+          fi
           docker run --rm --init --ipc host --network host \
             --user "$(id -u):$(id -g)" --env HOME=/tmp \
             --env CI --env E2E_BASE_URL --env E2E_EXPECTED_VERSION --env E2E_EXPECTED_TRACKS \
             --volume "$PWD:/e2e" --workdir /e2e \
-            "mcr.microsoft.com/playwright:v$version-noble" npm test
+            "$PLAYWRIGHT_IMAGE" npm test
 
       - name: Show container logs
         if: failure()

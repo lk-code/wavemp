@@ -1,11 +1,17 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
 
 # Multi-arch build (linux/amd64, linux/arm64): the web app and the .NET service are built on the
 # build machine's own platform ($BUILDPLATFORM). The service is cross-compiled for the target
 # architecture ($TARGETARCH), so only the runtime stage runs for the target platform.
+#
+# All foreign images (including the Dockerfile frontend above) are pinned by the digest of their
+# multi-arch index (image:tag@sha256:...); the tag only documents the version. To update an image,
+# resolve the new index digest with
+#   docker buildx imagetools inspect <image>:<tag>
+# and replace tag and digest together.
 
 # --- Web app (platform independent output) -------------------------------------
-FROM --platform=$BUILDPLATFORM node:24-alpine AS web
+FROM --platform=$BUILDPLATFORM node:24-alpine@sha256:61cf3202592df80f42ff3a595636e97039b351d1bd2a1c475f897f328e4870ed AS web
 WORKDIR /src/source/WaveMP.Web
 COPY source/WaveMP.Web/package.json source/WaveMP.Web/package-lock.json ./
 RUN npm ci
@@ -15,7 +21,7 @@ COPY source/WaveMP.Web/ ./
 RUN npm run build
 
 # --- Service (cross-compiled on the build machine for the target architecture) --
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:0294f285d062afacc8b5f6d7febb0cd4ee879320e5585fa15f2f4ebf1feb9ba7 AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY .editorconfig global.json Directory.Build.props Directory.Packages.props ./
@@ -46,7 +52,7 @@ RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -a "$T
     --no-self-contained --no-restore -o /app ${VERSION:+-p:Version=$VERSION}
 
 # --- Runtime --------------------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:21c3f9798416cba4c0576a947c286231cb71ea2884896cb968253f5c9668f930 AS runtime
 
 # ffmpeg and ffprobe are used as external processes only (never linked); the cache scales covers
 # to WebP with the libwebp encoder of the Alpine ffmpeg package.

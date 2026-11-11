@@ -346,6 +346,8 @@ It restores the .NET tools and npm packages it needs by itself and fails if a pa
 
 GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit and media tests (with ffmpeg) and integration tests against a PostgreSQL 18 service container, lint, type check, unit tests (Vitest) and build of the web app, the license check, and the E2E tests against the Docker image with synthetic test media. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
 
+All foreign Docker images in the `Dockerfile`, in `docker-compose.dev.yml` and in the workflows (base images, PostgreSQL, the static ffmpeg build, the Playwright image, BuildKit and QEMU) are pinned by the digest of their multi-arch index, for example `postgres:18@sha256:...`; the tag only shows the version. To update an image, change the tag if needed and replace the digest with the one printed by `docker buildx imagetools inspect <image>:<tag>`. The Playwright image in `test.yml` has to be updated together with `@playwright/test` in `tests/WaveMP.E2E`; the E2E job fails if the two versions differ. The `docker-compose.yml` for users keeps the plain tags, so PostgreSQL patch releases arrive with `docker compose pull`.
+
 ## License
 
 WaveMP is licensed under the [MIT License](LICENSE).
