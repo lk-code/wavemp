@@ -14,7 +14,7 @@ using WaveMP.Data.Entities;
 using WaveMP.Data.Repositories;
 using JobRunStatus = WaveMP.Data.Entities.JobRunStatus;
 
-namespace WaveMP.Core.Jobs.Tests.Hosting;
+namespace WaveMP.Core.Jobs.Tests.Hosts;
 
 /// <summary>
 /// Runs Quartz.NET in a real host, as in the service, with the run history in a substitute.
