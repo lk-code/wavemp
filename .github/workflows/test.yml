@@ -1,5 +1,5 @@
-# Builds and tests everything: .NET with unit and integration tests, the web app, the license
-# check and the Docker image with the E2E tests. Called by pull-request.yml, main.yml and
+# Builds and tests everything: .NET with unit, media and integration tests, the web app, the
+# license check and the Docker image with the E2E tests. Called by pull-request.yml, main.yml and
 # release.yml.
 name: Test
 
@@ -76,6 +76,13 @@ jobs:
 
       - name: Check formatting
         run: dotnet format WaveMP.slnx --verify-no-changes --no-restore
+
+      # The media tests and the scan create their test files with ffmpeg and read them with ffprobe.
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
+          ffprobe -version
 
       - name: Unit tests
         run: dotnet test WaveMP.slnx --no-build --filter "TestCategory!=Integration"
@@ -185,6 +192,14 @@ jobs:
           cache-from: type=gha,scope=wavemp-image
           cache-to: type=gha,mode=max,scope=wavemp-image
 
+      # Synthetic media for the scan (4 tracks), created with the ffmpeg of the image itself.
+      - name: Generate test media
+        run: |
+          mkdir -p media
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD/media:/media" -v "$PWD/tests/WaveMP.E2E/scripts:/scripts:ro" \
+            --entrypoint sh wavemp:dev /scripts/generate-media.sh /media
+
       - name: Start WaveMP and PostgreSQL
         run: docker compose -f docker-compose.dev.yml up --detach --no-build --wait
 
@@ -214,6 +229,7 @@ jobs:
         env:
           E2E_BASE_URL: http://localhost:8080
           E2E_EXPECTED_VERSION: ${{ inputs.version }}
+          E2E_EXPECTED_TRACKS: '4'
         run: npm test
 
       - name: Show container logs
