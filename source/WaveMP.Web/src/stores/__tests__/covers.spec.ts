@@ -1,0 +1,84 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+
+const api = vi.hoisted(() => ({
+    fetchAlbumCover: vi.fn(),
+    fetchTrackCover: vi.fn(),
+}))
+
+vi.mock('@/library/api', () => api)
+
+const { maxCachedCovers, useCoversStore } = await import('../covers')
+
+describe('covers store', () => {
+    let created = 0
+    const createObjectURL = vi.fn(() => `blob:cover-${++created}`)
+    const revokeObjectURL = vi.fn()
+
+    beforeEach(() => {
+        setActivePinia(createPinia())
+        created = 0
+        api.fetchAlbumCover.mockReset().mockResolvedValue(new Uint8Array([1, 2, 3]).buffer)
+        api.fetchTrackCover.mockReset().mockResolvedValue(new Uint8Array([4]).buffer)
+        createObjectURL.mockClear()
+        revokeObjectURL.mockClear()
+        vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+    })
+
+    afterEach(() => {
+        vi.unstubAllGlobals()
+    })
+
+    it('loads a cover once for all components that show it', async () => {
+        const store = useCoversStore()
+
+        const [first, second] = await Promise.all([
+            store.acquire('album', 'a'),
+            store.acquire('album', 'a'),
+        ])
+        const third = await store.acquire('album', 'a')
+
+        expect(first).toBe('blob:cover-1')
+        expect(second).toBe(first)
+        expect(third).toBe(first)
+        expect(api.fetchAlbumCover).toHaveBeenCalledTimes(1)
+        expect(api.fetchAlbumCover).toHaveBeenCalledWith('a')
+    })
+
+    it('loads covers of tracks through their endpoint', async () => {
+        const store = useCoversStore()
+
+        expect(await store.acquire('track', 't')).toBe('blob:cover-1')
+        expect(api.fetchTrackCover).toHaveBeenCalledWith('t')
+        expect(api.fetchAlbumCover).not.toHaveBeenCalled()
+    })
+
+    it('remembers a missing cover but loads again after other errors', async () => {
+        api.fetchAlbumCover
+            .mockRejectedValueOnce({ responseStatusCode: 404, code: 'cover.not_found' })
+            .mockRejectedValueOnce(new Error('offline'))
+            .mockResolvedValueOnce(new Uint8Array([9]).buffer)
+        const store = useCoversStore()
+
+        expect(await store.acquire('album', 'missing')).toBeNull()
+        expect(await store.acquire('album', 'missing')).toBeNull()
+        expect(await store.acquire('album', 'offline')).toBeNull()
+        expect(await store.acquire('album', 'offline')).toBe('blob:cover-1')
+        expect(api.fetchAlbumCover).toHaveBeenCalledTimes(3)
+    })
+
+    it('frees the least recently used covers that are not shown', async () => {
+        const store = useCoversStore()
+        const shown = await store.acquire('album', 'shown')
+
+        for (let index = 0; index <= maxCachedCovers; index++) {
+            await store.acquire('track', `t${index}`)
+            store.release('track', `t${index}`)
+        }
+
+        expect(store.size()).toBe(maxCachedCovers + 1)
+        expect(revokeObjectURL).toHaveBeenCalledTimes(1)
+        expect(revokeObjectURL).toHaveBeenCalledWith('blob:cover-2')
+        expect(revokeObjectURL).not.toHaveBeenCalledWith(shown)
+    })
+})

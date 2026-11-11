@@ -51,3 +51,25 @@ export function formatDate(
 ): string {
     return new Intl.DateTimeFormat(locale, options).format(date)
 }
+
+const sizeUnits = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'] as const
+
+/**
+ * Formats a file size in bytes with the largest fitting unit (1 kB = 1000 bytes), e.g. 4.2 MB.
+ * Negative or invalid values are shown as 0 bytes.
+ */
+export function formatFileSize(bytes: number, locale: string): string {
+    let value = Number.isFinite(bytes) && bytes > 0 ? bytes : 0
+    let index = 0
+    while (value >= 1000 && index < sizeUnits.length - 1) {
+        value /= 1000
+        index++
+    }
+
+    return new Intl.NumberFormat(locale, {
+        style: 'unit',
+        unit: sizeUnits[index],
+        unitDisplay: 'short',
+        maximumFractionDigits: index === 0 ? 0 : 1,
+    }).format(value)
+}

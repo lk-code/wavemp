@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatDuration, formatNumber, formatPercent, formatYear } from '../format'
+import {
+    formatDate,
+    formatDuration,
+    formatFileSize,
+    formatNumber,
+    formatPercent,
+    formatYear,
+} from '../format'
 
 describe('formatDuration', () => {
     it('formats minutes and seconds', () => {
@@ -58,5 +65,20 @@ describe('formatDate', () => {
         expect(formatDate(date, 'de')).not.toBe(formatDate(date, 'en'))
         expect(formatDate(date, 'de', { month: 'long', timeZone: 'UTC' })).toBe('Januar')
         expect(formatDate(date, 'en', { month: 'long', timeZone: 'UTC' })).toBe('January')
+    })
+})
+
+describe('formatFileSize', () => {
+    it('uses the largest fitting unit', () => {
+        expect(formatFileSize(0, 'en')).toBe('0 byte')
+        expect(formatFileSize(999, 'en')).toBe('999 byte')
+        expect(formatFileSize(1500, 'en')).toBe('1.5 kB')
+        expect(formatFileSize(4_200_000, 'de')).toBe('4,2 MB')
+        expect(formatFileSize(3_000_000_000, 'en')).toBe('3 GB')
+    })
+
+    it('shows invalid and negative values as zero', () => {
+        expect(formatFileSize(-1, 'en')).toBe('0 byte')
+        expect(formatFileSize(Number.NaN, 'en')).toBe('0 byte')
     })
 })
