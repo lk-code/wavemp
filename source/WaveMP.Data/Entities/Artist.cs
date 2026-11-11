@@ -9,7 +9,7 @@ public class Artist
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Name as first found in the media files.
+    /// Name as first found in the media files, or as an admin typed it in the metadata editor.
     /// </summary>
     public required string Name { get; set; }
 
