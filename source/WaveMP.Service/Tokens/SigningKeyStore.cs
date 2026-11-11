@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using WaveMP.Data.Repositories;
 
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Holds the key that signs the session tokens. The key is created on the first start and kept in the database, so

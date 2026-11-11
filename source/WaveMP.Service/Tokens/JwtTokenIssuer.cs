@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WaveMP.Core.Users.Sessions;
 
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Issues session tokens as JWT signed with HMAC-SHA256. The token only names the profile (<c>sub</c>) and the

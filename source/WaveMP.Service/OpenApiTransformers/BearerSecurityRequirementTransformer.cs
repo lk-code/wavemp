@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
-using WaveMP.Service.Authentication;
+using WaveMP.Service.Tokens;
 
-namespace WaveMP.Service.OpenApi;
+namespace WaveMP.Service.OpenApiTransformers;
 
 /// <summary>
 /// Marks every operation that needs a session with the bearer security requirement; operations that allow anonymous

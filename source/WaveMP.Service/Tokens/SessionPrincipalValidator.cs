@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WaveMP.Core.Users.Sessions;
 
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Accepts a validly signed token only while its session is active and belongs to the profile of the token, and adds

@@ -1,6 +1,6 @@
 using Microsoft.IdentityModel.Tokens;
 
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Fixed values of the session tokens (JWT).

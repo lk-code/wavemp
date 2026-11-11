@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
-using WaveMP.Service.Authentication;
+using WaveMP.Service.Tokens;
 
-namespace WaveMP.Service.OpenApi;
+namespace WaveMP.Service.OpenApiTransformers;
 
 /// <summary>
 /// Describes the session token as HTTP bearer security scheme of the OpenAPI document.

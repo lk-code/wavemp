@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using WaveMP.Service.Authentication;
+using WaveMP.Service.Tokens;
 
 namespace WaveMP.Service.Extensions;
 

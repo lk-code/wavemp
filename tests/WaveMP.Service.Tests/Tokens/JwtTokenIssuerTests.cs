@@ -7,9 +7,9 @@ using NSubstitute;
 using WaveMP.Core.Users.Sessions;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Repositories;
-using WaveMP.Service.Authentication;
+using WaveMP.Service.Tokens;
 
-namespace WaveMP.Service.Tests.Authentication;
+namespace WaveMP.Service.Tests.Tokens;
 
 [TestFixture]
 public class JwtTokenIssuerTests

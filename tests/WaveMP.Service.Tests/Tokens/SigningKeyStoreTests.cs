@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using WaveMP.Data.Repositories;
-using WaveMP.Service.Authentication;
+using WaveMP.Service.Tokens;
 
-namespace WaveMP.Service.Tests.Authentication;
+namespace WaveMP.Service.Tests.Tokens;
 
 [TestFixture]
 public class SigningKeyStoreTests

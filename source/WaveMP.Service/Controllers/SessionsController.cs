@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaveMP.Core.Users.Sessions;
-using WaveMP.Service.Authentication;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Extensions;
 using WaveMP.Service.Mappings;
+using WaveMP.Service.Tokens;
 
 namespace WaveMP.Service.Controllers;
 

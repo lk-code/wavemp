@@ -3,8 +3,8 @@ using WaveMP.Core.Users.Extensions;
 using WaveMP.Data;
 using WaveMP.Data.Extensions;
 using WaveMP.Data.Options;
-using WaveMP.Service.Authentication;
 using WaveMP.Service.Extensions;
+using WaveMP.Service.Tokens;
 
 namespace WaveMP.Service;
 

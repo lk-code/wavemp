@@ -1,4 +1,4 @@
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Names of the secrets the service keeps in the database.

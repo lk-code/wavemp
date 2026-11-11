@@ -1,6 +1,6 @@
 using WaveMP.Core.Users.Sessions;
 
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Issues the token of a session.

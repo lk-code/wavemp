@@ -1,4 +1,4 @@
-namespace WaveMP.Service.Authentication;
+namespace WaveMP.Service.Tokens;
 
 /// <summary>
 /// Claims of the session token and of the authenticated principal.

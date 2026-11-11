@@ -5,11 +5,11 @@ using WaveMP.Core.Users.Users;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Queries;
 using WaveMP.Data.Repositories;
-using WaveMP.Service.Authentication;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Extensions;
 using WaveMP.Service.Mappings;
 using WaveMP.Service.Queries;
+using WaveMP.Service.Tokens;
 
 namespace WaveMP.Service.Controllers;
 

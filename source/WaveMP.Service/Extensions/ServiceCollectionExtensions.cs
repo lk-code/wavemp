@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using WaveMP.Data.Entities;
-using WaveMP.Service.Authentication;
 using WaveMP.Service.Dtos;
-using WaveMP.Service.OpenApi;
+using WaveMP.Service.OpenApiTransformers;
 using WaveMP.Service.Problems;
+using WaveMP.Service.Tokens;
 
 namespace WaveMP.Service.Extensions;
 
