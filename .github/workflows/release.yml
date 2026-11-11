@@ -1,0 +1,86 @@
+# Release for a version tag (e.g. v1.2.3): tests, publishes the image with the tags 1.2.3, 1.2 and
+# latest and creates a GitHub release with generated release notes. Prerelease tags (e.g.
+# v1.3.0-rc.1) only get their own image tag and a prerelease.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+# A running release is never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Validate tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Read the version from the tag
+        id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$'
+          if [[ ! "$version" =~ $pattern ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME is not a semantic version (vMAJOR.MINOR.PATCH[-PRERELEASE])."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test
+    needs: version
+    uses: ./.github/workflows/test.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+
+  publish:
+    name: Publish
+    needs:
+      - version
+      - test
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      tags: |
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+      # latest only for versions without a prerelease suffix.
+      flavor: latest=auto
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  release:
+    name: GitHub release
+    needs:
+      - version
+      - publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Create the release with generated notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          notes="Docker image: \`ghcr.io/lk-code/wavemp:${VERSION}\` and \`lkcode/wavemp:${VERSION}\` (linux/amd64, linux/arm64)."
+          args=(--repo "$GITHUB_REPOSITORY" --title "WaveMP ${VERSION}" --notes "$notes" --generate-notes --verify-tag)
+          if [[ "$VERSION" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "$TAG" "${args[@]}"

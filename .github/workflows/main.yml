@@ -1,0 +1,36 @@
+# Tests every push to main and then publishes the image with the tags edge and sha-<commit>.
+name: Main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# A newer push to main cancels the running workflow; the newer one publishes edge.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/test.yml
+
+  publish:
+    name: Publish
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      tags: |
+        type=edge,branch=main
+        type=sha,prefix=sha-,format=short
+      flavor: latest=false
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

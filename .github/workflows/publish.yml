@@ -1,0 +1,98 @@
+# Builds the multi-arch image (linux/amd64, linux/arm64) and pushes it to GitHub Container
+# Registry and Docker Hub. Called by main.yml and release.yml after all tests passed.
+name: Publish image
+
+on:
+  workflow_call:
+    inputs:
+      tags:
+        description: Tag rules for docker/metadata-action.
+        type: string
+        required: true
+      flavor:
+        description: Flavor for docker/metadata-action (e.g. whether to add latest).
+        type: string
+        required: false
+        default: latest=false
+      version:
+        description: Version the image reports (release builds). Empty keeps the version from Directory.Build.props.
+        type: string
+        required: false
+        default: ''
+    secrets:
+      DOCKERHUB_USERNAME:
+        description: Docker Hub user with write access to lkcode/wavemp.
+        required: true
+      DOCKERHUB_TOKEN:
+        description: Docker Hub access token (Read & Write) of that user.
+        required: true
+
+# No concurrency here: the calling workflows define it.
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  GHCR_IMAGE: ghcr.io/lk-code/wavemp
+  DOCKERHUB_IMAGE: docker.io/lkcode/wavemp
+
+jobs:
+  publish:
+    name: Build and push linux/amd64 and linux/arm64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Only the runtime stage runs emulated; the web app and the service are cross-built.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          # Multi-arch images need the annotations on the index as well.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: |
+            ${{ env.GHCR_IMAGE }}
+            ${{ env.DOCKERHUB_IMAGE }}
+          tags: ${{ inputs.tags }}
+          flavor: ${{ inputs.flavor }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ inputs.version }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          # Same scope as the test build, so its layers are reused.
+          cache-from: type=gha,scope=wavemp-image
+          cache-to: type=gha,mode=max,scope=wavemp-image

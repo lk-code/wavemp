@@ -1,0 +1,233 @@
+# Builds and tests everything: .NET with unit and integration tests, the web app, the license
+# check and the Docker image with the E2E tests. Called by pull-request.yml, main.yml and
+# release.yml.
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version the image reports (release builds). Empty keeps the version from Directory.Build.props.
+        type: string
+        required: false
+        default: ''
+
+# No concurrency here: a called workflow shares github.workflow with its caller, so a group here
+# would block the caller's own run. The calling workflows define it.
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  # Throwaway password for the databases of this run only (service container and docker compose).
+  DB_PASSWORD: wavemp-ci
+
+jobs:
+  dotnet:
+    name: .NET build, unit and integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: wavemp
+          # Same value as DB_PASSWORD above (the env context is not available for services).
+          POSTGRES_PASSWORD: wavemp-ci
+          POSTGRES_DB: wavemp
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wavemp -d wavemp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_PORT: '5432'
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'dotnet-tools.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore WaveMP.slnx
+
+      - name: Build
+        run: dotnet build WaveMP.slnx --no-restore
+
+      - name: Check that openapi.json is up to date
+        run: git diff --exit-code -- source/WaveMP.Service/openapi.json
+
+      - name: Check formatting
+        run: dotnet format WaveMP.slnx --verify-no-changes --no-restore
+
+      - name: Unit tests
+        run: dotnet test WaveMP.slnx --no-build --filter "TestCategory!=Integration"
+
+      - name: Integration tests (PostgreSQL 18)
+        run: dotnet test WaveMP.slnx --no-build --filter "TestCategory=Integration"
+
+  web:
+    name: Web app lint, type check and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: source/WaveMP.Web
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: source/WaveMP.Web/package-lock.json
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint:check
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build
+        run: npm run build-only
+
+  licenses:
+    name: License check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'dotnet-tools.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            .github/scripts/package-lock.json
+            source/WaveMP.Web/package-lock.json
+            tests/WaveMP.E2E/package-lock.json
+
+      # Fails for licenses that .github/license-policy.json does not allow (e.g. GPL or AGPL).
+      - name: Check licenses of NuGet and npm dependencies
+        run: node .github/scripts/check-licenses.mjs
+
+      - name: Test the license check
+        run: node --test .github/scripts/check-licenses.test.mjs
+
+  e2e:
+    name: Docker image and E2E tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: VERSION=${{ inputs.version }}
+          load: true
+          # docker-compose.dev.yml uses this tag; --no-build below relies on it.
+          tags: wavemp:dev
+          cache-from: type=gha,scope=wavemp-image
+          cache-to: type=gha,mode=max,scope=wavemp-image
+
+      - name: Start WaveMP and PostgreSQL
+        run: docker compose -f docker-compose.dev.yml up --detach --no-build --wait
+
+      - name: Wait until WaveMP is healthy
+        run: >-
+          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors
+          http://localhost:8080/api/v1/health
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: tests/WaveMP.E2E/package-lock.json
+
+      - name: Install packages
+        working-directory: tests/WaveMP.E2E
+        run: npm ci
+
+      # Not cached, as recommended by Playwright: restoring takes about as long as downloading.
+      - name: Install Playwright browser
+        working-directory: tests/WaveMP.E2E
+        run: npm run install-browsers
+
+      - name: E2E tests
+        working-directory: tests/WaveMP.E2E
+        env:
+          E2E_BASE_URL: http://localhost:8080
+          E2E_EXPECTED_VERSION: ${{ inputs.version }}
+        run: npm test
+
+      - name: Show container logs
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml logs --no-color
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            tests/WaveMP.E2E/playwright-report/
+            tests/WaveMP.E2E/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down --volumes

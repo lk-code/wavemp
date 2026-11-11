@@ -1,0 +1,20 @@
+# Tests every pull request to main. Nothing is published.
+name: Pull request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+# A new push to the pull request cancels the running tests.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/test.yml
