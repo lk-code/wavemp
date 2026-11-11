@@ -20,6 +20,8 @@ public static class ProblemCodes
         return statusCode switch
         {
             StatusCodes.Status400BadRequest => ProblemCodeDto.RequestInvalid,
+            StatusCodes.Status401Unauthorized => ProblemCodeDto.AuthUnauthorized,
+            StatusCodes.Status403Forbidden => ProblemCodeDto.AuthForbidden,
             StatusCodes.Status404NotFound => ProblemCodeDto.RequestNotFound,
             StatusCodes.Status503ServiceUnavailable => ProblemCodeDto.ServiceUnavailable,
             < StatusCodes.Status500InternalServerError => ProblemCodeDto.RequestFailed,

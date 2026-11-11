@@ -14,6 +14,8 @@ namespace WaveMP.Service.Tests.Problems;
 public class ProblemCodesTests
 {
     [TestCase(StatusCodes.Status400BadRequest, ProblemCodeDto.RequestInvalid)]
+    [TestCase(StatusCodes.Status401Unauthorized, ProblemCodeDto.AuthUnauthorized)]
+    [TestCase(StatusCodes.Status403Forbidden, ProblemCodeDto.AuthForbidden)]
     [TestCase(StatusCodes.Status404NotFound, ProblemCodeDto.RequestNotFound)]
     [TestCase(StatusCodes.Status405MethodNotAllowed, ProblemCodeDto.RequestFailed)]
     [TestCase(StatusCodes.Status415UnsupportedMediaType, ProblemCodeDto.RequestFailed)]

@@ -43,4 +43,16 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("health.unhealthy")]
     HealthUnhealthy,
+
+    /// <summary>
+    /// No valid session token, or the session has ended or expired (401).
+    /// </summary>
+    [JsonStringEnumMemberName("auth.unauthorized")]
+    AuthUnauthorized,
+
+    /// <summary>
+    /// The profile is not allowed to do this, e.g. an endpoint for admins only (403).
+    /// </summary>
+    [JsonStringEnumMemberName("auth.forbidden")]
+    AuthForbidden,
 }

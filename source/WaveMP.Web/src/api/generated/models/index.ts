@@ -139,6 +139,8 @@ export const ProblemCodeObject = {
     ServerError: "server.error",
     ServiceUnavailable: "service.unavailable",
     HealthUnhealthy: "health.unhealthy",
+    AuthUnauthorized: "auth.unauthorized",
+    AuthForbidden: "auth.forbidden",
 } as const;
 /* tslint:enable */
 /* eslint-enable */

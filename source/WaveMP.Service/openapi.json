@@ -74,7 +74,9 @@
           "request.failed",
           "server.error",
           "service.unavailable",
-          "health.unhealthy"
+          "health.unhealthy",
+          "auth.unauthorized",
+          "auth.forbidden"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -120,6 +122,14 @@
             "$ref": "#/components/schemas/ProblemCode"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Token of a session, created with POST /api/v1/sessions.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   },

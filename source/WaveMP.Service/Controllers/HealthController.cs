@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using WaveMP.Service.Dtos;
@@ -10,6 +11,7 @@ namespace WaveMP.Service.Controllers;
 /// Reports whether the service and its database are ready.
 /// </summary>
 [ApiController]
+[AllowAnonymous]
 [Route("api/v1/health")]
 public sealed class HealthController(HealthCheckService healthCheckService) : ControllerBase
 {

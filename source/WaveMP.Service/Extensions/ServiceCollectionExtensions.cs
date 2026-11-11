@@ -1,9 +1,14 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using WaveMP.Data.Entities;
+using WaveMP.Service.Authentication;
 using WaveMP.Service.Dtos;
+using WaveMP.Service.OpenApi;
 using WaveMP.Service.Problems;
 
 namespace WaveMP.Service.Extensions;
@@ -51,6 +56,51 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers the token-based authentication: every request with a valid session token (JWT, see
+    /// <see cref="JwtTokenIssuer"/>) is authenticated while its session is active, and the policy
+    /// <see cref="AuthorizationPolicies.Admin"/> for admin endpoints. The signing key is loaded on start by
+    /// <see cref="SigningKeyStore.InitializeAsync"/>.
+    /// </summary>
+    public static IServiceCollection AddWaveMpAuthentication(this IServiceCollection services)
+    {
+        services.AddSingleton<SigningKeyStore>();
+        services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+        services.AddScoped<SessionPrincipalValidator>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<SigningKeyStore>((options, keys) =>
+            {
+                // Keeps the claim names of the token (sub, sid) instead of mapping them to long URIs.
+                options.MapInboundClaims = false;
+                options.IncludeErrorDetails = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = TokenDefaults.Issuer,
+                    ValidAudience = TokenDefaults.Audience,
+                    ValidAlgorithms = [TokenDefaults.Algorithm],
+                    IssuerSigningKeyResolver = (_, _, _, _) => [keys.Key],
+                    NameClaimType = WaveMpClaimTypes.Subject,
+                    RoleClaimType = WaveMpClaimTypes.Role,
+                    ClockSkew = TimeSpan.FromMinutes(1),
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context => context.HttpContext.RequestServices
+                        .GetRequiredService<SessionPrincipalValidator>()
+                        .ValidateAsync(context),
+                };
+            });
+
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.Admin, policy => policy
+                .RequireAuthenticatedUser()
+                .RequireRole(nameof(UserRole.Admin)));
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers the OpenAPI document <c>v1</c>, served at <c>/openapi/v1.json</c>.
     /// Keep XML summaries of API types on one line: the generator joins lines with the platform's line break.
     /// </summary>
@@ -64,6 +114,8 @@ public static class ServiceCollectionExtensions
 
             options.AddSchemaTransformer(DescribeEnumsAsStrings);
             options.AddDocumentTransformer(AddProblemCodeAsync);
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
 
             options.AddDocumentTransformer((document, _, _) =>
             {

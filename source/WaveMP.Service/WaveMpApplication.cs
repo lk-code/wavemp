@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Options;
+using WaveMP.Core.Users.Extensions;
 using WaveMP.Data;
 using WaveMP.Data.Extensions;
 using WaveMP.Data.Options;
+using WaveMP.Service.Authentication;
 using WaveMP.Service.Extensions;
 
 namespace WaveMP.Service;
@@ -32,17 +34,25 @@ public static class WaveMpApplication
         builder.Services.AddControllers();
         builder.Services.AddWaveMpOpenApi();
         builder.Services.AddWaveMpData();
+        builder.Services.AddWaveMpUsers();
+        builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<WaveMpDbContext>("database");
 
         WebApplication app = builder.Build();
 
         app.UseExceptionHandler();
+        // Before the authentication, so that its empty 401 and 403 responses become Problem Details as well.
         app.UseStatusCodePages();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapStaticAssets();
         app.MapOpenApi();
-        app.MapControllers();
+        // Every action declares [Authorize] or [AllowAnonymous] itself; this is the safety net for a forgotten one.
+        // No fallback policy: it would also apply to unknown API routes (404), 405 responses and the web app.
+        app.MapControllers().RequireAuthorization();
 
         // Unknown API routes (404) and unsupported methods on API routes (405) are written as Problem Details by the
         // status code pages; all other routes return the web app.
@@ -53,7 +63,8 @@ public static class WaveMpApplication
     }
 
     /// <summary>
-    /// Validates the database configuration and applies pending migrations.
+    /// Validates the database configuration, applies pending migrations, creates the built-in admin profile on the
+    /// first start and loads the key that signs the session tokens.
     /// Returns <c>false</c> if the configuration is invalid; the reason is logged.
     /// </summary>
     public static async Task<bool> InitializeAsync(WebApplication app, CancellationToken cancellationToken = default)
@@ -69,6 +80,8 @@ public static class WaveMpApplication
         }
 
         await app.Services.MigrateWaveMpDatabaseAsync(cancellationToken);
+        await app.Services.InitializeWaveMpUsersAsync(cancellationToken);
+        await app.Services.GetRequiredService<SigningKeyStore>().InitializeAsync(cancellationToken);
         return true;
     }
 }
