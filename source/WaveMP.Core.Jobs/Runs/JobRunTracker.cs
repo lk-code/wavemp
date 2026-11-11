@@ -1,6 +1,9 @@
 namespace WaveMP.Core.Jobs.Runs;
 
-internal sealed class JobRunTracker : IJobRunTracker
+/// <summary>
+/// Keeps the queued and running runs of every job in memory (singleton).
+/// </summary>
+public sealed class JobRunTracker : IJobRunTracker
 {
     private readonly Lock _lock = new();
     private readonly Dictionary<string, JobActivity> _jobs = new(StringComparer.Ordinal);

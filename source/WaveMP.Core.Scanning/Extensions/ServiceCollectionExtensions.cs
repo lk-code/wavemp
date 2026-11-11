@@ -2,9 +2,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using WaveMP.Core.Jobs.Definitions;
+using WaveMP.Core.Jobs.Extensions;
+using WaveMP.Core.Scanning.Jobs;
 using WaveMP.Core.Scanning.Options;
 using WaveMP.Core.Scanning.Scans;
 using WaveMP.Core.Scanning.Writers;
+using WaveMP.Core.Settings.Groups;
+using WaveMP.Core.Settings.Handlers;
 
 namespace WaveMP.Core.Scanning.Extensions;
 
@@ -33,6 +38,11 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IScanProgressTracker, ScanProgressTracker>();
         services.AddScoped<LibraryWriter>();
         services.AddScoped<ILibraryScanner, LibraryScanner>();
+        services.AddScoped<IScanService, ScanService>();
+
+        services.AddWaveMpJob<LibraryScanJob>(JobIds.LibraryScan);
+        services.AddSingleton<IJobScheduleProvider, LibraryScanScheduleProvider>();
+        services.AddSingleton<ISettingsChangeHandler<LibrarySettings>, LibraryScanRescheduler>();
 
         return services;
     }

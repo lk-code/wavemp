@@ -10,7 +10,7 @@ public interface ILibraryScanner
     /// <summary>
     /// Scans the folders of the scope; the progress is reported for the run.
     /// </summary>
-    /// <exception cref="Jobs.Runs.JobFailedException">
+    /// <exception cref="WaveMP.Core.Jobs.Runs.JobFailedException">
     /// The media folder is missing, unreadable or unexpectedly empty, or ffprobe is not available.
     /// </exception>
     Task<ScanResult> ScanAsync(ScanScope scope, Guid runId, CancellationToken cancellationToken = default);
