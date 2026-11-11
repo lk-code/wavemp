@@ -18,7 +18,8 @@
   "nuget": {
     "solution": "WaveMP.slnx",
     "toolManifests": ["dotnet-tools.json"],
-    "allowedPackages": []
+    "$comment": "Reviewed 2026-11: TagLibSharp 2.3.0 is LGPL-2.1-only. WaveMP uses it unchanged as a separate assembly (dynamic linking), which CLAUDE.md allows; the license text is shipped in the image under /licenses/taglibsharp, the source is https://github.com/mono/taglib-sharp.",
+    "allowedPackages": ["TagLibSharp"]
   },
   "npm": {
     "projects": [".github/scripts", "source/WaveMP.Web", "tests/WaveMP.E2E"],
