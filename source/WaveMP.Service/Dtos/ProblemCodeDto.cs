@@ -55,4 +55,28 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("auth.forbidden")]
     AuthForbidden,
+
+    /// <summary>
+    /// The profile to select does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("profile.not_found")]
+    ProfileNotFound,
+
+    /// <summary>
+    /// The user does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("user.not_found")]
+    UserNotFound,
+
+    /// <summary>
+    /// Another user already has this name; names are compared without regard to case (409).
+    /// </summary>
+    [JsonStringEnumMemberName("user.name_taken")]
+    UserNameTaken,
+
+    /// <summary>
+    /// The built-in admin profile cannot be deleted and always keeps the admin role (409).
+    /// </summary>
+    [JsonStringEnumMemberName("user.built_in_admin")]
+    UserBuiltInAdmin,
 }

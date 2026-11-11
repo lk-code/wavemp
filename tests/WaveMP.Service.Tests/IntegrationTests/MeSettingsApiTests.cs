@@ -1,0 +1,123 @@
+using System.Net;
+using System.Net.Http.Json;
+using AwesomeAssertions;
+using WaveMP.Service.Dtos;
+using WaveMP.Service.Tests.IntegrationTests.Extensions;
+
+namespace WaveMP.Service.Tests.IntegrationTests;
+
+[TestFixture]
+[Category("Integration")]
+public class MeSettingsApiTests
+{
+    private WaveMpWebApplicationFactory _factory = null!;
+    private HttpClient _anonymous = null!;
+    private HttpClient _admin = null!;
+
+    [OneTimeSetUp]
+    public async Task OneTimeSetUp()
+    {
+        _factory = new WaveMpWebApplicationFactory(
+            WaveMpWebApplicationFactory.TestDatabaseName + "_settings",
+            freshDatabase: true);
+        _anonymous = _factory.CreateClient();
+        _admin = await _factory.CreateAdminClientAsync();
+    }
+
+    [OneTimeTearDown]
+    public async Task OneTimeTearDown()
+    {
+        _admin?.Dispose();
+        _anonymous?.Dispose();
+        await _factory.DeleteDatabaseAsync();
+        await _factory.DisposeAsync();
+    }
+
+    [Test]
+    public async Task GetMySettings_ForNewProfile_ReturnsEnglish()
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            UserSettingsDto settings = await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+
+            settings.Language.Should().Be(LanguageDto.En);
+        }
+    }
+
+    [Test]
+    public async Task UpdateMySettings_WithLanguage_KeepsItForTheProfileAcrossSessions()
+    {
+        (Guid profileId, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            HttpResponseMessage response = await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { language = "de" },
+                HttpClientExtensions.JsonOptions);
+            UserSettingsDto read = await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+            using HttpClient otherSession = _factory.CreateAuthorizedClient(
+                (await _anonymous.CreateSessionAsync(profileId)).Token);
+            UserSettingsDto otherRead = await otherSession.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            (await response.Content.ReadAsStringAsync()).Should().Contain("\"language\":\"de\"");
+            read.Language.Should().Be(LanguageDto.De);
+            otherRead.Language.Should().Be(LanguageDto.De);
+        }
+    }
+
+    [Test]
+    public async Task UpdateMySettings_WithoutLanguage_KeepsIt()
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            await client.PatchAsJsonAsync("/api/v1/me/settings", new { language = "de" }, HttpClientExtensions.JsonOptions);
+
+            HttpResponseMessage response = await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { },
+                HttpClientExtensions.JsonOptions);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            (await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings")).Language.Should().Be(LanguageDto.De);
+        }
+    }
+
+    [Test]
+    public async Task UpdateMySettings_WithUnsupportedLanguage_ReturnsBadRequest()
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            HttpResponseMessage response = await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { language = "fr" },
+                HttpClientExtensions.JsonOptions);
+
+            await response.ShouldBeProblemAsync(HttpStatusCode.BadRequest, "request.invalid");
+        }
+    }
+
+    [TestCase("GET")]
+    [TestCase("PATCH")]
+    public async Task MySettings_WithoutToken_ReturnUnauthorized(string method)
+    {
+        using HttpRequestMessage request = new(new HttpMethod(method), "/api/v1/me/settings")
+        {
+            Content = method == "PATCH" ? JsonContent.Create(new { language = "de" }) : null,
+        };
+
+        HttpResponseMessage response = await _anonymous.SendAsync(request);
+
+        await response.ShouldBeProblemAsync(HttpStatusCode.Unauthorized, "auth.unauthorized");
+    }
+
+    private async Task<(Guid ProfileId, HttpClient Client)> CreateProfileAsync()
+    {
+        UserDto user = await _admin.CreateUserAsync(new { name = $"Settings {HttpClientExtensions.Unique()}" });
+        CreatedSessionDto session = await _anonymous.CreateSessionAsync(user.Id);
+        return (user.Id, _factory.CreateAuthorizedClient(session.Token));
+    }
+}

@@ -162,6 +162,95 @@ public class ApiIntegrationTests
         });
     }
 
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesTheBearerSecurityScheme()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode scheme = document["components"]!["securitySchemes"]!["Bearer"]!;
+        scheme["type"]!.GetValue<string>().Should().Be("http");
+        scheme["scheme"]!.GetValue<string>().Should().Be("bearer");
+        scheme["bearerFormat"]!.GetValue<string>().Should().Be("JWT");
+    }
+
+    [TestCase("ListUsers", true)]
+    [TestCase("CreateUser", true)]
+    [TestCase("GetCurrentSession", true)]
+    [TestCase("DeleteCurrentSession", true)]
+    [TestCase("GetMySettings", true)]
+    [TestCase("UpdateMySettings", true)]
+    [TestCase("ListProfiles", false)]
+    [TestCase("CreateSession", false)]
+    [TestCase("GetHealth", false)]
+    public async Task GetOpenApiDocument_Always_MarksOperationsThatNeedASession(string operationId, bool secured)
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode operation = FindOperations(document).Single(node => node["operationId"]!.GetValue<string>() == operationId);
+
+        if (secured)
+        {
+            operation["security"]!.AsArray().Should().ContainSingle()
+                .Which!["Bearer"].Should().NotBeNull();
+        }
+        else
+        {
+            operation["security"].Should().BeNull();
+        }
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesUnauthorizedAndForbiddenResponses()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        List<JsonNode> secured = [.. FindOperations(document).Where(operation => operation["security"] is not null)];
+
+        secured.Should().NotBeEmpty();
+        secured.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
+        FindOperations(document)
+            .Where(operation => operation["tags"]![0]!.GetValue<string>() == "Users")
+            .Should().HaveCount(5)
+            .And.AllSatisfy(operation => operation["responses"]!["403"].Should().NotBeNull());
+    }
+
+    [TestCase("ProfilePage", "Profile")]
+    [TestCase("UserPage", "User")]
+    public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode page = document["components"]!["schemas"]![pageSchema]!;
+        page["required"]!.AsArray().Select(node => node!.GetValue<string>())
+            .Should().BeEquivalentTo(["items", "offset", "limit", "total"]);
+        page["properties"]!["items"]!["items"]!["$ref"]!.GetValue<string>()
+            .Should().Be($"#/components/schemas/{itemSchema}");
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesThePagingParameters()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode listProfiles = FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == "ListProfiles");
+        JsonArray parameters = listProfiles["parameters"]!.AsArray();
+
+        JsonNode offset = parameters.Single(parameter => parameter!["name"]!.GetValue<string>() == "offset")!;
+        JsonNode limit = parameters.Single(parameter => parameter!["name"]!.GetValue<string>() == "limit")!;
+        offset["in"]!.GetValue<string>().Should().Be("query");
+        offset["schema"]!["minimum"]!.GetValue<int>().Should().Be(0);
+        limit["schema"]!["minimum"]!.GetValue<int>().Should().Be(1);
+        limit["schema"]!["maximum"]!.GetValue<int>().Should().Be(100);
+    }
+
+    private static IEnumerable<JsonNode> FindOperations(JsonNode document)
+    {
+        return document["paths"]!.AsObject()
+            .SelectMany(path => path.Value!.AsObject())
+            .Select(operation => operation.Value!);
+    }
+
     private async Task<JsonNode> GetOpenApiDocumentAsync()
     {
         HttpResponseMessage response = await _client.GetAsync(new Uri("/openapi/v1.json", UriKind.Relative));

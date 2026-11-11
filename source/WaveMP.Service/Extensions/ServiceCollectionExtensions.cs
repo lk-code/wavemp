@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
@@ -16,6 +17,7 @@ namespace WaveMP.Service.Extensions;
 public static class ServiceCollectionExtensions
 {
     private const string DtoSuffix = "Dto";
+    private const string PageSuffix = "Page";
 
     // Schemas of all Problem Details types the framework may describe.
     private static readonly string[] _problemSchemaIds =
@@ -108,9 +110,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddOpenApi("v1", options =>
         {
-            // Clients see "Health" instead of "HealthDto".
-            options.CreateSchemaReferenceId = typeInfo => RemoveDtoSuffix(
-                OpenApiOptions.CreateDefaultSchemaReferenceId(typeInfo));
+            // Clients see "Health" instead of "HealthDto" and "ProfilePage" for a PageDto of profiles.
+            options.CreateSchemaReferenceId = CreateSchemaReferenceId;
 
             options.AddSchemaTransformer(DescribeEnumsAsStrings);
             options.AddDocumentTransformer(AddProblemCodeAsync);
@@ -133,6 +134,17 @@ public static class ServiceCollectionExtensions
     {
         options.NumberHandling = JsonNumberHandling.Strict;
         options.Converters.Add(new JsonStringEnumConverter());
+    }
+
+    private static string? CreateSchemaReferenceId(JsonTypeInfo typeInfo)
+    {
+        Type type = typeInfo.Type;
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(PageDto<>))
+        {
+            return RemoveDtoSuffix(type.GetGenericArguments()[0].Name) + PageSuffix;
+        }
+
+        return RemoveDtoSuffix(OpenApiOptions.CreateDefaultSchemaReferenceId(typeInfo));
     }
 
     private static string? RemoveDtoSuffix(string? id)

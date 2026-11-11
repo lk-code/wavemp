@@ -4,6 +4,14 @@
 // @ts-ignore
 import { HealthRequestBuilderRequestsMetadata, type HealthRequestBuilder } from './health/index.js';
 // @ts-ignore
+import { MeRequestBuilderNavigationMetadata, type MeRequestBuilder } from './me/index.js';
+// @ts-ignore
+import { ProfilesRequestBuilderRequestsMetadata, type ProfilesRequestBuilder } from './profiles/index.js';
+// @ts-ignore
+import { SessionsRequestBuilderNavigationMetadata, SessionsRequestBuilderRequestsMetadata, type SessionsRequestBuilder } from './sessions/index.js';
+// @ts-ignore
+import { type UsersRequestBuilder, UsersRequestBuilderNavigationMetadata, UsersRequestBuilderRequestsMetadata } from './users/index.js';
+// @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata } from '@microsoft/kiota-abstractions';
 
 /**
@@ -14,6 +22,22 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      * The health property
      */
     get health(): HealthRequestBuilder;
+    /**
+     * The me property
+     */
+    get me(): MeRequestBuilder;
+    /**
+     * The profiles property
+     */
+    get profiles(): ProfilesRequestBuilder;
+    /**
+     * The sessions property
+     */
+    get sessions(): SessionsRequestBuilder;
+    /**
+     * The users property
+     */
+    get users(): UsersRequestBuilder;
 }
 /**
  * Uri template for the request builder.
@@ -25,6 +49,20 @@ export const V1RequestBuilderUriTemplate = "{+baseurl}/api/v1";
 export const V1RequestBuilderNavigationMetadata: Record<Exclude<keyof V1RequestBuilder, KeysToExcludeForNavigationMetadata>, NavigationMetadata> = {
     health: {
         requestsMetadata: HealthRequestBuilderRequestsMetadata,
+    },
+    me: {
+        navigationMetadata: MeRequestBuilderNavigationMetadata,
+    },
+    profiles: {
+        requestsMetadata: ProfilesRequestBuilderRequestsMetadata,
+    },
+    sessions: {
+        requestsMetadata: SessionsRequestBuilderRequestsMetadata,
+        navigationMetadata: SessionsRequestBuilderNavigationMetadata,
+    },
+    users: {
+        requestsMetadata: UsersRequestBuilderRequestsMetadata,
+        navigationMetadata: UsersRequestBuilderNavigationMetadata,
     },
 };
 /* tslint:enable */
