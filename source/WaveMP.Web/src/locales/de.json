@@ -1,0 +1,183 @@
+{
+  "app": {
+    "name": "WaveMP"
+  },
+  "nav": {
+    "main": "Hauptnavigation",
+    "history": "Verlauf",
+    "back": "Zurück",
+    "forward": "Vor",
+    "menu": "Menü",
+    "nowPlaying": "Aktuelle Wiedergabe",
+    "library": "Bibliothek",
+    "playlists": "Playlists"
+  },
+  "breadcrumb": {
+    "label": "Position",
+    "music": "Musik"
+  },
+  "toolbar": {
+    "view": "Ansichtsoptionen",
+    "sort": "Sortieren",
+    "search": "Suche",
+    "searchPlaceholder": "Suchen",
+    "clearSearch": "Suche leeren"
+  },
+  "sidebar": {
+    "label": "Bibliotheksnavigation",
+    "playlists": "Playlists",
+    "createPlaylist": "Playlist erstellen",
+    "library": "Bibliothek"
+  },
+  "library": {
+    "recentlyAdded": "Zuletzt hinzugefügt",
+    "artists": "Interpret",
+    "albums": "Album",
+    "songs": "Titel",
+    "genres": "Genre",
+    "years": "Jahr",
+    "placeholderNotice": "Diese Liste zeigt Platzhalter. Deine Musik erscheint hier, sobald die Bibliothek gescannt werden kann.",
+    "emptyTitle": "Hier ist noch nichts",
+    "emptyText": "Dieser Bereich der Bibliothek steht zur Verfügung, sobald deine Musik gescannt wurde."
+  },
+  "list": {
+    "columns": {
+      "number": "Nr.",
+      "title": "Titel",
+      "duration": "Länge",
+      "artist": "Interpret"
+    },
+    "hasVideo": "Video vorhanden",
+    "album": "Album",
+    "artist": "Interpret",
+    "genre": "Genre",
+    "year": "Jahr"
+  },
+  "placeholders": {
+    "album": "Platzhalter-Album {number}",
+    "artist": "Platzhalter-Interpret {number}",
+    "track": "Platzhalter-Titel {number}",
+    "genre": "Platzhalter-Genre {number}"
+  },
+  "player": {
+    "label": "Player",
+    "controls": "Wiedergabesteuerung",
+    "nothingPlaying": "Keine Wiedergabe",
+    "play": "Wiedergabe",
+    "pause": "Pause",
+    "stop": "Stopp",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "shuffle": "Zufallswiedergabe",
+    "repeatOff": "Wiederholen: aus",
+    "repeatAll": "Wiederholen: alle",
+    "repeatOne": "Wiederholen: einen",
+    "mute": "Stummschalten",
+    "volume": "Lautstärke",
+    "seek": "Position",
+    "position": "{position} von {duration}",
+    "modes": "Player-Modi",
+    "compactMode": "Zum Kompaktmodus wechseln",
+    "open": "Player öffnen",
+    "showNowPlaying": "Aktuelle Wiedergabe anzeigen",
+    "close": "Player schließen"
+  },
+  "nowPlaying": {
+    "emptyTitle": "Es wird nichts wiedergegeben",
+    "emptyText": "Titel, die du abspielst, erscheinen hier."
+  },
+  "playlists": {
+    "emptyTitle": "Noch keine Playlists",
+    "emptyText": "Playlists, die du erstellst, erscheinen hier.",
+    "create": "Playlist erstellen"
+  },
+  "server": {
+    "status": "Serverstatus",
+    "checking": "Verbinde",
+    "healthy": "Online",
+    "degraded": "Eingeschränkt",
+    "unhealthy": "Problem",
+    "unreachable": "Offline",
+    "version": "Version {version}"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "text": "Diese Seite gibt es nicht.",
+    "toLibrary": "Zur Bibliothek"
+  },
+  "dialog": {
+    "close": "Schließen"
+  },
+  "actions": {
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "add": "Hinzufügen",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "showVideo": "Video",
+    "showVisualization": "Visualisierung",
+    "showCover": "Cover",
+    "cancel": "Abbrechen",
+    "confirm": "OK"
+  },
+  "dev": {
+    "title": "Komponentenübersicht",
+    "intro": "Interne Seite für die Entwicklung. Sie zeigt alle Parts der Theme-API im aktuellen Theme.",
+    "language": "Sprache",
+    "sections": {
+      "buttons": "Buttons",
+      "tabs": "Tabs",
+      "tree": "Baum",
+      "list": "Liste mit Gruppen",
+      "sliders": "Schieberegler",
+      "fields": "Eingabefelder",
+      "dialog": "Dialog",
+      "contextMenu": "Kontextmenü",
+      "header": "Kopfbereich",
+      "toolbar": "Toolbar",
+      "sidebar": "Sidebar",
+      "transport": "Transport-Leiste",
+      "bottomNav": "Untere Navigation",
+      "states": "Weitere Zustände",
+      "parts": "Parts",
+      "icons": "Icon-Slots",
+      "previews": "Layouts"
+    },
+    "samples": {
+      "button": "Button",
+      "primary": "Primär",
+      "disabled": "Gesperrt",
+      "pressed": "Gedrückt",
+      "textField": "Name",
+      "textValue": "Beispieltext",
+      "searchValue": "Beispielsuche",
+      "dialogTitle": "Beispieldialog",
+      "dialogText": "Dialoge nutzen das native dialog-Element. Mit Escape schließen.",
+      "openDialog": "Dialog öffnen",
+      "openContextMenu": "Kontextmenü öffnen",
+      "contextMenuArea": "Hier rechtsklicken",
+      "slider": "Schieberegler {value}",
+      "sliderDisabled": "Gesperrter Schieberegler"
+    },
+    "transportStates": {
+      "idle": "Leerlauf",
+      "playing": "Wiedergabe",
+      "paused": "Pausiert",
+      "shuffle": "Zufallswiedergabe an",
+      "repeatAll": "Alle wiederholen",
+      "repeatOne": "Einen wiederholen",
+      "muted": "Stumm",
+      "expanded": "Erweitert (mobiler Vollbild-Player)"
+    },
+    "table": {
+      "part": "Part",
+      "slot": "Slot",
+      "file": "Standarddatei",
+      "preview": "Vorschau"
+    },
+    "previews": {
+      "mobile": "Mobil",
+      "desktop": "Desktop"
+    }
+  }
+}

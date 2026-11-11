@@ -5,7 +5,7 @@ test('start page shows the app name and a healthy server', async ({ page }) => {
 
     await expect(page).toHaveTitle('WaveMP')
     await expect(page.getByRole('heading', { level: 1, name: 'WaveMP' })).toBeVisible()
-    await expect(page.getByTestId('health-status')).toHaveText('Healthy')
+    await expect(page.locator("[data-part='health']")).toHaveAttribute('data-state', 'healthy')
 })
 
 test('unknown client routes still load the web app', async ({ page }) => {

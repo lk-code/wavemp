@@ -1,0 +1,183 @@
+{
+  "app": {
+    "name": "WaveMP"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "history": "History",
+    "back": "Back",
+    "forward": "Forward",
+    "menu": "Menu",
+    "nowPlaying": "Now Playing",
+    "library": "Library",
+    "playlists": "Playlists"
+  },
+  "breadcrumb": {
+    "label": "Location",
+    "music": "Music"
+  },
+  "toolbar": {
+    "view": "View options",
+    "sort": "Sort",
+    "search": "Search",
+    "searchPlaceholder": "Search",
+    "clearSearch": "Clear search"
+  },
+  "sidebar": {
+    "label": "Library navigation",
+    "playlists": "Playlists",
+    "createPlaylist": "Create Playlist",
+    "library": "Library"
+  },
+  "library": {
+    "recentlyAdded": "Recently Added",
+    "artists": "Artist",
+    "albums": "Album",
+    "songs": "Songs",
+    "genres": "Genre",
+    "years": "Year",
+    "placeholderNotice": "This list shows placeholder content. Your music appears here once the library can be scanned.",
+    "emptyTitle": "Nothing here yet",
+    "emptyText": "This part of the library becomes available once your music has been scanned."
+  },
+  "list": {
+    "columns": {
+      "number": "#",
+      "title": "Title",
+      "duration": "Length",
+      "artist": "Artist"
+    },
+    "hasVideo": "Video available",
+    "album": "Album",
+    "artist": "Artist",
+    "genre": "Genre",
+    "year": "Year"
+  },
+  "placeholders": {
+    "album": "Placeholder Album {number}",
+    "artist": "Placeholder Artist {number}",
+    "track": "Placeholder Track {number}",
+    "genre": "Placeholder Genre {number}"
+  },
+  "player": {
+    "label": "Player",
+    "controls": "Playback controls",
+    "nothingPlaying": "Nothing playing",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "previous": "Previous",
+    "next": "Next",
+    "shuffle": "Shuffle",
+    "repeatOff": "Repeat: off",
+    "repeatAll": "Repeat: all",
+    "repeatOne": "Repeat: one",
+    "mute": "Mute",
+    "volume": "Volume",
+    "seek": "Position",
+    "position": "{position} of {duration}",
+    "modes": "Player modes",
+    "compactMode": "Switch to compact mode",
+    "open": "Open player",
+    "showNowPlaying": "Show Now Playing",
+    "close": "Close player"
+  },
+  "nowPlaying": {
+    "emptyTitle": "Nothing is playing",
+    "emptyText": "Songs you play will appear here."
+  },
+  "playlists": {
+    "emptyTitle": "No playlists yet",
+    "emptyText": "Playlists you create will appear here.",
+    "create": "Create playlist"
+  },
+  "server": {
+    "status": "Server status",
+    "checking": "Connecting",
+    "healthy": "Online",
+    "degraded": "Limited",
+    "unhealthy": "Problem",
+    "unreachable": "Offline",
+    "version": "Version {version}"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "This page does not exist.",
+    "toLibrary": "Go to the library"
+  },
+  "dialog": {
+    "close": "Close"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "settings": "Settings",
+    "profile": "Profile",
+    "showVideo": "Video",
+    "showVisualization": "Visualization",
+    "showCover": "Cover",
+    "cancel": "Cancel",
+    "confirm": "OK"
+  },
+  "dev": {
+    "title": "Component overview",
+    "intro": "Internal page for development. It shows all parts of the theme API in the current theme.",
+    "language": "Language",
+    "sections": {
+      "buttons": "Buttons",
+      "tabs": "Tabs",
+      "tree": "Tree",
+      "list": "List with groups",
+      "sliders": "Sliders",
+      "fields": "Input fields",
+      "dialog": "Dialog",
+      "contextMenu": "Context menu",
+      "header": "Header",
+      "toolbar": "Toolbar",
+      "sidebar": "Sidebar",
+      "transport": "Transport",
+      "bottomNav": "Bottom navigation",
+      "states": "Other states",
+      "parts": "Parts",
+      "icons": "Icon slots",
+      "previews": "Layouts"
+    },
+    "samples": {
+      "button": "Button",
+      "primary": "Primary",
+      "disabled": "Disabled",
+      "pressed": "Pressed",
+      "textField": "Name",
+      "textValue": "Sample text",
+      "searchValue": "Sample search",
+      "dialogTitle": "Sample dialog",
+      "dialogText": "Dialogs use the native dialog element. Press Escape to close.",
+      "openDialog": "Open dialog",
+      "openContextMenu": "Open context menu",
+      "contextMenuArea": "Right-click here",
+      "slider": "Slider {value}",
+      "sliderDisabled": "Disabled slider"
+    },
+    "transportStates": {
+      "idle": "Idle",
+      "playing": "Playing",
+      "paused": "Paused",
+      "shuffle": "Shuffle on",
+      "repeatAll": "Repeat all",
+      "repeatOne": "Repeat one",
+      "muted": "Muted",
+      "expanded": "Expanded (full-screen player on mobile)"
+    },
+    "table": {
+      "part": "Part",
+      "slot": "Slot",
+      "file": "Default file",
+      "preview": "Preview"
+    },
+    "previews": {
+      "mobile": "Mobile",
+      "desktop": "Desktop"
+    }
+  }
+}
