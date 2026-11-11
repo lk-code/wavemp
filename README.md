@@ -2,6 +2,8 @@
 
 **A nostalgic media player for your self-hosted music and music videos.**
 
+[![Main](https://github.com/lk-code/wavemp/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/lk-code/wavemp/actions/workflows/main.yml)
+[![Release](https://github.com/lk-code/wavemp/actions/workflows/release.yml/badge.svg)](https://github.com/lk-code/wavemp/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > **Status:** WaveMP is in early development. Features listed below are planned and will be added step by step.
@@ -82,6 +84,20 @@ docker compose up -d
 
 Open `http://<your-server>:8080` and select the **Admin** profile to set up your library.
 
+### Image tags
+
+Images are built for `linux/amd64` and `linux/arm64` and published as `ghcr.io/lk-code/wavemp` and on Docker Hub as `lkcode/wavemp`, both with the same tags:
+
+| Tag | Content |
+|---|---|
+| `latest` | Latest stable version |
+| `1.2.3` | A specific version |
+| `1.2` | Latest patch of a minor version |
+| `edge` | Current state of `main`, may be unstable |
+| `sha-<commit>` | A specific commit on `main` (short hash) |
+
+Until the first release, only `edge` and `sha-<commit>` are available.
+
 ### Settings
 
 | Variable | Description | Default |
@@ -141,7 +157,7 @@ WaveMP reads metadata from the file tags first. If tags are missing, it tries to
 
 | Platform | Status |
 |---|---|
-| Docker | Planned (first release) |
+| Docker (linux/amd64, linux/arm64) | Preview images (`edge`), first release planned |
 | TrueNAS, ZimaOS and other app catalogs | Planned |
 | Android, iOS, Windows, macOS | Planned |
 
@@ -166,6 +182,7 @@ This builds the image from source and starts WaveMP on `http://localhost:8080`. 
 | `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, migrations) |
 | `source/WaveMP.Web` | Vue 3 web app |
 | `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright) |
+| `.github/` | GitHub Actions workflows, license check script and policy |
 
 ### Local development
 
@@ -207,14 +224,15 @@ Errors are returned as Problem Details ([RFC 9457](https://www.rfc-editor.org/rf
 
 ### Tests
 
+Run the commands from the repository root:
+
 ```bash
 # Unit and integration tests (integration tests need the dev database)
 docker compose -f docker-compose.dev.yml up -d wavemp-db
 dotnet test
 
 # Web app checks
-cd source/WaveMP.Web
-npm run lint && npm run type-check && npm run format:check
+(cd source/WaveMP.Web && npm run lint:check && npm run type-check && npm run format:check)
 
 # E2E tests against a running instance
 docker compose -f docker-compose.dev.yml up --build -d
@@ -225,6 +243,22 @@ npm test                                          # E2E_BASE_URL defaults to htt
 ```
 
 The integration tests start the service in-process on a free local port, use their own database `wavemp_tests` and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
+
+`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version.
+
+### License check
+
+All NuGet and npm dependencies must have a license listed in `.github/license-policy.json`: MIT-compatible licenses only, never GPL or AGPL. The CI runs the same command:
+
+```bash
+node .github/scripts/check-licenses.mjs
+```
+
+It restores the .NET tools and npm packages it needs by itself and fails if a package has a license that is not allowed or no license information. Exceptions for single packages are only added to the policy after a manual license review.
+
+### Continuous integration
+
+GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit tests and integration tests against a PostgreSQL 18 service container, lint, type check and build of the web app, the license check, and the E2E tests against the Docker image. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
 
 ## License
 
