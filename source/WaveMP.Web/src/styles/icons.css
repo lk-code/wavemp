@@ -287,6 +287,38 @@
         --_icon: var(--wmp-icon-go-to-artist);
     }
 
+    [data-icon='play-now'] {
+        --_icon: var(--wmp-icon-play-now);
+    }
+
+    [data-icon='play-next'] {
+        --_icon: var(--wmp-icon-play-next);
+    }
+
+    [data-icon='add-to-queue'] {
+        --_icon: var(--wmp-icon-add-to-queue);
+    }
+
+    [data-icon='shuffle-play'] {
+        --_icon: var(--wmp-icon-shuffle-play);
+    }
+
+    [data-icon='move-up'] {
+        --_icon: var(--wmp-icon-move-up);
+    }
+
+    [data-icon='move-down'] {
+        --_icon: var(--wmp-icon-move-down);
+    }
+
+    [data-icon='remove-from-queue'] {
+        --_icon: var(--wmp-icon-remove-from-queue);
+    }
+
+    [data-icon='clear-queue'] {
+        --_icon: var(--wmp-icon-clear-queue);
+    }
+
     [data-icon='close'] {
         --_icon: var(--wmp-icon-close);
     }

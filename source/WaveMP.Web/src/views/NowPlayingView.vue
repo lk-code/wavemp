@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import BaseCover from '@/components/base/BaseCover.vue'
+import NowPlayingStage from '@/components/player/NowPlayingStage.vue'
+import PlayQueue from '@/components/player/PlayQueue.vue'
+import { usePlayerStore } from '@/stores/player'
 
-const { t } = useI18n()
+/** Now Playing: the stage with the current track and the queue of the player. */
+const player = usePlayerStore()
 </script>
 
 <template>
     <div data-part="view" data-view="now-playing">
-        <!-- The stage shows the cover; video and visualization follow in later steps. -->
-        <div data-part="stage">
-            <BaseCover />
-            <div data-part="empty-state">
-                <p data-part="empty-state-title">{{ t('nowPlaying.emptyTitle') }}</p>
-                <p data-part="empty-state-text">{{ t('nowPlaying.emptyText') }}</p>
-            </div>
-        </div>
+        <NowPlayingStage :track="player.current?.track" />
+        <PlayQueue
+            v-if="player.queue.items.length > 0"
+            :items="player.queue.items"
+            :current-index="player.queue.index"
+            @play="player.playItem"
+            @move="player.moveItem"
+            @remove="player.removeItem"
+            @clear="player.clearQueue"
+        />
     </div>
 </template>

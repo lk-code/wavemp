@@ -6,6 +6,7 @@ import type { Track } from '@/api/generated/models'
 import { createWaveMpI18n } from '@/i18n'
 import { createRoutes } from '@/router/routes'
 import { usePageTitleStore } from '@/stores/pageTitle'
+import { usePlayerStore } from '@/stores/player'
 import { useSessionStore } from '@/stores/session'
 
 const api = vi.hoisted(() => ({
@@ -235,6 +236,26 @@ describe('AlbumView', () => {
         expect(usePageTitleStore().title).toBeNull()
     })
 
+    it('plays the album in order or shuffled', async () => {
+        api.getAlbum.mockResolvedValue({ id: 'first', title: 'First Album', artist: alpha })
+        api.listAlbumTracks.mockResolvedValue({
+            items: [track('One'), track('Clip', { hasAudio: false }), track('Two')],
+            total: 3,
+        })
+        const player = usePlayerStore()
+        const playTracks = vi.spyOn(player, 'playTracks').mockImplementation(() => undefined)
+
+        const { wrapper } = await mountView(AlbumView, '/library/albums/first', { id: 'first' })
+        await wrapper.get('[data-part="detail-actions"] [data-item="play"]').trigger('click')
+        await wrapper.get('[data-part="detail-actions"] [data-item="shuffle"]').trigger('click')
+
+        const ids = (call: unknown[]) => (call[0] as Track[]).map((item) => item.id)
+        expect(ids(playTracks.mock.calls[0]!)).toEqual(['One', 'Two'])
+        expect(playTracks.mock.calls[0]!.slice(1)).toEqual([0, { shuffle: false }])
+        expect(playTracks.mock.calls[1]!.slice(1)).toEqual([-1, { shuffle: true }])
+        wrapper.unmount()
+    })
+
     it('tells when the album no longer exists', async () => {
         api.getAlbum.mockRejectedValue({ responseStatusCode: 404, code: 'album.not_found' })
         api.listAlbumTracks.mockRejectedValue({ responseStatusCode: 404 })
@@ -385,7 +406,10 @@ describe('TrackView', () => {
             signIn('User')
             const user = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
 
-            expect(user.wrapper.find('[data-part="detail-actions"]').exists()).toBe(false)
+            expect(user.wrapper.find('[data-item="edit-metadata"]').exists()).toBe(false)
+            expect(
+                user.wrapper.find('[data-part="detail-actions"] [data-item="play"]').exists(),
+            ).toBe(true)
             expect(user.wrapper.find('[data-part="dialog"]').exists()).toBe(false)
             user.wrapper.unmount()
 

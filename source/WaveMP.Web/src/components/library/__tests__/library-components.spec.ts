@@ -6,6 +6,8 @@ import type { Track } from '@/api/generated/models'
 import { createWaveMpI18n } from '@/i18n'
 import { groupTracksByAlbum } from '@/library/grouping'
 import { createRoutes } from '@/router/routes'
+import { getPlayback } from '@/player/api'
+import { playerDependencies, usePlayerStore } from '@/stores/player'
 import { useSessionStore } from '@/stores/session'
 
 const covers = vi.hoisted(() => ({
@@ -14,6 +16,7 @@ const covers = vi.hoisted(() => ({
 }))
 
 vi.mock('@/library/api', () => covers)
+vi.mock('@/player/api', () => ({ getPlayback: vi.fn(), recordPlay: vi.fn() }))
 
 const LibraryCover = (await import('../LibraryCover.vue')).default
 const TileList = (await import('../TileList.vue')).default
@@ -64,8 +67,88 @@ async function mountWith(component: unknown, props: Record<string, unknown>) {
 }
 
 describe('TrackGroupList', () => {
+    const original = { ...playerDependencies }
+    const engine = {
+        position: 0,
+        hasPrepared: false,
+        load: vi.fn(),
+        prepare: vi.fn(),
+        play: vi.fn(() => Promise.resolve()),
+        pause: vi.fn(),
+        stop: vi.fn(),
+        seek: vi.fn(),
+        setVolume: vi.fn(),
+        setTrackGain: vi.fn(),
+    }
+
     beforeEach(() => {
         setActivePinia(createPinia())
+        vi.mocked(getPlayback).mockReset()
+        vi.mocked(getPlayback).mockImplementation((id) =>
+            Promise.resolve({
+                trackId: id,
+                method: 'DirectPlay',
+                streamUrl: `/stream/${id}`,
+                replayGain: {},
+            }),
+        )
+        playerDependencies.createEngine = () => engine
+        playerDependencies.audioFormats = () => ['Mp3']
+        playerDependencies.mediaSession = false
+    })
+
+    afterEach(() => {
+        Object.assign(playerDependencies, original)
+    })
+
+    it('plays the list from a row on double click and on Enter and marks the playing row', async () => {
+        const { wrapper } = await mountWith(TrackGroupList, {
+            groups: groupTracksByAlbum(tracks),
+            label: 'Songs',
+        })
+        const player = usePlayerStore()
+
+        await wrapper.findAll('[data-part="list-row"]')[1]!.trigger('dblclick')
+        await flushPromises()
+
+        expect(player.queue.items.map((item) => item.track.id)).toEqual(['opening', 'closing'])
+        expect(player.state.trackId).toBe('closing')
+        const rows = wrapper.findAll('[data-part="list-row"]')
+        expect(rows[1]!.attributes('data-state')).toContain('playing')
+        expect(rows[0]!.attributes('data-state') ?? '').not.toContain('playing')
+
+        await rows[0]!.trigger('keydown', { key: 'Enter' })
+        await flushPromises()
+        expect(player.state.trackId).toBe('opening')
+        wrapper.unmount()
+    })
+
+    it('puts a track next or at the end of the queue from its menu', async () => {
+        const { wrapper } = await mountWith(TrackGroupList, {
+            groups: groupTracksByAlbum(tracks),
+            label: 'Songs',
+        })
+        const player = usePlayerStore()
+        player.playTracks([tracks[0]!], 0)
+        await flushPromises()
+
+        const rows = wrapper.findAll('[data-part="list-row"]')
+        await rows[1]!.trigger('contextmenu', { clientX: 10, clientY: 20 })
+        await flushPromises()
+        ;(document.querySelector('[data-item="add-to-queue"]') as HTMLElement).click()
+        await flushPromises()
+        await rows[1]!.trigger('contextmenu', { clientX: 10, clientY: 20 })
+        await flushPromises()
+        ;(document.querySelector('[data-item="play-next"]') as HTMLElement).click()
+        await flushPromises()
+
+        expect(player.queue.items.map((item) => item.track.id)).toEqual([
+            'opening',
+            'closing',
+            'closing',
+        ])
+        expect(player.state.trackId).toBe('opening')
+        wrapper.unmount()
     })
 
     it('shows the tracks grouped by album with links to album, artist, genre and year', async () => {
@@ -134,7 +217,7 @@ describe('TrackGroupList', () => {
             [...menu.querySelectorAll('[data-part="menu-item"]')].map((item) =>
                 item.getAttribute('data-item'),
             ),
-        ).toEqual(['details', 'album', 'artist'])
+        ).toEqual(['play', 'play-next', 'add-to-queue', 'details', 'album', 'artist'])
         ;(menu.querySelector('[data-item="details"]') as HTMLElement).click()
         await flushPromises()
         expect(router.currentRoute.value.fullPath).toBe('/library/tracks/opening')

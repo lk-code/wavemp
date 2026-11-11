@@ -54,6 +54,9 @@ export const parts = [
     'empty-state-text',
     'link',
     'stage',
+    'stage-info',
+    'stage-title',
+    'stage-subtitle',
     'cover',
     'cover-image',
 
@@ -88,6 +91,16 @@ export const parts = [
     'file-item',
     'file-path',
     'file-meta',
+
+    // Queue
+    'queue',
+    'queue-list',
+    'queue-item',
+    'queue-item-info',
+    'queue-item-title',
+    'queue-item-artist',
+    'queue-item-duration',
+    'queue-item-actions',
 
     // Transport
     'transport',

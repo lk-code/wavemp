@@ -15,6 +15,7 @@ import { getAlbum, listAlbumTracks } from '@/library/api'
 import { groupTracksByDisc } from '@/library/grouping'
 import { artistLabelKey, durationSeconds } from '@/library/presentation'
 import { usePageTitleStore } from '@/stores/pageTitle'
+import { usePlayerStore } from '@/stores/player'
 
 /** An album with its cover, details and all its tracks in the order of disc and track number. */
 const props = defineProps<{
@@ -24,6 +25,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const format = useFormat()
 const pageTitle = usePageTitleStore()
+const player = usePlayerStore()
 
 const album = ref<Album | null>(null)
 const tracks = ref<Track[]>([])
@@ -37,6 +39,15 @@ const artistKey = computed(() =>
     artistLabelKey(album.value?.artist, album.value?.isCompilation ?? false),
 )
 const duration = computed(() => durationSeconds(album.value?.durationMilliseconds))
+/** Tracks with audio in the order of the page (discs, then track numbers). */
+const playable = computed(() =>
+    groups.value.flatMap((group) => group.tracks).filter((track) => track.hasAudio),
+)
+const hasAudio = computed(() => playable.value.length > 0)
+
+function play(shuffle: boolean): void {
+    player.playTracks(playable.value, shuffle ? -1 : 0, { shuffle })
+}
 
 async function load(): Promise<void> {
     const current = ++generation
@@ -117,6 +128,21 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem v-if="duration !== null" field="duration" :label="t('list.duration')">
                     {{ format.duration(duration) }}
                 </MetaItem>
+                <template v-if="hasAudio" #actions>
+                    <BaseButton
+                        data-item="play"
+                        variant="primary"
+                        icon="play-now"
+                        :label="t('library.play')"
+                        @click="play(false)"
+                    />
+                    <BaseButton
+                        data-item="shuffle"
+                        icon="shuffle-play"
+                        :label="t('library.shufflePlay')"
+                        @click="play(true)"
+                    />
+                </template>
             </DetailHeader>
             <TrackGroupList :groups="groups" :label="album.title ?? ''" :show-group-info="false" />
         </template>

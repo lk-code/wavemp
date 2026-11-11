@@ -616,6 +616,11 @@
         outline-offset: -2px;
     }
 
+    /* The playing track stands out in every list. */
+    [data-part='list-row'][data-state~='playing'] {
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
     [data-part='badge'] {
         position: relative;
         display: inline-grid;
@@ -1484,6 +1489,110 @@
         gap: var(--wmp-space-l);
         min-block-size: 100%;
         padding: var(--wmp-space-xl);
+    }
+
+    [data-part='stage-info'] {
+        display: grid;
+        gap: var(--wmp-space-xs);
+        max-inline-size: 100%;
+        text-align: center;
+    }
+
+    [data-part='stage-title'] {
+        margin: 0;
+        font-size: var(--wmp-font-size-xl);
+        font-weight: var(--wmp-font-weight-bold);
+        overflow-wrap: anywhere;
+    }
+
+    [data-part='stage-subtitle'] {
+        margin: 0;
+        color: var(--wmp-color-text-muted);
+        overflow-wrap: anywhere;
+    }
+
+    /* --- Queue --------------------------------------------------------------------------- */
+
+    [data-part='queue'] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        align-content: start;
+        gap: var(--wmp-space-s) var(--wmp-space-m);
+        min-inline-size: 0;
+        padding: var(--wmp-space-l);
+    }
+
+    [data-part='queue'] > [data-part='queue-list'] {
+        grid-column: 1 / -1;
+    }
+
+    [data-part='queue-list'] {
+        display: grid;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    [data-part='queue-item'] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: var(--wmp-space-s);
+        min-block-size: var(--wmp-list-row-height);
+        padding-inline: var(--wmp-space-s);
+        border-radius: var(--wmp-radius-s);
+    }
+
+    [data-part='queue-item']:hover {
+        background: var(--wmp-color-hover);
+    }
+
+    [data-part='queue-item'][data-state~='current'] {
+        background: var(--wmp-color-selection);
+        color: var(--wmp-color-selection-text);
+    }
+
+    [data-part='queue-item'][data-state~='played'] {
+        color: var(--wmp-color-text-muted);
+    }
+
+    [data-part='queue-item-info'] {
+        display: grid;
+        min-inline-size: 0;
+        padding: var(--wmp-space-xs) 0;
+        color: inherit;
+        font: inherit;
+        text-align: start;
+        background: none;
+        border: 0;
+        cursor: pointer;
+    }
+
+    [data-part='queue-item-title'],
+    [data-part='queue-item-artist'] {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    [data-part='queue-item'][data-state~='current'] [data-part='queue-item-title'] {
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
+    [data-part='queue-item-artist'],
+    [data-part='queue-item-duration'] {
+        font-size: var(--wmp-font-size-s);
+        opacity: 0.8;
+    }
+
+    [data-part='queue-item-duration'] {
+        font-variant-numeric: tabular-nums;
+    }
+
+    [data-part='queue-item-actions'] {
+        display: flex;
+        gap: var(--wmp-space-xs);
     }
 
     /* --- Dialog -------------------------------------------------------------------------- */

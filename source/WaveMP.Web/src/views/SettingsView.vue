@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseSelect, { type SelectOption } from '@/components/base/BaseSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
+import { ReplayGainModeObject, type ReplayGainMode } from '@/api/generated/models'
 import { isSupportedLocale, type SupportedLocale } from '@/i18n/locales'
 import { useSessionStore } from '@/stores/session'
 
@@ -17,7 +18,15 @@ const languageOptions = computed<SelectOption[]>(() => [
     { value: 'de', label: t('settings.languages.de') },
 ])
 
+const replayGainOptions = computed<SelectOption[]>(() => [
+    { value: ReplayGainModeObject.Off, label: t('settings.replayGainModes.off') },
+    { value: ReplayGainModeObject.Track, label: t('settings.replayGainModes.track') },
+    { value: ReplayGainModeObject.Album, label: t('settings.replayGainModes.album') },
+])
+const replayGainModes = new Set<string>(Object.values(ReplayGainModeObject))
+
 const language = ref<string>(session.language ?? locale.value)
+const replayGain = ref<string>(session.replayGain)
 const saving = ref(false)
 const error = ref<string | null>(null)
 
@@ -29,6 +38,33 @@ watch(
         }
     },
 )
+
+watch(
+    () => session.replayGain,
+    (value) => {
+        if (!saving.value) {
+            replayGain.value = value
+        }
+    },
+)
+
+async function changeReplayGain(value: string): Promise<void> {
+    if (!replayGainModes.has(value) || value === session.replayGain) {
+        return
+    }
+
+    const previous = session.replayGain
+    saving.value = true
+    error.value = null
+    try {
+        await session.updateReplayGain(value as ReplayGainMode)
+    } catch {
+        error.value = t('settings.saveError')
+        replayGain.value = previous
+    } finally {
+        saving.value = false
+    }
+}
 
 async function changeLanguage(value: string): Promise<void> {
     if (!isSupportedLocale(value) || value === session.language) {
@@ -66,6 +102,14 @@ async function changeLanguage(value: string): Promise<void> {
                 :hint="t('settings.languageHint')"
                 :disabled="saving"
                 @update:model-value="changeLanguage"
+            />
+            <BaseSelect
+                v-model="replayGain"
+                :label="t('settings.replayGain')"
+                :options="replayGainOptions"
+                :hint="t('settings.replayGainHint')"
+                :disabled="saving"
+                @update:model-value="changeReplayGain"
             />
         </form>
     </div>

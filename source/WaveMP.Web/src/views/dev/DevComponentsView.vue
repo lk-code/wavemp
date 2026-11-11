@@ -40,6 +40,8 @@ import MetaItem from '@/components/library/MetaItem.vue'
 import TileList from '@/components/library/TileList.vue'
 import TrackFileList from '@/components/library/TrackFileList.vue'
 import TrackGroupList from '@/components/library/TrackGroupList.vue'
+import NowPlayingStage from '@/components/player/NowPlayingStage.vue'
+import PlayQueue from '@/components/player/PlayQueue.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
 import type { ProfileTileData } from '@/components/profiles/ProfileTile.vue'
@@ -103,6 +105,12 @@ const treeCollapsed = ref<string[]>([])
 // List, library and sliders and fields
 const selectedTrack = ref<string | undefined>('sample-track-2')
 const sampleGroups = computed(() => groupTracksByAlbum(sampleTracks(t)))
+const sampleQueue = computed(() =>
+    sampleTracks(t)
+        .filter((track) => track.hasAudio)
+        .map((track, index) => ({ key: `sample-${index}`, track })),
+)
+const sampleQueueIndex = ref(1)
 const tiles = computed(() => sampleTiles(t))
 const files = sampleFiles()
 const sortSampleMenu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
@@ -841,6 +849,21 @@ const sampleCacheUsage: CacheUsage = {
                 </div>
                 <div data-part="dev-sample">
                     <NowPlayingView />
+                </div>
+                <div data-part="dev-sample">
+                    <div data-part="view" data-view="now-playing">
+                        <NowPlayingStage :track="sampleQueue[sampleQueueIndex]?.track" />
+                        <PlayQueue
+                            :items="sampleQueue"
+                            :current-index="sampleQueueIndex"
+                            @play="
+                                (key) =>
+                                    (sampleQueueIndex = sampleQueue.findIndex(
+                                        (item) => item.key === key,
+                                    ))
+                            "
+                        />
+                    </div>
                 </div>
                 <div data-part="dev-sample">
                     <PlaylistsView />

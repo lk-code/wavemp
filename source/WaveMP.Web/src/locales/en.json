@@ -121,8 +121,6 @@
     "emptyTitle": "Nothing is playing",
     "emptyText": "Songs you play will appear here.",
     "queue": "Queue",
-    "queueEmpty": "The queue is empty.",
-    "nowPlaying": "Now playing",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "remove": "Remove from queue",

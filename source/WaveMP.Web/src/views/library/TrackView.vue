@@ -16,6 +16,7 @@ import { useFormat } from '@/composables/useFormat'
 import { getTrack, listTrackFiles } from '@/library/api'
 import { artistLabelKey, durationSeconds, mediaKey } from '@/library/presentation'
 import { usePageTitleStore } from '@/stores/pageTitle'
+import { usePlayerStore } from '@/stores/player'
 import { useSessionStore } from '@/stores/session'
 
 /**
@@ -33,6 +34,7 @@ const router = useRouter()
 const format = useFormat()
 const pageTitle = usePageTitleStore()
 const session = useSessionStore()
+const player = usePlayerStore()
 const filesTitleId = useId()
 
 const track = ref<Track | null>(null)
@@ -194,8 +196,17 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem field="media" :label="t('list.media')">
                     {{ t(mediaKey({ hasAudio: track.hasAudio, hasVideo: track.hasVideo })) }}
                 </MetaItem>
-                <template v-if="session.isAdmin" #actions>
+                <template v-if="track.hasAudio || session.isAdmin" #actions>
                     <BaseButton
+                        v-if="track.hasAudio"
+                        data-item="play"
+                        variant="primary"
+                        icon="play-now"
+                        :label="t('library.play')"
+                        @click="player.playTracks([track], 0)"
+                    />
+                    <BaseButton
+                        v-if="session.isAdmin"
                         data-item="edit-metadata"
                         icon="edit"
                         :label="t('trackMetadata.edit')"

@@ -121,8 +121,6 @@
     "emptyTitle": "Es wird nichts wiedergegeben",
     "emptyText": "Titel, die du abspielst, erscheinen hier.",
     "queue": "Warteschlange",
-    "queueEmpty": "Die Warteschlange ist leer.",
-    "nowPlaying": "Läuft gerade",
     "moveUp": "Nach oben",
     "moveDown": "Nach unten",
     "remove": "Aus der Warteschlange entfernen",

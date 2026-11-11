@@ -114,7 +114,10 @@ Example of a desktop layout with the sidebar on the right:
 | `empty-state-title` | `p` | `empty-state` | Title of the message |
 | `empty-state-text` | `p` | `empty-state` | Text of the message |
 | `link` | `a` | `empty-state`, `view`, `section`, `meta-value` | Text link in the content, for example to an album, an artist, a genre or a year |
-| `stage` | `div` | `view` | Stage of the Now Playing page: cover (later also video and visualization) |
+| `stage` | `div` | `view` | Stage of the Now Playing page: cover (later also video and visualization) and `stage-info` |
+| `stage-info` | `div` | `stage` | Title, artist and album of the current song |
+| `stage-title` | `p` | `stage-info` | Title of the current song |
+| `stage-subtitle` | `p` | `stage-info` | Artist and album of the current song |
 | `cover` | `span` | `stage`, `list-group-info`, `now-playing-mini`, `tile`, `detail-header` | Cover: `cover-image`, or the placeholder icon (`data-state="placeholder"`); on tiles and detail pages of artists, genres and years the `icon` of their kind |
 | `cover-image` | `img` (`alt=""`) | `cover` | Picture of the cover, loaded from the server |
 | `list` | `div` (`role="grid"`) | `view` | Table of tracks grouped by album |
@@ -145,6 +148,14 @@ Example of a desktop layout with the sidebar on the right:
 | `file-item` | `li` | `file-list` | One file with `file-path` and `file-meta` |
 | `file-path` | `span` | `file-item` | Path of the file relative to the media folder |
 | `file-meta` | `span` | `file-item` | Kind, use and problem of the file as `badge` with a visible `label`, and its technical details (format, bitrate, resolution, size, ...) as `label`s |
+| `queue` | `section` (`aria-labelledby`) | `view` | Queue on the Now Playing page: a `section-title`, the `button` `clear-queue` and the `queue-list`; missing while the queue is empty. On the desktop the base shows it beside the stage |
+| `queue-list` | `ol` | `queue` | Entries of the queue in playing order |
+| `queue-item` | `li` (`aria-current`) | `queue-list` | One entry with `queue-item-info`, `queue-item-duration` and `queue-item-actions` |
+| `queue-item-info` | `button` | `queue-item` | Title and artist of the entry; plays it |
+| `queue-item-title` | `span` | `queue-item-info` | Title of the song |
+| `queue-item-artist` | `span` | `queue-item-info` | Artist of the song |
+| `queue-item-duration` | `span` | `queue-item` | Duration of the song |
+| `queue-item-actions` | `div` (`role="group"`) | `queue-item` | Icon `button`s `move-up`, `move-down` and `remove` |
 | `transport` | `section` | `app` | Transport bar; mini player and full-screen player on mobile |
 | `seek` | `div` | `transport` | Progress bar with a `slider` |
 | `now-playing-mini` | `button` | `transport` | Cover and title of the current track; opens Now Playing (desktop) or the full-screen player (mobile) |
@@ -185,7 +196,7 @@ Example of a desktop layout with the sidebar on the right:
 | `admin-nav` | `nav` | `view` | Navigation between the pages of the administration (library, jobs, cache, profiles) |
 | `admin-nav-item` | `a` (`aria-current`) | `admin-nav` | Page of the administration with `icon` and `label` |
 | `section` | `section` (`aria-labelledby`) | `view` | Part of a page with a `section-title` |
-| `section-title` | `h2` | `section` | Title of the section |
+| `section-title` | `h2` | `section`, `queue` | Title of the section or of the queue |
 | `scan-status` | `div` | `section` | State of the library scan: `badge` with a visible `label`, while running the phase as `label`, a `progress` and its value as `label`, and the button that starts a scan |
 | `progress` | `div` (`role="progressbar"`) | `scan-status`, any | Progress bar; the share done is `--wmp-progress-value` |
 | `progress-track` | `div` | `progress` | Background of the bar |
@@ -264,7 +275,8 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `tab`, `bottom-nav-item`, `breadcrumb-item`, `tree-item` | `active` for the current page |
 | `tree-item` | additionally `expanded` or `collapsed` for nodes with children |
 | `list` | `placeholder` while the list shows placeholder content (component overview) |
-| `list-row` | `selected`; `has-video` for songs with a video, additionally `video-only` for songs with a video only (no audio); `playing` is reserved for the playing track |
+| `list-row` | `selected`; `has-video` for songs with a video, additionally `video-only` for songs with a video only (no audio); `playing` for the current song of the player |
+| `queue-item` | `current` for the current song, `played` for the songs before it |
 | `placeholder-notice`, `cover` | `placeholder` |
 | `now-playing-mini` | `empty` while nothing plays |
 | `server-status` | `checking`, `healthy`, `degraded`, `unhealthy` or `unreachable` |
@@ -288,7 +300,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | Attribute or state | Parts |
 |---|---|
 | `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item`, `admin-nav-item` |
-| `aria-current="true"` | `profile-tile` of the current profile |
+| `aria-current="true"` | `profile-tile` of the current profile, `queue-item` of the current song |
 | `aria-busy="true"` | `profile-select` while a profile is being selected; `view` while its content loads; `load-more` while the next page loads |
 | `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
@@ -317,7 +329,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media` |
 | `data-field` | `field` (metadata editor) | `title`, `artist`, `album`, `album-artist`, `year`, `number`, `disc`, `genre` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `button` in `detail-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist` and, for admins, `edit-metadata`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`), the job (`library-scan`, `cover-cache`) or the section of the search and of an artist (`artists`, `albums`, `tracks`), of a song (`files`) and of the cache page (`usage`, `settings`), or the action of a detail page (`edit-metadata`) |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `button` in `detail-actions`, `queue` and `queue-item-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `play`, `play-next` and `add-to-queue` for songs with audio, then `details`, `album`, `artist` and, for admins, `edit-metadata`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`), the job (`library-scan`, `cover-cache`) or the section of the search and of an artist (`artists`, `albums`, `tracks`), of a song (`files`) and of the cache page (`usage`, `settings`), the action of a detail page (`play`, `shuffle`, `edit-metadata`) or of the queue (`clear-queue`; per entry `move-up`, `move-down`, `remove`) |
 
 ## Variables
 
@@ -582,6 +594,14 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `view-cover` | `--wmp-icon-view-cover` | `/icons/phosphor/regular/image.svg` | Menus and dialogs |
 | `go-to-album` | `--wmp-icon-go-to-album` | `/icons/phosphor/regular/vinyl-record.svg` | Menus and dialogs |
 | `go-to-artist` | `--wmp-icon-go-to-artist` | `/icons/phosphor/regular/microphone-stage.svg` | Menus and dialogs |
+| `play-now` | `--wmp-icon-play-now` | `/icons/phosphor/regular/play.svg` | Menus and dialogs |
+| `play-next` | `--wmp-icon-play-next` | `/icons/phosphor/regular/queue.svg` | Menus and dialogs |
+| `add-to-queue` | `--wmp-icon-add-to-queue` | `/icons/phosphor/regular/list-plus.svg` | Menus and dialogs |
+| `shuffle-play` | `--wmp-icon-shuffle-play` | `/icons/phosphor/regular/shuffle.svg` | Menus and dialogs |
+| `move-up` | `--wmp-icon-move-up` | `/icons/phosphor/regular/caret-up.svg` | Menus and dialogs |
+| `move-down` | `--wmp-icon-move-down` | `/icons/phosphor/regular/caret-down.svg` | Menus and dialogs |
+| `remove-from-queue` | `--wmp-icon-remove-from-queue` | `/icons/phosphor/regular/x.svg` | Menus and dialogs |
+| `clear-queue` | `--wmp-icon-clear-queue` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `close` | `--wmp-icon-close` | `/icons/phosphor/regular/x.svg` | Menus and dialogs |
 
 ## Rules
@@ -629,3 +649,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
     - Additions without a version change: the library with tiles (`tile-list`, `tile-item`, `tile`, `tile-title`, `tile-subtitle`, attribute `data-kind`), detail pages (`detail-header`, `detail-info`, `detail-title`, `data-view` `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`) and the search (`data-view="library-search"`), the part `cover-image`, the button `load-more` with the state `loading`, the files of a song for admins (`file-list`, `file-item`, `file-path`, `file-meta` and their states), the state `video-only` of `list-row` and `badge` (in addition to `has-video`, which keeps its meaning), `aria-busy` on `view`, `menuitemradio` entries with `aria-checked` in the sort options, further values of `data-field` and `data-item` (also on `section`), `link` in `meta-value`, `view` and `section`, the icon slots `album`, `artist`, `genre`, `year`, `go-to-album` and `go-to-artist` and the variables `--wmp-cover-size-l` and `--wmp-tile-width`. The sort button `sort` is active where a list can be sorted.
     - Additions without a version change: the metadata editor of a song for admins in a `dialog` (`detail-actions` with the `button` `edit-metadata`, `field-row`, `form-note`, `data-field` on its `field`s, the menu entry `edit-metadata` in the menu of a song). Disabled inputs (`input:disabled`) are greyed out by the base; an open `dialog` fits the screen and scrolls its `dialog-body`.
     - Additions without a version change: the cache page of the administration (`cache-usage`, `data-view="admin-cache"`, the entry `admin-cache` of `admin-nav`, further values of `data-item`) with the base component `meter` (`meter-track`, `meter-fill`, `role="meter"` with `aria-valuenow`), which uses the variables of `progress`, the runtime variable `--wmp-meter-value` and the icon slot `admin-cache`.
+    - Additions without a version change: the player. The transport bar plays (`transport-message` with its states, the state `loading` of `transport`), Now Playing shows the current song (`stage-info`, `stage-title`, `stage-subtitle`) and the queue (`queue`, `queue-list`, `queue-item` with the states `current` and `played` and `aria-current`, `queue-item-info`, `queue-item-title`, `queue-item-artist`, `queue-item-duration`, `queue-item-actions`). The reserved state `playing` of `list-row` is now set. New values of `data-item` (menu entries `play`, `play-next`, `add-to-queue`; detail actions `play`, `shuffle`; queue buttons) and the icon slots `play-now`, `play-next`, `add-to-queue`, `shuffle-play`, `move-up`, `move-down`, `remove-from-queue` and `clear-queue`.

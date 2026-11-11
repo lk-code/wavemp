@@ -154,6 +154,14 @@
         --wmp-icon-view-cover: url('/icons/phosphor/regular/image.svg');
         --wmp-icon-go-to-album: url('/icons/phosphor/regular/vinyl-record.svg');
         --wmp-icon-go-to-artist: url('/icons/phosphor/regular/microphone-stage.svg');
+        --wmp-icon-play-now: url('/icons/phosphor/regular/play.svg');
+        --wmp-icon-play-next: url('/icons/phosphor/regular/queue.svg');
+        --wmp-icon-add-to-queue: url('/icons/phosphor/regular/list-plus.svg');
+        --wmp-icon-shuffle-play: url('/icons/phosphor/regular/shuffle.svg');
+        --wmp-icon-move-up: url('/icons/phosphor/regular/caret-up.svg');
+        --wmp-icon-move-down: url('/icons/phosphor/regular/caret-down.svg');
+        --wmp-icon-remove-from-queue: url('/icons/phosphor/regular/x.svg');
+        --wmp-icon-clear-queue: url('/icons/phosphor/regular/trash.svg');
         --wmp-icon-close: url('/icons/phosphor/regular/x.svg');
 
         /* Spacing and radii */

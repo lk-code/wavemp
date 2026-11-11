@@ -42,7 +42,13 @@ describe('SettingsView', () => {
         expect(wrapper.findAll('option').map((option) => option.text())).toEqual([
             'English',
             'Deutsch',
+            'Off',
+            'Per song',
+            'Per album',
         ])
+        expect(wrapper.findAll<HTMLSelectElement>('[data-part="select"]')[1]!.element.value).toBe(
+            'Off',
+        )
         expect(wrapper.get('[data-part="field-hint"]').text()).toBe(
             'Applies to this profile on all devices.',
         )
@@ -57,6 +63,27 @@ describe('SettingsView', () => {
 
         expect(updateLanguage).toHaveBeenCalledWith('de')
         expect(wrapper.find('[data-part="alert"]').exists()).toBe(false)
+    })
+
+    it('saves the ReplayGain mode at once and keeps it after an error', async () => {
+        const { wrapper, session } = mountView()
+        const update = vi
+            .spyOn(session, 'updateReplayGain')
+            .mockImplementationOnce(async (mode) => {
+                session.replayGain = mode
+            })
+            .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+        const select = () => wrapper.findAll<HTMLSelectElement>('[data-part="select"]')[1]!
+
+        await select().setValue('Album')
+        await flushPromises()
+        expect(update).toHaveBeenCalledWith('Album')
+        expect(session.replayGain).toBe('Album')
+
+        await select().setValue('Track')
+        await flushPromises()
+        expect(wrapper.get('[data-part="alert"]').text()).toBe('The setting could not be saved.')
+        expect(select().element.value).toBe('Album')
     })
 
     it('reports an error and keeps the saved language', async () => {

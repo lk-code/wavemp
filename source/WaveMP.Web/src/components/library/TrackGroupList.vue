@@ -12,11 +12,13 @@ import TrackMenu from './TrackMenu.vue'
 import { useFormat } from '@/composables/useFormat'
 import type { TrackGroup } from '@/library/grouping'
 import { artistLabelKey, durationSeconds, trackRowState } from '@/library/presentation'
+import { usePlayerStore } from '@/stores/player'
 
 /**
  * Tracks grouped by album (or by disc on the album page), with cover and details of each group.
- * Details link to the pages of album, artist, genre and year; the context menu of a row leads to
- * the track, its album and its artist.
+ * Details link to the pages of album, artist, genre and year; the context menu of a row plays or
+ * queues the track and leads to the track, its album and its artist. A double click, Enter or a tap
+ * on a touch screen plays the tracks of the list from the row on; the playing track is marked.
  */
 interface TrackRow extends ListRowBase {
     readonly track: Track
@@ -41,6 +43,8 @@ const selected = defineModel<string | undefined>('selected', { default: undefine
 const { t } = useI18n()
 const format = useFormat()
 const menu = ref<InstanceType<typeof TrackMenu> | null>(null)
+const player = usePlayerStore()
+const playingId = computed(() => player.state.trackId)
 
 const columns = computed(() => [
     { id: 'number', label: t('list.columns.number') },
@@ -63,7 +67,10 @@ const listGroups = computed<ListGroup<TrackRow>[]>(() =>
         title: groupTitle(group),
         rows: group.tracks.map((track) => ({
             id: track.id ?? '',
-            state: trackRowState(track),
+            state: [
+                ...trackRowState(track),
+                ...(track.id && track.id === playingId.value ? ['playing'] : []),
+            ],
             track,
         })),
     })),
@@ -85,10 +92,28 @@ function trackArtist(track: Track): string {
     return key ? t(key) : (track.artist?.name ?? '')
 }
 
+const allTracks = computed(() => props.groups.flatMap((group) => group.tracks))
+
 function openMenu(rowId: string, x: number, y: number): void {
-    const track = props.groups.flatMap((group) => group.tracks).find((item) => item.id === rowId)
+    const track = allTracks.value.find((item) => item.id === rowId)
     if (track) {
         void menu.value?.open(track, x, y)
+    }
+}
+
+/** Plays the tracks of the list from the track on; video-only tracks are left out. */
+function playFrom(track: Track): void {
+    if (!track.hasAudio || props.state?.split(' ').includes('placeholder')) {
+        return
+    }
+
+    player.playTracks(allTracks.value, allTracks.value.indexOf(track))
+}
+
+function activate(rowId: string): void {
+    const track = allTracks.value.find((item) => item.id === rowId)
+    if (track) {
+        playFrom(track)
     }
 }
 </script>
@@ -101,7 +126,9 @@ function openMenu(rowId: string, x: number, y: number): void {
         :label="label"
         :state="state"
         row-menu
+        activate-on-tap
         @row-menu="openMenu"
+        @row-activate="activate"
     >
         <template v-if="showGroupInfo" #group-info="{ group }">
             <template v-if="infoOf(group)">
@@ -180,5 +207,5 @@ function openMenu(rowId: string, x: number, y: number): void {
             <template v-else>{{ trackArtist(row.track) }}</template>
         </template>
     </BaseList>
-    <TrackMenu ref="menu" />
+    <TrackMenu ref="menu" @play="playFrom" />
 </template>

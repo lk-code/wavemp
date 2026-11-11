@@ -391,6 +391,43 @@ a[data-part='breadcrumb-link']:hover {
     box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 35%);
 }
 
+[data-part='stage-title'] {
+    color: #1e2329;
+}
+
+/* The playing song glows blue in the lists, the current entry of the queue like a selected row. */
+[data-part='list-row'][data-state~='playing'] [data-part='list-cell'][data-column='title'] {
+    color: #1f6fd6;
+}
+
+[data-part='queue-item'] {
+    border: 1px solid transparent;
+    border-radius: 0.125rem;
+}
+
+[data-part='queue-item']:hover {
+    border-color: #d3e8fb;
+    background: #eef7ff;
+}
+
+[data-part='queue-item'][data-state~='current'] {
+    border-color: #7fb2e6;
+    background: linear-gradient(#e2f0fd, #c6e0fa);
+    color: #10253f;
+}
+
+[data-part='queue-item-actions'] [data-part='icon'] {
+    --wmp-icon-fill: #6b737e;
+}
+
+/* The notice of the player is a small dark glass label above the transport bar. */
+[data-part='transport'] > [data-part='transport-message']:not([data-state~='empty']) {
+    color: #eef4fa;
+    background: linear-gradient(rgb(40 46 54 / 95%), rgb(14 17 21 / 95%));
+    border-color: rgb(255 255 255 / 18%);
+    box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 35%);
+}
+
 /* --- Library: tiles, detail pages, files ------------------------------------------------------- */
 
 /* Covers are glossy pictures with a soft shadow; a light reflection lies on their upper half. */

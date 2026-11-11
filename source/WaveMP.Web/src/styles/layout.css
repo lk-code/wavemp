@@ -101,6 +101,17 @@
         grid-area: btn-collapse;
     }
 
+    /* Now Playing: the stage, and the queue below it (beside it on the desktop). */
+    [data-view='now-playing'] {
+        display: grid;
+        align-content: start;
+        min-block-size: 100%;
+    }
+
+    [data-view='now-playing']:has(> [data-part='queue']) > [data-part='stage'] {
+        min-block-size: auto;
+    }
+
     [data-part='nav-history'] {
         display: flex;
         align-items: center;
@@ -151,6 +162,22 @@
             gap: var(--wmp-space-s);
             min-block-size: var(--wmp-toolbar-height);
             padding-inline: var(--wmp-space-s);
+        }
+
+        [data-view='now-playing']:has(> [data-part='queue']) {
+            grid-template-columns: minmax(0, 1fr) minmax(18rem, 28rem);
+            align-content: stretch;
+            block-size: 100%;
+        }
+
+        [data-view='now-playing']:has(> [data-part='queue']) > [data-part='stage'] {
+            min-block-size: 100%;
+        }
+
+        [data-view='now-playing'] > [data-part='queue'] {
+            min-block-size: 0;
+            overflow: auto;
+            border-inline-start: 1px solid var(--wmp-color-border);
         }
 
         [data-part='transport'] {

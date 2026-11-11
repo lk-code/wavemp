@@ -93,6 +93,14 @@ export const iconSlots = {
     'view-cover': { file: regular('image'), area: 'general' },
     'go-to-album': { file: regular('vinyl-record'), area: 'general' },
     'go-to-artist': { file: regular('microphone-stage'), area: 'general' },
+    'play-now': { file: regular('play'), area: 'general' },
+    'play-next': { file: regular('queue'), area: 'general' },
+    'add-to-queue': { file: regular('list-plus'), area: 'general' },
+    'shuffle-play': { file: regular('shuffle'), area: 'general' },
+    'move-up': { file: regular('caret-up'), area: 'general' },
+    'move-down': { file: regular('caret-down'), area: 'general' },
+    'remove-from-queue': { file: regular('x'), area: 'general' },
+    'clear-queue': { file: regular('trash'), area: 'general' },
     close: { file: regular('x'), area: 'general' },
 } as const satisfies Record<string, IconSlot>
 

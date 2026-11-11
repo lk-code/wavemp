@@ -34,12 +34,19 @@ const props = withDefaults(
          * on touch screens emit row-menu instead of opening the menu of the browser.
          */
         rowMenu?: boolean
+        /**
+         * A tap on a touch screen activates the row (row-activate) instead of only selecting it,
+         * for lists whose rows start something, e.g. playback.
+         */
+        activateOnTap?: boolean
     }>(),
-    { state: undefined, rowMenu: false },
+    { state: undefined, rowMenu: false, activateOnTap: false },
 )
 
 const emit = defineEmits<{
     'row-menu': [rowId: string, x: number, y: number]
+    /** Double click, Enter or (with activateOnTap) a tap on a touch screen. */
+    'row-activate': [rowId: string]
 }>()
 
 defineSlots<{
@@ -75,10 +82,29 @@ async function select(rowId: string, focus = false): Promise<void> {
     }
 }
 
+/** Kind of the pointer of the last press, to tell taps from clicks. */
+let lastPointerType = ''
+let menuOpened = false
+
 const longPress = useLongPress<string>((rowId, x, y) => {
+    menuOpened = true
     void select(rowId)
     emit('row-menu', rowId, x, y)
 })
+
+function onClick(rowId: string): void {
+    void select(rowId)
+    if (props.activateOnTap && lastPointerType === 'touch' && !menuOpened) {
+        emit('row-activate', rowId)
+    }
+
+    menuOpened = false
+}
+
+function activate(rowId: string): void {
+    void select(rowId)
+    emit('row-activate', rowId)
+}
 
 function onContextMenu(event: MouseEvent, rowId: string): void {
     if (!props.rowMenu) {
@@ -92,6 +118,8 @@ function onContextMenu(event: MouseEvent, rowId: string): void {
 }
 
 function onPointerdown(event: PointerEvent, rowId: string): void {
+    lastPointerType = event.pointerType
+    menuOpened = false
     if (props.rowMenu) {
         longPress.onPointerdown(event, rowId)
     }
@@ -119,7 +147,13 @@ function onKeydown(event: KeyboardEvent, rowId: string): void {
         End: rows[rows.length - 1],
     }[event.key]
 
-    if (event.key === ' ' || event.key === 'Enter') {
+    if (event.key === 'Enter') {
+        event.preventDefault()
+        activate(rowId)
+        return
+    }
+
+    if (event.key === ' ') {
         event.preventDefault()
         void select(rowId)
         return
@@ -175,7 +209,8 @@ function onKeydown(event: KeyboardEvent, rowId: string): void {
                     :aria-selected="row.id === selected ? 'true' : 'false'"
                     :data-state="rowState(row)"
                     :tabindex="row.id === tabStop ? 0 : -1"
-                    @click="select(row.id)"
+                    @click="onClick(row.id)"
+                    @dblclick="activate(row.id)"
                     @keydown="onKeydown($event, row.id)"
                     @contextmenu="onContextMenu($event, row.id)"
                     @pointerdown="onPointerdown($event, row.id)"
