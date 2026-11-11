@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import type { MediaFile, Track } from '@/api/generated/models'
 import { fetchAllPages } from '@/api/paging'
 import { statusOf } from '@/api/problems'
@@ -10,6 +11,7 @@ import DetailHeader from '@/components/library/DetailHeader.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
 import TrackFileList from '@/components/library/TrackFileList.vue'
+import TrackMetadataDialog from '@/components/library/TrackMetadataDialog.vue'
 import { useFormat } from '@/composables/useFormat'
 import { getTrack, listTrackFiles } from '@/library/api'
 import { artistLabelKey, durationSeconds, mediaKey } from '@/library/presentation'
@@ -18,13 +20,16 @@ import { useSessionStore } from '@/stores/session'
 
 /**
  * The details of a track: its cover, artist, album, numbers, year, genre, length and media. Admins
- * also see all its files.
+ * also see all its files and edit its metadata; the query edit=metadata opens the editor at once
+ * (context menu of a track).
  */
 const props = defineProps<{
     id: string
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const format = useFormat()
 const pageTitle = usePageTitleStore()
 const session = useSessionStore()
@@ -34,9 +39,12 @@ const track = ref<Track | null>(null)
 const status = ref<'loading' | 'ready' | 'notFound' | 'error'>('loading')
 const files = ref<MediaFile[]>([])
 const filesStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+const editing = ref(false)
 let generation = 0
+let editRequestHandled = false
 
 const duration = computed(() => durationSeconds(track.value?.durationMilliseconds))
+const editRequested = computed(() => route.query.edit === 'metadata')
 
 async function load(): Promise<void> {
     const current = ++generation
@@ -89,10 +97,33 @@ watch(
     () => {
         files.value = []
         filesStatus.value = 'idle'
+        editRequestHandled = false
         void reload()
     },
     { immediate: true },
 )
+
+// Opens the editor once per request, as soon as the track is loaded.
+watch(
+    [editRequested, status],
+    ([requested, current]) => {
+        if (!requested) {
+            editRequestHandled = false
+        } else if (!editRequestHandled && current === 'ready' && session.isAdmin) {
+            editRequestHandled = true
+            editing.value = true
+        }
+    },
+    { immediate: true },
+)
+
+// Closing the editor removes the request from the address, so reloading the page does not open it.
+watch(editing, (value) => {
+    if (!value && editRequested.value) {
+        void router.replace({ query: { ...route.query, edit: undefined } })
+    }
+})
+
 onBeforeUnmount(() => pageTitle.clear())
 </script>
 
@@ -163,6 +194,14 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem field="media" :label="t('list.media')">
                     {{ t(mediaKey({ hasAudio: track.hasAudio, hasVideo: track.hasVideo })) }}
                 </MetaItem>
+                <template v-if="session.isAdmin" #actions>
+                    <BaseButton
+                        data-item="edit-metadata"
+                        icon="edit"
+                        :label="t('trackMetadata.edit')"
+                        @click="editing = true"
+                    />
+                </template>
             </DetailHeader>
             <section
                 v-if="session.isAdmin"
@@ -181,6 +220,12 @@ onBeforeUnmount(() => pageTitle.clear())
                     :label="t('files.label')"
                 />
             </section>
+            <TrackMetadataDialog
+                v-if="session.isAdmin"
+                v-model:open="editing"
+                :track-id="id"
+                @saved="reload"
+            />
         </template>
     </div>
 </template>

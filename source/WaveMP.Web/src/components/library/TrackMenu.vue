@@ -4,10 +4,15 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { Track } from '@/api/generated/models'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
+import { useSessionStore } from '@/stores/session'
 
-/** Context menu of a track: its details, its album and its artist. */
+/**
+ * Context menu of a track: its details, its album and its artist; for admins also the metadata
+ * editor, which opens on the page of the track.
+ */
 const { t } = useI18n()
 const router = useRouter()
+const session = useSessionStore()
 const menu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
 const track = ref<Track | null>(null)
 
@@ -20,6 +25,9 @@ const items = computed<MenuItem[]>(() => {
             : []),
         ...(current?.artist?.id
             ? [{ id: 'artist', label: t('trackMenu.artist'), icon: 'go-to-artist' } as const]
+            : []),
+        ...(session.isAdmin
+            ? [{ id: 'edit-metadata', label: t('trackMenu.editMetadata'), icon: 'edit' } as const]
             : []),
     ]
 })
@@ -42,6 +50,12 @@ function choose(id: string): void {
         void router.push({ name: 'library-artist', params: { id: current.artist.id } })
     } else if (id === 'details') {
         void router.push({ name: 'library-track', params: { id: current.id } })
+    } else if (id === 'edit-metadata') {
+        void router.push({
+            name: 'library-track',
+            params: { id: current.id },
+            query: { edit: 'metadata' },
+        })
     }
 }
 

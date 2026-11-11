@@ -129,6 +129,8 @@ const textFilled = ref('')
 const searchEmpty = ref('')
 const searchFilled = ref('')
 const textInvalid = ref('')
+const yearSample = ref('2006')
+const numberSample = ref('1')
 const selected = ref('one')
 const selectOptions = computed(() => [
     { value: 'one', label: t('dev.samples.optionOne') },
@@ -490,6 +492,13 @@ const sampleRunningJob: Job[] = [
                     <MetaItem field="tracks" :label="t('list.songs')">{{
                         format.number(4)
                     }}</MetaItem>
+                    <template #actions>
+                        <BaseButton
+                            data-item="edit-metadata"
+                            icon="edit"
+                            :label="t('trackMetadata.edit')"
+                        />
+                    </template>
                 </DetailHeader>
                 <section data-part="section" data-item="files">
                     <h2 data-part="section-title">{{ t('track.filesTitle') }}</h2>
@@ -595,6 +604,28 @@ const sampleRunningJob: Job[] = [
                     :label="t('dev.samples.colorLabel')"
                     :options="colorOptions"
                 />
+                <div data-part="field-row">
+                    <BaseTextField
+                        v-model="yearSample"
+                        :label="t('trackMetadata.fields.year')"
+                        inputmode="numeric"
+                        :maxlength="4"
+                    />
+                    <BaseTextField
+                        v-model="numberSample"
+                        :label="t('trackMetadata.fields.trackNumber')"
+                        inputmode="numeric"
+                        :maxlength="4"
+                    />
+                    <BaseTextField
+                        v-model="numberSample"
+                        :label="t('trackMetadata.fields.discNumber')"
+                        inputmode="numeric"
+                        :maxlength="4"
+                        disabled
+                    />
+                </div>
+                <p data-part="form-note">{{ t('trackMetadata.emptyRemoves') }}</p>
             </form>
         </section>
 

@@ -12,6 +12,15 @@ const options = [
 ]
 
 describe('BaseTextField', () => {
+    it('passes the input mode to the input', () => {
+        const numeric = mount(BaseTextField, { props: { label: 'Year', inputmode: 'numeric' } })
+        const plain = mount(BaseTextField, { props: { label: 'Name' } })
+
+        expect(numeric.get('input').attributes('inputmode')).toBe('numeric')
+        expect(numeric.get('input').attributes('type')).toBe('text')
+        expect(plain.get('input').attributes('inputmode')).toBeUndefined()
+    })
+
     it('renders label and input in a field', () => {
         const wrapper = mount(BaseTextField, {
             props: { label: 'Name', required: true, maxlength: 50, autocomplete: 'off' },

@@ -451,6 +451,37 @@
     "filesTitle": "Dateien",
     "filesError": "Die Dateien konnten nicht geladen werden."
   },
+  "trackMetadata": {
+    "edit": "Metadaten bearbeiten",
+    "title": "Metadaten bearbeiten",
+    "loading": "Metadaten werden geladen",
+    "save": "Speichern",
+    "fields": {
+      "title": "Titel",
+      "artist": "Interpret",
+      "album": "Album",
+      "albumArtist": "Albuminterpret",
+      "year": "Jahr",
+      "trackNumber": "Track-Nr.",
+      "discNumber": "CD-Nr.",
+      "genre": "Genre"
+    },
+    "file": "Die Tags werden in {path} geschrieben.",
+    "emptyRemoves": "Leere Felder entfernen den Wert aus den Tags; WaveMP nutzt dann wieder Ordner- und Dateinamen.",
+    "hints": {
+      "noAudio": "Dieser Titel hat nur ein Video. Tags werden nur in Audiodateien geschrieben, nie in Videos.",
+      "notWritable": "Die Audiodatei ist nicht beschreibbar. Binde den Medienordner beschreibbar ein und erlaube WaveMP, die Datei zu ändern."
+    },
+    "errors": {
+      "loadFailed": "Die Metadaten konnten nicht geladen werden.",
+      "notFound": "Diesen Titel gibt es nicht mehr.",
+      "notWritable": "Die Änderungen konnten nicht in die Audiodatei geschrieben werden.",
+      "invalid": "Bitte prüfe die markierten Felder.",
+      "invalidField": "Dieser Wert ist ungültig.",
+      "number": "Gib eine ganze Zahl von 1 bis {max} ein.",
+      "saveFailed": "Die Änderungen konnten nicht gespeichert werden."
+    }
+  },
   "files": {
     "label": "Dateien des Titels",
     "kinds": {
@@ -502,6 +533,7 @@
     "label": "Aktionen für den Titel",
     "details": "Details anzeigen",
     "album": "Zum Album",
-    "artist": "Zum Interpreten"
+    "artist": "Zum Interpreten",
+    "editMetadata": "Metadaten bearbeiten"
   }
 }

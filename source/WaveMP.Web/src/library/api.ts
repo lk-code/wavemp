@@ -19,7 +19,9 @@ import type {
     MediaFilePage,
     SearchResult,
     Track,
+    TrackMetadata,
     TrackPage,
+    UpdateTrackMetadata,
     YearPage,
 } from '@/api/generated/models'
 
@@ -47,6 +49,17 @@ export function listTrackFiles(
 
 export function fetchTrackCover(id: string): Promise<ArrayBuffer | undefined> {
     return apiClient.api.v1.tracks.byId(id).cover.get()
+}
+
+export function getTrackMetadata(id: string): Promise<TrackMetadata | undefined> {
+    return apiClient.api.v1.tracks.byId(id).metadata.get()
+}
+
+export function updateTrackMetadata(
+    id: string,
+    changes: UpdateTrackMetadata,
+): Promise<TrackMetadata | undefined> {
+    return apiClient.api.v1.tracks.byId(id).metadata.patch(changes)
 }
 
 export function listAlbums(query: AlbumQuery): Promise<AlbumPage | undefined> {

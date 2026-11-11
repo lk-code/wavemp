@@ -20,6 +20,8 @@ const api = vi.hoisted(() => ({
     listArtistAlbums: vi.fn(),
     getTrack: vi.fn(),
     listTrackFiles: vi.fn(),
+    getTrackMetadata: vi.fn(),
+    updateTrackMetadata: vi.fn(),
     searchLibrary: vi.fn(),
     fetchAlbumCover: vi.fn(),
     fetchTrackCover: vi.fn(),
@@ -363,5 +365,89 @@ describe('TrackView', () => {
         expect(wrapper.find('[data-item="files"]').exists()).toBe(false)
         expect(api.listTrackFiles).not.toHaveBeenCalled()
         wrapper.unmount()
+    })
+
+    describe('metadata editor', () => {
+        const metadata = {
+            trackId: 'Closing',
+            status: 'Editable',
+            audioFilePath: 'Band/Album/02 - Closing.flac',
+            title: 'Closing',
+            artist: 'Alpha Band',
+        }
+
+        beforeEach(() => {
+            api.getTrackMetadata.mockResolvedValue(metadata)
+            api.updateTrackMetadata.mockResolvedValue({ ...metadata, title: 'Renamed' })
+        })
+
+        it('is offered to admins only', async () => {
+            signIn('User')
+            const user = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+
+            expect(user.wrapper.find('[data-part="detail-actions"]').exists()).toBe(false)
+            expect(user.wrapper.find('[data-part="dialog"]').exists()).toBe(false)
+            user.wrapper.unmount()
+
+            signIn('Admin')
+            const admin = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+
+            const button = admin.wrapper.get(
+                '[data-part="detail-actions"] [data-item="edit-metadata"]',
+            )
+            expect(button.text()).toBe('Edit metadata')
+            expect(api.getTrackMetadata).not.toHaveBeenCalled()
+            admin.wrapper.unmount()
+        })
+
+        it('opens with the button and loads the song again after saving', async () => {
+            signIn('Admin')
+            const { wrapper } = await mountView(TrackView, '/library/tracks/Closing', {
+                id: 'Closing',
+            })
+
+            await wrapper.get('[data-item="edit-metadata"]').trigger('click')
+            await flushPromises()
+            expect(api.getTrackMetadata).toHaveBeenCalledWith('Closing')
+
+            await wrapper.get('[data-part="field"][data-field="title"] input').setValue('Renamed')
+            await wrapper.get('[data-part="dialog"] form').trigger('submit')
+            await flushPromises()
+
+            expect(api.updateTrackMetadata).toHaveBeenCalledWith('Closing', { title: 'Renamed' })
+            expect(api.getTrack).toHaveBeenCalledTimes(2)
+            expect(api.listTrackFiles).toHaveBeenCalledTimes(2)
+            wrapper.unmount()
+        })
+
+        it('opens from the address and removes the request when it closes', async () => {
+            signIn('Admin')
+            const { wrapper, router } = await mountView(
+                TrackView,
+                '/library/tracks/Closing?edit=metadata',
+                { id: 'Closing' },
+            )
+
+            expect(api.getTrackMetadata).toHaveBeenCalledWith('Closing')
+            await wrapper.get('[data-part="dialog-footer"] button[type="button"]').trigger('click')
+            await flushPromises()
+
+            expect(router.currentRoute.value.query.edit).toBeUndefined()
+            expect(router.currentRoute.value.path).toBe('/library/tracks/Closing')
+            expect(api.getTrackMetadata).toHaveBeenCalledTimes(1)
+            wrapper.unmount()
+        })
+
+        it('ignores the request from the address for other profiles', async () => {
+            signIn('User')
+            const { wrapper } = await mountView(
+                TrackView,
+                '/library/tracks/Closing?edit=metadata',
+                { id: 'Closing' },
+            )
+
+            expect(api.getTrackMetadata).not.toHaveBeenCalled()
+            wrapper.unmount()
+        })
     })
 })

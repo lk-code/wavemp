@@ -451,6 +451,37 @@
     "filesTitle": "Files",
     "filesError": "The files could not be loaded."
   },
+  "trackMetadata": {
+    "edit": "Edit metadata",
+    "title": "Edit metadata",
+    "loading": "Loading the metadata",
+    "save": "Save",
+    "fields": {
+      "title": "Title",
+      "artist": "Artist",
+      "album": "Album",
+      "albumArtist": "Album artist",
+      "year": "Year",
+      "trackNumber": "Track no.",
+      "discNumber": "Disc no.",
+      "genre": "Genre"
+    },
+    "file": "The tags are written to {path}.",
+    "emptyRemoves": "Empty fields remove the value from the tags; WaveMP then uses the folder and file name again.",
+    "hints": {
+      "noAudio": "This song only has a video. Tags are only written to audio files, never to videos.",
+      "notWritable": "The audio file cannot be written. Mount the media folder writable and allow WaveMP to change the file."
+    },
+    "errors": {
+      "loadFailed": "The metadata could not be loaded.",
+      "notFound": "The song no longer exists.",
+      "notWritable": "The changes could not be written to the audio file.",
+      "invalid": "Please check the marked fields.",
+      "invalidField": "This value is not valid.",
+      "number": "Enter a whole number from 1 to {max}.",
+      "saveFailed": "The changes could not be saved."
+    }
+  },
   "files": {
     "label": "Files of the song",
     "kinds": {
@@ -502,6 +533,7 @@
     "label": "Song actions",
     "details": "Show details",
     "album": "Go to album",
-    "artist": "Go to artist"
+    "artist": "Go to artist",
+    "editMetadata": "Edit metadata"
   }
 }

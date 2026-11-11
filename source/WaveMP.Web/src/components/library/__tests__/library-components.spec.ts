@@ -6,6 +6,7 @@ import type { Track } from '@/api/generated/models'
 import { createWaveMpI18n } from '@/i18n'
 import { groupTracksByAlbum } from '@/library/grouping'
 import { createRoutes } from '@/router/routes'
+import { useSessionStore } from '@/stores/session'
 
 const covers = vi.hoisted(() => ({
     fetchAlbumCover: vi.fn(),
@@ -137,6 +138,42 @@ describe('TrackGroupList', () => {
         ;(menu.querySelector('[data-item="details"]') as HTMLElement).click()
         await flushPromises()
         expect(router.currentRoute.value.fullPath).toBe('/library/tracks/opening')
+        wrapper.unmount()
+    })
+
+    it('offers admins to edit the metadata on the page of the track', async () => {
+        useSessionStore().$patch({
+            token: 'token',
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            profile: {
+                id: 'admin',
+                name: 'Admin',
+                initials: 'A',
+                color: '#1f6fd6',
+                role: 'Admin',
+                isBuiltIn: true,
+            },
+        })
+        const { wrapper, router } = await mountWith(TrackGroupList, {
+            groups: groupTracksByAlbum(tracks),
+            label: 'Songs',
+        })
+
+        await wrapper.findAll('[data-part="list-row"]')[2]!.trigger('contextmenu', {
+            clientX: 10,
+            clientY: 20,
+        })
+        await flushPromises()
+
+        const menu = document.querySelector('[data-part="context-menu"]')!
+        expect(
+            [...menu.querySelectorAll('[data-part="menu-item"]')].map((item) =>
+                item.getAttribute('data-item'),
+            ),
+        ).toEqual(['details', 'edit-metadata'])
+        ;(menu.querySelector('[data-item="edit-metadata"]') as HTMLElement).click()
+        await flushPromises()
+        expect(router.currentRoute.value.fullPath).toBe('/library/tracks/clip?edit=metadata')
         wrapper.unmount()
     })
 

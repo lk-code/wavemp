@@ -321,6 +321,11 @@
         color: var(--wmp-color-text-muted);
     }
 
+    [data-part='input']:disabled {
+        background: var(--wmp-color-surface-raised);
+        color: var(--wmp-color-text-disabled);
+    }
+
     [data-part='select'] {
         min-inline-size: 0;
         min-block-size: var(--wmp-field-height);
@@ -350,6 +355,19 @@
         align-content: start;
         gap: var(--wmp-space-l);
         max-inline-size: 32rem;
+    }
+
+    /* Short fields side by side; they wrap where the space is too small. */
+    [data-part='field-row'] {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+        gap: var(--wmp-space-l);
+    }
+
+    [data-part='form-note'] {
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+        overflow-wrap: anywhere;
     }
 
     [data-part='color-picker'] {
@@ -1185,6 +1203,13 @@
         color: var(--wmp-content-color);
     }
 
+    [data-part='detail-actions'] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--wmp-space-s);
+        padding-block-start: var(--wmp-space-s);
+    }
+
     [data-part='meta-value'] > [data-part='link'] {
         color: inherit;
         text-decoration: none;
@@ -1410,6 +1435,14 @@
         background: var(--wmp-backdrop-color);
     }
 
+    /* An open dialog fits the screen and scrolls its body; display only when open, otherwise a
+       closed dialog would show. */
+    [data-part='dialog'][open] {
+        display: flex;
+        flex-direction: column;
+        max-block-size: calc(100dvh - 2rem);
+    }
+
     [data-part='dialog-header'] {
         display: flex;
         align-items: center;
@@ -1425,6 +1458,8 @@
     }
 
     [data-part='dialog-body'] {
+        min-block-size: 0;
+        overflow: auto;
         padding: var(--wmp-space-l);
     }
 

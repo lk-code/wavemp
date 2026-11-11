@@ -10,6 +10,8 @@ const props = withDefaults(
         required?: boolean
         maxlength?: number
         autocomplete?: string
+        /** Keyboard on touch devices, e.g. numeric for numbers entered as text. */
+        inputmode?: 'text' | 'numeric'
         /** Help text below the input. */
         hint?: string
         /** Error message; marks the field as invalid. */
@@ -22,6 +24,7 @@ const props = withDefaults(
         required: false,
         maxlength: undefined,
         autocomplete: undefined,
+        inputmode: undefined,
         hint: undefined,
         error: undefined,
     },
@@ -51,6 +54,7 @@ const describedBy = computed(
             :required="required"
             :maxlength="maxlength"
             :autocomplete="autocomplete"
+            :inputmode="inputmode"
             :aria-invalid="error ? 'true' : undefined"
             :aria-describedby="describedBy"
         />
