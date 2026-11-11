@@ -1,11 +1,13 @@
 // Location of the current page: breadcrumb, page title and the active entry of the sidebar tree.
 
 import type { RouteLocationRaw } from 'vue-router'
-import { findLibrarySection } from './libraryTree'
+import { findLibrarySection, type LibrarySection } from './libraryTree'
 
 export interface Crumb {
     readonly id: string
     readonly labelKey: string
+    /** Text to show instead of the message, e.g. the name of an album. */
+    readonly label?: string
     /** Target of the crumb; the last crumb is the current page and has none. */
     readonly to?: RouteLocationRaw
 }
@@ -22,8 +24,22 @@ const adminPageTitles = {
     'admin-users': 'adminUsers.title',
 } as const
 
-export function buildBreadcrumb(route: RouteInfo): Crumb[] {
+/** The section of the library each detail page belongs to. */
+const detailSections: Readonly<Record<string, LibrarySection>> = {
+    'library-album': 'albums',
+    'library-artist': 'artists',
+    'library-genre': 'genres',
+    'library-year': 'years',
+    'library-track': 'songs',
+}
+
+/**
+ * The crumbs of a page. Detail pages (album, artist, genre, year, track) end with their name,
+ * once it is known; until then with their section.
+ */
+export function buildBreadcrumb(route: RouteInfo, detailTitle?: string | null): Crumb[] {
     const crumbs: Crumb[] = [{ id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } }]
+    const library: Crumb = { id: 'library', labelKey: 'nav.library', to: { name: 'library' } }
 
     switch (route.name) {
         case 'now-playing':
@@ -33,13 +49,36 @@ export function buildBreadcrumb(route: RouteInfo): Crumb[] {
             crumbs.push({ id: 'playlists', labelKey: 'nav.playlists' })
             break
         case 'library-section': {
-            crumbs.push({ id: 'library', labelKey: 'nav.library', to: { name: 'library' } })
+            crumbs.push(library)
             const section = findLibrarySection(route.params.section)
             if (section) {
                 crumbs.push({ id: section.id, labelKey: section.labelKey })
             }
             break
         }
+        case 'library-album':
+        case 'library-artist':
+        case 'library-genre':
+        case 'library-year':
+        case 'library-track': {
+            crumbs.push(library)
+            const section = findLibrarySection(detailSections[route.name])
+            if (section) {
+                crumbs.push({
+                    id: section.id,
+                    labelKey: section.labelKey,
+                    to: { name: 'library-section', params: { section: section.id } },
+                })
+                if (detailTitle) {
+                    crumbs.push({ id: route.name, labelKey: section.labelKey, label: detailTitle })
+                }
+            }
+            break
+        }
+        case 'library-search':
+            crumbs.push(library)
+            crumbs.push({ id: 'search', labelKey: 'search.title' })
+            break
         case 'settings':
             crumbs.push({ id: 'settings', labelKey: 'settings.title' })
             break
@@ -55,11 +94,17 @@ export function buildBreadcrumb(route: RouteInfo): Crumb[] {
     }
 
     return crumbs.map((crumb, index) =>
-        index === crumbs.length - 1 ? { id: crumb.id, labelKey: crumb.labelKey } : crumb,
+        index === crumbs.length - 1
+            ? {
+                  id: crumb.id,
+                  labelKey: crumb.labelKey,
+                  ...(crumb.label ? { label: crumb.label } : {}),
+              }
+            : crumb,
     )
 }
 
-/** Message key of the page title: the last crumb. */
+/** Message key of the page title: the last crumb (detail pages show their name instead). */
 export function pageTitleKey(route: RouteInfo): string {
     const crumbs = buildBreadcrumb(route)
     return crumbs[crumbs.length - 1]?.labelKey ?? 'app.name'
@@ -69,6 +114,10 @@ export function pageTitleKey(route: RouteInfo): string {
 export function activeTreeId(route: RouteInfo): string | undefined {
     if (route.name === 'library-section') {
         return findLibrarySection(route.params.section)?.id
+    }
+
+    if (typeof route.name === 'string' && route.name in detailSections) {
+        return detailSections[route.name]
     }
 
     return route.name === 'playlists' ? 'playlists' : undefined

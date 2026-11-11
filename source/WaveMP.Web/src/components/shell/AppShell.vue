@@ -10,6 +10,7 @@ import AppTransport from './AppTransport.vue'
 import { usePlaceholderTransport } from '@/composables/usePlaceholderTransport'
 import { pageTitleKey } from '@/navigation/breadcrumb'
 import { useHealthStore } from '@/stores/health'
+import { usePageTitleStore } from '@/stores/pageTitle'
 
 /**
  * App shell: the fixed areas of the theme API around the content of the current page. The DOM is
@@ -19,13 +20,15 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const health = useHealthStore()
+const pageTitle = usePageTitleStore()
 
 // Placeholder until the player exists (step 9).
 const transport = usePlaceholderTransport()
 
 const sidebarOpen = ref(false)
 const playerExpanded = ref(false)
-const title = computed(() => t(pageTitleKey(route)))
+// Detail pages show their name (album, artist, ...), the other pages the name of the page.
+const title = computed(() => pageTitle.title ?? t(pageTitleKey(route)))
 
 /** Moves the focus to an element of the shell after the next render. */
 async function focus(selector: string): Promise<void> {

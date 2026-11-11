@@ -55,6 +55,7 @@ export const parts = [
     'link',
     'stage',
     'cover',
+    'cover-image',
 
     // List
     'list',
@@ -71,6 +72,17 @@ export const parts = [
     'list-row',
     'list-cell',
     'badge',
+
+    // Library
+    'tile-list',
+    'tile-item',
+    'tile',
+    'tile-title',
+    'tile-subtitle',
+    'detail-header',
+    'detail-info',
+    'detail-title',
+    'load-more',
 
     // Transport
     'transport',

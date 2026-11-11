@@ -190,6 +190,8 @@
         --wmp-slider-thumb-size: 0.875rem;
         --wmp-cover-size: 8rem;
         --wmp-cover-size-mini: 2.5rem;
+        --wmp-cover-size-l: 12rem;
+        --wmp-tile-width: 9rem;
         --wmp-list-row-height: 2rem;
         --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr);
         --wmp-list-group-info-width: 11rem;

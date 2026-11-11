@@ -80,3 +80,47 @@ describe('activeTreeId', () => {
         ).toBeUndefined()
     })
 })
+
+describe('detail pages', () => {
+    it('end the breadcrumb with the name below their section', () => {
+        const crumbs = buildBreadcrumb(
+            { name: 'library-album', params: { id: 'a' } },
+            'First Album',
+        )
+
+        expect(crumbs).toEqual([
+            { id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } },
+            { id: 'library', labelKey: 'nav.library', to: { name: 'library' } },
+            {
+                id: 'albums',
+                labelKey: 'library.albums',
+                to: { name: 'library-section', params: { section: 'albums' } },
+            },
+            { id: 'library-album', labelKey: 'library.albums', label: 'First Album' },
+        ])
+    })
+
+    it('end with their section while the name is unknown', () => {
+        const crumbs = buildBreadcrumb({ name: 'library-genre', params: { genre: 'Rock' } })
+
+        expect(crumbs.at(-1)).toEqual({ id: 'genres', labelKey: 'library.genres' })
+        expect(pageTitleKey({ name: 'library-track', params: { id: 't' } })).toBe('library.songs')
+    })
+
+    it('select the tree node of their section', () => {
+        expect(activeTreeId({ name: 'library-album', params: {} })).toBe('albums')
+        expect(activeTreeId({ name: 'library-artist', params: {} })).toBe('artists')
+        expect(activeTreeId({ name: 'library-genre', params: {} })).toBe('genres')
+        expect(activeTreeId({ name: 'library-year', params: {} })).toBe('years')
+        expect(activeTreeId({ name: 'library-track', params: {} })).toBe('songs')
+        expect(activeTreeId({ name: 'library-search', params: {} })).toBeUndefined()
+    })
+
+    it('show the search below the library', () => {
+        expect(buildBreadcrumb({ name: 'library-search', params: {} }).map((c) => c.id)).toEqual([
+            'music',
+            'library',
+            'search',
+        ])
+    })
+})

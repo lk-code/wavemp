@@ -29,7 +29,14 @@ import BaseTextField from '@/components/base/BaseTextField.vue'
 import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
 import UserList, { type UserListItem } from '@/components/admin/UserList.vue'
-import AlbumGroupList from '@/components/library/AlbumGroupList.vue'
+import BaseCover from '@/components/base/BaseCover.vue'
+import BaseLink from '@/components/base/BaseLink.vue'
+import DetailHeader from '@/components/library/DetailHeader.vue'
+import LibraryEmpty from '@/components/library/LibraryEmpty.vue'
+import LoadMore from '@/components/library/LoadMore.vue'
+import MetaItem from '@/components/library/MetaItem.vue'
+import TileList from '@/components/library/TileList.vue'
+import TrackGroupList from '@/components/library/TrackGroupList.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
 import type { ProfileTileData } from '@/components/profiles/ProfileTile.vue'
@@ -42,14 +49,16 @@ import type { TransportState } from '@/components/shell/transport'
 import { useFormat } from '@/composables/useFormat'
 import { setLocale } from '@/i18n'
 import { supportedLocales, type SupportedLocale } from '@/i18n/locales'
+import { groupTracksByAlbum } from '@/library/grouping'
+import { sortItemId, sortLabelKey, sortOptions } from '@/library/sorting'
 import { libraryTree, mainNavigation, type NavigationTreeNode } from '@/navigation/libraryTree'
 import { profileColorOptions } from '@/profiles/presentation'
 import { iconSlotNames, iconSlots } from '@/themes/iconSlots'
 import { parts } from '@/themes/parts'
-import LibraryView from '@/views/LibraryView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
+import { sampleTiles, sampleTracks } from './samples'
 
 const i18n = useI18n({ useScope: 'global' })
 const { t } = i18n
@@ -88,8 +97,29 @@ const treeNodes = computed(() => libraryTree.map(toTreeNode))
 const treeExpanded = ref<string[]>(['playlists', 'library'])
 const treeCollapsed = ref<string[]>([])
 
-// List, sliders and fields
-const selectedTrack = ref<string | undefined>('track-2')
+// List, library and sliders and fields
+const selectedTrack = ref<string | undefined>('sample-track-2')
+const sampleGroups = computed(() => groupTracksByAlbum(sampleTracks(t)))
+const tiles = computed(() => sampleTiles(t))
+const sortSampleMenu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
+const sortSampleItems = computed<MenuItem[]>(() => [
+    ...sortOptions('tracks', true).map((key) => ({
+        id: sortItemId(key),
+        label: t(sortLabelKey(key)),
+        checked: key === 'Title',
+    })),
+    { id: 'separator', separator: true },
+    { id: 'direction-asc', label: t('sort.ascending'), checked: true },
+    { id: 'direction-desc', label: t('sort.descending'), checked: false },
+])
+
+function openSortSample(event: MouseEvent): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    void sortSampleMenu.value?.openAt(rect.left, rect.bottom + 4)
+}
+
+/** A picture of the theme stands in for a cover from the server. */
+const sampleCover = '/themes/midnight/images/cover-placeholder.svg'
 const sliders = ref([0, 0.5, 1])
 const disabledSlider = ref(0.3)
 const textEmpty = ref('')
@@ -421,7 +451,61 @@ const sampleRunningJob: Job[] = [
 
         <section data-part="dev-section">
             <h2 data-part="dev-section-title">{{ t('dev.sections.list') }}</h2>
-            <AlbumGroupList v-model:selected="selectedTrack" />
+            <p data-part="placeholder-notice" data-state="placeholder" role="note">
+                <BaseIcon name="info" />
+                <span data-part="label">{{ t('library.placeholderNotice') }}</span>
+            </p>
+            <TrackGroupList
+                v-model:selected="selectedTrack"
+                :groups="sampleGroups"
+                :label="t('library.songs')"
+                state="placeholder"
+            />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.library') }}</h2>
+            <div data-part="view" data-view="library" data-section="albums">
+                <TileList :tiles="tiles" :label="t('library.albums')" />
+                <LoadMore />
+                <LoadMore loading />
+            </div>
+            <div data-part="view" data-view="library-album">
+                <DetailHeader :title="t('placeholders.album', { number: 1 })">
+                    <template #media>
+                        <BaseCover :src="sampleCover" />
+                    </template>
+                    <MetaItem field="artist" :label="t('list.artist')">
+                        <BaseLink
+                            :to="{ name: 'library-artist', params: { id: 'sample-artist-1' } }"
+                        >
+                            {{ t('placeholders.artist', { number: 1 }) }}
+                        </BaseLink>
+                    </MetaItem>
+                    <MetaItem field="year" :label="t('list.year')">{{
+                        format.year(2006)
+                    }}</MetaItem>
+                    <MetaItem field="tracks" :label="t('list.songs')">{{
+                        format.number(4)
+                    }}</MetaItem>
+                </DetailHeader>
+            </div>
+            <div data-part="dev-samples">
+                <BaseButton
+                    part="sort"
+                    variant="icon"
+                    icon="sort"
+                    dropdown
+                    :label="t('toolbar.sort')"
+                    aria-haspopup="menu"
+                    @click="openSortSample"
+                />
+            </div>
+            <BaseContextMenu
+                ref="sortSampleMenu"
+                :items="sortSampleItems"
+                :label="t('sort.menu')"
+            />
         </section>
 
         <section data-part="dev-section">
@@ -662,7 +746,9 @@ const sampleRunningJob: Job[] = [
             <h2 data-part="dev-section-title">{{ t('dev.sections.states') }}</h2>
             <div data-part="dev-samples">
                 <div data-part="dev-sample">
-                    <LibraryView section="albums" />
+                    <div data-part="view" data-view="library" data-section="albums">
+                        <LibraryEmpty />
+                    </div>
                 </div>
                 <div data-part="dev-sample">
                     <NowPlayingView />
@@ -673,9 +759,6 @@ const sampleRunningJob: Job[] = [
                 <div data-part="dev-sample">
                     <NotFoundView />
                 </div>
-            </div>
-            <div data-part="dev-sample">
-                <LibraryView section="songs" />
             </div>
         </section>
 

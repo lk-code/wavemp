@@ -10,6 +10,8 @@ export interface MenuItem {
     readonly icon?: IconSlotName
     readonly disabled?: boolean
     readonly separator?: boolean
+    /** Entry of a choice (role menuitemradio): whether it is the chosen one. */
+    readonly checked?: boolean
 }
 
 /** Context menu on the Popover API: light dismiss and Escape come from the browser. */
@@ -142,7 +144,10 @@ defineExpose({ openAt, close, isOpen })
                 v-else
                 type="button"
                 data-part="menu-item"
-                role="menuitem"
+                :role="item.checked === undefined ? 'menuitem' : 'menuitemradio'"
+                :aria-checked="
+                    item.checked === undefined ? undefined : item.checked ? 'true' : 'false'
+                "
                 tabindex="-1"
                 :data-item="item.id"
                 :disabled="item.disabled"

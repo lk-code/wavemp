@@ -1,5 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router'
-import LibraryView from '@/views/LibraryView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
@@ -8,6 +7,13 @@ import SettingsView from '@/views/SettingsView.vue'
 import AdminJobsView from '@/views/admin/AdminJobsView.vue'
 import AdminLibraryView from '@/views/admin/AdminLibraryView.vue'
 import AdminUsersView from '@/views/admin/AdminUsersView.vue'
+import AlbumView from '@/views/library/AlbumView.vue'
+import ArtistView from '@/views/library/ArtistView.vue'
+import GenreView from '@/views/library/GenreView.vue'
+import LibraryView from '@/views/library/LibraryView.vue'
+import SearchView from '@/views/library/SearchView.vue'
+import TrackView from '@/views/library/TrackView.vue'
+import YearView from '@/views/library/YearView.vue'
 import {
     defaultLibrarySection,
     librarySectionPattern,
@@ -69,6 +75,47 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             path: `/library/:section(${librarySectionPattern})`,
             name: 'library-section',
             component: LibraryView,
+            props: true,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/search',
+            name: 'library-search',
+            component: SearchView,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/albums/:id',
+            name: 'library-album',
+            component: AlbumView,
+            props: true,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/artists/:id',
+            name: 'library-artist',
+            component: ArtistView,
+            props: true,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/genres/:genre',
+            name: 'library-genre',
+            component: GenreView,
+            props: true,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/years/:year(\\d{1,4})',
+            name: 'library-year',
+            component: YearView,
+            props: true,
+            meta: { tab: 'library' },
+        },
+        {
+            path: '/library/tracks/:id',
+            name: 'library-track',
+            component: TrackView,
             props: true,
             meta: { tab: 'library' },
         },

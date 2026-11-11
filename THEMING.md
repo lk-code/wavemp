@@ -95,7 +95,7 @@ Example of a desktop layout with the sidebar on the right:
 | `breadcrumb-link` | `a`, or `span` (`aria-current="page"`) for the current page | `breadcrumb-item` | Name of a location; the first one has the icon `breadcrumb-root` |
 | `breadcrumb-separator` | `span` | `breadcrumb-item` | Separator icon between two items |
 | `view-switch` | `button` (`aria-haspopup="menu"`) | `toolbar` | View options of the list (disabled in this version) |
-| `sort` | `button` (`aria-haspopup="menu"`) | `toolbar` | Sort options of the list (disabled in this version) |
+| `sort` | `button` (`aria-haspopup="menu"`) | `toolbar` | Opens the sort options of the current list (a `context-menu` with `menuitemradio` entries); disabled where the list cannot be sorted, always hidden on mobile |
 | `search` | `div` (`role="search"`) | `toolbar` | Search field with `icon`, `input` and `btn-clear` |
 | `input` | `input` (`aria-invalid`) | `search`, `field` | Text input |
 | `btn-clear` | `button` | `search` | Clears the search; `hidden` while the field is empty |
@@ -109,13 +109,14 @@ Example of a desktop layout with the sidebar on the right:
 | `content` | `main` | `app` | Content of the current page |
 | `content-title` | `h1` | `content` | Title of the page |
 | `view` | `div` | `content` | Page, see `data-view` in [States](#states) |
-| `placeholder-notice` | `p` (`role="note"`) | `view` | Notice that the content is a placeholder |
-| `empty-state` | `div` | `view`, `stage`, `profile-select` | Message for empty content, or that something could not be loaded |
+| `placeholder-notice` | `p` (`role="note"`) | `view` | Notice that the content is a placeholder; currently only shown in the component overview |
+| `empty-state` | `div` | `view`, `stage`, `profile-select`, `section` | Message for empty content, or that something could not be loaded |
 | `empty-state-title` | `p` | `empty-state` | Title of the message |
 | `empty-state-text` | `p` | `empty-state` | Text of the message |
-| `link` | `a` | `empty-state` | Text link in the content |
+| `link` | `a` | `empty-state`, `view`, `section`, `meta-value` | Text link in the content, for example to an album, an artist, a genre or a year |
 | `stage` | `div` | `view` | Stage of the Now Playing page: cover (later also video and visualization) |
-| `cover` | `span` | `stage`, `list-group-info`, `now-playing-mini` | Cover image or placeholder |
+| `cover` | `span` | `stage`, `list-group-info`, `now-playing-mini`, `tile`, `detail-header` | Cover: `cover-image`, or the placeholder icon (`data-state="placeholder"`); on tiles and detail pages of artists, genres and years the `icon` of their kind |
+| `cover-image` | `img` (`alt=""`) | `cover` | Picture of the cover, loaded from the server |
 | `list` | `div` (`role="grid"`) | `view` | Table of tracks grouped by album |
 | `list-header` | `div` (`role="row"`) | `list` | Column headers |
 | `list-column` | `span` (`role="columnheader"`) | `list-header` | Column header with `label` |
@@ -124,12 +125,21 @@ Example of a desktop layout with the sidebar on the right:
 | `list-group-title` | `span` (`role="rowheader"`) | `list-group-header` | Title of the group |
 | `list-group-info` | `div` (`role="row"`) | `list-group` | Cover and details of the group |
 | `list-group-meta` | `div` (`role="gridcell"`) | `list-group-info` | Details of the group |
-| `meta-item` | `span` | `list-group-meta` | One detail with `label` and `meta-value` |
-| `meta-value` | `span` | `meta-item` | Value of a detail |
+| `meta-item` | `span` | `list-group-meta`, `detail-info` | One detail with `label` and `meta-value`, see `data-field` in [States](#states) |
+| `meta-value` | `span` | `meta-item` | Value of a detail, often a `link` |
 | `list-group-rows` | `div` (`role="presentation"`) | `list-group` | Rows of the group |
 | `list-row` | `div` (`role="row"`, `aria-selected`) | `list-group-rows` | Row of a track |
 | `list-cell` | `span` (`role="gridcell"`) | `list-row` | Cell of a row |
 | `badge` | `span` | `list-cell`, `user-meta`, `scan-status`, `run-item`, `run-meta`, `job-meta` | Small hint with `icon` and `label`, for example that a video exists; in `user-meta` the role, in `scan-status`, `run-item`, `run-meta` and `job-meta` a state, each with a visible `label` |
+| `tile-list` | `ul` | `view`, `section` | Albums, artists, genres or years as tiles |
+| `tile-item` | `li` | `tile-list` | One tile |
+| `tile` | `a` | `tile-item` | Link to the page of the entry with `cover`, `tile-title` and optionally `tile-subtitle`, see `data-kind` in [States](#states) |
+| `tile-title` | `span` | `tile` | Name of the entry |
+| `tile-subtitle` | `span` | `tile` | Detail of the entry, for example the album artist or the number of songs |
+| `detail-header` | `div` | `view` | Head of a detail page (album, artist, genre, year, song) with a `cover` and `detail-info` |
+| `detail-info` | `div` | `detail-header` | `detail-title` and the details as `meta-item` |
+| `detail-title` | `h2` | `detail-info` | Name of the album, artist, genre, year or song |
+| `load-more` | `button` | `view`, `section` | Loads the next page of a list; also loads by itself when it scrolls into view |
 | `transport` | `section` | `app` | Transport bar; mini player and full-screen player on mobile |
 | `seek` | `div` | `transport` | Progress bar with a `slider` |
 | `now-playing-mini` | `button` | `transport` | Cover and title of the current track; opens Now Playing (desktop) or the full-screen player (mobile) |
@@ -215,7 +225,7 @@ Example of a desktop layout with the sidebar on the right:
 | `dialog-body` | `div` | `dialog` | Content of the dialog |
 | `dialog-footer` | `div` | `dialog` | Buttons of the dialog |
 | `context-menu` | `div` (`role="menu"`, `popover`) | any | Context menu, shown in the top layer |
-| `menu-item` | `button` (`role="menuitem"`) | `context-menu` | Entry with `icon` and `label` |
+| `menu-item` | `button` (`role="menuitem"`, or `role="menuitemradio"` with `aria-checked` in choices such as the sort options) | `context-menu` | Entry with `icon` and `label` |
 | `menu-separator` | `hr` | `context-menu` | Separator between entries |
 | `alert` | `div` (`role="alert"` for errors, otherwise `role="status"`) | any | Message with `icon` and `label` |
 
@@ -240,14 +250,14 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `sidebar`, `sidebar-backdrop` | `open` or `closed` (drawer on mobile) |
 | `tab`, `bottom-nav-item`, `breadcrumb-item`, `tree-item` | `active` for the current page |
 | `tree-item` | additionally `expanded` or `collapsed` for nodes with children |
-| `list` | `placeholder` while the list shows placeholder content |
-| `list-row` | `selected`, `has-video`; `playing` is reserved for the playing track |
+| `list` | `placeholder` while the list shows placeholder content (component overview) |
+| `list-row` | `selected`; `has-video` for songs with audio and video, `video-only` for songs with a video only; `playing` is reserved for the playing track |
 | `placeholder-notice`, `cover` | `placeholder` |
 | `now-playing-mini` | `empty` while nothing plays |
 | `server-status` | `checking`, `healthy`, `degraded`, `unhealthy` or `unreachable` |
 | `search` | `empty` or `filled` |
 | `context-menu` | `open` or `closed` |
-| `badge` | the kind of hint, for example `has-video`; in `user-meta` `admin` or `user`, and `built-in`; in `scan-status` `idle`, `queued` or `running`; in `run-item`, `run-meta` and `job-meta` the status of the run: `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
+| `badge` | the kind of hint, for example `has-video` or `video-only`; in `user-meta` `admin` or `user`, and `built-in`; in `scan-status` `idle`, `queued` or `running`; in `run-item`, `run-meta` and `job-meta` the status of the run: `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
 | `profile-select` | `loading`, `ready` or `error` (the profiles could not be loaded) |
 | `profile-tile` | `built-in` for the built-in admin profile, additionally `secondary` as soon as other profiles exist; `current` for the profile of the current session |
 | `alert` | `error`, `success` or `info` |
@@ -257,6 +267,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `scan-status`, `job-item` | `idle`, `queued` or `running` |
 | `run-item` | `queued`, `running`, `succeeded`, `failed`, `canceled` or `interrupted` |
 | `progress` | `indeterminate` while the share done is unknown |
+| `load-more` | `loading` while the next page loads |
 
 ### ARIA attributes and native states
 
@@ -264,10 +275,10 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 |---|---|
 | `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item`, `admin-nav-item` |
 | `aria-current="true"` | `profile-tile` of the current profile |
-| `aria-busy="true"` | `profile-select` while a profile is being selected |
+| `aria-busy="true"` | `profile-select` while a profile is being selected; `view` while its content loads; `load-more` while the next page loads |
 | `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
-| `aria-checked` | `color-swatch` |
+| `aria-checked` | `color-swatch`; `menu-item` with `role="menuitemradio"`, for example the chosen sort key and direction |
 | `aria-selected` | `list-row` |
 | `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
@@ -286,11 +297,12 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `now-playing`, `playlists`, `settings`, `admin-library`, `admin-jobs`, `admin-users`, `not-found` |
+| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `now-playing`, `playlists`, `settings`, `admin-library`, `admin-jobs`, `admin-users`, `not-found` |
+| `data-kind` | `tile` | `album`, `artist`, `genre`, `year` |
 | `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist` |
-| `data-field` | `meta-item` | `album`, `artist`, `genre`, `year` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`), the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`) or the job (`library-scan`) |
+| `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media` |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `details`, `album`, `artist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`), the job (`library-scan`) or the section of the search and of an artist (`artists`, `albums`, `tracks`) |
 
 ## Variables
 
@@ -445,6 +457,8 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-slider-thumb-size` | `0.875rem` | Size of `slider-thumb` |
 | `--wmp-cover-size` | `8rem` | Size of covers in the list |
 | `--wmp-cover-size-mini` | `2.5rem` | Size of the cover in `now-playing-mini` |
+| `--wmp-cover-size-l` | `12rem` | Size of the cover in `detail-header` |
+| `--wmp-tile-width` | `9rem` | Smallest width of a column of tiles |
 | `--wmp-list-row-height` | `2rem` | Minimum height of `list-row` |
 | `--wmp-list-columns` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)` | `grid-template-columns` of `list-header` and `list-row` |
 | `--wmp-list-group-info-width` | `11rem` | Width of `list-group-info` (desktop) |
@@ -593,4 +607,4 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
     - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.
     - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item` (`menu-item` already carried it, now it is documented), the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.
-    - Additions without a version change: the library, with the icon slots `album`, `artist`, `genre` and `year`.
+    - Additions without a version change: the library with tiles (`tile-list`, `tile-item`, `tile`, `tile-title`, `tile-subtitle`, attribute `data-kind`), detail pages (`detail-header`, `detail-info`, `detail-title`, `data-view` `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`) and the search (`data-view="library-search"`), the part `cover-image`, the button `load-more` with the state `loading`, the state `video-only` of `list-row` and `badge`, `aria-busy` on `view`, `menuitemradio` entries with `aria-checked` in the sort options, further values of `data-field` and `data-item` (also on `section`), `link` in `meta-value`, `view` and `section`, the icon slots `album`, `artist`, `genre` and `year` and the variables `--wmp-cover-size-l` and `--wmp-tile-width`. The sort button `sort` is active where a list can be sorted.

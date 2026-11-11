@@ -36,6 +36,28 @@ describe('createRoutes', () => {
         }
     })
 
+    it('knows the search and the detail pages of the library', async () => {
+        for (const [path, name, param] of [
+            ['/library/search?q=balad', 'library-search', undefined],
+            ['/library/albums/a1', 'library-album', 'a1'],
+            ['/library/artists/b2', 'library-artist', 'b2'],
+            ['/library/genres/Hip%20Hop', 'library-genre', 'Hip Hop'],
+            ['/library/years/2001', 'library-year', '2001'],
+            ['/library/tracks/c3', 'library-track', 'c3'],
+        ] as const) {
+            const route = await resolve(path)
+            expect(route.name, path).toBe(name)
+            expect(route.meta.tab, path).toBe('library')
+            if (param) {
+                expect(Object.values(route.params), path).toEqual([param])
+            }
+        }
+    })
+
+    it('accepts only years as years', async () => {
+        expect((await resolve('/library/years/abc')).name).toBe('not-found')
+    })
+
     it('assigns the main tabs', async () => {
         expect((await resolve('/now-playing')).meta.tab).toBe('now-playing')
         expect((await resolve('/playlists')).meta.tab).toBe('playlists')

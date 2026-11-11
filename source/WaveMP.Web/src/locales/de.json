@@ -37,8 +37,29 @@
     "genres": "Genre",
     "years": "Jahr",
     "placeholderNotice": "Diese Liste zeigt Platzhalter. Deine Musik erscheint hier, sobald die Bibliothek gescannt werden kann.",
-    "emptyTitle": "Hier ist noch nichts",
-    "emptyText": "Dieser Bereich der Bibliothek steht zur Verfügung, sobald deine Musik gescannt wurde."
+    "emptyTitle": "Deine Bibliothek ist leer",
+    "emptyText": "Deine Musik erscheint hier, sobald der Medienordner gescannt wurde.",
+    "emptyAdminAction": "Bibliothek scannen",
+    "noMatchesTitle": "Nichts gefunden",
+    "noMatchesText": "Nichts in dieser Liste passt zu „{query}“.",
+    "filterEmptyText": "Für diesen Filter gibt es nichts in der Bibliothek.",
+    "filteredBy": "Es werden Einträge angezeigt, die zu „{query}“ passen.",
+    "showAll": "Alle anzeigen",
+    "loadError": "Die Bibliothek konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loadMore": "Mehr anzeigen",
+    "unknownAlbum": "Unbekanntes Album",
+    "unknownArtist": "Unbekannter Interpret",
+    "variousArtists": "Verschiedene Interpreten",
+    "songCount": "Titel: {count}",
+    "albumCount": "Alben: {count}",
+    "disc": "CD {number}",
+    "albumsTitle": "Alben",
+    "songsTitle": "Titel",
+    "albumNotFound": "Dieses Album gibt es nicht mehr.",
+    "artistNotFound": "Diesen Interpreten gibt es nicht mehr.",
+    "trackNotFound": "Diesen Titel gibt es nicht mehr.",
+    "toLibrary": "Zur Bibliothek"
   },
   "list": {
     "columns": {
@@ -51,7 +72,14 @@
     "album": "Album",
     "artist": "Interpret",
     "genre": "Genre",
-    "year": "Jahr"
+    "year": "Jahr",
+    "videoOnly": "Nur Video",
+    "duration": "Länge",
+    "songs": "Titel",
+    "albums": "Alben",
+    "number": "Nr.",
+    "disc": "CD",
+    "media": "Verfügbar als"
   },
   "placeholders": {
     "album": "Platzhalter-Album {number}",
@@ -129,6 +157,7 @@
       "tabs": "Tabs",
       "tree": "Baum",
       "list": "Liste mit Gruppen",
+      "library": "Bibliothek",
       "sliders": "Schieberegler",
       "fields": "Eingabefelder",
       "dialog": "Dialog",
@@ -412,5 +441,67 @@
       "mediaFolderEmpty": "Der Medienordner ist leer, deshalb wurde nichts entfernt. Prüfe, ob er eingebunden ist.",
       "probeUnavailable": "ffprobe ist auf dem Server nicht verfügbar."
     }
+  },
+  "track": {
+    "media": {
+      "audioAndVideo": "Audio und Video",
+      "audio": "Nur Audio",
+      "video": "Nur Video"
+    },
+    "filesTitle": "Dateien",
+    "filesError": "Die Dateien konnten nicht geladen werden."
+  },
+  "files": {
+    "label": "Dateien des Titels",
+    "kinds": {
+      "audio": "Audio",
+      "video": "Video",
+      "image": "Bild"
+    },
+    "primary": "Wird abgespielt",
+    "lossless": "Verlustfrei",
+    "writable": "Tags änderbar",
+    "bitrate": "{value} kbit/s",
+    "sampleRate": "{value} kHz",
+    "bitDepth": "{value} Bit",
+    "channels": "Kanäle: {count}",
+    "resolution": "{width} × {height}",
+    "modified": "Geändert {date}"
+  },
+  "search": {
+    "title": "Suche",
+    "artists": "Interpreten",
+    "albums": "Alben",
+    "songs": "Titel",
+    "showAll": "Alle anzeigen",
+    "promptTitle": "Bibliothek durchsuchen",
+    "promptText": "Finde Interpreten, Alben und Titel. Kleine Tippfehler sind kein Problem.",
+    "noResultsTitle": "Nichts gefunden",
+    "noResultsText": "Nichts passt zu „{query}“.",
+    "error": "Die Suche ist fehlgeschlagen."
+  },
+  "sort": {
+    "menu": "Sortieroptionen",
+    "ascending": "Aufsteigend",
+    "descending": "Absteigend",
+    "keys": {
+      "albumArtist": "Albuminterpret",
+      "album": "Album",
+      "title": "Titel",
+      "artist": "Interpret",
+      "name": "Name",
+      "duration": "Länge",
+      "year": "Jahr",
+      "genre": "Genre",
+      "firstSeenAt": "Hinzugefügt am",
+      "trackCount": "Anzahl der Titel",
+      "relevance": "Relevanz"
+    }
+  },
+  "trackMenu": {
+    "label": "Aktionen für den Titel",
+    "details": "Details anzeigen",
+    "album": "Zum Album",
+    "artist": "Zum Interpreten"
   }
 }

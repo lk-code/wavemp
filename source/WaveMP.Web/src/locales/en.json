@@ -37,8 +37,29 @@
     "genres": "Genre",
     "years": "Year",
     "placeholderNotice": "This list shows placeholder content. Your music appears here once the library can be scanned.",
-    "emptyTitle": "Nothing here yet",
-    "emptyText": "This part of the library becomes available once your music has been scanned."
+    "emptyTitle": "Your library is empty",
+    "emptyText": "Your music appears here once the media folder has been scanned.",
+    "emptyAdminAction": "Scan the library",
+    "noMatchesTitle": "Nothing found",
+    "noMatchesText": "Nothing in this list matches “{query}”.",
+    "filterEmptyText": "There is nothing in the library for this filter.",
+    "filteredBy": "Showing entries that match “{query}”.",
+    "showAll": "Show all",
+    "loadError": "The library could not be loaded.",
+    "retry": "Try again",
+    "loadMore": "Show more",
+    "unknownAlbum": "Unknown album",
+    "unknownArtist": "Unknown artist",
+    "variousArtists": "Various artists",
+    "songCount": "Songs: {count}",
+    "albumCount": "Albums: {count}",
+    "disc": "Disc {number}",
+    "albumsTitle": "Albums",
+    "songsTitle": "Songs",
+    "albumNotFound": "This album no longer exists.",
+    "artistNotFound": "This artist no longer exists.",
+    "trackNotFound": "This song no longer exists.",
+    "toLibrary": "Go to the library"
   },
   "list": {
     "columns": {
@@ -51,7 +72,14 @@
     "album": "Album",
     "artist": "Artist",
     "genre": "Genre",
-    "year": "Year"
+    "year": "Year",
+    "videoOnly": "Video only",
+    "duration": "Length",
+    "songs": "Songs",
+    "albums": "Albums",
+    "number": "Track",
+    "disc": "Disc",
+    "media": "Available as"
   },
   "placeholders": {
     "album": "Placeholder Album {number}",
@@ -129,6 +157,7 @@
       "tabs": "Tabs",
       "tree": "Tree",
       "list": "List with groups",
+      "library": "Library",
       "sliders": "Sliders",
       "fields": "Input fields",
       "dialog": "Dialog",
@@ -412,5 +441,67 @@
       "mediaFolderEmpty": "The media folder is empty, so nothing was removed. Check that it is mounted.",
       "probeUnavailable": "ffprobe is not available on the server."
     }
+  },
+  "track": {
+    "media": {
+      "audioAndVideo": "Audio and video",
+      "audio": "Audio only",
+      "video": "Video only"
+    },
+    "filesTitle": "Files",
+    "filesError": "The files could not be loaded."
+  },
+  "files": {
+    "label": "Files of the song",
+    "kinds": {
+      "audio": "Audio",
+      "video": "Video",
+      "image": "Picture"
+    },
+    "primary": "Used for playback",
+    "lossless": "Lossless",
+    "writable": "Tags can be changed",
+    "bitrate": "{value} kbit/s",
+    "sampleRate": "{value} kHz",
+    "bitDepth": "{value} bit",
+    "channels": "Channels: {count}",
+    "resolution": "{width} × {height}",
+    "modified": "Changed {date}"
+  },
+  "search": {
+    "title": "Search",
+    "artists": "Artists",
+    "albums": "Albums",
+    "songs": "Songs",
+    "showAll": "Show all",
+    "promptTitle": "Search your library",
+    "promptText": "Find artists, albums and songs. Small typos are fine.",
+    "noResultsTitle": "Nothing found",
+    "noResultsText": "Nothing matches “{query}”.",
+    "error": "The search failed."
+  },
+  "sort": {
+    "menu": "Sort options",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "keys": {
+      "albumArtist": "Album artist",
+      "album": "Album",
+      "title": "Title",
+      "artist": "Artist",
+      "name": "Name",
+      "duration": "Length",
+      "year": "Year",
+      "genre": "Genre",
+      "firstSeenAt": "Date added",
+      "trackCount": "Number of songs",
+      "relevance": "Relevance"
+    }
+  },
+  "trackMenu": {
+    "label": "Song actions",
+    "details": "Show details",
+    "album": "Go to album",
+    "artist": "Go to artist"
   }
 }

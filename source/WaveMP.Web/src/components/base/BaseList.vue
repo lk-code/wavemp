@@ -19,6 +19,7 @@ export interface ListGroup<Row extends ListRowBase> {
 
 <script setup lang="ts" generic="Row extends ListRowBase">
 import { computed, nextTick, useId } from 'vue'
+import { useLongPress } from '@/composables/useLongPress'
 
 const props = withDefaults(
     defineProps<{
@@ -28,9 +29,18 @@ const props = withDefaults(
         label: string
         /** data-state tokens of the list, e.g. "placeholder". */
         state?: string
+        /**
+         * Rows have a context menu: right click, the context menu key, Shift+F10 and a long press
+         * on touch screens emit row-menu instead of opening the menu of the browser.
+         */
+        rowMenu?: boolean
     }>(),
-    { state: undefined },
+    { state: undefined, rowMenu: false },
 )
+
+const emit = defineEmits<{
+    'row-menu': [rowId: string, x: number, y: number]
+}>()
 
 defineSlots<{
     cell?(props: { row: Row; column: ListColumn }): unknown
@@ -65,7 +75,41 @@ async function select(rowId: string, focus = false): Promise<void> {
     }
 }
 
+const longPress = useLongPress<string>((rowId, x, y) => {
+    void select(rowId)
+    emit('row-menu', rowId, x, y)
+})
+
+function onContextMenu(event: MouseEvent, rowId: string): void {
+    if (!props.rowMenu) {
+        return
+    }
+
+    event.preventDefault()
+    longPress.cancel()
+    void select(rowId)
+    emit('row-menu', rowId, event.clientX, event.clientY)
+}
+
+function onPointerdown(event: PointerEvent, rowId: string): void {
+    if (props.rowMenu) {
+        longPress.onPointerdown(event, rowId)
+    }
+}
+
+function openMenuAtRow(event: KeyboardEvent, rowId: string): void {
+    event.preventDefault()
+    void select(rowId)
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    emit('row-menu', rowId, rect.left, rect.bottom)
+}
+
 function onKeydown(event: KeyboardEvent, rowId: string): void {
+    if (props.rowMenu && (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey))) {
+        openMenuAtRow(event, rowId)
+        return
+    }
+
     const rows = allRows.value
     const index = rows.findIndex((row) => row.id === rowId)
     const target = {
@@ -133,6 +177,12 @@ function onKeydown(event: KeyboardEvent, rowId: string): void {
                     :tabindex="row.id === tabStop ? 0 : -1"
                     @click="select(row.id)"
                     @keydown="onKeydown($event, row.id)"
+                    @contextmenu="onContextMenu($event, row.id)"
+                    @pointerdown="onPointerdown($event, row.id)"
+                    @pointermove="longPress.onPointermove"
+                    @pointerup="longPress.cancel"
+                    @pointercancel="longPress.cancel"
+                    @pointerleave="longPress.cancel"
                 >
                     <span
                         v-for="column in columns"
