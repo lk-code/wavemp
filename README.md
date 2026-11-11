@@ -248,13 +248,14 @@ The integration tests start the service in-process on a free local port, use the
 
 ### License check
 
-All NuGet and npm dependencies must have a license listed in `.github/license-policy.json`: MIT-compatible licenses only, never GPL or AGPL. The CI runs the same command:
+All NuGet and npm dependencies must have a license listed in `.github/license-policy.json`: MIT-compatible licenses only, never GPL or AGPL. This covers the NuGet packages of all projects in `WaveMP.slnx` (including transitive ones), the local .NET tools in `dotnet-tools.json` and the npm packages of every npm project, including the license check's own tools in `.github/scripts`. The CI runs the same commands:
 
 ```bash
 node .github/scripts/check-licenses.mjs
+node --test .github/scripts/check-licenses.test.mjs   # tests of the check itself
 ```
 
-It restores the .NET tools and npm packages it needs by itself and fails if a package has a license that is not allowed or no license information. Exceptions for single packages are only added to the policy after a manual license review.
+It restores the .NET tools and npm packages it needs by itself and fails if a package has a license that is not allowed or no license information. It also fails if a .NET project is not part of `WaveMP.slnx` or a tool manifest or npm project is missing from the policy (`nuget.toolManifests`, `npm.projects`), so new projects cannot be skipped. Exceptions for single packages are only added to the policy after a manual license review, npm exceptions with their exact version.
 
 ### Continuous integration
 

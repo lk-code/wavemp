@@ -7,6 +7,8 @@
     "node": ">=24.12.0"
   },
   "devDependencies": {
-    "licensee": "^12.0.2"
+    "licensee": "^12.0.2",
+    "spdx-expression-parse": "^4.0.0",
+    "spdx-whitelisted": "^1.0.0"
   }
 }

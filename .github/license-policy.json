@@ -1,5 +1,5 @@
 {
-  "$comment": "Licenses allowed for all NuGet and npm dependencies (SPDX identifiers), checked by .github/scripts/check-licenses.mjs. Only MIT-compatible licenses, never GPL or AGPL. LGPL only as a reviewed package exception. Package exceptions are added only after a manual license review.",
+  "$comment": "Licenses allowed for all NuGet and npm dependencies (SPDX identifiers), checked by .github/scripts/check-licenses.mjs. Only MIT-compatible licenses, never GPL or AGPL. LGPL only as a reviewed package exception. Package exceptions are added only after a manual license review, npm exceptions with their exact version. Every .NET project must be part of the solution, every tool manifest and npm project of the repository must be listed here.",
   "allowedLicenses": [
     "0BSD",
     "Apache-2.0",
@@ -17,10 +17,16 @@
   ],
   "nuget": {
     "solution": "WaveMP.slnx",
+    "toolManifests": ["dotnet-tools.json"],
     "allowedPackages": []
   },
   "npm": {
-    "projects": ["source/WaveMP.Web", "tests/WaveMP.E2E"],
-    "allowedPackages": {}
+    "projects": [".github/scripts", "source/WaveMP.Web", "tests/WaveMP.E2E"],
+    "$comment": "Reviewed 2026-11: spdx-exceptions, spdx-expression-validate and spdx-ranges are dependencies of licensee (license check tool, not part of the image). Their code is MIT, the bundled SPDX license lists are CC-BY-3.0 (attribution only).",
+    "allowedPackages": {
+      "spdx-exceptions": "2.5.0",
+      "spdx-expression-validate": "2.0.0",
+      "spdx-ranges": "2.1.1"
+    }
   }
 }
