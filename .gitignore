@@ -44,3 +44,9 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code (local)
+.claude/settings.local.json
+
+# Claude Code (local)
+.claude/settings.local.json
