@@ -142,6 +142,36 @@ public class ApiIntegrationTests
     }
 
     [Test]
+    public async Task GetOpenApiDocument_Always_DescribesNamedEnumsWithoutNull()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        List<KeyValuePair<string, JsonNode?>> enums = [.. document["components"]!["schemas"]!.AsObject()
+            .Where(entry => entry.Value?["enum"] is not null)];
+
+        enums.Should().Contain(entry => entry.Key == "JobErrorCode");
+        enums.Should().AllSatisfy(entry =>
+        {
+            entry.Value!["enum"]!.AsArray().Should().NotContainNulls($"enum {entry.Key} must not have a null member");
+            GetTypes(entry.Value.AsObject()).Should().Equal(["string"], $"enum {entry.Key} must not be nullable");
+        });
+    }
+
+    [TestCase("JobRun")]
+    [TestCase("Scan")]
+    public async Task GetOpenApiDocument_Always_KeepsNullableEnumPropertiesNullable(string schema)
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonArray oneOf = document["components"]!["schemas"]![schema]!["properties"]!["errorCode"]!["oneOf"]!.AsArray();
+
+        oneOf.Should().HaveCount(2);
+        oneOf.Should().ContainSingle(node => node!["type"] != null && node["type"]!.GetValue<string>() == "null");
+        oneOf.Should().ContainSingle(node => node!["$ref"] != null
+            && node["$ref"]!.GetValue<string>() == "#/components/schemas/JobErrorCode");
+    }
+
+    [Test]
     public async Task GetOpenApiDocument_Always_UsesUnambiguousTypes()
     {
         JsonNode document = await GetOpenApiDocumentAsync();

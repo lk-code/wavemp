@@ -1672,13 +1672,9 @@
           "scan.media_folder_not_found",
           "scan.media_folder_unreadable",
           "scan.media_folder_empty",
-          "scan.probe_unavailable",
-          null
+          "scan.probe_unavailable"
         ],
-        "type": [
-          "null",
-          "string"
-        ]
+        "type": "string"
       },
       "JobId": {
         "enum": [

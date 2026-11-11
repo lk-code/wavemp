@@ -1692,7 +1692,6 @@ export const JobErrorCodeObject = {
     ScanMedia_folder_unreadable: "scan.media_folder_unreadable",
     ScanMedia_folder_empty: "scan.media_folder_empty",
     ScanProbe_unavailable: "scan.probe_unavailable",
-    OpenapiJsonNullSentinelValue2BF936000FE44250987AE5DDB203E464: "openapi-json-null-sentinel-value-2BF93600-0FE4-4250-987A-E5DDB203E464",
 } as const;
 /**
  * Id of a background job.

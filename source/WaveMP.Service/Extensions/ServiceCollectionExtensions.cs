@@ -128,7 +128,7 @@ public static class ServiceCollectionExtensions
             // Clients see "Health" instead of "HealthDto" and "ProfilePage" for a PageDto of profiles.
             options.CreateSchemaReferenceId = CreateSchemaReferenceId;
 
-            options.AddSchemaTransformer(DescribeEnumsAsStrings);
+            options.AddSchemaTransformer<StringEnumSchemaTransformer>();
             options.AddDocumentTransformer(AddProblemCodeAsync);
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
@@ -167,26 +167,6 @@ public static class ServiceCollectionExtensions
         return id is not null && id.EndsWith(DtoSuffix, StringComparison.Ordinal) && id.Length > DtoSuffix.Length
             ? id[..^DtoSuffix.Length]
             : id;
-    }
-
-    /// <summary>
-    /// Enums are serialized as strings; states that explicitly so every generator creates a string enum.
-    /// </summary>
-    private static Task DescribeEnumsAsStrings(
-        OpenApiSchema schema,
-        OpenApiSchemaTransformerContext context,
-        CancellationToken cancellationToken)
-    {
-        Type type = Nullable.GetUnderlyingType(context.JsonTypeInfo.Type) ?? context.JsonTypeInfo.Type;
-        if (!type.IsEnum || schema.Enum is not { Count: > 0 } values || schema.Type is not null)
-        {
-            return Task.CompletedTask;
-        }
-
-        schema.Type = values.Any(value => value is null)
-            ? JsonSchemaType.String | JsonSchemaType.Null
-            : JsonSchemaType.String;
-        return Task.CompletedTask;
     }
 
     /// <summary>
