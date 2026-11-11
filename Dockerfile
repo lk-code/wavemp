@@ -1,27 +1,35 @@
 # syntax=docker/dockerfile:1
 
-# --- Web app ------------------------------------------------------------------
-FROM node:24-alpine AS web
+# Multi-arch build (linux/amd64, linux/arm64): the web app and the .NET service are built on the
+# build machine's own platform ($BUILDPLATFORM). The service is cross-compiled for the target
+# architecture ($TARGETARCH), so only the runtime stage runs for the target platform.
+
+# --- Web app (platform independent output) -------------------------------------
+FROM --platform=$BUILDPLATFORM node:24-alpine AS web
 WORKDIR /src/source/WaveMP.Web
 COPY source/WaveMP.Web/package.json source/WaveMP.Web/package-lock.json ./
 RUN npm ci
 COPY source/WaveMP.Web/ ./
 RUN npm run build
 
-# --- Service ------------------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# --- Service (cross-compiled on the build machine for the target architecture) --
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+ARG TARGETARCH
 WORKDIR /src
 COPY .editorconfig global.json Directory.Build.props Directory.Packages.props ./
 COPY source/WaveMP.Data/WaveMP.Data.csproj source/WaveMP.Data/
 COPY source/WaveMP.Service/WaveMP.Service.csproj source/WaveMP.Service/
-RUN dotnet restore source/WaveMP.Service/WaveMP.Service.csproj
+RUN dotnet restore source/WaveMP.Service/WaveMP.Service.csproj -a "$TARGETARCH"
 COPY source/WaveMP.Data/ source/WaveMP.Data/
 COPY source/WaveMP.Service/ source/WaveMP.Service/
 # The built web app becomes part of the service's static assets.
 COPY --from=web /src/source/WaveMP.Web/dist/ source/WaveMP.Service/wwwroot/
-RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -o /app --no-restore
+# Version of release images (e.g. 1.2.3); empty keeps the version from Directory.Build.props.
+ARG VERSION
+RUN dotnet publish source/WaveMP.Service/WaveMP.Service.csproj -c Release -a "$TARGETARCH" \
+    --no-self-contained --no-restore -o /app ${VERSION:+-p:Version=$VERSION}
 
-# --- Runtime ------------------------------------------------------------------
+# --- Runtime --------------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 
 # ffmpeg is used as an external process only (never linked).
