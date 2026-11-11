@@ -32,6 +32,11 @@ public class ModelTests
     [TestCase(typeof(ServerSecret), "server_secrets")]
     [TestCase(typeof(ServerSetting), "server_settings")]
     [TestCase(typeof(JobRun), "job_runs")]
+    [TestCase(typeof(Artist), "artists")]
+    [TestCase(typeof(Album), "albums")]
+    [TestCase(typeof(Track), "tracks")]
+    [TestCase(typeof(MediaFile), "media_files")]
+    [TestCase(typeof(Cover), "covers")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);
@@ -119,6 +124,63 @@ public class ModelTests
 
         result.GetColumnType().Should().Be("jsonb");
         result.IsNullable.Should().BeTrue();
+    }
+
+    [TestCase(typeof(MediaFile), new[] { nameof(MediaFile.RelativePath) })]
+    [TestCase(typeof(Track), new[] { nameof(Track.DirectoryPath), nameof(Track.NormalizedBaseName) })]
+    [TestCase(typeof(Album), new[] { nameof(Album.AlbumKey) })]
+    [TestCase(typeof(Artist), new[] { nameof(Artist.NormalizedName) })]
+    public void Library_NaturalKeys_HaveUniqueIndexes(Type entityType, string[] properties)
+    {
+        IIndex index = GetEntity(entityType).GetIndexes()
+            .Single(candidate => candidate.Properties.Select(property => property.Name).SequenceEqual(properties));
+
+        index.IsUnique.Should().BeTrue();
+    }
+
+    [Test]
+    public void Cover_Always_BelongsToEitherAnAlbumOrATrack()
+    {
+        ICheckConstraint constraint = GetEntity(typeof(Cover)).GetCheckConstraints().Single();
+
+        constraint.Name.Should().Be("ck_covers_owner");
+        constraint.Sql.Should().Be("(album_id IS NULL) <> (track_id IS NULL)");
+    }
+
+    [TestCase(typeof(Cover), typeof(Album), DeleteBehavior.Cascade)]
+    [TestCase(typeof(Cover), typeof(Track), DeleteBehavior.Cascade)]
+    [TestCase(typeof(Cover), typeof(MediaFile), DeleteBehavior.Cascade)]
+    [TestCase(typeof(Track), typeof(Album), DeleteBehavior.SetNull)]
+    [TestCase(typeof(Track), typeof(Artist), DeleteBehavior.SetNull)]
+    [TestCase(typeof(Album), typeof(Artist), DeleteBehavior.SetNull)]
+    [TestCase(typeof(MediaFile), typeof(Track), DeleteBehavior.SetNull)]
+    public void Library_ForeignKeys_HaveTheirDeleteBehavior(Type dependent, Type principal, DeleteBehavior expected)
+    {
+        IForeignKey foreignKey = GetEntity(dependent).GetForeignKeys()
+            .Single(key => key.PrincipalEntityType.ClrType == principal);
+
+        foreignKey.DeleteBehavior.Should().Be(expected);
+    }
+
+    [TestCase(typeof(MediaFile), nameof(MediaFile.Kind))]
+    [TestCase(typeof(MediaFile), nameof(MediaFile.Issue))]
+    [TestCase(typeof(Cover), nameof(Cover.Source))]
+    [TestCase(typeof(Track), nameof(Track.MetadataSource))]
+    public void Library_Enums_AreStoredAsNames(Type entityType, string property)
+    {
+        IProperty column = GetEntity(entityType).FindProperty(property)!;
+
+        column.GetProviderClrType().Should().Be<string>();
+    }
+
+    [Test]
+    public void MediaFile_Tags_AreColumnsOfTheFileTable()
+    {
+        IComplexProperty tags = GetEntity(typeof(MediaFile)).FindComplexProperty(nameof(MediaFile.Tags))!;
+
+        tags.ComplexType.FindProperty(nameof(MediaFileTags.Title))!.GetColumnName().Should().Be("tags_title");
+        tags.ComplexType.FindProperty(nameof(MediaFileTags.ReplayGainTrackGain))!.GetColumnName()
+            .Should().Be("tags_replay_gain_track_gain");
     }
 
     private IEntityType GetEntity(Type type)

@@ -21,6 +21,16 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     public DbSet<JobRun> JobRuns => Set<JobRun>();
 
+    public DbSet<Artist> Artists => Set<Artist>();
+
+    public DbSet<Album> Albums => Set<Album>();
+
+    public DbSet<Track> Tracks => Set<Track>();
+
+    public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
+
+    public DbSet<Cover> Covers => Set<Cover>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Applied one by one instead of scanning the assembly: a scan also loads the design-time types, whose
@@ -32,5 +42,10 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
         modelBuilder.ApplyConfiguration(new ServerSecretConfiguration());
         modelBuilder.ApplyConfiguration(new ServerSettingConfiguration());
         modelBuilder.ApplyConfiguration(new JobRunConfiguration());
+        modelBuilder.ApplyConfiguration(new ArtistConfiguration());
+        modelBuilder.ApplyConfiguration(new AlbumConfiguration());
+        modelBuilder.ApplyConfiguration(new TrackConfiguration());
+        modelBuilder.ApplyConfiguration(new MediaFileConfiguration());
+        modelBuilder.ApplyConfiguration(new CoverConfiguration());
     }
 }

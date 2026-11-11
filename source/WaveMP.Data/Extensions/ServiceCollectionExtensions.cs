@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IServerSecretRepository, ServerSecretRepository>();
         services.AddScoped<IServerSettingRepository, ServerSettingRepository>();
         services.AddScoped<IJobRunRepository, JobRunRepository>();
+        services.AddScoped<ILibraryScanRepository, LibraryScanRepository>();
 
         return services;
     }
