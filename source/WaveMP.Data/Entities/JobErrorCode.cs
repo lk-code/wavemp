@@ -34,4 +34,14 @@ public enum JobErrorCode
     /// ffprobe cannot be started.
     /// </summary>
     ProbeUnavailable,
+
+    /// <summary>
+    /// ffmpeg cannot be started, e.g. to scale covers.
+    /// </summary>
+    FfmpegUnavailable,
+
+    /// <summary>
+    /// The cache folder under the data folder cannot be written.
+    /// </summary>
+    CacheFolderUnwritable,
 }

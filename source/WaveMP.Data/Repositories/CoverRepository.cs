@@ -42,12 +42,71 @@ internal sealed class CoverRepository(WaveMpDbContext dbContext) : ICoverReposit
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Guid>> ListAlbumIdsWithCoversAsync(CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Albums.AsNoTracking()
+            .Where(album => album.Covers.Any() || album.Tracks.Any(track => track.Covers.Any()))
+            .OrderBy(album => album.Id)
+            .Select(album => album.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> ListLooseTrackIdsWithCoversAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Tracks.AsNoTracking()
+            .Where(track => track.AlbumId == null && track.Covers.Any())
+            .OrderBy(track => track.Id)
+            .Select(track => track.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<CoverCandidateRow>> GetAlbumBatchCandidatesAsync(
+        IReadOnlyCollection<Guid> albumIds,
+        CancellationToken cancellationToken = default)
+    {
+        Guid[] ids = [.. albumIds];
+        return await Project(dbContext.Covers.Where(cover =>
+                (cover.AlbumId != null && ids.Contains(cover.AlbumId.Value))
+                || (cover.Track != null && cover.Track.AlbumId != null && ids.Contains(cover.Track.AlbumId.Value))))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<CoverCandidateRow>> GetTrackBatchCandidatesAsync(
+        IReadOnlyCollection<Guid> trackIds,
+        CancellationToken cancellationToken = default)
+    {
+        Guid[] ids = [.. trackIds];
+        return await Project(dbContext.Covers.Where(cover =>
+                cover.TrackId != null && ids.Contains(cover.TrackId.Value)))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<CoverSourceRow>> ListCoverSourcesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var sources = await dbContext.Covers.AsNoTracking()
+            .Select(cover => new
+            {
+                cover.MediaFileId,
+                cover.Source,
+                cover.MediaFile!.Size,
+                cover.MediaFile.ModifiedAt,
+            })
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        return [.. sources.Select(source =>
+            new CoverSourceRow(source.MediaFileId, source.Source, source.Size, source.ModifiedAt))];
+    }
+
     private static IQueryable<CoverCandidateRow> Project(IQueryable<Cover> covers)
     {
         return covers.AsNoTracking().Select(cover => new CoverCandidateRow(
             cover.Id,
+            cover.MediaFileId,
             cover.AlbumId,
             cover.TrackId,
+            cover.Track != null ? cover.Track.AlbumId : null,
             cover.Track != null ? cover.Track.DiscNumber : null,
             cover.Track != null ? cover.Track.TrackNumber : null,
             cover.Track != null ? cover.Track.Title : null,

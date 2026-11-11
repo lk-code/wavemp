@@ -92,7 +92,9 @@ public class CoverResolverTests
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
+            Guid.NewGuid(),
             _albumId,
+            null,
             null,
             null,
             null,
@@ -109,8 +111,10 @@ public class CoverResolverTests
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
+            Guid.NewGuid(),
             null,
             trackId,
+            _albumId,
             disc,
             number,
             name,

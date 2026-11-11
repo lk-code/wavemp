@@ -175,7 +175,9 @@ public class CoverServiceTests
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
+            Guid.NewGuid(),
             _albumId,
+            null,
             null,
             null,
             null,
@@ -192,8 +194,10 @@ public class CoverServiceTests
     {
         return new CoverCandidateRow(
             Guid.NewGuid(),
+            Guid.NewGuid(),
             null,
             _trackId,
+            _albumId,
             1,
             1,
             "Song",
