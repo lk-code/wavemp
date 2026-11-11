@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // Address of WaveMP.Service during development (see Properties/launchSettings.json).
 const serviceUrl = process.env.WAVEMP_SERVICE_URL ?? 'http://localhost:5080'
@@ -21,6 +22,54 @@ export default defineConfig({
         VueI18nPlugin({
             include: fileURLToPath(new URL('./src/locales/**', import.meta.url)),
             strictMessage: true,
+        }),
+        // Installable web app: manifest and a service worker that precaches the app shell (HTML,
+        // scripts, styles, themes, icons). API responses and media are never cached.
+        VitePWA({
+            // New versions activate on the next load without asking and without a forced reload.
+            registerType: 'autoUpdate',
+            // Registration through /registerSW.js, no inline script.
+            injectRegister: 'script-defer',
+            manifest: {
+                id: '/',
+                name: 'WaveMP',
+                short_name: 'WaveMP',
+                description:
+                    'A nostalgic media player for your self-hosted music and music videos.',
+                lang: 'en',
+                dir: 'ltr',
+                start_url: '/',
+                scope: '/',
+                display: 'standalone',
+                background_color: '#0b0d10',
+                theme_color: '#000000',
+                icons: [
+                    { src: '/brand/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+                    { src: '/brand/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+                    {
+                        src: '/brand/pwa-maskable-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable',
+                    },
+                    { src: '/brand/logo.svg', sizes: 'any', type: 'image/svg+xml' },
+                ],
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+                navigateFallback: '/index.html',
+                // The API, the OpenAPI document and paths that look like files (as on the server)
+                // always come from the network.
+                navigateFallbackDenylist: [
+                    /^\/api(?:\/|$)/,
+                    /^\/openapi(?:\/|$)/,
+                    /\/[^/?]+\.[^/?]+$/,
+                ],
+                cleanupOutdatedCaches: true,
+                // No runtime caching: API responses and media are never cached.
+                runtimeCaching: [],
+            },
+            devOptions: { enabled: false },
         }),
     ],
     resolve: {

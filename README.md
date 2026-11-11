@@ -84,6 +84,8 @@ docker compose up -d
 
 Open `http://<your-server>:8080` and select the **Admin** profile to set up your library.
 
+WaveMP can be installed as an app (PWA). Browsers require HTTPS for that, except on `localhost`, for example behind a reverse proxy with TLS.
+
 ### Image tags
 
 Images are built for `linux/amd64` and `linux/arm64` and published as `ghcr.io/lk-code/wavemp` and on Docker Hub as `lkcode/wavemp`, both with the same tags:
