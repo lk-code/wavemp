@@ -151,6 +151,7 @@ Example of a desktop layout with the sidebar on the right:
 | `now-playing-meta` | `span` | `now-playing-mini` | Title and artist |
 | `now-playing-title` | `span` | `now-playing-meta` | Title of the current track |
 | `now-playing-artist` | `span` | `now-playing-meta` | Artist of the current track |
+| `transport-message` | `p` (`role="status"`) | `transport` | Notice of the player, for example that a song was skipped; empty while there is none. The base shows it above the transport bar, outside the grid |
 | `transport-controls` | `div` (`role="group"`) | `transport` | Playback controls |
 | `btn-shuffle` | `button` (`aria-pressed`) | `transport-controls` | Shuffle |
 | `btn-repeat` | `button` (`aria-pressed`) | `transport-controls` | Repeat off, all or one |
@@ -250,7 +251,8 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 
 | Part | Tokens |
 |---|---|
-| `transport` | `idle`, `playing` or `paused`; additionally `expanded` while the full-screen player is open (mobile) |
+| `transport` | `idle`, `playing` or `paused`; additionally `loading` while a song loads or waits for data, and `expanded` while the full-screen player is open (mobile) |
+| `transport-message` | `empty` without a notice, otherwise its kind: `unsupported` (the song needs transcoding, which follows later), `unavailable` (it could not be loaded) or `failed` (it failed to play) |
 | `btn-play` | `idle`, `playing` or `paused` |
 | `btn-shuffle` | `on` or `off` |
 | `btn-repeat` | `off`, `all` or `one` |

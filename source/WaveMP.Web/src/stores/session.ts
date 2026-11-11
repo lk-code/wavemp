@@ -2,7 +2,14 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { sessionTokens } from '@/api/auth'
 import { apiClient } from '@/api/client'
-import { RoleObject, type Language, type Session } from '@/api/generated/models'
+import {
+    ReplayGainModeObject,
+    RoleObject,
+    type Language,
+    type ReplayGainMode,
+    type Session,
+    type UserSettings,
+} from '@/api/generated/models'
 import { isUnauthorized } from '@/api/problems'
 import { isSupportedLocale, type SupportedLocale } from '@/i18n/locales'
 import {
@@ -13,6 +20,13 @@ import {
     type StoredProfile,
     type StoredSession,
 } from '@/session/storage'
+
+const replayGainModes = new Set<string>(Object.values(ReplayGainModeObject))
+
+function toReplayGain(settings: UserSettings | null | undefined): ReplayGainMode | null {
+    const mode = settings?.replayGain
+    return mode && replayGainModes.has(mode) ? mode : null
+}
 
 function toLocale(language: Language | null | undefined): SupportedLocale | null {
     return language && isSupportedLocale(language) ? language : null
@@ -30,6 +44,8 @@ export const useSessionStore = defineStore('session', () => {
     const expiresAt = ref<string | null>(null)
     const profile = ref<StoredProfile | null>(null)
     const language = ref<SupportedLocale | null>(null)
+    /** ReplayGain mode of the profile; Off until the settings are loaded. */
+    const replayGain = ref<ReplayGainMode>(ReplayGainModeObject.Off)
 
     const isAuthenticated = computed(
         () =>
@@ -49,6 +65,7 @@ export const useSessionStore = defineStore('session', () => {
         expiresAt.value = session?.expiresAt ?? null
         profile.value = session?.profile ?? null
         language.value = session?.language ?? null
+        replayGain.value = ReplayGainModeObject.Off
         sessionTokens.current = token.value
     }
 
@@ -109,6 +126,7 @@ export const useSessionStore = defineStore('session', () => {
         token.value = created.token
         sessionTokens.current = created.token
         language.value = null
+        replayGain.value = ReplayGainModeObject.Off
         if (!applySession(created.session)) {
             clear()
             throw new Error('The server returned an incomplete session.')
@@ -117,6 +135,7 @@ export const useSessionStore = defineStore('session', () => {
         try {
             const settings = await apiClient.api.v1.me.settings.get()
             language.value = toLocale(settings?.language)
+            replayGain.value = toReplayGain(settings) ?? ReplayGainModeObject.Off
         } catch {
             // The language follows with the next refresh; until then the browser language applies.
         }
@@ -142,6 +161,7 @@ export const useSessionStore = defineStore('session', () => {
 
             applySession(session)
             language.value = toLocale(settings?.language) ?? language.value
+            replayGain.value = toReplayGain(settings) ?? replayGain.value
             persist()
         } catch (error) {
             if (isUnauthorized(error) && token.value === requestToken) {
@@ -155,6 +175,12 @@ export const useSessionStore = defineStore('session', () => {
         const settings = await apiClient.api.v1.me.settings.patch({ language: locale })
         language.value = toLocale(settings?.language) ?? locale
         persist()
+    }
+
+    /** Saves the ReplayGain mode of the profile on the server. Errors are passed on. */
+    async function updateReplayGain(mode: ReplayGainMode): Promise<void> {
+        const settings = await apiClient.api.v1.me.settings.patch({ replayGain: mode })
+        replayGain.value = toReplayGain(settings) ?? mode
     }
 
     /** Ends the session on the server (if reachable) and forgets it. */
@@ -176,6 +202,7 @@ export const useSessionStore = defineStore('session', () => {
         expiresAt,
         profile,
         language,
+        replayGain,
         isAuthenticated,
         isAdmin,
         isBuiltInAdmin,
@@ -183,6 +210,7 @@ export const useSessionStore = defineStore('session', () => {
         select,
         refresh,
         updateLanguage,
+        updateReplayGain,
         signOut,
         clear,
     }

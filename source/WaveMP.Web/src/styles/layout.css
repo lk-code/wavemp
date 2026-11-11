@@ -34,6 +34,7 @@
 
     [data-part='app'] > [data-part='transport'] {
         grid-area: transport;
+        position: relative;
     }
 
     [data-part='app'] > [data-part='bottom-nav'] {

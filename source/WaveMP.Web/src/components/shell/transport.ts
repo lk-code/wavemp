@@ -1,5 +1,5 @@
-// State of the transport bar. The bar is controlled through props only, so the source of the
-// state can be exchanged: a placeholder until step 9, then the player.
+// State of the transport bar. The bar is controlled through props only; the player store
+// (src/stores/player.ts) provides the state and handles the events.
 
 import type { IconSlotName } from '@/themes/iconSlots'
 
@@ -7,10 +7,23 @@ export type PlaybackState = 'idle' | 'playing' | 'paused'
 
 export type RepeatMode = 'off' | 'all' | 'one'
 
+/**
+ * Notice of the player: the track needs transcoding (not available yet), could not be loaded or
+ * failed to play. The player skips to the next track.
+ */
+export type PlayerMessage = 'unsupported' | 'unavailable' | 'failed'
+
 export interface TransportState {
     playback: PlaybackState
+    /** The track is being loaded or waits for data. */
+    loading?: boolean
+    /** Id of the current track; without one, there is nothing to play. */
+    trackId?: string
+    /** Whether the current track has a cover. */
+    hasCover?: boolean
     title?: string
     artist?: string
+    message?: PlayerMessage | null
     /** Position and duration in seconds. */
     position: number
     duration: number
@@ -50,7 +63,11 @@ export function transportIcons(
     }
 }
 
-/** data-state tokens of the transport bar, e.g. "playing expanded". */
-export function transportStateTokens(playback: PlaybackState, expanded: boolean): string {
-    return expanded ? `${playback} expanded` : playback
+/** data-state tokens of the transport bar, e.g. "playing loading expanded". */
+export function transportStateTokens(
+    playback: PlaybackState,
+    expanded: boolean,
+    loading = false,
+): string {
+    return [playback, ...(loading ? ['loading'] : []), ...(expanded ? ['expanded'] : [])].join(' ')
 }

@@ -4,10 +4,16 @@ import { useI18n } from 'vue-i18n'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseCover from '@/components/base/BaseCover.vue'
 import BaseSlider from '@/components/base/BaseSlider.vue'
+import LibraryCover from '@/components/library/LibraryCover.vue'
 import { useFormat } from '@/composables/useFormat'
 import { useMediaQuery } from '@/composables/useMediaQuery'
 import { desktopMediaQuery } from '@/themes/breakpoints'
-import { transportIcons, transportStateTokens, type TransportState } from './transport'
+import {
+    transportIcons,
+    transportStateTokens,
+    type PlayerMessage,
+    type TransportState,
+} from './transport'
 
 /**
  * Transport bar: seek bar, mini player and playback controls. It is controlled through props and
@@ -44,9 +50,22 @@ const format = useFormat()
 const isDesktop = useMediaQuery(desktopMediaQuery)
 
 const idle = computed(() => props.state.playback === 'idle')
+/** Without a current track there is nothing to play, skip or seek. */
+const empty = computed(() => !props.state.trackId)
 const playing = computed(() => props.state.playback === 'playing')
 const icons = computed(() => transportIcons(props.state))
-const tokens = computed(() => transportStateTokens(props.state.playback, props.expanded))
+const tokens = computed(() =>
+    transportStateTokens(props.state.playback, props.expanded, props.state.loading ?? false),
+)
+
+const messageText = computed(() => {
+    const messages: Record<PlayerMessage, string> = {
+        unsupported: t('player.messages.unsupported'),
+        unavailable: t('player.messages.unavailable'),
+        failed: t('player.messages.failed'),
+    }
+    return props.state.message ? messages[props.state.message] : ''
+})
 
 const repeatLabel = computed(() => {
     switch (props.state.repeat) {
@@ -97,7 +116,13 @@ function onMiniPlayer(): void {
             :aria-expanded="isDesktop ? undefined : expanded ? 'true' : 'false'"
             @click="onMiniPlayer"
         >
-            <BaseCover />
+            <LibraryCover
+                v-if="state.trackId"
+                kind="track"
+                :id="state.trackId"
+                :available="state.hasCover ?? false"
+            />
+            <BaseCover v-else />
             <span data-part="now-playing-meta">
                 <span data-part="now-playing-title">{{
                     state.title ?? t('player.nothingPlaying')
@@ -108,6 +133,13 @@ function onMiniPlayer(): void {
                 isDesktop ? t('player.showNowPlaying') : t('player.open')
             }}</span>
         </button>
+        <p
+            data-part="transport-message"
+            role="status"
+            :data-state="state.message ? state.message : 'empty'"
+        >
+            {{ messageText }}
+        </p>
         <div data-part="transport-controls" role="group" :aria-label="t('player.controls')">
             <BaseButton
                 part="btn-shuffle"
@@ -140,7 +172,7 @@ function onMiniPlayer(): void {
                 variant="icon"
                 icon="previous"
                 :label="t('player.previous')"
-                :disabled="idle"
+                :disabled="empty"
                 @click="emit('previous')"
             />
             <BaseButton
@@ -149,7 +181,7 @@ function onMiniPlayer(): void {
                 :icon="icons.play"
                 :label="playing ? t('player.pause') : t('player.play')"
                 :state="state.playback"
-                :disabled="idle"
+                :disabled="empty"
                 @click="playing ? emit('pause') : emit('play')"
             />
             <BaseButton
@@ -157,7 +189,7 @@ function onMiniPlayer(): void {
                 variant="icon"
                 icon="next"
                 :label="t('player.next')"
-                :disabled="idle"
+                :disabled="empty"
                 @click="emit('next')"
             />
             <BaseButton

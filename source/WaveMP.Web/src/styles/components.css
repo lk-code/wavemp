@@ -35,6 +35,28 @@
         border-block-start: 1px solid var(--wmp-color-border);
     }
 
+    /* Notice of the player, above the transport bar; empty while there is none. */
+    [data-part='transport'] > [data-part='transport-message'] {
+        position: absolute;
+        inset-block-end: 100%;
+        inset-inline: var(--wmp-space-s);
+        z-index: 1;
+        margin: 0 0 var(--wmp-space-xs);
+        padding: var(--wmp-space-xs) var(--wmp-space-s);
+        color: var(--wmp-color-text);
+        font-size: var(--wmp-font-size-s);
+        background: var(--wmp-color-surface-raised);
+        border: 1px solid var(--wmp-color-border);
+        border-radius: var(--wmp-radius-s);
+        pointer-events: none;
+    }
+
+    [data-part='transport'] > [data-part='transport-message'][data-state~='empty'] {
+        padding: 0;
+        background: none;
+        border: 0;
+    }
+
     [data-part='bottom-nav'] {
         color: var(--wmp-bottom-nav-color);
         background: var(--wmp-bottom-nav-background);

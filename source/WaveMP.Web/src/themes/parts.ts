@@ -96,6 +96,7 @@ export const parts = [
     'now-playing-meta',
     'now-playing-title',
     'now-playing-artist',
+    'transport-message',
     'transport-controls',
     'btn-shuffle',
     'btn-repeat',

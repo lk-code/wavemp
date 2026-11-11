@@ -59,7 +59,9 @@
     "albumNotFound": "This album no longer exists.",
     "artistNotFound": "This artist no longer exists.",
     "trackNotFound": "This song no longer exists.",
-    "toLibrary": "Go to the library"
+    "toLibrary": "Go to the library",
+    "play": "Play",
+    "shufflePlay": "Shuffle"
   },
   "list": {
     "columns": {
@@ -108,11 +110,24 @@
     "compactMode": "Switch to compact mode",
     "open": "Open player",
     "showNowPlaying": "Show Now Playing",
-    "close": "Close player"
+    "close": "Close player",
+    "messages": {
+      "unsupported": "This song cannot be played in this browser yet; it was skipped.",
+      "unavailable": "This song could not be loaded; it was skipped.",
+      "failed": "Playback failed; the song was skipped."
+    }
   },
   "nowPlaying": {
     "emptyTitle": "Nothing is playing",
-    "emptyText": "Songs you play will appear here."
+    "emptyText": "Songs you play will appear here.",
+    "queue": "Queue",
+    "queueEmpty": "The queue is empty.",
+    "nowPlaying": "Now playing",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove from queue",
+    "clear": "Clear queue",
+    "playItem": "Play {title}"
   },
   "playlists": {
     "emptyTitle": "No playlists yet",
@@ -218,6 +233,8 @@
       "repeatAll": "Repeat all",
       "repeatOne": "Repeat one",
       "muted": "Muted",
+      "loading": "Loading",
+      "message": "Notice (format not supported)",
       "expanded": "Expanded (full-screen player on mobile)"
     },
     "table": {
@@ -257,6 +274,13 @@
     "languages": {
       "en": "English",
       "de": "Deutsch"
+    },
+    "replayGain": "Volume leveling (ReplayGain)",
+    "replayGainHint": "Evens out the volume of songs with their ReplayGain tags. Applies to this profile on all devices.",
+    "replayGainModes": {
+      "off": "Off",
+      "track": "Per song",
+      "album": "Per album"
     }
   },
   "adminUsers": {
@@ -574,7 +598,10 @@
     "details": "Show details",
     "album": "Go to album",
     "artist": "Go to artist",
-    "editMetadata": "Edit metadata"
+    "editMetadata": "Edit metadata",
+    "play": "Play",
+    "playNext": "Play next",
+    "addToQueue": "Add to queue"
   },
   "validation": {
     "required": "This field is required.",

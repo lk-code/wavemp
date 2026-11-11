@@ -177,6 +177,7 @@ const idle: TransportState = {
     muted: false,
 }
 const track = computed(() => ({
+    trackId: 'dev-track',
     title: t('placeholders.track', { number: 1 }),
     artist: t('placeholders.artist', { number: 1 }),
     position: 65,
@@ -218,6 +219,23 @@ const transports = computed(() => [
         id: 'muted',
         label: t('dev.transportStates.muted'),
         state: { ...idle, ...track.value, playback: 'paused' as const, muted: true },
+        expanded: false,
+    },
+    {
+        id: 'loading',
+        label: t('dev.transportStates.loading'),
+        state: { ...idle, ...track.value, playback: 'playing' as const, loading: true },
+        expanded: false,
+    },
+    {
+        id: 'message',
+        label: t('dev.transportStates.message'),
+        state: {
+            ...idle,
+            ...track.value,
+            playback: 'playing' as const,
+            message: 'unsupported' as const,
+        },
         expanded: false,
     },
     {

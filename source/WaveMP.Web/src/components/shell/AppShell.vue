@@ -7,10 +7,10 @@ import AppHeader from './AppHeader.vue'
 import AppSidebar from './AppSidebar.vue'
 import AppToolbar from './AppToolbar.vue'
 import AppTransport from './AppTransport.vue'
-import { usePlaceholderTransport } from '@/composables/usePlaceholderTransport'
 import { pageTitleKey } from '@/navigation/breadcrumb'
 import { useHealthStore } from '@/stores/health'
 import { usePageTitleStore } from '@/stores/pageTitle'
+import { usePlayerStore } from '@/stores/player'
 
 /**
  * App shell: the fixed areas of the theme API around the content of the current page. The DOM is
@@ -22,8 +22,7 @@ const router = useRouter()
 const health = useHealthStore()
 const pageTitle = usePageTitleStore()
 
-// Placeholder until the player exists (step 9).
-const transport = usePlaceholderTransport()
+const player = usePlayerStore()
 
 const sidebarOpen = ref(false)
 const playerExpanded = ref(false)
@@ -106,12 +105,18 @@ onUnmounted(() => {
             <slot />
         </main>
         <AppTransport
-            :state="transport.state"
+            :state="player.state"
             :expanded="playerExpanded"
-            @toggle-shuffle="transport.toggleShuffle"
-            @cycle-repeat="transport.cycleRepeat"
-            @toggle-mute="transport.toggleMute"
-            @change-volume="transport.setVolume"
+            @play="player.play"
+            @pause="player.pause"
+            @stop="player.stop"
+            @previous="player.previous"
+            @next="player.next"
+            @seek="player.seek"
+            @toggle-shuffle="player.toggleShuffle"
+            @cycle-repeat="player.cycleRepeat"
+            @toggle-mute="player.toggleMute"
+            @change-volume="player.setVolume"
             @show-now-playing="router.push({ name: 'now-playing' })"
             @expand="expandPlayer"
             @collapse="collapsePlayer"

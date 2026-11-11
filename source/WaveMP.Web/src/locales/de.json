@@ -59,7 +59,9 @@
     "albumNotFound": "Dieses Album gibt es nicht mehr.",
     "artistNotFound": "Diesen Interpreten gibt es nicht mehr.",
     "trackNotFound": "Diesen Titel gibt es nicht mehr.",
-    "toLibrary": "Zur Bibliothek"
+    "toLibrary": "Zur Bibliothek",
+    "play": "Abspielen",
+    "shufflePlay": "Zufällig abspielen"
   },
   "list": {
     "columns": {
@@ -108,11 +110,24 @@
     "compactMode": "Zum Kompaktmodus wechseln",
     "open": "Player öffnen",
     "showNowPlaying": "Aktuelle Wiedergabe anzeigen",
-    "close": "Player schließen"
+    "close": "Player schließen",
+    "messages": {
+      "unsupported": "Dieser Titel kann in diesem Browser noch nicht abgespielt werden und wurde übersprungen.",
+      "unavailable": "Dieser Titel konnte nicht geladen werden und wurde übersprungen.",
+      "failed": "Die Wiedergabe ist fehlgeschlagen; der Titel wurde übersprungen."
+    }
   },
   "nowPlaying": {
     "emptyTitle": "Es wird nichts wiedergegeben",
-    "emptyText": "Titel, die du abspielst, erscheinen hier."
+    "emptyText": "Titel, die du abspielst, erscheinen hier.",
+    "queue": "Warteschlange",
+    "queueEmpty": "Die Warteschlange ist leer.",
+    "nowPlaying": "Läuft gerade",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "remove": "Aus der Warteschlange entfernen",
+    "clear": "Warteschlange leeren",
+    "playItem": "{title} abspielen"
   },
   "playlists": {
     "emptyTitle": "Noch keine Playlists",
@@ -218,6 +233,8 @@
       "repeatAll": "Alle wiederholen",
       "repeatOne": "Einen wiederholen",
       "muted": "Stumm",
+      "loading": "Laden",
+      "message": "Hinweis (Format nicht unterstützt)",
       "expanded": "Erweitert (mobiler Vollbild-Player)"
     },
     "table": {
@@ -257,6 +274,13 @@
     "languages": {
       "en": "English",
       "de": "Deutsch"
+    },
+    "replayGain": "Lautstärkeausgleich (ReplayGain)",
+    "replayGainHint": "Gleicht die Lautstärke der Titel mit ihren ReplayGain-Tags an. Gilt für dieses Profil auf allen Geräten.",
+    "replayGainModes": {
+      "off": "Aus",
+      "track": "Pro Titel",
+      "album": "Pro Album"
     }
   },
   "adminUsers": {
@@ -574,7 +598,10 @@
     "details": "Details anzeigen",
     "album": "Zum Album",
     "artist": "Zum Interpreten",
-    "editMetadata": "Metadaten bearbeiten"
+    "editMetadata": "Metadaten bearbeiten",
+    "play": "Abspielen",
+    "playNext": "Als Nächstes abspielen",
+    "addToQueue": "Zur Warteschlange hinzufügen"
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",

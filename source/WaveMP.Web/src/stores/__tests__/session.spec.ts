@@ -219,6 +219,25 @@ describe('session store', () => {
         expect(loadStoredSession()?.language).toBe('de')
     })
 
+    it('loads the ReplayGain mode with the settings and saves it on the server', async () => {
+        api.createSession.mockResolvedValue(created('a'))
+        api.getSettings.mockResolvedValue({ language: 'en', replayGain: 'Album' })
+        api.updateSettings.mockResolvedValue({ language: 'en', replayGain: 'Track' })
+        const session = useSessionStore()
+        session.restore()
+        expect(session.replayGain).toBe('Off')
+
+        await session.select('a')
+        expect(session.replayGain).toBe('Album')
+
+        await session.updateReplayGain('Track')
+        expect(api.updateSettings).toHaveBeenCalledWith({ replayGain: 'Track' })
+        expect(session.replayGain).toBe('Track')
+
+        session.clear()
+        expect(session.replayGain).toBe('Off')
+    })
+
     it('passes errors of saving the language on', async () => {
         saveStoredSession(stored('a', 'en'))
         api.updateSettings.mockRejectedValue(new TypeError('Failed to fetch'))
