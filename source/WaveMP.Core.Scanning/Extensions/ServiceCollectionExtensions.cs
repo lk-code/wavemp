@@ -7,6 +7,7 @@ using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Scanning.Jobs;
 using WaveMP.Core.Scanning.Options;
 using WaveMP.Core.Scanning.Scans;
+using WaveMP.Core.Scanning.Watchers;
 using WaveMP.Core.Scanning.Writers;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Handlers;
@@ -18,7 +19,8 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers the library scan. The media folder comes from <c>MEDIA_PATH</c> (default <c>/media</c>; relative
     /// paths against the content root), further settings from the section <c>Scanning</c>. Needs <c>AddWaveMpData</c>,
-    /// <c>AddWaveMpSettings</c>, <c>AddWaveMpMetadata</c> and <c>AddWaveMpJobs</c>.
+    /// <c>AddWaveMpSettings</c>, <c>AddWaveMpMetadata</c> and <c>AddWaveMpJobs</c>. Includes the scan job, its periodic
+    /// schedule and the file watcher (hosted service).
     /// </summary>
     public static IServiceCollection AddWaveMpScanning(this IServiceCollection services)
     {
@@ -43,6 +45,11 @@ public static class ServiceCollectionExtensions
         services.AddWaveMpJob<LibraryScanJob>(JobIds.LibraryScan);
         services.AddSingleton<IJobScheduleProvider, LibraryScanScheduleProvider>();
         services.AddSingleton<ISettingsChangeHandler<LibrarySettings>, LibraryScanRescheduler>();
+
+        services.AddSingleton<MediaFolderWatcher>();
+        services.AddHostedService(provider => provider.GetRequiredService<MediaFolderWatcher>());
+        services.AddSingleton<ISettingsChangeHandler<LibrarySettings>>(provider =>
+            provider.GetRequiredService<MediaFolderWatcher>());
 
         return services;
     }
