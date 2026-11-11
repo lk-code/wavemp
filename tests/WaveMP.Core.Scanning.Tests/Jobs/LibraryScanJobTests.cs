@@ -1,16 +1,20 @@
 using System.Reflection;
 using AwesomeAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Quartz;
 using WaveMP.Core.Jobs.Definitions;
 using WaveMP.Core.Jobs.Runs;
 using WaveMP.Core.Jobs.Schedulers;
+using WaveMP.Core.Jobs.Services;
 using WaveMP.Core.Scanning.Jobs;
 using WaveMP.Core.Scanning.Options;
 using WaveMP.Core.Scanning.Plans;
 using WaveMP.Core.Scanning.Scans;
 using WaveMP.Core.Settings.Groups;
 using WaveMP.Core.Settings.Snapshots;
+using WaveMP.Data.Entities;
 
 namespace WaveMP.Core.Scanning.Tests.Jobs;
 
@@ -39,12 +43,54 @@ public class LibraryScanJobTests
             [JobDataKeys.Payload] = LibraryScanJob.CreatePayload(ScanScope.Of(["Artist/Album", "Other"])),
         });
 
-        await new LibraryScanJob(scanner, tracker).Execute(context, CancellationToken.None);
+        await new LibraryScanJob(scanner, tracker, Substitute.For<IJobService>(), NullLogger<LibraryScanJob>.Instance)
+            .Execute(context, CancellationToken.None);
 
         await scanner.Received(1).ScanAsync(
             Arg.Is<ScanScope>(scope => scope.Directories.SequenceEqual(new[] { "Artist/Album", "Other" })),
             runId,
             Arg.Any<CancellationToken>());
+        context.Received().Result = result;
+    }
+
+    [TestCase(true, 0, true)]
+    [TestCase(false, 1, true)]
+    [TestCase(false, 0, false)]
+    public async Task Execute_AfterTheScan_StartsThePreparationOfTheCoversAfterFullScansAndChanges(
+        bool full,
+        int filesAdded,
+        bool expected)
+    {
+        ILibraryScanner scanner = Substitute.For<ILibraryScanner>();
+        scanner.ScanAsync(Arg.Any<ScanScope>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(new ScanResult(new ScanStatistics { FilesAdded = filesAdded, IsPartial = !full }, []));
+        IJobService jobs = Substitute.For<IJobService>();
+        IJobExecutionContext context = ContextFor(full ? null : ScanScope.Of(["Artist/Album"]));
+
+        await new LibraryScanJob(scanner, new JobRunTracker(), jobs, NullLogger<LibraryScanJob>.Instance)
+            .Execute(context, CancellationToken.None);
+
+        await jobs.Received(expected ? 1 : 0).StartRunAsync(
+            new JobRunRequest(JobIds.CoverCache, JobRunTrigger.LibraryScan),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task Execute_PreparationCannotBeStarted_KeepsTheScanSuccessful()
+    {
+        ILibraryScanner scanner = Substitute.For<ILibraryScanner>();
+        ScanResult result = new(new ScanStatistics(), []);
+        scanner.ScanAsync(Arg.Any<ScanScope>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(result);
+        IJobService jobs = Substitute.For<IJobService>();
+        jobs.StartRunAsync(Arg.Any<JobRunRequest>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new InvalidOperationException("Database gone"));
+        IJobExecutionContext context = ContextFor(null);
+
+        Func<Task> execute = async () =>
+            await new LibraryScanJob(scanner, new JobRunTracker(), jobs, NullLogger<LibraryScanJob>.Instance)
+                .Execute(context, CancellationToken.None);
+
+        await execute.Should().NotThrowAsync();
         context.Received().Result = result;
     }
 
@@ -101,5 +147,15 @@ public class LibraryScanJobTests
             CancellationToken.None);
 
         await scheduler.DidNotReceive().RescheduleAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    private static IJobExecutionContext ContextFor(ScanScope? scope)
+    {
+        IJobExecutionContext context = Substitute.For<IJobExecutionContext>();
+        context.FireInstanceId.Returns("fire-1");
+        context.MergedJobDataMap.Returns(scope is null
+            ? []
+            : new JobDataMap { [JobDataKeys.Payload] = LibraryScanJob.CreatePayload(scope) });
+        return context;
     }
 }

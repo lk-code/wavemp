@@ -9,4 +9,9 @@ public static class JobIds
     /// Scans the media folder and updates the library.
     /// </summary>
     public const string LibraryScan = "library-scan";
+
+    /// <summary>
+    /// Prepares the scaled covers after a scan and removes those of changed or removed pictures from the cache.
+    /// </summary>
+    public const string CoverCache = "cover-cache";
 }
