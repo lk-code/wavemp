@@ -2964,12 +2964,15 @@ export const JobErrorCodeObject = {
     ScanMedia_folder_unreadable: "scan.media_folder_unreadable",
     ScanMedia_folder_empty: "scan.media_folder_empty",
     ScanProbe_unavailable: "scan.probe_unavailable",
+    CacheFfmpeg_unavailable: "cache.ffmpeg_unavailable",
+    CacheFolder_unwritable: "cache.folder_unwritable",
 } as const;
 /**
  * Id of a background job.
  */
 export const JobIdObject = {
     LibraryScan: "library-scan",
+    CoverCache: "cover-cache",
 } as const;
 /**
  * State of a job run.
@@ -2997,6 +3000,7 @@ export const JobTriggerObject = {
     Schedule: "Schedule",
     Manual: "Manual",
     FileWatcher: "FileWatcher",
+    LibraryScan: "LibraryScan",
 } as const;
 /**
  * Language of the user interface.

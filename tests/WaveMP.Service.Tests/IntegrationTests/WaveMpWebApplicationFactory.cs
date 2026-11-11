@@ -14,8 +14,9 @@ namespace WaveMP.Service.Tests.IntegrationTests;
 /// configuration, the migrations and the creation of the built-in admin profile, against a real PostgreSQL instance
 /// (local: docker-compose.dev.yml, CI: service container). Uses its own database, by default <c>wavemp_tests</c>.
 /// The connection settings come from <see cref="TestDatabaseSettings"/>. The media folder is an empty temporary
-/// folder unless the test passes its own, and no periodic scan runs during the tests. <c>Program</c> is public without
-/// a declaration of its own: since .NET 10, ASP.NET Core generates it for apps with top-level statements.
+/// folder unless the test passes its own, the data folder (with the cache) is a temporary folder of its own, and no
+/// periodic scan runs during the tests. <c>Program</c> is public without a declaration of its own: since .NET 10,
+/// ASP.NET Core generates it for apps with top-level statements.
 /// </summary>
 /// <param name="databaseName">
 /// Name of the database. If <c>null</c>, <c>DB_NAME</c> from the environment or <see cref="TestDatabaseName"/>.
@@ -36,6 +37,12 @@ public sealed class WaveMpWebApplicationFactory(
     private const string EnvironmentName = "Testing";
 
     private readonly TemporaryDirectory? _emptyMedia = mediaPath is null ? new TemporaryDirectory() : null;
+    private readonly TemporaryDirectory _data = new();
+
+    /// <summary>
+    /// The data folder (<c>DATA_PATH</c>) of the service; the cache lies in its folder <c>cache</c>.
+    /// </summary>
+    public string DataPath => _data.Path;
 
     private string DatabaseName => databaseName ?? Environment.GetEnvironmentVariable("DB_NAME") ?? TestDatabaseName;
 
@@ -54,12 +61,14 @@ public sealed class WaveMpWebApplicationFactory(
         builder.UseEnvironment(EnvironmentName);
         Dictionary<string, string?> settings = TestDatabaseSettings.ToConfiguration(DatabaseName);
         settings["MEDIA_PATH"] = mediaPath ?? _emptyMedia!.Path;
+        settings["DATA_PATH"] = _data.Path;
         // The periodic scan would start one minute after the start; tests start scans themselves.
         settings["Scanning:StartupDelay"] = "1.00:00:00";
         if (Environment.GetEnvironmentVariable("FFMPEG_PATH") is { Length: > 0 } ffmpeg)
         {
-            string ffprobe = OperatingSystem.IsWindows() ? "ffprobe.exe" : "ffprobe";
-            settings["Metadata:FfprobePath"] = Path.Combine(ffmpeg, ffprobe);
+            string extension = OperatingSystem.IsWindows() ? ".exe" : string.Empty;
+            settings["Metadata:FfprobePath"] = Path.Combine(ffmpeg, "ffprobe" + extension);
+            settings["Caching:FfmpegPath"] = Path.Combine(ffmpeg, "ffmpeg" + extension);
         }
 
         builder.ConfigureAppConfiguration(configuration => configuration.AddInMemoryCollection(settings));
@@ -90,5 +99,6 @@ public sealed class WaveMpWebApplicationFactory(
     {
         await base.DisposeAsync();
         _emptyMedia?.Dispose();
+        _data.Dispose();
     }
 }

@@ -108,7 +108,9 @@ internal static class HttpClientExtensions
     }
 
     /// <summary>
-    /// Polls a scan until it has finished (neither queued nor running) and returns it.
+    /// Polls a scan until it has finished (neither queued nor running), then waits until the jobs it started (the
+    /// preparation of the covers) have finished as well, and returns the scan. The scan queues those jobs before it
+    /// ends, so no job can start unnoticed afterwards. Needs an admin client.
     /// </summary>
     public static async Task<ScanDto> WaitForScanAsync(this HttpClient client, Guid id)
     {
@@ -118,7 +120,44 @@ internal static class HttpClientExtensions
             ScanDto scan = await client.GetJsonAsync<ScanDto>($"/api/v1/scans/{id}");
             if (scan.Status is not (JobRunStatusDto.Queued or JobRunStatusDto.Running))
             {
+                await client.WaitForJobsIdleAsync();
                 return scan;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(100), timeout.Token);
+        }
+    }
+
+    /// <summary>
+    /// Polls the jobs until none is queued or running. Needs an admin client.
+    /// </summary>
+    public static async Task WaitForJobsIdleAsync(this HttpClient client)
+    {
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(60));
+        while (true)
+        {
+            PageDto<JobDto> jobs = await client.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs?limit=100");
+            if (jobs.Items.All(job => job.State == JobStateDto.Idle))
+            {
+                return;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(100), timeout.Token);
+        }
+    }
+
+    /// <summary>
+    /// Polls a run of a job until it has finished and returns it. Needs an admin client.
+    /// </summary>
+    public static async Task<JobRunDto> WaitForJobRunAsync(this HttpClient client, string jobId, Guid runId)
+    {
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(60));
+        while (true)
+        {
+            JobRunDto run = await client.GetJsonAsync<JobRunDto>($"/api/v1/jobs/{jobId}/runs/{runId}");
+            if (run.Status is not (JobRunStatusDto.Queued or JobRunStatusDto.Running))
+            {
+                return run;
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(100), timeout.Token);

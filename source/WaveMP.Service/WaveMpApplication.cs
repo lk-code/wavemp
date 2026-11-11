@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using WaveMP.Core.Caching.Extensions;
 using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Library.Extensions;
 using WaveMP.Core.Metadata.Extensions;
@@ -46,6 +47,7 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpJobs();
         builder.Services.AddWaveMpScanning();
         builder.Services.AddWaveMpLibrary();
+        builder.Services.AddWaveMpCaching();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<WaveMpDbContext>("database");
@@ -75,8 +77,8 @@ public static class WaveMpApplication
 
     /// <summary>
     /// Validates the database configuration, applies pending migrations, creates the built-in admin profile on the
-    /// first start, loads the key that signs the session tokens and the server settings, and plans the background
-    /// jobs (they start to run once the application has started).
+    /// first start, loads the key that signs the session tokens and the server settings, prepares the cache folder,
+    /// and plans the background jobs (they start to run once the application has started).
     /// Returns <c>false</c> if the configuration is invalid; the reason is logged.
     /// </summary>
     public static async Task<bool> InitializeAsync(WebApplication app, CancellationToken cancellationToken = default)
@@ -95,6 +97,7 @@ public static class WaveMpApplication
         await app.Services.InitializeWaveMpUsersAsync(cancellationToken);
         await app.Services.GetRequiredService<SigningKeyStore>().InitializeAsync(cancellationToken);
         await app.Services.InitializeWaveMpSettingsAsync(cancellationToken);
+        await app.Services.InitializeWaveMpCacheAsync(cancellationToken);
         await app.Services.InitializeWaveMpJobsAsync(cancellationToken);
 
         string mediaFolder = app.Services.GetRequiredService<IOptions<MediaLibraryOptions>>().Value.RootPath;

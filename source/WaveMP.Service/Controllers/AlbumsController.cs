@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WaveMP.Core.Caching.Covers;
 using WaveMP.Core.Library.Albums;
 using WaveMP.Core.Library.Covers;
 using WaveMP.Core.Library.Tracks;
@@ -20,7 +21,7 @@ namespace WaveMP.Service.Controllers;
 [Authorize]
 [Route("api/v1/albums")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-public sealed class AlbumsController(IAlbumService albums, ICoverService covers) : ControllerBase
+public sealed class AlbumsController(IAlbumService albums, ICoverCacheService covers) : ControllerBase
 {
     /// <summary>
     /// Lists the albums, sorted and optionally searched and filtered.
@@ -139,11 +140,17 @@ public sealed class AlbumsController(IAlbumService albums, ICoverService covers)
 
     /// <summary>
     /// Returns the cover of an album as picture: the picture in its folder, otherwise the cover of one of its tracks.
-    /// The picture is delivered as stored (JPEG, PNG, WebP, GIF or BMP); scaled sizes follow later.
+    /// With size, the picture is scaled to fit into a square of 96, 300 or 1000 pixels (the requested size rounded up,
+    /// at most 1000; never enlarged) and delivered as WebP from the cache; without size, as stored (JPEG, PNG, WebP,
+    /// GIF or BMP). Every picture carries a strong ETag of its version and size, Last-Modified and
+    /// Cache-Control: private, no-cache; a request with a matching If-None-Match returns 304.
     /// </summary>
     /// <param name="id">Id of the album.</param>
+    /// <param name="size">Largest width and height in pixels the client shows the picture with (1 to 4096); the
+    /// server rounds it up to 96, 300 or 1000.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">The picture.</response>
+    /// <response code="400">Invalid size (code <c>request.invalid</c>).</response>
     /// <response code="404">The album does not exist (code <c>album.not_found</c>) or has no cover (code
     /// <c>cover.not_found</c>).</response>
     [HttpGet("{id:guid}/cover", Name = "GetAlbumCover")]
@@ -154,10 +161,14 @@ public sealed class AlbumsController(IAlbumService albums, ICoverService covers)
         ImageFormats.WebP,
         ImageFormats.Gif,
         ImageFormats.Bmp)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
-    public async Task<IActionResult> GetAlbumCoverAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAlbumCoverAsync(
+        Guid id,
+        [FromQuery, Range(CoverSizes.MinRequested, CoverSizes.MaxRequested)] int? size = null,
+        CancellationToken cancellationToken = default)
     {
-        CoverResult result = await covers.GetAlbumCoverAsync(id, cancellationToken);
+        CoverDeliveryResult result = await covers.GetAlbumCoverAsync(id, size, cancellationToken);
         return this.Cover(result, ProblemCodeDto.AlbumNotFound);
     }
 }

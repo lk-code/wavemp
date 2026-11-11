@@ -326,6 +326,8 @@ public class LibraryApiTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.MediaType.Should().Be("image/jpeg");
+        response.Headers.ETag!.Tag.Should().EndWith("-original\"");
+        response.Headers.CacheControl!.NoCache.Should().BeTrue();
         (await response.Content.ReadAsByteArrayAsync()).Should().Equal(
             await File.ReadAllBytesAsync(_media.Combine("Alpha Band/First Album/cover.jpg")));
     }

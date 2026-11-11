@@ -331,7 +331,7 @@
         "tags": [
           "Albums"
         ],
-        "summary": "Returns the cover of an album as picture: the picture in its folder, otherwise the cover of one of its tracks. The picture is delivered as stored (JPEG, PNG, WebP, GIF or BMP); scaled sizes follow later.",
+        "summary": "Returns the cover of an album as picture: the picture in its folder, otherwise the cover of one of its tracks. With size, the picture is scaled to fit into a square of 96, 300 or 1000 pixels (the requested size rounded up, at most 1000; never enlarged) and delivered as WebP from the cache; without size, as stored (JPEG, PNG, WebP, GIF or BMP). Every picture carries a strong ETag of its version and size, Last-Modified and Cache-Control: private, no-cache; a request with a matching If-None-Match returns 304.",
         "operationId": "GetAlbumCover",
         "parameters": [
           {
@@ -342,6 +342,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Largest width and height in pixels the client shows the picture with (1 to 4096); the server rounds it up to 96, 300 or 1000.",
+            "schema": {
+              "maximum": 4096,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -387,6 +398,16 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid size (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
                 }
               }
             }
@@ -2186,7 +2207,7 @@
         "tags": [
           "Tracks"
         ],
-        "summary": "Returns the cover of a track as picture. By default the cover of its album comes before its own cover; if the preferred cover is missing, the other one is used, and finally the cover of another track of the album. The picture is delivered as stored (JPEG, PNG, WebP, GIF or BMP); scaled sizes follow later.",
+        "summary": "Returns the cover of a track as picture. By default the cover of its album comes before its own cover; if the preferred cover is missing, the other one is used, and finally the cover of another track of the album. With size, the picture is scaled to fit into a square of 96, 300 or 1000 pixels (the requested size rounded up, at most 1000; never enlarged) and delivered as WebP from the cache; without size, as stored (JPEG, PNG, WebP, GIF or BMP). Every picture carries a strong ETag of its version and size, Last-Modified and Cache-Control: private, no-cache; a request with a matching If-None-Match returns 304.",
         "operationId": "GetTrackCover",
         "parameters": [
           {
@@ -2197,6 +2218,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Largest width and height in pixels the client shows the picture with (1 to 4096); the server rounds it up to 96, 300 or 1000.",
+            "schema": {
+              "maximum": 4096,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -2242,6 +2274,16 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid size (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
                 }
               }
             }
@@ -3527,13 +3569,16 @@
           "scan.media_folder_not_found",
           "scan.media_folder_unreadable",
           "scan.media_folder_empty",
-          "scan.probe_unavailable"
+          "scan.probe_unavailable",
+          "cache.ffmpeg_unavailable",
+          "cache.folder_unwritable"
         ],
         "type": "string"
       },
       "JobId": {
         "enum": [
-          "library-scan"
+          "library-scan",
+          "cover-cache"
         ],
         "type": "string",
         "description": "Id of a background job."
@@ -3695,7 +3740,8 @@
         "enum": [
           "Schedule",
           "Manual",
-          "FileWatcher"
+          "FileWatcher",
+          "LibraryScan"
         ],
         "type": "string",
         "description": "What started a job run."

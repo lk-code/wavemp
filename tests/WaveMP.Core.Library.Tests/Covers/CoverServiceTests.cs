@@ -16,7 +16,6 @@ public class CoverServiceTests
     private readonly Guid _albumId = Guid.NewGuid();
 
     private ICoverRepository _covers = null!;
-    private ICoverSourceReader _reader = null!;
     private ISettingsSnapshot<LibrarySettings> _settings = null!;
     private CoverService _service = null!;
 
@@ -26,10 +25,9 @@ public class CoverServiceTests
         _covers = Substitute.For<ICoverRepository>();
         _covers.ListAlbumIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([]);
         _covers.ListLooseTrackIdsWithCoversAsync(Arg.Any<CancellationToken>()).Returns([]);
-        _reader = Substitute.For<ICoverSourceReader>();
         _settings = Substitute.For<ISettingsSnapshot<LibrarySettings>>();
         _settings.Current.Returns(new LibrarySettings());
-        _service = new CoverService(_covers, _settings, _reader);
+        _service = new CoverService(_covers, _settings);
     }
 
     [Test]
@@ -133,32 +131,6 @@ public class CoverServiceTests
         await _covers.Received(1).GetAlbumBatchCandidatesAsync(
             Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Count == 1),
             Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task GetTrackCoverAsync_UnreadableFirstCover_DeliversTheNextOne()
-    {
-        CoverCandidateRow album = AlbumCover();
-        CoverCandidateRow own = TrackCover(_trackId);
-        CoverImage image = new(new MemoryStream([1]), "image/png", own.CoverId, own.ModifiedAt);
-        _covers.GetTrackCandidatesAsync(_trackId, Arg.Any<CancellationToken>()).Returns([own, album]);
-        _reader.OpenAsync(own, Arg.Any<CancellationToken>()).Returns(image);
-
-        CoverResult result = await _service.GetTrackCoverAsync(_trackId);
-
-        result.Should().Be(CoverResult.Found(image));
-        await _reader.Received(1).OpenAsync(album, Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task GetAlbumCoverAsync_UnknownAlbumOrNoReadableCover_ReturnsTheStatus()
-    {
-        _covers.GetAlbumCandidatesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((IReadOnlyList<CoverCandidateRow>?)null);
-        _covers.GetAlbumCandidatesAsync(_albumId, Arg.Any<CancellationToken>()).Returns([AlbumCover()]);
-
-        (await _service.GetAlbumCoverAsync(Guid.NewGuid())).Status.Should().Be(CoverStatus.OwnerNotFound);
-        (await _service.GetAlbumCoverAsync(_albumId)).Status.Should().Be(CoverStatus.NotFound);
     }
 
     private CoverCandidateRow AlbumCover()

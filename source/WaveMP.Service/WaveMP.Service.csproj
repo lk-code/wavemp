@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WaveMP.Core.Caching\WaveMP.Core.Caching.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Jobs\WaveMP.Core.Jobs.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Library\WaveMP.Core.Library.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Metadata\WaveMP.Core.Metadata.csproj" />

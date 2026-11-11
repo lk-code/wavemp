@@ -61,7 +61,8 @@ public class SettingsApiTests
         updated.AlbumCoverNames.Should().Equal("front", "cover");
         updated.VideoExtensions.Should().Contain("mkv");
         loaded.Should().BeEquivalentTo(updated);
-        (await restarted.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items.Single().IntervalMinutes
+        (await restarted.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items
+            .Single(job => job.Id == JobIdDto.LibraryScan).IntervalMinutes
             .Should().Be(720);
         await second.DeleteDatabaseAsync();
     }

@@ -44,4 +44,16 @@ public enum JobErrorCodeDto
     /// </summary>
     [JsonStringEnumMemberName("scan.probe_unavailable")]
     ScanProbeUnavailable,
+
+    /// <summary>
+    /// ffmpeg cannot be started, so covers cannot be scaled.
+    /// </summary>
+    [JsonStringEnumMemberName("cache.ffmpeg_unavailable")]
+    CacheFfmpegUnavailable,
+
+    /// <summary>
+    /// The cache folder under the data folder cannot be written.
+    /// </summary>
+    [JsonStringEnumMemberName("cache.folder_unwritable")]
+    CacheFolderUnwritable,
 }

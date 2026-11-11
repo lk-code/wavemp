@@ -23,4 +23,9 @@ public enum JobTriggerDto
     /// The file watcher after changes in the media folder.
     /// </summary>
     FileWatcher,
+
+    /// <summary>
+    /// A library scan that finished, e.g. to prepare the covers of the changed library.
+    /// </summary>
+    LibraryScan,
 }

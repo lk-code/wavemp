@@ -64,15 +64,33 @@ public class JobsApiTests
     }
 
     [Test]
-    public async Task ListJobs_Always_ContainsTheLibraryScanWithItsSchedule()
+    public async Task ListJobs_Always_ContainsTheLibraryScanWithItsScheduleAndTheCoversWithout()
     {
         PageDto<JobDto> jobs = await _admin.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs");
 
         JobDto scan = jobs.Items.Should().ContainSingle(job => job.Id == JobIdDto.LibraryScan).Subject;
-        jobs.Total.Should().Be(1);
+        JobDto covers = jobs.Items.Should().ContainSingle(job => job.Id == JobIdDto.CoverCache).Subject;
+        jobs.Total.Should().Be(2);
         scan.State.Should().Be(JobStateDto.Idle);
         scan.IntervalMinutes.Should().Be(360);
         scan.NextRunAt.Should().BeAfter(DateTimeOffset.UtcNow);
+        covers.IntervalMinutes.Should().BeNull();
+        covers.NextRunAt.Should().BeNull();
+    }
+
+    [Test]
+    public async Task StartJobRun_CoverCache_PreparesTheCoversManually()
+    {
+        await _admin.WaitForJobsIdleAsync();
+
+        HttpResponseMessage response = await _admin.PostAsync("/api/v1/jobs/cover-cache/runs", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted, await response.Content.ReadAsStringAsync());
+        JobRunDto run = (await response.Content.ReadFromJsonAsync<JobRunDto>(HttpClientExtensions.JsonOptions))!;
+        run.JobId.Should().Be(JobIdDto.CoverCache);
+        run.Trigger.Should().Be(JobTriggerDto.Manual);
+        JobRunDto finished = await _admin.WaitForJobRunAsync("cover-cache", run.Id);
+        finished.Status.Should().Be(JobRunStatusDto.Succeeded);
     }
 
     [Test]
@@ -86,7 +104,8 @@ public class JobsApiTests
                 HttpClientExtensions.JsonOptions);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            JobDto scan = (await _admin.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items.Single();
+            JobDto scan = (await _admin.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items
+                .Single(job => job.Id == JobIdDto.LibraryScan);
 
             scan.IntervalMinutes.Should().Be(30);
             scan.NextRunAt.Should().BeCloseTo(DateTimeOffset.UtcNow.AddMinutes(30), TimeSpan.FromMinutes(1));
@@ -116,7 +135,8 @@ public class JobsApiTests
         JobRunDto stored = await _admin.GetJsonAsync<JobRunDto>($"/api/v1/jobs/library-scan/runs/{run.Id}");
         PageDto<JobRunDto> runs = await _admin.GetJsonAsync<PageDto<JobRunDto>>(
             "/api/v1/jobs/library-scan/runs?status=Succeeded&limit=100");
-        JobDto job = (await _admin.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items.Single();
+        JobDto job = (await _admin.GetJsonAsync<PageDto<JobDto>>("/api/v1/jobs")).Items
+            .Single(item => item.Id == JobIdDto.LibraryScan);
 
         stored.Status.Should().Be(JobRunStatusDto.Succeeded);
         stored.DurationMilliseconds.Should().BeGreaterThanOrEqualTo(0);

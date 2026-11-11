@@ -301,6 +301,28 @@ public class ApiIntegrationTests
         document["components"]!["schemas"]!.AsObject().Should().NotContainKey("IFormFile");
     }
 
+    [TestCase("GetAlbumCover")]
+    [TestCase("GetTrackCover")]
+    public async Task GetOpenApiDocument_Always_DescribesTheSizeAndHttpCachingOfCovers(string operationId)
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode operation = FindOperations(document)
+            .Single(node => node["operationId"]!.GetValue<string>() == operationId);
+
+        JsonNode size = operation["parameters"]!.AsArray()
+            .Single(parameter => parameter!["name"]!.GetValue<string>() == "size")!;
+        size["in"]!.GetValue<string>().Should().Be("query");
+        size["required"]?.GetValue<bool>().Should().NotBe(true);
+        size["schema"]!["minimum"]!.GetValue<int>().Should().Be(1);
+        size["schema"]!["maximum"]!.GetValue<int>().Should().Be(4096);
+        operation["responses"]!["400"]!["content"]!["application/problem+json"].Should().NotBeNull();
+
+        // 304 is part of the description only: Kiota would generate no body for an operation that lists it.
+        operation["summary"]!.GetValue<string>().Should().Contain("If-None-Match returns 304");
+        operation["responses"]!["304"].Should().BeNull();
+    }
+
     [Test]
     public async Task GetOpenApiDocument_Always_DescribesForbiddenOnlyForTheAdminEndpointsOfTheLibrary()
     {

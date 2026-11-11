@@ -51,6 +51,7 @@ public static class JobMappingExtensions
         return jobId switch
         {
             JobIds.LibraryScan => JobIdDto.LibraryScan,
+            JobIds.CoverCache => JobIdDto.CoverCache,
             _ => throw new ArgumentOutOfRangeException(nameof(jobId), jobId, "Unknown job."),
         };
     }
@@ -73,6 +74,7 @@ public static class JobMappingExtensions
             JobRunTrigger.Schedule => JobTriggerDto.Schedule,
             JobRunTrigger.Manual => JobTriggerDto.Manual,
             JobRunTrigger.FileWatcher => JobTriggerDto.FileWatcher,
+            JobRunTrigger.LibraryScan => JobTriggerDto.LibraryScan,
             _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, "Unknown trigger."),
         };
     }
@@ -84,6 +86,7 @@ public static class JobMappingExtensions
             JobTriggerDto.Schedule => JobRunTrigger.Schedule,
             JobTriggerDto.Manual => JobRunTrigger.Manual,
             JobTriggerDto.FileWatcher => JobRunTrigger.FileWatcher,
+            JobTriggerDto.LibraryScan => JobRunTrigger.LibraryScan,
             _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, "Unknown trigger."),
         };
     }
@@ -126,6 +129,8 @@ public static class JobMappingExtensions
             JobErrorCode.MediaFolderUnreadable => JobErrorCodeDto.ScanMediaFolderUnreadable,
             JobErrorCode.MediaFolderEmpty => JobErrorCodeDto.ScanMediaFolderEmpty,
             JobErrorCode.ProbeUnavailable => JobErrorCodeDto.ScanProbeUnavailable,
+            JobErrorCode.FfmpegUnavailable => JobErrorCodeDto.CacheFfmpegUnavailable,
+            JobErrorCode.CacheFolderUnwritable => JobErrorCodeDto.CacheFolderUnwritable,
             _ => throw new ArgumentOutOfRangeException(nameof(code), code, "Unknown error code."),
         };
     }

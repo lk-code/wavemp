@@ -9,8 +9,7 @@ namespace WaveMP.Core.Library.Covers;
 
 internal sealed class CoverService(
     ICoverRepository covers,
-    ISettingsSnapshot<LibrarySettings> settings,
-    ICoverSourceReader reader) : ICoverService
+    ISettingsSnapshot<LibrarySettings> settings) : ICoverService
 {
     internal const int AlbumBatchSize = 200;
     internal const int TrackBatchSize = 500;
@@ -79,41 +78,11 @@ internal sealed class CoverService(
         }
     }
 
-    public async Task<CoverResult> GetTrackCoverAsync(Guid trackId, CancellationToken cancellationToken = default)
-    {
-        CoverCandidates candidates = await GetTrackCandidatesAsync(trackId, cancellationToken);
-        return await OpenFirstAsync(candidates, cancellationToken);
-    }
-
-    public async Task<CoverResult> GetAlbumCoverAsync(Guid albumId, CancellationToken cancellationToken = default)
-    {
-        CoverCandidates candidates = await GetAlbumCandidatesAsync(albumId, cancellationToken);
-        return await OpenFirstAsync(candidates, cancellationToken);
-    }
-
     /// <summary>
     /// Albums and tracks have no rule of their own yet; the global one applies.
     /// </summary>
     private CoverPriority Priority()
     {
         return CoverRules.Effective(settings.Current.CoverPriority, album: null, track: null);
-    }
-
-    private async Task<CoverResult> OpenFirstAsync(CoverCandidates candidates, CancellationToken cancellationToken)
-    {
-        if (!candidates.OwnerExists)
-        {
-            return CoverResult.OwnerNotFound;
-        }
-
-        foreach (CoverCandidateRow candidate in candidates.Ordered)
-        {
-            if (await reader.OpenAsync(candidate, cancellationToken) is { } image)
-            {
-                return CoverResult.Found(image);
-            }
-        }
-
-        return CoverResult.NotFound;
     }
 }

@@ -14,4 +14,10 @@ public enum JobIdDto
     /// </summary>
     [JsonStringEnumMemberName("library-scan")]
     LibraryScan,
+
+    /// <summary>
+    /// Prepares the scaled covers after scans and removes those of changed or removed pictures.
+    /// </summary>
+    [JsonStringEnumMemberName("cover-cache")]
+    CoverCache,
 }

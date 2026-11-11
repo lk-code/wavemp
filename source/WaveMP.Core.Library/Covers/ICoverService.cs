@@ -3,8 +3,8 @@ using WaveMP.Data.Projections;
 namespace WaveMP.Core.Library.Covers;
 
 /// <summary>
-/// Finds the covers of tracks and albums following the cover rule of the library settings, and delivers them as
-/// stored (unscaled).
+/// Finds the covers of tracks and albums following the cover rule of the library settings. Reading the pictures is the
+/// task of <see cref="ICoverSourceReader"/>.
 /// </summary>
 public interface ICoverService
 {
@@ -27,14 +27,4 @@ public interface ICoverService
     /// </summary>
     IAsyncEnumerable<IReadOnlyList<CoverCandidateRow>> EnumerateShownCoversAsync(
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// The cover of a track as stored. Covers whose file is missing or unreadable are skipped.
-    /// </summary>
-    Task<CoverResult> GetTrackCoverAsync(Guid trackId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// The cover of an album as stored.
-    /// </summary>
-    Task<CoverResult> GetAlbumCoverAsync(Guid albumId, CancellationToken cancellationToken = default);
 }
