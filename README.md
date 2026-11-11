@@ -177,7 +177,9 @@ A number at the start of a file name is only a track number inside an album fold
 3. **Switch profiles** with **Switch profile** in the profile menu.
 4. **Choose your language** under **Settings** in the profile menu. It is stored with the profile and applies on all devices; before a profile is selected, WaveMP uses the language of the browser (English or German, otherwise English).
 5. **Scan your library.** As admin, open **Administration > Library**: **Scan now** starts a scan of your media folder, shows its progress and then its result (files found, added, updated and removed, tracks, albums and artists, and files with problems). Below are the history of scans and the settings: how often the library is scanned, whether the media folder is watched for changes, the file extensions of audio, video and pictures and the names of album covers. **Administration > Jobs** lists all background jobs with their last and next run and runs them on demand.
-6. **Play.** Browse by artist, album or track, build playlists and switch between cover, video and visualization while playing.
+6. **Browse your library.** **Library** in the sidebar (the drawer behind the menu button on smartphones) has the sections **Recently Added** (newest first), **Artist**, **Album**, **Songs** (grouped by album with cover), **Genre** and **Year**. Albums, artists, genres and years open their own page; the details of a song (cover, artist, album, length, audio and video) open from its context menu: right click, the context menu key or a long press on touch screens. Admins also see all files of a song there, with their technical details.
+7. **Search.** Type into the search field at the top: WaveMP searches artists, albums and songs while you type, and small typos are fine. **Show all** opens the full list filtered by your text. On the desktop, the sort button next to the search sorts the current list; sort order and search text are part of the address, so you can bookmark or share them.
+8. **Play.** Build playlists and switch between cover, video and visualization while playing.
 
 Profiles are not protected yet: everyone who can open WaveMP can select any profile, including the admin profile. An optional PIN is planned. Do not expose WaveMP to the internet without protection, for example a reverse proxy with authentication or a VPN.
 
@@ -212,6 +214,7 @@ This builds the image from source and starts WaveMP on `http://localhost:8080`. 
 | `source/WaveMP.Core.Jobs` | Background jobs with Quartz.NET (in memory) and their run history |
 | `source/WaveMP.Core.Metadata` | Tags (TagLib#), technical information (ffprobe) and metadata from folder and file names |
 | `source/WaveMP.Core.Scanning` | Library scan, grouping of files, the scan job and the file watcher |
+| `source/WaveMP.Core.Library` | Library queries: artists, albums, tracks, genres, years, the search and the covers |
 | `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, entities, repositories, migrations) |
 | `source/WaveMP.Web` | Vue 3 web app |
 | `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright); `tests/WaveMP.Testing` holds helpers shared by the test projects (test databases, temporary folders, synthetic media) |
@@ -277,6 +280,8 @@ Collections are paged with the query parameters `offset` (from 0) and `limit` (1
 
 Admins start a scan with `POST /api/v1/scans`; the answer is `202 Accepted` with the queued scan and its `Location`. `GET /api/v1/scans/current` returns the running scan with its progress (`404`, `scan.not_running`, while none runs), `GET /api/v1/scans` the history. A second start while a scan runs gets `409` (`scan.already_running`). All background jobs are listed with `GET /api/v1/jobs` and started with `POST /api/v1/jobs/{id}/runs` (for example `library-scan`); `GET /api/v1/jobs/{id}/runs` returns their run history (30 days, at most 100 runs per job). Errors of runs and problems of files are codes such as `scan.media_folder_empty` or `file.probe_failed`. The library settings are read and changed with `GET` and `PATCH /api/v1/settings/library`.
 
+The library is available to every session: `GET /api/v1/artists`, `/api/v1/albums` and `/api/v1/tracks` with their items (`/{id}`), the albums of an artist (`/api/v1/artists/{id}/albums`), the tracks of an album (`/api/v1/albums/{id}/tracks`) and the lists of genres and years (`/api/v1/genres`, `/api/v1/years`). Lists are sorted with `sort` and `direction` (the defaults are documented per operation) and filtered with `q` (fault-tolerant search text), `artistId`, `albumId`, `genre`, `year`, `hasAudio` and `hasVideo` where they apply. Tracks tell with `hasAudio`, `hasVideo` and `hasCover` what they offer. `GET /api/v1/search?q=` returns the best artists, albums and tracks at once (`limit` up to 50 per group); it finds texts that contain the search text or are similar to it, using the PostgreSQL extension `pg_trgm`, which the database migration creates. `GET /api/v1/albums/{id}/cover` and `/api/v1/tracks/{id}/cover` return the original picture (JPEG, PNG, WebP, GIF or BMP): by default the album cover (a picture such as `cover.jpg` in the album folder) before the cover of the track (a picture with its base name or embedded in its file), each falling back to the other and finally to the cover of another track of the album. Admins list all files of a track with `GET /api/v1/tracks/{id}/files`. Missing items get `404` with `artist.not_found`, `album.not_found`, `track.not_found` or `cover.not_found`.
+
 ### Tests
 
 Run the commands from the repository root:
@@ -305,7 +310,7 @@ The E2E tests first select the built-in admin profile once (project `setup`) and
 
 If you set `WAVEMP_PORT` in `.env`, point the E2E tests at it, for example `E2E_BASE_URL=http://localhost:8081 npm test`. `npm run test:unit` runs the unit tests of the web app (Vitest), including checks that every text comes from the translation files and that `THEMING.md` matches the code.
 
-`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version. They scan the media folder of the running instance; with the test media of `tests/WaveMP.E2E/scripts/generate-media.sh` (see [Local development](#local-development)) and `E2E_EXPECTED_TRACKS=4`, they also check the result of the scan, as the CI does.
+`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version. They scan the media folder of the running instance before the tests (project `setup`) and need the test media of `tests/WaveMP.E2E/scripts/generate-media.sh` in it (see [Local development](#local-development)): the library tests browse and search exactly these songs. With `E2E_EXPECTED_TRACKS=4` they also check the number of songs, as the CI does.
 
 ### License check
 
