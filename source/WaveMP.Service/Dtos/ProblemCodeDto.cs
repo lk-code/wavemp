@@ -116,4 +116,28 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("job.run_not_found")]
     JobRunNotFound,
+
+    /// <summary>
+    /// The artist does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("artist.not_found")]
+    ArtistNotFound,
+
+    /// <summary>
+    /// The album does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("album.not_found")]
+    AlbumNotFound,
+
+    /// <summary>
+    /// The track does not exist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("track.not_found")]
+    TrackNotFound,
+
+    /// <summary>
+    /// The track or album exists, but has no cover that can be delivered (404).
+    /// </summary>
+    [JsonStringEnumMemberName("cover.not_found")]
+    CoverNotFound,
 }

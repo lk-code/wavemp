@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using WaveMP.Core.Jobs.Extensions;
+using WaveMP.Core.Library.Extensions;
 using WaveMP.Core.Metadata.Extensions;
 using WaveMP.Core.Metadata.Options;
 using WaveMP.Core.Scanning.Extensions;
@@ -44,6 +45,7 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpMetadata();
         builder.Services.AddWaveMpJobs();
         builder.Services.AddWaveMpScanning();
+        builder.Services.AddWaveMpLibrary();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<WaveMpDbContext>("database");

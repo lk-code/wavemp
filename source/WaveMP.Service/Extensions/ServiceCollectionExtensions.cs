@@ -132,6 +132,7 @@ public static class ServiceCollectionExtensions
             options.AddSchemaTransformer<XmlCommentLineBreakTransformer>();
             options.AddSchemaTransformer<StringEnumSchemaTransformer>();
             options.AddDocumentTransformer(AddProblemCodeAsync);
+            options.AddDocumentTransformer<BinaryContentSchemaTransformer>();
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
 

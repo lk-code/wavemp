@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WaveMP.Core.Library.Covers;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Problems;
 
@@ -19,6 +20,33 @@ public static class ControllerBaseExtensions
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The picture of a cover, or 404 with <paramref name="ownerNotFound"/> if the track or album does not exist and
+    /// <c>cover.not_found</c> if it has no cover. The stream of the picture is disposed after the response.
+    /// </summary>
+    public static IActionResult Cover(this ControllerBase controller, CoverResult result, ProblemCodeDto ownerNotFound)
+    {
+        return result switch
+        {
+            { Status: CoverStatus.Found, Image: { } image } => controller.File(image.Content, image.ContentType),
+            { Status: CoverStatus.OwnerNotFound } => controller.Problem(ownerNotFound, StatusCodes.Status404NotFound),
+            _ => controller.Problem(ProblemCodeDto.CoverNotFound, StatusCodes.Status404NotFound),
+        };
+    }
+
+    /// <summary>
+    /// Checks an enum of the query. Model binding of query parameters also accepts numbers for enums, including
+    /// undefined ones; such values are added to the model state under the name of the parameter.
+    /// </summary>
+    public static void ValidateEnum<TEnum>(this ControllerBase controller, TEnum? value, string name)
+        where TEnum : struct, Enum
+    {
+        if (value is { } defined && !Enum.IsDefined(defined))
+        {
+            controller.ModelState.AddModelError(name, "The value is not valid.");
+        }
     }
 
     /// <summary>

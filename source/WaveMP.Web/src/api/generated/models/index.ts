@@ -5,6 +5,208 @@
 import { type AdditionalDataHolder, type ApiError, type Guid, type Parsable, type ParseNode, type SerializationWriter } from '@microsoft/kiota-abstractions';
 
 /**
+ * An album of the library.
+ */
+export interface Album extends AdditionalDataHolder, Parsable {
+    /**
+     * The artist property
+     */
+    artist?: ArtistReference | null;
+    /**
+     * Sum of the durations of the tracks in milliseconds.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * When the album was found for the first time.
+     */
+    firstSeenAt?: Date | null;
+    /**
+     * The first genre of its tracks in the order of disc and track number.
+     */
+    genre?: string | null;
+    /**
+     * Whether the album or one of its tracks has a cover (GetAlbumCover).
+     */
+    hasCover?: boolean | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * Tracks of several artists without a common album artist. Clients show their own text for it.
+     */
+    isCompilation?: boolean | null;
+    /**
+     * The title property
+     */
+    title?: string | null;
+    /**
+     * The trackCount property
+     */
+    trackCount?: number | null;
+    /**
+     * The year property
+     */
+    year?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface AlbumPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Album[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+/**
+ * The album of a track.
+ */
+export interface AlbumReference extends AdditionalDataHolder, Parsable {
+    /**
+     * The artist property
+     */
+    artist?: ArtistReference | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * Tracks of several artists without a common album artist. Clients show their own text for it.
+     */
+    isCompilation?: boolean | null;
+    /**
+     * The title property
+     */
+    title?: string | null;
+}
+export type AlbumSort = (typeof AlbumSortObject)[keyof typeof AlbumSortObject];
+/**
+ * An artist of the library.
+ */
+export interface Artist extends AdditionalDataHolder, Parsable {
+    /**
+     * Albums with the artist as album artist or with tracks of the artist.
+     */
+    albumCount?: number | null;
+    /**
+     * When the artist was found for the first time.
+     */
+    firstSeenAt?: Date | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * Name as first found in the media files.
+     */
+    name?: string | null;
+    /**
+     * Tracks of the artist or on albums of the artist.
+     */
+    trackCount?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface ArtistPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Artist[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+/**
+ * An artist referred to by a track or an album.
+ */
+export interface ArtistReference extends AdditionalDataHolder, Parsable {
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * The name property
+     */
+    name?: string | null;
+}
+export type ArtistSort = (typeof ArtistSortObject)[keyof typeof ArtistSortObject];
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Album}
+ */
+// @ts-ignore
+export function createAlbumFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoAlbum;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {AlbumPage}
+ */
+// @ts-ignore
+export function createAlbumPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoAlbumPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {AlbumReference}
+ */
+// @ts-ignore
+export function createAlbumReferenceFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoAlbumReference;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Artist}
+ */
+// @ts-ignore
+export function createArtistFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoArtist;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ArtistPage}
+ */
+// @ts-ignore
+export function createArtistPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoArtistPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ArtistReference}
+ */
+// @ts-ignore
+export function createArtistReferenceFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoArtistReference;
+}
+/**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {CreatedSession}
@@ -43,6 +245,24 @@ export interface CreatedSession extends AdditionalDataHolder, Parsable {
      * Bearer token of the session for the Authorization header.
      */
     token?: string | null;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Genre}
+ */
+// @ts-ignore
+export function createGenreFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoGenre;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {GenrePage}
+ */
+// @ts-ignore
+export function createGenrePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoGenrePage;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -97,6 +317,24 @@ export function createJobRunPageFromDiscriminatorValue(parseNode: ParseNode | un
 // @ts-ignore
 export function createLibrarySettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoLibrarySettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {MediaFile}
+ */
+// @ts-ignore
+export function createMediaFileFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoMediaFile;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {MediaFilePage}
+ */
+// @ts-ignore
+export function createMediaFilePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoMediaFilePage;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -171,6 +409,15 @@ export function createScanStatisticsFromDiscriminatorValue(parseNode: ParseNode 
     return deserializeIntoScanStatistics;
 }
 /**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {SearchResult}
+ */
+// @ts-ignore
+export function createSearchResultFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoSearchResult;
+}
+/**
  * Selects a profile.
  */
 export interface CreateSession extends AdditionalDataHolder, Parsable {
@@ -187,6 +434,24 @@ export interface CreateSession extends AdditionalDataHolder, Parsable {
 // @ts-ignore
 export function createSessionFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoSession;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Track}
+ */
+// @ts-ignore
+export function createTrackFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrack;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TrackPage}
+ */
+// @ts-ignore
+export function createTrackPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrackPage;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -282,6 +547,113 @@ export function createValidationProblemDetailsFromDiscriminatorValue(parseNode: 
     return deserializeIntoValidationProblemDetails;
 }
 /**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Year}
+ */
+// @ts-ignore
+export function createYearFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoYear;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {YearPage}
+ */
+// @ts-ignore
+export function createYearPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoYearPage;
+}
+/**
+ * The deserialization information for the current model
+ * @param Album The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoAlbum(album: Partial<Album> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "artist": n => { album.artist = n.getObjectValue<ArtistReference>(createArtistReferenceFromDiscriminatorValue); },
+        "durationMilliseconds": n => { album.durationMilliseconds = n.getNumberValue(); },
+        "firstSeenAt": n => { album.firstSeenAt = n.getDateValue(); },
+        "genre": n => { album.genre = n.getStringValue(); },
+        "hasCover": n => { album.hasCover = n.getBooleanValue(); },
+        "id": n => { album.id = n.getGuidValue(); },
+        "isCompilation": n => { album.isCompilation = n.getBooleanValue(); },
+        "title": n => { album.title = n.getStringValue(); },
+        "trackCount": n => { album.trackCount = n.getNumberValue(); },
+        "year": n => { album.year = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param AlbumPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoAlbumPage(albumPage: Partial<AlbumPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { albumPage.items = n.getCollectionOfObjectValues<Album>(createAlbumFromDiscriminatorValue); },
+        "limit": n => { albumPage.limit = n.getNumberValue(); },
+        "offset": n => { albumPage.offset = n.getNumberValue(); },
+        "total": n => { albumPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param AlbumReference The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoAlbumReference(albumReference: Partial<AlbumReference> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "artist": n => { albumReference.artist = n.getObjectValue<ArtistReference>(createArtistReferenceFromDiscriminatorValue); },
+        "id": n => { albumReference.id = n.getGuidValue(); },
+        "isCompilation": n => { albumReference.isCompilation = n.getBooleanValue(); },
+        "title": n => { albumReference.title = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param Artist The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoArtist(artist: Partial<Artist> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumCount": n => { artist.albumCount = n.getNumberValue(); },
+        "firstSeenAt": n => { artist.firstSeenAt = n.getDateValue(); },
+        "id": n => { artist.id = n.getGuidValue(); },
+        "name": n => { artist.name = n.getStringValue(); },
+        "trackCount": n => { artist.trackCount = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ArtistPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoArtistPage(artistPage: Partial<ArtistPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { artistPage.items = n.getCollectionOfObjectValues<Artist>(createArtistFromDiscriminatorValue); },
+        "limit": n => { artistPage.limit = n.getNumberValue(); },
+        "offset": n => { artistPage.offset = n.getNumberValue(); },
+        "total": n => { artistPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ArtistReference The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoArtistReference(artistReference: Partial<ArtistReference> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "id": n => { artistReference.id = n.getGuidValue(); },
+        "name": n => { artistReference.name = n.getStringValue(); },
+    }
+}
+/**
  * The deserialization information for the current model
  * @param CreatedSession The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
@@ -316,6 +688,33 @@ export function deserializeIntoCreateUser(createUser: Partial<CreateUser> | unde
         "initials": n => { createUser.initials = n.getStringValue(); },
         "name": n => { createUser.name = n.getStringValue(); },
         "role": n => { createUser.role = n.getEnumValue<Role>(RoleObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param Genre The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoGenre(genre: Partial<Genre> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumCount": n => { genre.albumCount = n.getNumberValue(); },
+        "name": n => { genre.name = n.getStringValue(); },
+        "trackCount": n => { genre.trackCount = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param GenrePage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoGenrePage(genrePage: Partial<GenrePage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { genrePage.items = n.getCollectionOfObjectValues<Genre>(createGenreFromDiscriminatorValue); },
+        "limit": n => { genrePage.limit = n.getNumberValue(); },
+        "offset": n => { genrePage.offset = n.getNumberValue(); },
+        "total": n => { genrePage.total = n.getNumberValue(); },
     }
 }
 /**
@@ -406,6 +805,53 @@ export function deserializeIntoLibrarySettings(librarySettings: Partial<LibraryS
         "imageExtensions": n => { librarySettings.imageExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
         "scanIntervalMinutes": n => { librarySettings.scanIntervalMinutes = n.getNumberValue(); },
         "videoExtensions": n => { librarySettings.videoExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param MediaFile The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoMediaFile(mediaFile: Partial<MediaFile> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "bitDepth": n => { mediaFile.bitDepth = n.getNumberValue(); },
+        "bitrate": n => { mediaFile.bitrate = n.getNumberValue(); },
+        "channels": n => { mediaFile.channels = n.getNumberValue(); },
+        "codec": n => { mediaFile.codec = n.getStringValue(); },
+        "durationMilliseconds": n => { mediaFile.durationMilliseconds = n.getNumberValue(); },
+        "extension": n => { mediaFile.extension = n.getStringValue(); },
+        "fileName": n => { mediaFile.fileName = n.getStringValue(); },
+        "firstSeenAt": n => { mediaFile.firstSeenAt = n.getDateValue(); },
+        "format": n => { mediaFile.format = n.getStringValue(); },
+        "hasEmbeddedPicture": n => { mediaFile.hasEmbeddedPicture = n.getBooleanValue(); },
+        "height": n => { mediaFile.height = n.getNumberValue(); },
+        "id": n => { mediaFile.id = n.getGuidValue(); },
+        "isLossless": n => { mediaFile.isLossless = n.getBooleanValue(); },
+        "isPrimary": n => { mediaFile.isPrimary = n.getBooleanValue(); },
+        "issue": n => { mediaFile.issue = n.getEnumValue<ScanIssueCode>(ScanIssueCodeObject); },
+        "isWritable": n => { mediaFile.isWritable = n.getBooleanValue(); },
+        "kind": n => { mediaFile.kind = n.getEnumValue<MediaFileKind>(MediaFileKindObject); },
+        "modifiedAt": n => { mediaFile.modifiedAt = n.getDateValue(); },
+        "relativePath": n => { mediaFile.relativePath = n.getStringValue(); },
+        "sampleRate": n => { mediaFile.sampleRate = n.getNumberValue(); },
+        "scannedAt": n => { mediaFile.scannedAt = n.getDateValue(); },
+        "size": n => { mediaFile.size = n.getNumberValue(); },
+        "width": n => { mediaFile.width = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param MediaFilePage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoMediaFilePage(mediaFilePage: Partial<MediaFilePage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { mediaFilePage.items = n.getCollectionOfObjectValues<MediaFile>(createMediaFileFromDiscriminatorValue); },
+        "limit": n => { mediaFilePage.limit = n.getNumberValue(); },
+        "offset": n => { mediaFilePage.offset = n.getNumberValue(); },
+        "total": n => { mediaFilePage.total = n.getNumberValue(); },
     }
 }
 /**
@@ -545,6 +991,19 @@ export function deserializeIntoScanStatistics(scanStatistics: Partial<ScanStatis
 }
 /**
  * The deserialization information for the current model
+ * @param SearchResult The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoSearchResult(searchResult: Partial<SearchResult> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albums": n => { searchResult.albums = n.getObjectValue<AlbumPage>(createAlbumPageFromDiscriminatorValue); },
+        "artists": n => { searchResult.artists = n.getObjectValue<ArtistPage>(createArtistPageFromDiscriminatorValue); },
+        "tracks": n => { searchResult.tracks = n.getObjectValue<TrackPage>(createTrackPageFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param Session The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -555,6 +1014,43 @@ export function deserializeIntoSession(session: Partial<Session> | undefined = {
         "expiresAt": n => { session.expiresAt = n.getDateValue(); },
         "id": n => { session.id = n.getGuidValue(); },
         "profile": n => { session.profile = n.getObjectValue<Profile>(createProfileFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param Track The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrack(track: Partial<Track> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "album": n => { track.album = n.getObjectValue<AlbumReference>(createAlbumReferenceFromDiscriminatorValue); },
+        "artist": n => { track.artist = n.getObjectValue<ArtistReference>(createArtistReferenceFromDiscriminatorValue); },
+        "discNumber": n => { track.discNumber = n.getNumberValue(); },
+        "durationMilliseconds": n => { track.durationMilliseconds = n.getNumberValue(); },
+        "firstSeenAt": n => { track.firstSeenAt = n.getDateValue(); },
+        "genre": n => { track.genre = n.getStringValue(); },
+        "hasAudio": n => { track.hasAudio = n.getBooleanValue(); },
+        "hasCover": n => { track.hasCover = n.getBooleanValue(); },
+        "hasVideo": n => { track.hasVideo = n.getBooleanValue(); },
+        "id": n => { track.id = n.getGuidValue(); },
+        "title": n => { track.title = n.getStringValue(); },
+        "trackNumber": n => { track.trackNumber = n.getNumberValue(); },
+        "year": n => { track.year = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TrackPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrackPage(trackPage: Partial<TrackPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { trackPage.items = n.getCollectionOfObjectValues<Track>(createTrackFromDiscriminatorValue); },
+        "limit": n => { trackPage.limit = n.getNumberValue(); },
+        "offset": n => { trackPage.offset = n.getNumberValue(); },
+        "total": n => { trackPage.total = n.getNumberValue(); },
     }
 }
 /**
@@ -667,6 +1163,72 @@ export function deserializeIntoValidationProblemDetails_errors(validationProblem
     return {
     }
 }
+/**
+ * The deserialization information for the current model
+ * @param Year The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoYear(year: Partial<Year> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumCount": n => { year.albumCount = n.getNumberValue(); },
+        "trackCount": n => { year.trackCount = n.getNumberValue(); },
+        "year": n => { year.year = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param YearPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoYearPage(yearPage: Partial<YearPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { yearPage.items = n.getCollectionOfObjectValues<Year>(createYearFromDiscriminatorValue); },
+        "limit": n => { yearPage.limit = n.getNumberValue(); },
+        "offset": n => { yearPage.offset = n.getNumberValue(); },
+        "total": n => { yearPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * A genre of the tracks; genres that differ only in case are one genre.
+ */
+export interface Genre extends AdditionalDataHolder, Parsable {
+    /**
+     * Albums with tracks of the genre.
+     */
+    albumCount?: number | null;
+    /**
+     * Name of the genre as found in the tracks; use it as filter genre of the lists.
+     */
+    name?: string | null;
+    /**
+     * The trackCount property
+     */
+    trackCount?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface GenrePage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Genre[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type GenreSort = (typeof GenreSortObject)[keyof typeof GenreSortObject];
 /**
  * Health of the WaveMP service.
  */
@@ -824,6 +1386,126 @@ export interface LibrarySettings extends AdditionalDataHolder, Parsable {
      */
     videoExtensions?: string[] | null;
 }
+/**
+ * A file of a track as found by the scan, with its technical details.
+ */
+export interface MediaFile extends AdditionalDataHolder, Parsable {
+    /**
+     * The bitDepth property
+     */
+    bitDepth?: number | null;
+    /**
+     * Bitrate in bit/s.
+     */
+    bitrate?: number | null;
+    /**
+     * The channels property
+     */
+    channels?: number | null;
+    /**
+     * Codec of the main stream, e.g. mp3, flac or h264.
+     */
+    codec?: string | null;
+    /**
+     * The durationMilliseconds property
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * Extension in lower case without the dot.
+     */
+    extension?: string | null;
+    /**
+     * The fileName property
+     */
+    fileName?: string | null;
+    /**
+     * When the file was found for the first time.
+     */
+    firstSeenAt?: Date | null;
+    /**
+     * Container format reported by ffprobe, e.g. flac.
+     */
+    format?: string | null;
+    /**
+     * Whether the tags of the file contain a picture.
+     */
+    hasEmbeddedPicture?: boolean | null;
+    /**
+     * Height in pixels of videos and pictures.
+     */
+    height?: number | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * The isLossless property
+     */
+    isLossless?: boolean | null;
+    /**
+     * The file of its kind (audio or video) that the track plays: the one with the highest quality.
+     */
+    isPrimary?: boolean | null;
+    /**
+     * The issue property
+     */
+    issue?: ScanIssueCode | null;
+    /**
+     * Whether the tags can be written back (audio files only).
+     */
+    isWritable?: boolean | null;
+    /**
+     * Kind of a media file.
+     */
+    kind?: MediaFileKind | null;
+    /**
+     * Time of the last change of the file.
+     */
+    modifiedAt?: Date | null;
+    /**
+     * Path relative to the media folder with / as separator.
+     */
+    relativePath?: string | null;
+    /**
+     * Sample rate in Hz.
+     */
+    sampleRate?: number | null;
+    /**
+     * When the file was read the last time.
+     */
+    scannedAt?: Date | null;
+    /**
+     * Size in bytes.
+     */
+    size?: number | null;
+    /**
+     * Width in pixels of videos and pictures.
+     */
+    width?: number | null;
+}
+export type MediaFileKind = (typeof MediaFileKindObject)[keyof typeof MediaFileKindObject];
+/**
+ * One page of a collection.
+ */
+export interface MediaFilePage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: MediaFile[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type MediaFileSort = (typeof MediaFileSortObject)[keyof typeof MediaFileSortObject];
 export type ProblemCode = (typeof ProblemCodeObject)[keyof typeof ProblemCodeObject];
 export interface ProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
     /**
@@ -1086,6 +1768,118 @@ export interface ScanStatistics extends AdditionalDataHolder, Parsable {
     tracksUpdated?: number | null;
 }
 /**
+ * The artists, albums and tracks that match a search text, each sorted by relevance (best first).
+ */
+export interface SearchResult extends AdditionalDataHolder, Parsable {
+    /**
+     * One page of a collection.
+     */
+    albums?: AlbumPage | null;
+    /**
+     * One page of a collection.
+     */
+    artists?: ArtistPage | null;
+    /**
+     * One page of a collection.
+     */
+    tracks?: TrackPage | null;
+}
+/**
+ * Serializes information the current object
+ * @param Album The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeAlbum(writer: SerializationWriter, album: Partial<Album> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!album || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<ArtistReference>("artist", album.artist, serializeArtistReference);
+    writer.writeNumberValue("durationMilliseconds", album.durationMilliseconds);
+    writer.writeDateValue("firstSeenAt", album.firstSeenAt);
+    writer.writeStringValue("genre", album.genre);
+    writer.writeBooleanValue("hasCover", album.hasCover);
+    writer.writeGuidValue("id", album.id);
+    writer.writeBooleanValue("isCompilation", album.isCompilation);
+    writer.writeStringValue("title", album.title);
+    writer.writeNumberValue("trackCount", album.trackCount);
+    writer.writeNumberValue("year", album.year);
+    writer.writeAdditionalData(album.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param AlbumPage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeAlbumPage(writer: SerializationWriter, albumPage: Partial<AlbumPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!albumPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Album>("items", albumPage.items, serializeAlbum);
+    writer.writeNumberValue("limit", albumPage.limit);
+    writer.writeNumberValue("offset", albumPage.offset);
+    writer.writeNumberValue("total", albumPage.total);
+    writer.writeAdditionalData(albumPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param AlbumReference The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeAlbumReference(writer: SerializationWriter, albumReference: Partial<AlbumReference> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!albumReference || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<ArtistReference>("artist", albumReference.artist, serializeArtistReference);
+    writer.writeGuidValue("id", albumReference.id);
+    writer.writeBooleanValue("isCompilation", albumReference.isCompilation);
+    writer.writeStringValue("title", albumReference.title);
+    writer.writeAdditionalData(albumReference.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param Artist The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeArtist(writer: SerializationWriter, artist: Partial<Artist> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!artist || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("albumCount", artist.albumCount);
+    writer.writeDateValue("firstSeenAt", artist.firstSeenAt);
+    writer.writeGuidValue("id", artist.id);
+    writer.writeStringValue("name", artist.name);
+    writer.writeNumberValue("trackCount", artist.trackCount);
+    writer.writeAdditionalData(artist.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param ArtistPage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeArtistPage(writer: SerializationWriter, artistPage: Partial<ArtistPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!artistPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Artist>("items", artistPage.items, serializeArtist);
+    writer.writeNumberValue("limit", artistPage.limit);
+    writer.writeNumberValue("offset", artistPage.offset);
+    writer.writeNumberValue("total", artistPage.total);
+    writer.writeAdditionalData(artistPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param ArtistReference The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeArtistReference(writer: SerializationWriter, artistReference: Partial<ArtistReference> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!artistReference || isSerializingDerivedType) { return; }
+    writer.writeGuidValue("id", artistReference.id);
+    writer.writeStringValue("name", artistReference.name);
+    writer.writeAdditionalData(artistReference.additionalData);
+}
+/**
  * Serializes information the current object
  * @param CreatedSession The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
@@ -1124,6 +1918,35 @@ export function serializeCreateUser(writer: SerializationWriter, createUser: Par
     writer.writeStringValue("name", createUser.name);
     writer.writeEnumValue<Role>("role", createUser.role);
     writer.writeAdditionalData(createUser.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param Genre The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeGenre(writer: SerializationWriter, genre: Partial<Genre> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!genre || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("albumCount", genre.albumCount);
+    writer.writeStringValue("name", genre.name);
+    writer.writeNumberValue("trackCount", genre.trackCount);
+    writer.writeAdditionalData(genre.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param GenrePage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeGenrePage(writer: SerializationWriter, genrePage: Partial<GenrePage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!genrePage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Genre>("items", genrePage.items, serializeGenre);
+    writer.writeNumberValue("limit", genrePage.limit);
+    writer.writeNumberValue("offset", genrePage.offset);
+    writer.writeNumberValue("total", genrePage.total);
+    writer.writeAdditionalData(genrePage.additionalData);
 }
 /**
  * Serializes information the current object
@@ -1220,6 +2043,55 @@ export function serializeLibrarySettings(writer: SerializationWriter, librarySet
     writer.writeNumberValue("scanIntervalMinutes", librarySettings.scanIntervalMinutes);
     writer.writeCollectionOfPrimitiveValues<string>("videoExtensions", librarySettings.videoExtensions);
     writer.writeAdditionalData(librarySettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param MediaFile The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeMediaFile(writer: SerializationWriter, mediaFile: Partial<MediaFile> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!mediaFile || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("bitDepth", mediaFile.bitDepth);
+    writer.writeNumberValue("bitrate", mediaFile.bitrate);
+    writer.writeNumberValue("channels", mediaFile.channels);
+    writer.writeStringValue("codec", mediaFile.codec);
+    writer.writeNumberValue("durationMilliseconds", mediaFile.durationMilliseconds);
+    writer.writeStringValue("extension", mediaFile.extension);
+    writer.writeStringValue("fileName", mediaFile.fileName);
+    writer.writeDateValue("firstSeenAt", mediaFile.firstSeenAt);
+    writer.writeStringValue("format", mediaFile.format);
+    writer.writeBooleanValue("hasEmbeddedPicture", mediaFile.hasEmbeddedPicture);
+    writer.writeNumberValue("height", mediaFile.height);
+    writer.writeGuidValue("id", mediaFile.id);
+    writer.writeBooleanValue("isLossless", mediaFile.isLossless);
+    writer.writeBooleanValue("isPrimary", mediaFile.isPrimary);
+    writer.writeEnumValue<ScanIssueCode>("issue", mediaFile.issue);
+    writer.writeBooleanValue("isWritable", mediaFile.isWritable);
+    writer.writeEnumValue<MediaFileKind>("kind", mediaFile.kind);
+    writer.writeDateValue("modifiedAt", mediaFile.modifiedAt);
+    writer.writeStringValue("relativePath", mediaFile.relativePath);
+    writer.writeNumberValue("sampleRate", mediaFile.sampleRate);
+    writer.writeDateValue("scannedAt", mediaFile.scannedAt);
+    writer.writeNumberValue("size", mediaFile.size);
+    writer.writeNumberValue("width", mediaFile.width);
+    writer.writeAdditionalData(mediaFile.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param MediaFilePage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeMediaFilePage(writer: SerializationWriter, mediaFilePage: Partial<MediaFilePage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!mediaFilePage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<MediaFile>("items", mediaFilePage.items, serializeMediaFile);
+    writer.writeNumberValue("limit", mediaFilePage.limit);
+    writer.writeNumberValue("offset", mediaFilePage.offset);
+    writer.writeNumberValue("total", mediaFilePage.total);
+    writer.writeAdditionalData(mediaFilePage.additionalData);
 }
 /**
  * Serializes information the current object
@@ -1367,6 +2239,20 @@ export function serializeScanStatistics(writer: SerializationWriter, scanStatist
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param SearchResult The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeSearchResult(writer: SerializationWriter, searchResult: Partial<SearchResult> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!searchResult || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<AlbumPage>("albums", searchResult.albums, serializeAlbumPage);
+    writer.writeObjectValue<ArtistPage>("artists", searchResult.artists, serializeArtistPage);
+    writer.writeObjectValue<TrackPage>("tracks", searchResult.tracks, serializeTrackPage);
+    writer.writeAdditionalData(searchResult.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param Session The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -1378,6 +2264,45 @@ export function serializeSession(writer: SerializationWriter, session: Partial<S
     writer.writeGuidValue("id", session.id);
     writer.writeObjectValue<Profile>("profile", session.profile, serializeProfile);
     writer.writeAdditionalData(session.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param Track The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrack(writer: SerializationWriter, track: Partial<Track> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!track || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<AlbumReference>("album", track.album, serializeAlbumReference);
+    writer.writeObjectValue<ArtistReference>("artist", track.artist, serializeArtistReference);
+    writer.writeNumberValue("discNumber", track.discNumber);
+    writer.writeNumberValue("durationMilliseconds", track.durationMilliseconds);
+    writer.writeDateValue("firstSeenAt", track.firstSeenAt);
+    writer.writeStringValue("genre", track.genre);
+    writer.writeBooleanValue("hasAudio", track.hasAudio);
+    writer.writeBooleanValue("hasCover", track.hasCover);
+    writer.writeBooleanValue("hasVideo", track.hasVideo);
+    writer.writeGuidValue("id", track.id);
+    writer.writeStringValue("title", track.title);
+    writer.writeNumberValue("trackNumber", track.trackNumber);
+    writer.writeNumberValue("year", track.year);
+    writer.writeAdditionalData(track.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TrackPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrackPage(writer: SerializationWriter, trackPage: Partial<TrackPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!trackPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Track>("items", trackPage.items, serializeTrack);
+    writer.writeNumberValue("limit", trackPage.limit);
+    writer.writeNumberValue("offset", trackPage.offset);
+    writer.writeNumberValue("total", trackPage.total);
+    writer.writeAdditionalData(trackPage.additionalData);
 }
 /**
  * Serializes information the current object
@@ -1498,6 +2423,35 @@ export function serializeValidationProblemDetails_errors(writer: SerializationWr
     writer.writeAdditionalData(validationProblemDetails_errors.additionalData);
 }
 /**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ * @param Year The instance to serialize from.
+ */
+// @ts-ignore
+export function serializeYear(writer: SerializationWriter, year: Partial<Year> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!year || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("albumCount", year.albumCount);
+    writer.writeNumberValue("trackCount", year.trackCount);
+    writer.writeNumberValue("year", year.year);
+    writer.writeAdditionalData(year.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ * @param YearPage The instance to serialize from.
+ */
+// @ts-ignore
+export function serializeYearPage(writer: SerializationWriter, yearPage: Partial<YearPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!yearPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Year>("items", yearPage.items, serializeYear);
+    writer.writeNumberValue("limit", yearPage.limit);
+    writer.writeNumberValue("offset", yearPage.offset);
+    writer.writeNumberValue("total", yearPage.total);
+    writer.writeAdditionalData(yearPage.additionalData);
+}
+/**
  * A session of a profile.
  */
 export interface Session extends AdditionalDataHolder, Parsable {
@@ -1519,6 +2473,85 @@ export interface Session extends AdditionalDataHolder, Parsable {
     profile?: Profile | null;
 }
 export type SortDirection = (typeof SortDirectionObject)[keyof typeof SortDirectionObject];
+/**
+ * A track of the library: all media files with the same base name in one folder.
+ */
+export interface Track extends AdditionalDataHolder, Parsable {
+    /**
+     * The album property
+     */
+    album?: AlbumReference | null;
+    /**
+     * The artist property
+     */
+    artist?: ArtistReference | null;
+    /**
+     * The discNumber property
+     */
+    discNumber?: number | null;
+    /**
+     * Duration in milliseconds: of the audio file, otherwise of the video file.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * When the track was found for the first time ("recently added").
+     */
+    firstSeenAt?: Date | null;
+    /**
+     * The genre property
+     */
+    genre?: string | null;
+    /**
+     * Whether the track can be played as audio.
+     */
+    hasAudio?: boolean | null;
+    /**
+     * Whether a cover exists (GetTrackCover): of the track, of its album or of another track of its album.
+     */
+    hasCover?: boolean | null;
+    /**
+     * Whether the track has a music video.
+     */
+    hasVideo?: boolean | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * The title property
+     */
+    title?: string | null;
+    /**
+     * Number of the track on its disc.
+     */
+    trackNumber?: number | null;
+    /**
+     * The year property
+     */
+    year?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface TrackPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Track[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type TrackSort = (typeof TrackSortObject)[keyof typeof TrackSortObject];
 /**
  * Changes the settings of the media library. Missing or null values stay unchanged.
  */
@@ -1675,6 +2708,60 @@ export interface ValidationProblemDetails extends AdditionalDataHolder, ApiError
 export interface ValidationProblemDetails_errors extends AdditionalDataHolder, Parsable {
 }
 /**
+ * A year of the tracks.
+ */
+export interface Year extends AdditionalDataHolder, Parsable {
+    /**
+     * Albums with tracks of the year.
+     */
+    albumCount?: number | null;
+    /**
+     * The trackCount property
+     */
+    trackCount?: number | null;
+    /**
+     * The year property
+     */
+    year?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface YearPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Year[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export const AlbumSortObject = {
+    Title: "Title",
+    Artist: "Artist",
+    Year: "Year",
+    FirstSeenAt: "FirstSeenAt",
+    Relevance: "Relevance",
+} as const;
+export const ArtistSortObject = {
+    Name: "Name",
+    FirstSeenAt: "FirstSeenAt",
+    Relevance: "Relevance",
+} as const;
+export const GenreSortObject = {
+    Name: "Name",
+    TrackCount: "TrackCount",
+} as const;
+/**
  * Aggregated status of all health checks.
  */
 export const HealthStatusObject = {
@@ -1734,6 +2821,19 @@ export const LanguageObject = {
     De: "de",
 } as const;
 /**
+ * Kind of a media file.
+ */
+export const MediaFileKindObject = {
+    Audio: "Audio",
+    Video: "Video",
+    Image: "Image",
+} as const;
+export const MediaFileSortObject = {
+    Kind: "Kind",
+    Name: "Name",
+    Size: "Size",
+} as const;
+/**
  * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
  */
 export const ProblemCodeObject = {
@@ -1755,6 +2855,10 @@ export const ProblemCodeObject = {
     JobNot_found: "job.not_found",
     JobAlready_running: "job.already_running",
     JobRun_not_found: "job.run_not_found",
+    ArtistNot_found: "artist.not_found",
+    AlbumNot_found: "album.not_found",
+    TrackNot_found: "track.not_found",
+    CoverNot_found: "cover.not_found",
 } as const;
 /**
  * Role of a profile.
@@ -1780,12 +2884,20 @@ export const ScanPhaseObject = {
     Processing: "Processing",
     CleaningUp: "CleaningUp",
 } as const;
-/**
- * Sort direction.
- */
 export const SortDirectionObject = {
     Asc: "Asc",
     Desc: "Desc",
+} as const;
+export const TrackSortObject = {
+    AlbumArtist: "AlbumArtist",
+    Album: "Album",
+    Title: "Title",
+    Artist: "Artist",
+    Duration: "Duration",
+    Year: "Year",
+    Genre: "Genre",
+    FirstSeenAt: "FirstSeenAt",
+    Relevance: "Relevance",
 } as const;
 /**
  * Sort key of the user list; ties are sorted by id.

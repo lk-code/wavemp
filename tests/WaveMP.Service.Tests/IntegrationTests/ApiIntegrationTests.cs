@@ -214,6 +214,10 @@ public class ApiIntegrationTests
     [TestCase("ListJobs", true)]
     [TestCase("StartJobRun", true)]
     [TestCase("UpdateLibrarySettings", true)]
+    [TestCase("ListTracks", true)]
+    [TestCase("SearchLibrary", true)]
+    [TestCase("GetAlbumCover", true)]
+    [TestCase("ListTrackFiles", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -257,6 +261,12 @@ public class ApiIntegrationTests
     [TestCase("ScanPage", "Scan")]
     [TestCase("JobPage", "Job")]
     [TestCase("JobRunPage", "JobRun")]
+    [TestCase("ArtistPage", "Artist")]
+    [TestCase("AlbumPage", "Album")]
+    [TestCase("TrackPage", "Track")]
+    [TestCase("GenrePage", "Genre")]
+    [TestCase("YearPage", "Year")]
+    [TestCase("MediaFilePage", "MediaFile")]
     public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
@@ -266,6 +276,43 @@ public class ApiIntegrationTests
             .Should().BeEquivalentTo(["items", "offset", "limit", "total"]);
         page["properties"]!["items"]!["items"]!["$ref"]!.GetValue<string>()
             .Should().Be($"#/components/schemas/{itemSchema}");
+    }
+
+    [TestCase("GetAlbumCover")]
+    [TestCase("GetTrackCover")]
+    public async Task GetOpenApiDocument_Always_DescribesCoversAsBinaryImages(string operationId)
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode responses = FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == operationId)["responses"]!;
+
+        JsonObject content = responses["200"]!["content"]!.AsObject();
+        content.Select(entry => entry.Key).Should().BeEquivalentTo(
+            ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"]);
+        content.Should().AllSatisfy(entry =>
+        {
+            entry.Value!["schema"]!["type"]!.GetValue<string>().Should().Be("string");
+            entry.Value["schema"]!["format"]!.GetValue<string>().Should().Be("binary");
+        });
+        responses["404"]!["content"]!["application/problem+json"].Should().NotBeNull();
+        document["components"]!["schemas"]!.AsObject().Should().NotContainKey("IFormFile");
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesForbiddenOnlyForTheFilesOfATrackInTheLibrary()
+    {
+        string[] libraryTags = ["Artists", "Albums", "Tracks", "Genres", "Years", "Search"];
+
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        List<JsonNode> library = [.. FindOperations(document)
+            .Where(operation => libraryTags.Contains(operation["tags"]![0]!.GetValue<string>()))];
+        library.Should().HaveCount(14);
+        library.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
+        library.Where(operation => operation["responses"]!["403"] is not null)
+            .Select(operation => operation["operationId"]!.GetValue<string>())
+            .Should().Equal("ListTrackFiles");
     }
 
     [Test]

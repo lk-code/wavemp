@@ -6,6 +6,802 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/albums": {
+      "get": {
+        "tags": [
+          "Albums"
+        ],
+        "summary": "Lists the albums, sorted and optionally searched and filtered.",
+        "operationId": "ListAlbums",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of albums to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of albums of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Artist by default, Relevance with q. Relevance without q falls back to the default.",
+            "schema": {
+              "$ref": "#/components/schemas/AlbumSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; descending by default for FirstSeenAt and Relevance, otherwise ascending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only albums whose title or album artist contains it or is similar to it (small typos).",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "artistId",
+            "in": "query",
+            "description": "Only albums with this album artist or with tracks of this artist.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Only albums with tracks of this genre, without regard to case.",
+            "schema": {
+              "maxLength": 128,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Only albums of this year.",
+            "schema": {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of albums.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlbumPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/albums/{id}": {
+      "get": {
+        "tags": [
+          "Albums"
+        ],
+        "summary": "Returns an album.",
+        "operationId": "GetAlbum",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the album.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The album.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Album"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The album does not exist (code `album.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/albums/{id}/tracks": {
+      "get": {
+        "tags": [
+          "Albums"
+        ],
+        "summary": "Lists the tracks of an album, by default in the order of disc and track number.",
+        "operationId": "ListAlbumTracks",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the album.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of tracks to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of tracks of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Album (disc and track number) by default, Relevance with q. Relevance without q falls back to the default.",
+            "schema": {
+              "$ref": "#/components/schemas/TrackSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; descending by default for FirstSeenAt and Relevance, otherwise ascending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only tracks whose title, artist or album contains it or is similar to it.",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "hasAudio",
+            "in": "query",
+            "description": "Only tracks with (true) or without (false) an audio file.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "hasVideo",
+            "in": "query",
+            "description": "Only tracks with (true) or without (false) a video file.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of tracks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The album does not exist (code `album.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/albums/{id}/cover": {
+      "get": {
+        "tags": [
+          "Albums"
+        ],
+        "summary": "Returns the cover of an album as picture: the picture in its folder, otherwise the cover of one of its tracks. The picture is delivered as stored (JPEG, PNG, WebP, GIF or BMP); scaled sizes follow later.",
+        "operationId": "GetAlbumCover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the album.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The picture.",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/gif": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/bmp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The album does not exist (code `album.not_found`) or has no cover (code `cover.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/artists": {
+      "get": {
+        "tags": [
+          "Artists"
+        ],
+        "summary": "Lists the artists, sorted and optionally searched.",
+        "operationId": "ListArtists",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of artists to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of artists of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Name by default, Relevance with q. Relevance without q falls back to the default.",
+            "schema": {
+              "$ref": "#/components/schemas/ArtistSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; descending by default for FirstSeenAt and Relevance, otherwise ascending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only artists whose name contains it or is similar to it (small typos).",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of artists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/artists/{id}": {
+      "get": {
+        "tags": [
+          "Artists"
+        ],
+        "summary": "Returns an artist.",
+        "operationId": "GetArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the artist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The artist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Artist"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The artist does not exist (code `artist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/artists/{id}/albums": {
+      "get": {
+        "tags": [
+          "Artists"
+        ],
+        "summary": "Lists the albums of an artist: albums with the artist as album artist and albums with tracks of the artist.",
+        "operationId": "ListArtistAlbums",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the artist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of albums to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of albums of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Artist by default, Relevance with q. Relevance without q falls back to the default.",
+            "schema": {
+              "$ref": "#/components/schemas/AlbumSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; descending by default for FirstSeenAt and Relevance, otherwise ascending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only albums whose title or album artist contains it or is similar to it.",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Only albums with tracks of this genre, without regard to case.",
+            "schema": {
+              "maxLength": 128,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Only albums of this year.",
+            "schema": {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of albums.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlbumPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The artist does not exist (code `artist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/genres": {
+      "get": {
+        "tags": [
+          "Genres"
+        ],
+        "summary": "Lists the genres of the tracks with the number of their tracks and albums. Genres that differ only in case are one genre; use its name as genre filter of the track and album lists.",
+        "operationId": "ListGenres",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of genres to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of genres of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Name by default.",
+            "schema": {
+              "$ref": "#/components/schemas/GenreSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; descending by default for TrackCount, otherwise ascending.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only genres that contain it or are similar to it.",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of genres.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenrePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "tags": [
@@ -855,6 +1651,89 @@
         ]
       }
     },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Searches artists, albums and tracks at once and returns the best matches of each, sorted by relevance. Finds texts that contain the search text or are similar to it, so small typos are fine. Tracks are also found by their artist and album. To see more of a group, use the parameter q of its list.",
+        "operationId": "SearchLibrary",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text, 1 to 200 characters; white space only is invalid.",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of matches of each group to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of matches of each group.",
+            "schema": {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The matches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/sessions": {
       "post": {
         "tags": [
@@ -1079,6 +1958,426 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks": {
+      "get": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Lists the tracks, sorted and optionally searched and filtered.",
+        "operationId": "ListTracks",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of tracks to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of tracks of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; AlbumArtist by default, Relevance with q. Relevance without q falls back to the default.",
+            "schema": {
+              "$ref": "#/components/schemas/TrackSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction of the key; descending by default for FirstSeenAt and Relevance, otherwise ascending. Disc and track number always ascend.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only tracks whose title, artist or album contains it or is similar to it (small typos).",
+            "schema": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "artistId",
+            "in": "query",
+            "description": "Only tracks of this artist or on albums of this album artist.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "albumId",
+            "in": "query",
+            "description": "Only tracks of this album.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Only tracks of this genre, without regard to case.",
+            "schema": {
+              "maxLength": 128,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Only tracks of this year.",
+            "schema": {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "hasAudio",
+            "in": "query",
+            "description": "Only tracks with (true) or without (false) an audio file.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "hasVideo",
+            "in": "query",
+            "description": "Only tracks with (true) or without (false) a video file.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of tracks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}": {
+      "get": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Returns a track.",
+        "operationId": "GetTrack",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The track.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Track"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/cover": {
+      "get": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Returns the cover of a track as picture. By default the cover of its album comes before its own cover; if the preferred cover is missing, the other one is used, and finally the cover of another track of the album. The picture is delivered as stored (JPEG, PNG, WebP, GIF or BMP); scaled sizes follow later.",
+        "operationId": "GetTrackCover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The picture.",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/gif": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/bmp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`) or has no cover (code `cover.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/files": {
+      "get": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Lists the files of a track, for admins only: audio, video and its own pictures, also duplicates of lower quality, with their technical details.",
+        "operationId": "ListTrackFiles",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of files to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of files of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Kind (audio, video, pictures, the primary file first) by default.",
+            "schema": {
+              "$ref": "#/components/schemas/MediaFileSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; ascending by default.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "Only files of this kind.",
+            "schema": {
+              "$ref": "#/components/schemas/MediaFileKind"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of files.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaFilePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -1517,10 +2816,331 @@
           }
         ]
       }
+    },
+    "/api/v1/years": {
+      "get": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Lists the years of the tracks with the number of their tracks and albums.",
+        "operationId": "ListYears",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of years to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of years of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; the newest year first by default.",
+            "schema": {
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of years.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "Album": {
+        "required": [
+          "id",
+          "title",
+          "isCompilation",
+          "trackCount",
+          "durationMilliseconds",
+          "hasCover",
+          "firstSeenAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "artist": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Album artist; null for compilations and albums without a known artist.",
+                "$ref": "#/components/schemas/ArtistReference"
+              }
+            ]
+          },
+          "isCompilation": {
+            "type": "boolean",
+            "description": "Tracks of several artists without a common album artist. Clients show their own text for it."
+          },
+          "year": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "genre": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The first genre of its tracks in the order of disc and track number."
+          },
+          "trackCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationMilliseconds": {
+            "type": "integer",
+            "description": "Sum of the durations of the tracks in milliseconds.",
+            "format": "int64"
+          },
+          "hasCover": {
+            "type": "boolean",
+            "description": "Whether the album or one of its tracks has a cover (GetAlbumCover)."
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "description": "When the album was found for the first time.",
+            "format": "date-time"
+          }
+        },
+        "description": "An album of the library."
+      },
+      "AlbumPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Album"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "AlbumReference": {
+        "required": [
+          "id",
+          "title",
+          "isCompilation"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "artist": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Album artist; null for compilations and albums without a known artist.",
+                "$ref": "#/components/schemas/ArtistReference"
+              }
+            ]
+          },
+          "isCompilation": {
+            "type": "boolean",
+            "description": "Tracks of several artists without a common album artist. Clients show their own text for it."
+          }
+        },
+        "description": "The album of a track."
+      },
+      "AlbumSort": {
+        "enum": [
+          "Title",
+          "Artist",
+          "Year",
+          "FirstSeenAt",
+          "Relevance"
+        ],
+        "type": "string"
+      },
+      "Artist": {
+        "required": [
+          "id",
+          "name",
+          "albumCount",
+          "trackCount",
+          "firstSeenAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name as first found in the media files."
+          },
+          "albumCount": {
+            "type": "integer",
+            "description": "Albums with the artist as album artist or with tracks of the artist.",
+            "format": "int32"
+          },
+          "trackCount": {
+            "type": "integer",
+            "description": "Tracks of the artist or on albums of the artist.",
+            "format": "int32"
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "description": "When the artist was found for the first time.",
+            "format": "date-time"
+          }
+        },
+        "description": "An artist of the library."
+      },
+      "ArtistPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Artist"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "ArtistReference": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "An artist referred to by a track or an album."
+      },
+      "ArtistSort": {
+        "enum": [
+          "Name",
+          "FirstSeenAt",
+          "Relevance"
+        ],
+        "type": "string"
+      },
       "CreatedSession": {
         "required": [
           "token",
@@ -1594,6 +3214,71 @@
           }
         },
         "description": "Creates a user (profile)."
+      },
+      "Genre": {
+        "required": [
+          "name",
+          "trackCount",
+          "albumCount"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the genre as found in the tracks; use it as filter genre of the lists."
+          },
+          "trackCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "albumCount": {
+            "type": "integer",
+            "description": "Albums with tracks of the genre.",
+            "format": "int32"
+          }
+        },
+        "description": "A genre of the tracks; genres that differ only in case are one genre."
+      },
+      "GenrePage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "GenreSort": {
+        "enum": [
+          "Name",
+          "TrackCount"
+        ],
+        "type": "string"
       },
       "Health": {
         "required": [
@@ -1904,6 +3589,209 @@
         },
         "description": "Settings of the media library."
       },
+      "MediaFile": {
+        "required": [
+          "id",
+          "kind",
+          "relativePath",
+          "fileName",
+          "extension",
+          "size",
+          "modifiedAt",
+          "isPrimary",
+          "isLossless",
+          "hasEmbeddedPicture",
+          "isWritable",
+          "firstSeenAt",
+          "scannedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MediaFileKind"
+          },
+          "relativePath": {
+            "type": "string",
+            "description": "Path relative to the media folder with / as separator."
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "string",
+            "description": "Extension in lower case without the dot."
+          },
+          "size": {
+            "type": "integer",
+            "description": "Size in bytes.",
+            "format": "int64"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "Time of the last change of the file.",
+            "format": "date-time"
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "description": "The file of its kind (audio or video) that the track plays: the one with the highest quality."
+          },
+          "format": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Container format reported by ffprobe, e.g. flac."
+          },
+          "codec": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Codec of the main stream, e.g. mp3, flac or h264."
+          },
+          "bitrate": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Bitrate in bit/s.",
+            "format": "int32"
+          },
+          "sampleRate": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Sample rate in Hz.",
+            "format": "int32"
+          },
+          "bitDepth": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "channels": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "isLossless": {
+            "type": "boolean"
+          },
+          "width": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Width in pixels of videos and pictures.",
+            "format": "int32"
+          },
+          "height": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Height in pixels of videos and pictures.",
+            "format": "int32"
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "hasEmbeddedPicture": {
+            "type": "boolean",
+            "description": "Whether the tags of the file contain a picture."
+          },
+          "isWritable": {
+            "type": "boolean",
+            "description": "Whether the tags can be written back (audio files only)."
+          },
+          "issue": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "A problem found while reading the file; null if there was none.",
+                "$ref": "#/components/schemas/ScanIssueCode"
+              }
+            ]
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "description": "When the file was found for the first time.",
+            "format": "date-time"
+          },
+          "scannedAt": {
+            "type": "string",
+            "description": "When the file was read the last time.",
+            "format": "date-time"
+          }
+        },
+        "description": "A file of a track as found by the scan, with its technical details."
+      },
+      "MediaFileKind": {
+        "enum": [
+          "Audio",
+          "Video",
+          "Image"
+        ],
+        "type": "string",
+        "description": "Kind of a media file."
+      },
+      "MediaFilePage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaFile"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "MediaFileSort": {
+        "enum": [
+          "Kind",
+          "Name",
+          "Size"
+        ],
+        "type": "string"
+      },
       "ProblemCode": {
         "enum": [
           "request.invalid",
@@ -1923,7 +3811,11 @@
           "scan.not_found",
           "job.not_found",
           "job.already_running",
-          "job.run_not_found"
+          "job.run_not_found",
+          "artist.not_found",
+          "album.not_found",
+          "track.not_found",
+          "cover.not_found"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -2339,6 +4231,26 @@
         },
         "description": "What a scan found and changed; the totals count the whole library after the scan."
       },
+      "SearchResult": {
+        "required": [
+          "artists",
+          "albums",
+          "tracks"
+        ],
+        "type": "object",
+        "properties": {
+          "artists": {
+            "$ref": "#/components/schemas/ArtistPage"
+          },
+          "albums": {
+            "$ref": "#/components/schemas/AlbumPage"
+          },
+          "tracks": {
+            "$ref": "#/components/schemas/TrackPage"
+          }
+        },
+        "description": "The artists, albums and tracks that match a search text, each sorted by relevance (best first)."
+      },
       "Session": {
         "required": [
           "id",
@@ -2373,8 +4285,151 @@
           "Asc",
           "Desc"
         ],
-        "type": "string",
-        "description": "Sort direction."
+        "type": "string"
+      },
+      "Track": {
+        "required": [
+          "id",
+          "title",
+          "hasAudio",
+          "hasVideo",
+          "hasCover",
+          "firstSeenAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "artist": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Artist of the track; null if unknown.",
+                "$ref": "#/components/schemas/ArtistReference"
+              }
+            ]
+          },
+          "album": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Album of the track; null for tracks without album.",
+                "$ref": "#/components/schemas/AlbumReference"
+              }
+            ]
+          },
+          "trackNumber": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Number of the track on its disc.",
+            "format": "int32"
+          },
+          "discNumber": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "year": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "genre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Duration in milliseconds: of the audio file, otherwise of the video file.",
+            "format": "int64"
+          },
+          "hasAudio": {
+            "type": "boolean",
+            "description": "Whether the track can be played as audio."
+          },
+          "hasVideo": {
+            "type": "boolean",
+            "description": "Whether the track has a music video."
+          },
+          "hasCover": {
+            "type": "boolean",
+            "description": "Whether a cover exists (GetTrackCover): of the track, of its album or of another track of its album."
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "description": "When the track was found for the first time (\"recently added\").",
+            "format": "date-time"
+          }
+        },
+        "description": "A track of the library: all media files with the same base name in one folder."
+      },
+      "TrackPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Track"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "TrackSort": {
+        "enum": [
+          "AlbumArtist",
+          "Album",
+          "Title",
+          "Artist",
+          "Duration",
+          "Year",
+          "Genre",
+          "FirstSeenAt",
+          "Relevance"
+        ],
+        "type": "string"
       },
       "UpdateLibrarySettings": {
         "type": "object",
@@ -2651,6 +4706,64 @@
             "$ref": "#/components/schemas/ProblemCode"
           }
         }
+      },
+      "Year": {
+        "required": [
+          "year",
+          "trackCount",
+          "albumCount"
+        ],
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trackCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "albumCount": {
+            "type": "integer",
+            "description": "Albums with tracks of the year.",
+            "format": "int32"
+          }
+        },
+        "description": "A year of the tracks."
+      },
+      "YearPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Year"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
       }
     },
     "securitySchemes": {
@@ -2663,6 +4776,15 @@
     }
   },
   "tags": [
+    {
+      "name": "Albums"
+    },
+    {
+      "name": "Artists"
+    },
+    {
+      "name": "Genres"
+    },
     {
       "name": "Health"
     },
@@ -2679,13 +4801,22 @@
       "name": "Scans"
     },
     {
+      "name": "Search"
+    },
+    {
       "name": "Sessions"
     },
     {
       "name": "Settings"
     },
     {
+      "name": "Tracks"
+    },
+    {
       "name": "Users"
+    },
+    {
+      "name": "Years"
     }
   ]
 }
