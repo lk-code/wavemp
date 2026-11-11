@@ -22,6 +22,9 @@ WaveMP brings back the glossy, glassy look of the classic desktop media players 
 - **Plays almost anything.** Formats your browser supports are streamed directly; everything else is transcoded on the fly with ffmpeg. Intel Quick Sync is supported for hardware acceleration.
 - **Easy setup.** One compose file, one password, your media folder. That's it.
 - **Open API.** A documented REST API (OpenAPI) for building your own clients. Native apps are planned.
+- **Installable as an app (PWA)** on desktop and mobile devices.
+- **English and German.** More languages will follow through community translations.
+- **Themes.** The look is a theme: one CSS file plus graphics, from colors to the complete desktop layout. WaveMP ships with the dark glass theme *Midnight*; see [THEMING.md](THEMING.md) for writing your own.
 
 ## Quick Start
 
@@ -184,7 +187,9 @@ This builds the image from source and starts WaveMP on `http://localhost:8080`. 
 | `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, migrations) |
 | `source/WaveMP.Web` | Vue 3 web app |
 | `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright) |
+| `assets/` | Graphics, icons, themes and license texts; `assets/web` is served unchanged by the web app |
 | `.github/` | GitHub Actions workflows, license check script and policy |
+| `THEMING.md` | Theme API for theme authors |
 
 ### Local development
 
@@ -200,6 +205,10 @@ cd source/WaveMP.Web
 npm install
 npm run dev                                       # http://localhost:5173, proxies /api to the service
 ```
+
+The development server also serves an internal component overview at `http://localhost:5173/dev/components`: all parts of the theme API in all states and the app at mobile and desktop size. It is not part of the production build.
+
+The Phosphor icons in `assets/web/icons` are copied from the npm package `@phosphor-icons/core`. To add an icon, add it to the list in `source/WaveMP.Web/scripts/sync-icons.ts` and run `npm run icons:sync` in `source/WaveMP.Web`.
 
 If you set `DB_PORT` in `.env`, also set it for the service: `dotnet user-secrets set DB_PORT <port> --project source/WaveMP.Service`.
 
@@ -245,6 +254,8 @@ npm test                                          # E2E_BASE_URL defaults to htt
 ```
 
 The integration tests start the service in-process on a free local port, use their own database `wavemp_tests` and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
+
+If you set `WAVEMP_PORT` in `.env`, point the E2E tests at it, for example `E2E_BASE_URL=http://localhost:8081 npm test`. `npm run test:unit` runs the unit tests of the web app (Vitest), including checks that every text comes from the translation files and that `THEMING.md` matches the code.
 
 `npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version.
 
