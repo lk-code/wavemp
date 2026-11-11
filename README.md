@@ -85,7 +85,7 @@ Start it:
 docker compose up -d
 ```
 
-Open `http://<your-server>:8080` and select the **Admin** profile to set up your library.
+Open `http://<your-server>:8080` and select the **Admin** profile to set up your library. WaveMP scans your media folder one minute after the start and then every six hours; changes are also picked up within seconds by watching the folder.
 
 WaveMP can be installed as an app (PWA). Browsers require HTTPS for that, except on `localhost`, for example behind a reverse proxy with TLS.
 
@@ -109,6 +109,7 @@ Until the first release, only `edge` and `sha-<commit>` are available.
 |---|---|---|
 | `DB_PASSWORD` | Database password, used by both containers | *(required)* |
 | `ADMIN_PIN` | Protects the admin profile with a PIN (planned, not available yet) | *(none)* |
+| `MEDIA_PATH` | Media folder inside the container; only change it if you mount your media elsewhere | `/media` |
 
 ### Hardware transcoding (optional)
 
@@ -125,6 +126,7 @@ WaveMP falls back to software transcoding when no hardware acceleration is avail
 
 - Mount the folder **read-only** (`/path/to/your/media:/media:ro`) if WaveMP should never change your files.
 - Mount it **writable** if you want to edit tags from within WaveMP. Changes are only written to audio files, never to videos.
+- The container runs as user `1654` (`app`); your files and folders must be readable for it.
 
 ## Organizing Your Media
 
@@ -147,18 +149,34 @@ Artist - Song.mp3
 Song.mp3
 ```
 
-WaveMP reads metadata from the file tags first. If tags are missing, it tries to detect artist, album and title from your folder and file names.
+Files are grouped without regard to case, so `Song.MP3` and `song.jpg` belong together. Which extensions count as audio, video and pictures can be changed under **Administration > Library**.
 
-**Covers:** By default, the album cover is used before a track's own cover.
-**Duplicates:** If there are several audio files with the same name (e.g. `Song.mp3` and `Song.flac`), the one with the higher quality is used.
+**Metadata.** WaveMP reads the tags of your files first (title, artist, album, album artist, track and disc number, year, genre). Whatever the tags leave open is taken from the folder and file names, for example:
+
+| Path | Result |
+|---|---|
+| `Artist/Album/01 - Title.mp3` | artist, album, track 1, title |
+| `Artist/Album/CD2/03 Title.mp3` | also disc 2 (`CD1`, `Disc 2` and similar folders are discs of one album) |
+| `Artist - Album/02. Title.mp3` | artist and album from the folder |
+| `Artist/2001 - Album/Title.mp3` | also the year (`(2001) Album`, `[2001] Album` and `Album (2001)` work too) |
+| `Artist/Title.mp3`, `Artist - Title.mp3` | artist and title |
+| `weird.mp3` | title `weird` |
+
+A number at the start of a file name is only a track number inside an album folder or with a leading zero, so `50 Cent - Song.mp3` keeps its artist. If most file names of a folder share a pattern, for example all files in the root named `Artist - Title` or `01 - Artist - Title`, WaveMP uses it for all of them. Albums without an album artist tag get the artist of their tracks; tracks of several artists in one album folder become a compilation.
+
+**Covers.** A picture named `cover`, `folder`, `front`, `album` or `albumart` (in this order, any picture format) is the cover of the album in its folder, and for disc folders such as `CD1` also in the folder above. A picture with the name of a track (`Song.jpg`) is the cover of that track, otherwise a picture embedded in its files is used. By default, the album cover is shown before a track's own cover.
+
+**Duplicates.** If there are several audio files with the same name (e.g. `Song.mp3` and `Song.flac`), the one with the highest quality plays: lossless before lossy, then the higher bit depth, sample rate and bitrate. For videos the higher resolution wins, then the bitrate. All files are kept in the library.
+
+**Scans.** Scans are incremental: only files that are new or have a new size or change time are read again, and files that are gone are removed. Hidden folders (starting with a dot) and the system folders of NAS devices and operating systems (`@eaDir`, `#recycle`, `#snapshot`, `$RECYCLE.BIN`, `System Volume Information`, `lost+found`) are skipped. If the media folder is suddenly empty while the library has files, for example because a network share is not mounted, the scan stops with an error and removes nothing. Watching the folder for changes is not reliable on network shares (NFS, SMB); the periodic scan therefore always stays active.
 
 ## Usage
 
 1. **Select a profile.** WaveMP starts with a profile selection instead of a login. On the first start there is only the built-in **Admin** profile. The selection is remembered on the device, so the next start goes straight on.
-2. **Create profiles.** As admin, open the profile menu (your initials at the top right) and choose **Manage profiles** to add, edit or delete profiles: name, initials (created from the name if left empty), color and role (admin or user). The built-in admin profile can be renamed, but it cannot be deleted and always stays an admin. Once there are other profiles, it is shown less prominently in the selection.
+2. **Create profiles.** As admin, open the profile menu (your initials at the top right), choose **Administration** and then **Profiles** to add, edit or delete profiles: name, initials (created from the name if left empty), color and role (admin or user). The built-in admin profile can be renamed, but it cannot be deleted and always stays an admin. Once there are other profiles, it is shown less prominently in the selection.
 3. **Switch profiles** with **Switch profile** in the profile menu.
 4. **Choose your language** under **Settings** in the profile menu. It is stored with the profile and applies on all devices; before a profile is selected, WaveMP uses the language of the browser (English or German, otherwise English).
-5. **Scan your library.** As admin, start a scan of your media folder.
+5. **Scan your library.** As admin, open **Administration > Library**: **Scan now** starts a scan of your media folder, shows its progress and then its result (files found, added, updated and removed, tracks, albums and artists, and files with problems). Below are the history of scans and the settings: how often the library is scanned, whether the media folder is watched for changes, the file extensions of audio, video and pictures and the names of album covers. **Administration > Jobs** lists all background jobs with their last and next run and runs them on demand.
 6. **Play.** Browse by artist, album or track, build playlists and switch between cover, video and visualization while playing.
 
 Profiles are not protected yet: everyone who can open WaveMP can select any profile, including the admin profile. An optional PIN is planned. Do not expose WaveMP to the internet without protection, for example a reverse proxy with authentication or a VPN.
@@ -173,7 +191,7 @@ Profiles are not protected yet: everyone who can open WaveMP can select any prof
 
 ## Building from Source
 
-Requirements: .NET 10 SDK, Node.js 24, Docker.
+Requirements: .NET 10 SDK, Node.js 24, Docker, and ffmpeg for running the service and the tests outside of Docker (Windows: `winget install --id Gyan.FFmpeg -e`, Debian/Ubuntu: `sudo apt install ffmpeg`, macOS: `brew install ffmpeg`). The Docker image brings its own ffmpeg.
 
 ```bash
 git clone https://github.com/lk-code/wavemp.git
@@ -190,9 +208,13 @@ This builds the image from source and starts WaveMP on `http://localhost:8080`. 
 |---|---|
 | `source/WaveMP.Service` | ASP.NET Core host (REST API, authentication, serves the web app) |
 | `source/WaveMP.Core.Users` | User profiles, sessions and user settings |
+| `source/WaveMP.Core.Settings` | Server settings, stored as JSON per group (for example the library settings) |
+| `source/WaveMP.Core.Jobs` | Background jobs with Quartz.NET (in memory) and their run history |
+| `source/WaveMP.Core.Metadata` | Tags (TagLib#), technical information (ffprobe) and metadata from folder and file names |
+| `source/WaveMP.Core.Scanning` | Library scan, grouping of files, the scan job and the file watcher |
 | `source/WaveMP.Data` | EF Core with PostgreSQL (DbContext, entities, repositories, migrations) |
 | `source/WaveMP.Web` | Vue 3 web app |
-| `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright) |
+| `tests/` | Unit and integration tests (NUnit), E2E tests (Playwright); `tests/WaveMP.Testing` holds helpers shared by the test projects (test databases, temporary folders, synthetic media) |
 | `assets/` | Graphics, icons, themes and license texts; `assets/web` is served unchanged by the web app |
 | `.github/` | GitHub Actions workflows, license check script and policy |
 | `THEMING.md` | Theme API for theme authors |
@@ -211,6 +233,16 @@ cd source/WaveMP.Web
 npm install
 npm run dev                                       # http://localhost:5173, proxies /api to the service
 ```
+
+`dotnet run` uses the folder `./media` of the repository as media folder (`MEDIA_PATH` in `Properties/launchSettings.json`); relative paths are resolved against the project folder. The image uses `/media`. To fill `./media` with synthetic test media (4 tracks, created with ffmpeg), build the image and run:
+
+```bash
+docker compose -f docker-compose.dev.yml build
+docker run --rm -v "$PWD/media:/media" -v "$PWD/tests/WaveMP.E2E/scripts:/scripts:ro" \
+  --entrypoint sh wavemp:dev /scripts/generate-media.sh /media
+```
+
+In Git Bash on Windows, prefix the command with `MSYS_NO_PATHCONV=1` and use `$(pwd -W)` instead of `$PWD`.
 
 The development server also serves an internal component overview at `http://localhost:5173/dev/components`: all parts of the theme API in all states and the app at mobile and desktop size. It is not part of the production build.
 
@@ -243,6 +275,8 @@ Authentication is token-based. `GET /api/v1/profiles` lists the profiles without
 
 Collections are paged with the query parameters `offset` (from 0) and `limit` (1 to 100, default 50); the answer contains `items`, `offset`, `limit` and `total`.
 
+Admins start a scan with `POST /api/v1/scans`; the answer is `202 Accepted` with the queued scan and its `Location`. `GET /api/v1/scans/current` returns the running scan with its progress (`404`, `scan.not_running`, while none runs), `GET /api/v1/scans` the history. A second start while a scan runs gets `409` (`scan.already_running`). All background jobs are listed with `GET /api/v1/jobs` and started with `POST /api/v1/jobs/{id}/runs` (for example `library-scan`); `GET /api/v1/jobs/{id}/runs` returns their run history (30 days, at most 100 runs per job). Errors of runs and problems of files are codes such as `scan.media_folder_empty` or `file.probe_failed`. The library settings are read and changed with `GET` and `PATCH /api/v1/settings/library`.
+
 ### Tests
 
 Run the commands from the repository root:
@@ -263,13 +297,15 @@ npx playwright install chromium
 npm test                                          # E2E_BASE_URL defaults to http://localhost:8080
 ```
 
+The tests create their media at runtime with ffmpeg (sine tones, test pictures, tags), so ffmpeg and ffprobe must be in the `PATH`, or in the folder named by `FFMPEG_PATH`; without them the media and scan tests fail with a hint. Tests in the category `Media` need ffmpeg only, tests in the category `Integration` the dev database as well (`dotnet test --filter "TestCategory!=Integration"` runs everything else).
+
 The integration tests host the service in memory with `WebApplicationFactory` and its real startup, including the configuration check, the database migrations and the creation of the built-in admin profile. They use their own databases `wavemp_tests` and `wavemp_tests_*` (created like a new installation and dropped afterwards) and read `DB_PASSWORD` and `DB_PORT` from the environment or from `.env`.
 
 The E2E tests first select the built-in admin profile once (project `setup`) and store the browser state in `tests/WaveMP.E2E/playwright/.auth/` (not committed); most tests start with this session. Tests that switch profiles create their own profiles through the API and delete them afterwards.
 
 If you set `WAVEMP_PORT` in `.env`, point the E2E tests at it, for example `E2E_BASE_URL=http://localhost:8081 npm test`. `npm run test:unit` runs the unit tests of the web app (Vitest), including checks that every text comes from the translation files and that `THEMING.md` matches the code.
 
-`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version.
+`npm run lint:check` only reports problems, like the CI does; `npm run lint` fixes what it can. The E2E tests check the version reported by `/api/v1/health` exactly if `E2E_EXPECTED_VERSION` is set (the release workflow sets it), otherwise any version. They scan the media folder of the running instance; with the test media of `tests/WaveMP.E2E/scripts/generate-media.sh` (see [Local development](#local-development)) and `E2E_EXPECTED_TRACKS=4`, they also check the result of the scan, as the CI does.
 
 ### License check
 
@@ -284,9 +320,9 @@ It restores the .NET tools and npm packages it needs by itself and fails if a pa
 
 ### Continuous integration
 
-GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit tests and integration tests against a PostgreSQL 18 service container, lint, type check, unit tests (Vitest) and build of the web app, the license check, and the E2E tests against the Docker image. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
+GitHub Actions run `.github/workflows/test.yml` for every pull request (`pull-request.yml`) and every push to `main` (`main.yml`): the .NET build with unit and media tests (with ffmpeg) and integration tests against a PostgreSQL 18 service container, lint, type check, unit tests (Vitest) and build of the web app, the license check, and the E2E tests against the Docker image with synthetic test media. After the tests pass, `main.yml` publishes the images `edge` and `sha-<commit>`. A version tag such as `v1.2.3` (`release.yml`) runs the tests, publishes `1.2.3`, `1.2` and `latest` and creates a GitHub release with generated release notes.
 
 ## License
 
 WaveMP is licensed under the [MIT License](LICENSE).
-It uses [ffmpeg](https://ffmpeg.org), which is licensed separately; see the notices shipped with the image.
+It uses [ffmpeg](https://ffmpeg.org) as a separate process and [TagLib#](https://github.com/mono/taglib-sharp) (LGPL-2.1, used unchanged as a separate assembly), which are licensed separately; see the notices shipped with the image under `/licenses`.
