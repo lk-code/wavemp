@@ -21,6 +21,7 @@ namespace WaveMP.Data.Migrations
                 .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("WaveMP.Data.Entities.Album", b =>
@@ -77,6 +78,12 @@ namespace WaveMP.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_albums_album_key");
 
+                    b.HasIndex("Title")
+                        .HasDatabaseName("ix_albums_title_trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Title"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Title"), new[] { "gin_trgm_ops" });
+
                     b.ToTable("albums", (string)null);
                 });
 
@@ -104,6 +111,12 @@ namespace WaveMP.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_artists");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_artists_name_trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Name"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Name"), new[] { "gin_trgm_ops" });
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -662,6 +675,12 @@ namespace WaveMP.Data.Migrations
 
                     b.HasIndex("FirstSeenAt")
                         .HasDatabaseName("ix_tracks_first_seen_at");
+
+                    b.HasIndex("Title")
+                        .HasDatabaseName("ix_tracks_title_trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Title"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Title"), new[] { "gin_trgm_ops" });
 
                     b.HasIndex("DirectoryPath", "NormalizedBaseName")
                         .IsUnique()

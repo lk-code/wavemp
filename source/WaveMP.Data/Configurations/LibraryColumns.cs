@@ -15,4 +15,12 @@ internal static class LibraryColumns
     public const int ExtensionMaxLength = 16;
     public const int TechnicalMaxLength = 64;
     public const int AlbumKeyLength = 64;
+
+    /// <summary>
+    /// Index method of the trigram indexes (pg_trgm). GIN indexes speed up word similarity (<c>&lt;%</c>) and
+    /// <c>ILIKE '%...%'</c>.
+    /// </summary>
+    public const string TrigramIndexMethod = "gin";
+
+    public const string TrigramOperators = "gin_trgm_ops";
 }

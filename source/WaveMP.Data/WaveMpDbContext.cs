@@ -31,8 +31,16 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     public DbSet<Cover> Covers => Set<Cover>();
 
+    /// <summary>
+    /// PostgreSQL extension of the fault-tolerant library search (trigrams). It is part of the official image and
+    /// trusted since PostgreSQL 13, so the owner of the database can create it.
+    /// </summary>
+    public const string TrigramExtension = "pg_trgm";
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension(TrigramExtension);
+
         // Applied one by one instead of scanning the assembly: a scan also loads the design-time types, whose
         // dependency (Microsoft.EntityFrameworkCore.Design) is not part of the published service. A configuration
         // that is missing here shows up as a pending model change in the tests.

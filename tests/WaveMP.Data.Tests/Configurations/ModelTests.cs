@@ -174,6 +174,28 @@ public class ModelTests
     }
 
     [Test]
+    public void Model_Always_HasTheTrigramExtensionOfTheSearch()
+    {
+        IEnumerable<string> extensions = _model.GetPostgresExtensions().Select(extension => extension.Name);
+
+        extensions.Should().Contain("pg_trgm");
+    }
+
+    [TestCase(typeof(Artist), nameof(Artist.Name), "ix_artists_name_trgm")]
+    [TestCase(typeof(Album), nameof(Album.Title), "ix_albums_title_trgm")]
+    [TestCase(typeof(Track), nameof(Track.Title), "ix_tracks_title_trgm")]
+    public void Library_SearchedTexts_HaveTrigramIndexes(Type entityType, string property, string expectedName)
+    {
+        IIndex index = GetEntity(entityType).GetIndexes()
+            .Single(candidate => candidate.Properties.Count == 1 && candidate.Properties[0].Name == property);
+
+        index.GetDatabaseName().Should().Be(expectedName);
+        index.GetMethod().Should().Be("gin");
+        index.GetOperators().Should().Equal("gin_trgm_ops");
+        index.IsUnique.Should().BeFalse();
+    }
+
+    [Test]
     public void MediaFile_Tags_AreColumnsOfTheFileTable()
     {
         IComplexProperty tags = GetEntity(typeof(MediaFile)).FindComplexProperty(nameof(MediaFile.Tags))!;

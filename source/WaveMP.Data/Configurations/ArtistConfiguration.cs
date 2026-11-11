@@ -6,6 +6,11 @@ namespace WaveMP.Data.Configurations;
 
 internal sealed class ArtistConfiguration : IEntityTypeConfiguration<Artist>
 {
+    /// <summary>
+    /// Trigram index of the name for the fault-tolerant search (pg_trgm).
+    /// </summary>
+    public const string NameTrigramIndex = "ix_artists_name_trgm";
+
     public void Configure(EntityTypeBuilder<Artist> builder)
     {
         builder.ToTable("artists");
@@ -16,5 +21,9 @@ internal sealed class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(artist => artist.NormalizedName).HasMaxLength(LibraryColumns.TextMaxLength);
 
         builder.HasIndex(artist => artist.NormalizedName).IsUnique();
+        builder.HasIndex(artist => artist.Name)
+            .HasDatabaseName(NameTrigramIndex)
+            .HasMethod(LibraryColumns.TrigramIndexMethod)
+            .HasOperators(LibraryColumns.TrigramOperators);
     }
 }
