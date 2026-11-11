@@ -14,5 +14,6 @@ public static class ServiceProviderExtensions
     {
         await using AsyncServiceScope scope = services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<ILibrarySettingsService>().InitializeAsync(cancellationToken);
+        await scope.ServiceProvider.GetRequiredService<ICacheSettingsService>().InitializeAsync(cancellationToken);
     }
 }
