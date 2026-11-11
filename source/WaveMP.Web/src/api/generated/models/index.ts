@@ -152,6 +152,7 @@ export interface ArtistReference extends AdditionalDataHolder, Parsable {
     name?: string | null;
 }
 export type ArtistSort = (typeof ArtistSortObject)[keyof typeof ArtistSortObject];
+export type AudioFormat = (typeof AudioFormatObject)[keyof typeof AudioFormatObject];
 /**
  * The space an area of the cache uses.
  */
@@ -296,6 +297,15 @@ export function createCreatedSessionFromDiscriminatorValue(parseNode: ParseNode 
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CreatePlayHistoryEntry}
+ */
+// @ts-ignore
+export function createCreatePlayHistoryEntryFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCreatePlayHistoryEntry;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {CreateSession}
  */
 // @ts-ignore
@@ -415,6 +425,37 @@ export function createMediaFilePageFromDiscriminatorValue(parseNode: ParseNode |
     return deserializeIntoMediaFilePage;
 }
 /**
+ * Records a play of a track in the play history of the current profile.
+ */
+export interface CreatePlayHistoryEntry extends AdditionalDataHolder, Parsable {
+    /**
+     * When the play started; now if missing. It must not lie in the future or be older than seven days, so clients can report plays they could not send right away.
+     */
+    playedAt?: Date | null;
+    /**
+     * Id of the track that was played.
+     */
+    trackId?: Guid | null;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlayHistoryEntry}
+ */
+// @ts-ignore
+export function createPlayHistoryEntryFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlayHistoryEntry;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlayHistoryEntryPage}
+ */
+// @ts-ignore
+export function createPlayHistoryEntryPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlayHistoryEntryPage;
+}
+/**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {ProblemDetails}
@@ -440,6 +481,15 @@ export function createProfileFromDiscriminatorValue(parseNode: ParseNode | undef
 // @ts-ignore
 export function createProfilePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoProfilePage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {ReplayGain}
+ */
+// @ts-ignore
+export function createReplayGainFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoReplayGain;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -539,6 +589,15 @@ export function createTrackMetadataFromDiscriminatorValue(parseNode: ParseNode |
 // @ts-ignore
 export function createTrackPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoTrackPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TrackPlayback}
+ */
+// @ts-ignore
+export function createTrackPlaybackFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrackPlayback;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -811,6 +870,18 @@ export function deserializeIntoCreatedSession(createdSession: Partial<CreatedSes
 }
 /**
  * The deserialization information for the current model
+ * @param CreatePlayHistoryEntry The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCreatePlayHistoryEntry(createPlayHistoryEntry: Partial<CreatePlayHistoryEntry> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "playedAt": n => { createPlayHistoryEntry.playedAt = n.getDateValue(); },
+        "trackId": n => { createPlayHistoryEntry.trackId = n.getGuidValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param CreateSession The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1000,6 +1071,33 @@ export function deserializeIntoMediaFilePage(mediaFilePage: Partial<MediaFilePag
 }
 /**
  * The deserialization information for the current model
+ * @param PlayHistoryEntry The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlayHistoryEntry(playHistoryEntry: Partial<PlayHistoryEntry> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "id": n => { playHistoryEntry.id = n.getGuidValue(); },
+        "playedAt": n => { playHistoryEntry.playedAt = n.getDateValue(); },
+        "track": n => { playHistoryEntry.track = n.getObjectValue<Track>(createTrackFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param PlayHistoryEntryPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlayHistoryEntryPage(playHistoryEntryPage: Partial<PlayHistoryEntryPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { playHistoryEntryPage.items = n.getCollectionOfObjectValues<PlayHistoryEntry>(createPlayHistoryEntryFromDiscriminatorValue); },
+        "limit": n => { playHistoryEntryPage.limit = n.getNumberValue(); },
+        "offset": n => { playHistoryEntryPage.offset = n.getNumberValue(); },
+        "total": n => { playHistoryEntryPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param ProblemDetails The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1042,6 +1140,20 @@ export function deserializeIntoProfilePage(profilePage: Partial<ProfilePage> | u
         "limit": n => { profilePage.limit = n.getNumberValue(); },
         "offset": n => { profilePage.offset = n.getNumberValue(); },
         "total": n => { profilePage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param ReplayGain The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoReplayGain(replayGain: Partial<ReplayGain> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumGain": n => { replayGain.albumGain = n.getNumberValue(); },
+        "albumPeak": n => { replayGain.albumPeak = n.getNumberValue(); },
+        "trackGain": n => { replayGain.trackGain = n.getNumberValue(); },
+        "trackPeak": n => { replayGain.trackPeak = n.getNumberValue(); },
     }
 }
 /**
@@ -1220,6 +1332,25 @@ export function deserializeIntoTrackPage(trackPage: Partial<TrackPage> | undefin
 }
 /**
  * The deserialization information for the current model
+ * @param TrackPlayback The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrackPlayback(trackPlayback: Partial<TrackPlayback> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "contentType": n => { trackPlayback.contentType = n.getStringValue(); },
+        "durationMilliseconds": n => { trackPlayback.durationMilliseconds = n.getNumberValue(); },
+        "expiresAt": n => { trackPlayback.expiresAt = n.getDateValue(); },
+        "format": n => { trackPlayback.format = n.getEnumValue<AudioFormat>(AudioFormatObject); },
+        "method": n => { trackPlayback.method = n.getEnumValue<PlaybackMethod>(PlaybackMethodObject); },
+        "replayGain": n => { trackPlayback.replayGain = n.getObjectValue<ReplayGain>(createReplayGainFromDiscriminatorValue); },
+        "streamUrl": n => { trackPlayback.streamUrl = n.getStringValue(); },
+        "trackId": n => { trackPlayback.trackId = n.getGuidValue(); },
+        "transcodeReason": n => { trackPlayback.transcodeReason = n.getEnumValue<TranscodeReason>(TranscodeReasonObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param UpdateCacheSettings The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1286,6 +1417,7 @@ export function deserializeIntoUpdateUser(updateUser: Partial<UpdateUser> | unde
 export function deserializeIntoUpdateUserSettings(updateUserSettings: Partial<UpdateUserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "language": n => { updateUserSettings.language = n.getEnumValue<Language>(LanguageObject); },
+        "replayGain": n => { updateUserSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
     }
 }
 /**
@@ -1328,6 +1460,7 @@ export function deserializeIntoUserPage(userPage: Partial<UserPage> | undefined 
 export function deserializeIntoUserSettings(userSettings: Partial<UserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "language": n => { userSettings.language = n.getEnumValue<Language>(LanguageObject); },
+        "replayGain": n => { userSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
     }
 }
 /**
@@ -1704,6 +1837,45 @@ export interface MediaFilePage extends AdditionalDataHolder, Parsable {
     total?: number | null;
 }
 export type MediaFileSort = (typeof MediaFileSortObject)[keyof typeof MediaFileSortObject];
+export type PlaybackMethod = (typeof PlaybackMethodObject)[keyof typeof PlaybackMethodObject];
+/**
+ * A play of a track in the play history of the current profile.
+ */
+export interface PlayHistoryEntry extends AdditionalDataHolder, Parsable {
+    /**
+     * Id of the entry.
+     */
+    id?: Guid | null;
+    /**
+     * When the play started.
+     */
+    playedAt?: Date | null;
+    /**
+     * The track that was played.
+     */
+    track?: Track | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface PlayHistoryEntryPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: PlayHistoryEntry[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
 export type ProblemCode = (typeof ProblemCodeObject)[keyof typeof ProblemCodeObject];
 export interface ProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
     /**
@@ -1781,6 +1953,28 @@ export interface ProfilePage extends AdditionalDataHolder, Parsable {
      */
     total?: number | null;
 }
+/**
+ * The ReplayGain tags of the audio file of a track. Missing tags are null; clients then leave the volume as it is.
+ */
+export interface ReplayGain extends AdditionalDataHolder, Parsable {
+    /**
+     * Gain of the album in dB.
+     */
+    albumGain?: number | null;
+    /**
+     * Peak of the album, linear (1.0 is full scale).
+     */
+    albumPeak?: number | null;
+    /**
+     * Gain of the track in dB.
+     */
+    trackGain?: number | null;
+    /**
+     * Peak of the track, linear (1.0 is full scale).
+     */
+    trackPeak?: number | null;
+}
+export type ReplayGainMode = (typeof ReplayGainModeObject)[keyof typeof ReplayGainModeObject];
 export type Role = (typeof RoleObject)[keyof typeof RoleObject];
 /**
  * A scan of the media folder: its run, its progress while running and its result once finished.
@@ -2134,6 +2328,19 @@ export function serializeCreatedSession(writer: SerializationWriter, createdSess
 }
 /**
  * Serializes information the current object
+ * @param CreatePlayHistoryEntry The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCreatePlayHistoryEntry(writer: SerializationWriter, createPlayHistoryEntry: Partial<CreatePlayHistoryEntry> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!createPlayHistoryEntry || isSerializingDerivedType) { return; }
+    writer.writeDateValue("playedAt", createPlayHistoryEntry.playedAt);
+    writer.writeGuidValue("trackId", createPlayHistoryEntry.trackId);
+    writer.writeAdditionalData(createPlayHistoryEntry.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param CreateSession The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -2336,6 +2543,35 @@ export function serializeMediaFilePage(writer: SerializationWriter, mediaFilePag
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlayHistoryEntry The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlayHistoryEntry(writer: SerializationWriter, playHistoryEntry: Partial<PlayHistoryEntry> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playHistoryEntry || isSerializingDerivedType) { return; }
+    writer.writeGuidValue("id", playHistoryEntry.id);
+    writer.writeDateValue("playedAt", playHistoryEntry.playedAt);
+    writer.writeObjectValue<Track>("track", playHistoryEntry.track, serializeTrack);
+    writer.writeAdditionalData(playHistoryEntry.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlayHistoryEntryPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlayHistoryEntryPage(writer: SerializationWriter, playHistoryEntryPage: Partial<PlayHistoryEntryPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playHistoryEntryPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<PlayHistoryEntry>("items", playHistoryEntryPage.items, serializePlayHistoryEntry);
+    writer.writeNumberValue("limit", playHistoryEntryPage.limit);
+    writer.writeNumberValue("offset", playHistoryEntryPage.offset);
+    writer.writeNumberValue("total", playHistoryEntryPage.total);
+    writer.writeAdditionalData(playHistoryEntryPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param ProblemDetails The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -2381,6 +2617,21 @@ export function serializeProfilePage(writer: SerializationWriter, profilePage: P
     writer.writeNumberValue("offset", profilePage.offset);
     writer.writeNumberValue("total", profilePage.total);
     writer.writeAdditionalData(profilePage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param ReplayGain The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeReplayGain(writer: SerializationWriter, replayGain: Partial<ReplayGain> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!replayGain || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("albumGain", replayGain.albumGain);
+    writer.writeNumberValue("albumPeak", replayGain.albumPeak);
+    writer.writeNumberValue("trackGain", replayGain.trackGain);
+    writer.writeNumberValue("trackPeak", replayGain.trackPeak);
+    writer.writeAdditionalData(replayGain.additionalData);
 }
 /**
  * Serializes information the current object
@@ -2569,6 +2820,26 @@ export function serializeTrackPage(writer: SerializationWriter, trackPage: Parti
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TrackPlayback The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrackPlayback(writer: SerializationWriter, trackPlayback: Partial<TrackPlayback> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!trackPlayback || isSerializingDerivedType) { return; }
+    writer.writeStringValue("contentType", trackPlayback.contentType);
+    writer.writeNumberValue("durationMilliseconds", trackPlayback.durationMilliseconds);
+    writer.writeDateValue("expiresAt", trackPlayback.expiresAt);
+    writer.writeEnumValue<AudioFormat>("format", trackPlayback.format);
+    writer.writeEnumValue<PlaybackMethod>("method", trackPlayback.method);
+    writer.writeObjectValue<ReplayGain>("replayGain", trackPlayback.replayGain, serializeReplayGain);
+    writer.writeStringValue("streamUrl", trackPlayback.streamUrl);
+    writer.writeGuidValue("trackId", trackPlayback.trackId);
+    writer.writeEnumValue<TranscodeReason>("transcodeReason", trackPlayback.transcodeReason);
+    writer.writeAdditionalData(trackPlayback.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param UpdateCacheSettings The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -2639,6 +2910,7 @@ export function serializeUpdateUser(writer: SerializationWriter, updateUser: Par
 export function serializeUpdateUserSettings(writer: SerializationWriter, updateUserSettings: Partial<UpdateUserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!updateUserSettings || isSerializingDerivedType) { return; }
     writer.writeEnumValue<Language>("language", updateUserSettings.language);
+    writer.writeEnumValue<ReplayGainMode>("replayGain", updateUserSettings.replayGain);
     writer.writeAdditionalData(updateUserSettings.additionalData);
 }
 /**
@@ -2684,6 +2956,7 @@ export function serializeUserPage(writer: SerializationWriter, userPage: Partial
 export function serializeUserSettings(writer: SerializationWriter, userSettings: Partial<UserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!userSettings || isSerializingDerivedType) { return; }
     writer.writeEnumValue<Language>("language", userSettings.language);
+    writer.writeEnumValue<ReplayGainMode>("replayGain", userSettings.replayGain);
     writer.writeAdditionalData(userSettings.additionalData);
 }
 /**
@@ -2898,7 +3171,49 @@ export interface TrackPage extends AdditionalDataHolder, Parsable {
      */
     total?: number | null;
 }
+/**
+ * How the client plays the audio of a track, and the signed URL of its stream.
+ */
+export interface TrackPlayback extends AdditionalDataHolder, Parsable {
+    /**
+     * MIME type the stream is delivered with; null without stream.
+     */
+    contentType?: string | null;
+    /**
+     * Duration of the audio file in milliseconds, if known.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * When the stream URL expires; null without stream.
+     */
+    expiresAt?: Date | null;
+    /**
+     * The format property
+     */
+    format?: AudioFormat | null;
+    /**
+     * Direct play or transcoding.
+     */
+    method?: PlaybackMethod | null;
+    /**
+     * The ReplayGain tags of the audio file.
+     */
+    replayGain?: ReplayGain | null;
+    /**
+     * Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token; null if the track has to be transcoded. It stays valid until expiresAt and while the session is active.
+     */
+    streamUrl?: string | null;
+    /**
+     * Id of the track.
+     */
+    trackId?: Guid | null;
+    /**
+     * The transcodeReason property
+     */
+    transcodeReason?: TranscodeReason | null;
+}
 export type TrackSort = (typeof TrackSortObject)[keyof typeof TrackSortObject];
+export type TranscodeReason = (typeof TranscodeReasonObject)[keyof typeof TranscodeReasonObject];
 /**
  * Changes the settings of the cache. Missing or null values stay unchanged.
  */
@@ -3003,6 +3318,10 @@ export interface UpdateUserSettings extends AdditionalDataHolder, Parsable {
      * The language property
      */
     language?: Language | null;
+    /**
+     * The replayGain property
+     */
+    replayGain?: ReplayGainMode | null;
 }
 /**
  * A user (profile) as managed by admins.
@@ -3066,6 +3385,10 @@ export interface UserSettings extends AdditionalDataHolder, Parsable {
      * Language of the user interface.
      */
     language?: Language | null;
+    /**
+     * Whether the players even out the volume with the ReplayGain tags; Off by default.
+     */
+    replayGain?: ReplayGainMode | null;
 }
 export type UserSort = (typeof UserSortObject)[keyof typeof UserSortObject];
 /**
@@ -3173,6 +3496,20 @@ export const ArtistSortObject = {
     FirstSeenAt: "FirstSeenAt",
     Relevance: "Relevance",
 } as const;
+export const AudioFormatObject = {
+    Mp3: "Mp3",
+    Flac: "Flac",
+    OggFlac: "OggFlac",
+    AdtsAac: "AdtsAac",
+    Mp4Aac: "Mp4Aac",
+    Mp4Alac: "Mp4Alac",
+    OggOpus: "OggOpus",
+    OggVorbis: "OggVorbis",
+    WebmOpus: "WebmOpus",
+    WebmVorbis: "WebmVorbis",
+    WavPcm: "WavPcm",
+    AiffPcm: "AiffPcm",
+} as const;
 export const GenreSortObject = {
     Name: "Name",
     TrackCount: "TrackCount",
@@ -3254,6 +3591,13 @@ export const MediaFileSortObject = {
     Size: "Size",
 } as const;
 /**
+ * Direct play or transcoding.
+ */
+export const PlaybackMethodObject = {
+    DirectPlay: "DirectPlay",
+    Transcode: "Transcode",
+} as const;
+/**
  * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
  */
 export const ProblemCodeObject = {
@@ -3281,6 +3625,17 @@ export const ProblemCodeObject = {
     TrackNo_audio: "track.no_audio",
     TrackNot_writable: "track.not_writable",
     CoverNot_found: "cover.not_found",
+    StreamTranscoding_required: "stream.transcoding_required",
+    StreamFile_missing: "stream.file_missing",
+    HistoryNot_found: "history.not_found",
+} as const;
+/**
+ * Whether the players even out the volume with the ReplayGain tags; Off by default.
+ */
+export const ReplayGainModeObject = {
+    Off: "Off",
+    Track: "Track",
+    Album: "Album",
 } as const;
 /**
  * Role of a profile.
@@ -3328,6 +3683,13 @@ export const TrackSortObject = {
     Genre: "Genre",
     FirstSeenAt: "FirstSeenAt",
     Relevance: "Relevance",
+} as const;
+/**
+ * Why the track has to be transcoded; null for direct play.
+ */
+export const TranscodeReasonObject = {
+    Format_unsupported: "format_unsupported",
+    Format_unknown: "format_unknown",
 } as const;
 /**
  * Sort key of the user list; ties are sorted by id.

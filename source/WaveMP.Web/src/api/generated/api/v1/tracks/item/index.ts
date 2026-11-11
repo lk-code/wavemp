@@ -10,6 +10,10 @@ import { FilesRequestBuilderRequestsMetadata, type FilesRequestBuilder } from '.
 // @ts-ignore
 import { MetadataRequestBuilderRequestsMetadata, type MetadataRequestBuilder } from './metadata/index.js';
 // @ts-ignore
+import { PlaybackRequestBuilderRequestsMetadata, type PlaybackRequestBuilder } from './playback/index.js';
+// @ts-ignore
+import { StreamRequestBuilderRequestsMetadata, type StreamRequestBuilder } from './stream/index.js';
+// @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata, type Parsable, type ParsableFactory, type RequestConfiguration, type RequestInformation, type RequestsMetadata } from '@microsoft/kiota-abstractions';
 
 /**
@@ -28,6 +32,14 @@ export interface TracksItemRequestBuilder extends BaseRequestBuilder<TracksItemR
      * The metadata property
      */
     get metadata(): MetadataRequestBuilder;
+    /**
+     * The playback property
+     */
+    get playback(): PlaybackRequestBuilder;
+    /**
+     * The stream property
+     */
+    get stream(): StreamRequestBuilder;
     /**
      * Returns a track.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
@@ -59,6 +71,12 @@ export const TracksItemRequestBuilderNavigationMetadata: Record<Exclude<keyof Tr
     },
     metadata: {
         requestsMetadata: MetadataRequestBuilderRequestsMetadata,
+    },
+    playback: {
+        requestsMetadata: PlaybackRequestBuilderRequestsMetadata,
+    },
+    stream: {
+        requestsMetadata: StreamRequestBuilderRequestsMetadata,
     },
 };
 /**
