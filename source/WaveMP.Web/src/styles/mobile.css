@@ -116,9 +116,10 @@
             overflow: auto !important;
             padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
             box-shadow: 0 0 2rem rgb(0 0 0 / 35%);
+            /* Closing: hidden after the slide; opening: visible at once, so it can take the focus. */
             transition:
                 transform 0.2s ease,
-                visibility 0.2s;
+                visibility 0s linear 0.2s;
         }
 
         [data-part='app'] > [data-part='sidebar'][data-state~='closed'] {
@@ -129,6 +130,9 @@
         [data-part='app'] > [data-part='sidebar'][data-state~='open'] {
             visibility: visible !important;
             transform: none !important;
+            transition:
+                transform 0.2s ease,
+                visibility 0s;
         }
 
         [data-part='app'] > [data-part='sidebar-backdrop'] {

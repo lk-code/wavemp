@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHealthStore } from '@/stores/health'
 
 const { t } = useI18n()
 const health = useHealthStore()
 
-const statusLabel = computed(() => {
+const state = computed(() => health.status.toLowerCase())
+
+const label = computed(() => {
     switch (health.status) {
         case 'Checking':
             return t('server.checking')
@@ -21,15 +23,15 @@ const statusLabel = computed(() => {
     }
 })
 
-onMounted(() => health.check())
+// Tooltip: the version of the service, once it is known.
+const title = computed(() =>
+    health.version ? t('server.version', { version: health.version }) : t('server.status'),
+)
 </script>
 
 <template>
-    <main data-part="home">
-        <h1 data-part="title">{{ t('app.name') }}</h1>
-        <p data-part="health" :data-state="health.status.toLowerCase()" role="status">
-            <span data-part="label">{{ t('server.status') }}</span>
-            <span data-part="value" data-testid="health-status">{{ statusLabel }}</span>
-        </p>
-    </main>
+    <div data-part="server-status" role="status" :data-state="state" :title="title">
+        <span data-part="status-indicator" aria-hidden="true"></span>
+        <span data-part="label">{{ label }}</span>
+    </div>
 </template>

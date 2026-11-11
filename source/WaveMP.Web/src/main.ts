@@ -21,4 +21,5 @@ app.use(createPinia())
 app.use(router)
 app.use(createWaveMpI18n(locale))
 
-app.mount('#app')
+// Mount after the first navigation, so that pages without the shell never show it.
+void router.isReady().then(() => app.mount('#app'))
