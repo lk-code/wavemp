@@ -186,6 +186,7 @@ export interface ArtistReference extends AdditionalDataHolder, Parsable {
     name?: string | null;
 }
 export type ArtistSort = (typeof ArtistSortObject)[keyof typeof ArtistSortObject];
+export type AudioCodec = (typeof AudioCodecObject)[keyof typeof AudioCodecObject];
 export type AudioFormat = (typeof AudioFormatObject)[keyof typeof AudioFormatObject];
 /**
  * The space an area of the cache uses.
@@ -430,6 +431,15 @@ export function createGenreFromDiscriminatorValue(parseNode: ParseNode | undefin
 // @ts-ignore
 export function createGenrePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoGenrePage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {HardwareAcceleration}
+ */
+// @ts-ignore
+export function createHardwareAccelerationFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoHardwareAcceleration;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -766,6 +776,51 @@ export function createTrackPlaybackFromDiscriminatorValue(parseNode: ParseNode |
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TrackVideoPlayback}
+ */
+// @ts-ignore
+export function createTrackVideoPlaybackFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrackVideoPlayback;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TranscodeJob}
+ */
+// @ts-ignore
+export function createTranscodeJobFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTranscodeJob;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TranscodeJobPage}
+ */
+// @ts-ignore
+export function createTranscodeJobPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTranscodeJobPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TranscodingSettings}
+ */
+// @ts-ignore
+export function createTranscodingSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTranscodingSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TranscodingStatus}
+ */
+// @ts-ignore
+export function createTranscodingStatusFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTranscodingStatus;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {UpdateCacheSettings}
  */
 // @ts-ignore
@@ -816,6 +871,15 @@ export function createUpdateTrackMetadataFromDiscriminatorValue(parseNode: Parse
 // @ts-ignore
 export function createUpdateTrackRatingFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoUpdateTrackRating;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateTranscodingSettings}
+ */
+// @ts-ignore
+export function createUpdateTranscodingSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateTranscodingSettings;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -1193,6 +1257,21 @@ export function deserializeIntoGenrePage(genrePage: Partial<GenrePage> | undefin
 }
 /**
  * The deserialization information for the current model
+ * @param HardwareAcceleration The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoHardwareAcceleration(hardwareAcceleration: Partial<HardwareAcceleration> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "accelerator": n => { hardwareAcceleration.accelerator = n.getEnumValue<HardwareAccelerator>(HardwareAcceleratorObject); },
+        "detectedAt": n => { hardwareAcceleration.detectedAt = n.getDateValue(); },
+        "device": n => { hardwareAcceleration.device = n.getStringValue(); },
+        "reason": n => { hardwareAcceleration.reason = n.getEnumValue<HardwareUnavailableReason>(HardwareUnavailableReasonObject); },
+        "state": n => { hardwareAcceleration.state = n.getEnumValue<HardwareAccelerationState>(HardwareAccelerationStateObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param Health The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1304,6 +1383,7 @@ export function deserializeIntoLibrarySettings(librarySettings: Partial<LibraryS
 // @ts-ignore
 export function deserializeIntoMediaFile(mediaFile: Partial<MediaFile> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
+        "audioCodec": n => { mediaFile.audioCodec = n.getStringValue(); },
         "bitDepth": n => { mediaFile.bitDepth = n.getNumberValue(); },
         "bitrate": n => { mediaFile.bitrate = n.getNumberValue(); },
         "channels": n => { mediaFile.channels = n.getNumberValue(); },
@@ -1322,6 +1402,7 @@ export function deserializeIntoMediaFile(mediaFile: Partial<MediaFile> | undefin
         "isWritable": n => { mediaFile.isWritable = n.getBooleanValue(); },
         "kind": n => { mediaFile.kind = n.getEnumValue<MediaFileKind>(MediaFileKindObject); },
         "modifiedAt": n => { mediaFile.modifiedAt = n.getDateValue(); },
+        "pixelFormat": n => { mediaFile.pixelFormat = n.getStringValue(); },
         "relativePath": n => { mediaFile.relativePath = n.getStringValue(); },
         "sampleRate": n => { mediaFile.sampleRate = n.getNumberValue(); },
         "scannedAt": n => { mediaFile.scannedAt = n.getDateValue(); },
@@ -1717,10 +1798,100 @@ export function deserializeIntoTrackPlayback(trackPlayback: Partial<TrackPlaybac
         "expiresAt": n => { trackPlayback.expiresAt = n.getDateValue(); },
         "format": n => { trackPlayback.format = n.getEnumValue<AudioFormat>(AudioFormatObject); },
         "method": n => { trackPlayback.method = n.getEnumValue<PlaybackMethod>(PlaybackMethodObject); },
+        "protocol": n => { trackPlayback.protocol = n.getEnumValue<StreamProtocol>(StreamProtocolObject); },
         "replayGain": n => { trackPlayback.replayGain = n.getObjectValue<ReplayGain>(createReplayGainFromDiscriminatorValue); },
         "streamUrl": n => { trackPlayback.streamUrl = n.getStringValue(); },
         "trackId": n => { trackPlayback.trackId = n.getGuidValue(); },
         "transcodeReason": n => { trackPlayback.transcodeReason = n.getEnumValue<TranscodeReason>(TranscodeReasonObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TrackVideoPlayback The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrackVideoPlayback(trackVideoPlayback: Partial<TrackVideoPlayback> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "audioCodec": n => { trackVideoPlayback.audioCodec = n.getEnumValue<AudioCodec>(AudioCodecObject); },
+        "container": n => { trackVideoPlayback.container = n.getEnumValue<VideoContainer>(VideoContainerObject); },
+        "contentType": n => { trackVideoPlayback.contentType = n.getStringValue(); },
+        "durationMilliseconds": n => { trackVideoPlayback.durationMilliseconds = n.getNumberValue(); },
+        "expiresAt": n => { trackVideoPlayback.expiresAt = n.getDateValue(); },
+        "hasAudio": n => { trackVideoPlayback.hasAudio = n.getBooleanValue(); },
+        "height": n => { trackVideoPlayback.height = n.getNumberValue(); },
+        "method": n => { trackVideoPlayback.method = n.getEnumValue<PlaybackMethod>(PlaybackMethodObject); },
+        "protocol": n => { trackVideoPlayback.protocol = n.getEnumValue<StreamProtocol>(StreamProtocolObject); },
+        "streamUrl": n => { trackVideoPlayback.streamUrl = n.getStringValue(); },
+        "trackId": n => { trackVideoPlayback.trackId = n.getGuidValue(); },
+        "transcodeReason": n => { trackVideoPlayback.transcodeReason = n.getEnumValue<TranscodeReason>(TranscodeReasonObject); },
+        "videoCodec": n => { trackVideoPlayback.videoCodec = n.getEnumValue<VideoCodec>(VideoCodecObject); },
+        "width": n => { trackVideoPlayback.width = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TranscodeJob The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTranscodeJob(transcodeJob: Partial<TranscodeJob> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "accelerator": n => { transcodeJob.accelerator = n.getEnumValue<HardwareAccelerator>(HardwareAcceleratorObject); },
+        "completedSegments": n => { transcodeJob.completedSegments = n.getNumberValue(); },
+        "id": n => { transcodeJob.id = n.getGuidValue(); },
+        "lastAccessAt": n => { transcodeJob.lastAccessAt = n.getDateValue(); },
+        "media": n => { transcodeJob.media = n.getEnumValue<HlsMedia>(HlsMediaObject); },
+        "segmentCount": n => { transcodeJob.segmentCount = n.getNumberValue(); },
+        "startedAt": n => { transcodeJob.startedAt = n.getDateValue(); },
+        "startSegment": n => { transcodeJob.startSegment = n.getNumberValue(); },
+        "track": n => { transcodeJob.track = n.getObjectValue<Track>(createTrackFromDiscriminatorValue); },
+        "trackId": n => { transcodeJob.trackId = n.getGuidValue(); },
+        "userId": n => { transcodeJob.userId = n.getGuidValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TranscodeJobPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTranscodeJobPage(transcodeJobPage: Partial<TranscodeJobPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { transcodeJobPage.items = n.getCollectionOfObjectValues<TranscodeJob>(createTranscodeJobFromDiscriminatorValue); },
+        "limit": n => { transcodeJobPage.limit = n.getNumberValue(); },
+        "offset": n => { transcodeJobPage.offset = n.getNumberValue(); },
+        "total": n => { transcodeJobPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TranscodingSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTranscodingSettings(transcodingSettings: Partial<TranscodingSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "audioBitrateKbps": n => { transcodingSettings.audioBitrateKbps = n.getNumberValue(); },
+        "hardwareAcceleration": n => { transcodingSettings.hardwareAcceleration = n.getEnumValue<HardwareAccelerationMode>(HardwareAccelerationModeObject); },
+        "maxParallelJobs": n => { transcodingSettings.maxParallelJobs = n.getNumberValue(); },
+        "maxVideoHeight": n => { transcodingSettings.maxVideoHeight = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param TranscodingStatus The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTranscodingStatus(transcodingStatus: Partial<TranscodingStatus> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "available": n => { transcodingStatus.available = n.getBooleanValue(); },
+        "cacheAvailable": n => { transcodingStatus.cacheAvailable = n.getBooleanValue(); },
+        "ffmpegAvailable": n => { transcodingStatus.ffmpegAvailable = n.getBooleanValue(); },
+        "hardware": n => { transcodingStatus.hardware = n.getObjectValue<HardwareAcceleration>(createHardwareAccelerationFromDiscriminatorValue); },
+        "maxParallelJobs": n => { transcodingStatus.maxParallelJobs = n.getNumberValue(); },
+        "runningJobs": n => { transcodingStatus.runningJobs = n.getNumberValue(); },
     }
 }
 /**
@@ -1799,6 +1970,20 @@ export function deserializeIntoUpdateTrackMetadata(updateTrackMetadata: Partial<
 export function deserializeIntoUpdateTrackRating(updateTrackRating: Partial<UpdateTrackRating> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "rating": n => { updateTrackRating.rating = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateTranscodingSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateTranscodingSettings(updateTranscodingSettings: Partial<UpdateTranscodingSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "audioBitrateKbps": n => { updateTranscodingSettings.audioBitrateKbps = n.getNumberValue(); },
+        "hardwareAcceleration": n => { updateTranscodingSettings.hardwareAcceleration = n.getEnumValue<HardwareAccelerationMode>(HardwareAccelerationModeObject); },
+        "maxParallelJobs": n => { updateTranscodingSettings.maxParallelJobs = n.getNumberValue(); },
+        "maxVideoHeight": n => { updateTranscodingSettings.maxVideoHeight = n.getNumberValue(); },
     }
 }
 /**
@@ -2019,6 +2204,35 @@ export interface GenrePage extends AdditionalDataHolder, Parsable {
 }
 export type GenreSort = (typeof GenreSortObject)[keyof typeof GenreSortObject];
 /**
+ * Result of the detection of the graphics hardware.
+ */
+export interface HardwareAcceleration extends AdditionalDataHolder, Parsable {
+    /**
+     * The encoder that passed the test; none without.
+     */
+    accelerator?: HardwareAccelerator | null;
+    /**
+     * When the detection finished; null while detecting.
+     */
+    detectedAt?: Date | null;
+    /**
+     * The render device that was tested, if any.
+     */
+    device?: string | null;
+    /**
+     * The reason property
+     */
+    reason?: HardwareUnavailableReason | null;
+    /**
+     * State of the hardware acceleration.
+     */
+    state?: HardwareAccelerationState | null;
+}
+export type HardwareAccelerationMode = (typeof HardwareAccelerationModeObject)[keyof typeof HardwareAccelerationModeObject];
+export type HardwareAccelerationState = (typeof HardwareAccelerationStateObject)[keyof typeof HardwareAccelerationStateObject];
+export type HardwareAccelerator = (typeof HardwareAcceleratorObject)[keyof typeof HardwareAcceleratorObject];
+export type HardwareUnavailableReason = (typeof HardwareUnavailableReasonObject)[keyof typeof HardwareUnavailableReasonObject];
+/**
  * Health of the WaveMP service.
  */
 export interface Health extends AdditionalDataHolder, Parsable {
@@ -2032,6 +2246,7 @@ export interface Health extends AdditionalDataHolder, Parsable {
     version?: string | null;
 }
 export type HealthStatus = (typeof HealthStatusObject)[keyof typeof HealthStatusObject];
+export type HlsMedia = (typeof HlsMediaObject)[keyof typeof HlsMediaObject];
 /**
  * The home page of the current profile: every row is the first page of its list, total tells how many items the whole list has.
  */
@@ -2205,6 +2420,10 @@ export interface LibrarySettings extends AdditionalDataHolder, Parsable {
  */
 export interface MediaFile extends AdditionalDataHolder, Parsable {
     /**
+     * Codec of the first audio stream of a video, e.g. aac; null for videos without sound and for other files.
+     */
+    audioCodec?: string | null;
+    /**
      * The bitDepth property
      */
     bitDepth?: number | null;
@@ -2276,6 +2495,10 @@ export interface MediaFile extends AdditionalDataHolder, Parsable {
      * Time of the last change of the file.
      */
     modifiedAt?: Date | null;
+    /**
+     * Pixel format of the video stream of a video, e.g. yuv420p; null for other files.
+     */
+    pixelFormat?: string | null;
     /**
      * Path relative to the media folder with / as separator.
      */
@@ -3102,6 +3325,22 @@ export function serializeGenrePage(writer: SerializationWriter, genrePage: Parti
 }
 /**
  * Serializes information the current object
+ * @param HardwareAcceleration The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeHardwareAcceleration(writer: SerializationWriter, hardwareAcceleration: Partial<HardwareAcceleration> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!hardwareAcceleration || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<HardwareAccelerator>("accelerator", hardwareAcceleration.accelerator);
+    writer.writeDateValue("detectedAt", hardwareAcceleration.detectedAt);
+    writer.writeStringValue("device", hardwareAcceleration.device);
+    writer.writeEnumValue<HardwareUnavailableReason>("reason", hardwareAcceleration.reason);
+    writer.writeEnumValue<HardwareAccelerationState>("state", hardwareAcceleration.state);
+    writer.writeAdditionalData(hardwareAcceleration.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param Health The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -3221,6 +3460,7 @@ export function serializeLibrarySettings(writer: SerializationWriter, librarySet
 // @ts-ignore
 export function serializeMediaFile(writer: SerializationWriter, mediaFile: Partial<MediaFile> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!mediaFile || isSerializingDerivedType) { return; }
+    writer.writeStringValue("audioCodec", mediaFile.audioCodec);
     writer.writeNumberValue("bitDepth", mediaFile.bitDepth);
     writer.writeNumberValue("bitrate", mediaFile.bitrate);
     writer.writeNumberValue("channels", mediaFile.channels);
@@ -3239,6 +3479,7 @@ export function serializeMediaFile(writer: SerializationWriter, mediaFile: Parti
     writer.writeBooleanValue("isWritable", mediaFile.isWritable);
     writer.writeEnumValue<MediaFileKind>("kind", mediaFile.kind);
     writer.writeDateValue("modifiedAt", mediaFile.modifiedAt);
+    writer.writeStringValue("pixelFormat", mediaFile.pixelFormat);
     writer.writeStringValue("relativePath", mediaFile.relativePath);
     writer.writeNumberValue("sampleRate", mediaFile.sampleRate);
     writer.writeDateValue("scannedAt", mediaFile.scannedAt);
@@ -3659,11 +3900,106 @@ export function serializeTrackPlayback(writer: SerializationWriter, trackPlaybac
     writer.writeDateValue("expiresAt", trackPlayback.expiresAt);
     writer.writeEnumValue<AudioFormat>("format", trackPlayback.format);
     writer.writeEnumValue<PlaybackMethod>("method", trackPlayback.method);
+    writer.writeEnumValue<StreamProtocol>("protocol", trackPlayback.protocol);
     writer.writeObjectValue<ReplayGain>("replayGain", trackPlayback.replayGain, serializeReplayGain);
     writer.writeStringValue("streamUrl", trackPlayback.streamUrl);
     writer.writeGuidValue("trackId", trackPlayback.trackId);
     writer.writeEnumValue<TranscodeReason>("transcodeReason", trackPlayback.transcodeReason);
     writer.writeAdditionalData(trackPlayback.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TrackVideoPlayback The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrackVideoPlayback(writer: SerializationWriter, trackVideoPlayback: Partial<TrackVideoPlayback> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!trackVideoPlayback || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<AudioCodec>("audioCodec", trackVideoPlayback.audioCodec);
+    writer.writeEnumValue<VideoContainer>("container", trackVideoPlayback.container);
+    writer.writeStringValue("contentType", trackVideoPlayback.contentType);
+    writer.writeNumberValue("durationMilliseconds", trackVideoPlayback.durationMilliseconds);
+    writer.writeDateValue("expiresAt", trackVideoPlayback.expiresAt);
+    writer.writeBooleanValue("hasAudio", trackVideoPlayback.hasAudio);
+    writer.writeNumberValue("height", trackVideoPlayback.height);
+    writer.writeEnumValue<PlaybackMethod>("method", trackVideoPlayback.method);
+    writer.writeEnumValue<StreamProtocol>("protocol", trackVideoPlayback.protocol);
+    writer.writeStringValue("streamUrl", trackVideoPlayback.streamUrl);
+    writer.writeGuidValue("trackId", trackVideoPlayback.trackId);
+    writer.writeEnumValue<TranscodeReason>("transcodeReason", trackVideoPlayback.transcodeReason);
+    writer.writeEnumValue<VideoCodec>("videoCodec", trackVideoPlayback.videoCodec);
+    writer.writeNumberValue("width", trackVideoPlayback.width);
+    writer.writeAdditionalData(trackVideoPlayback.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TranscodeJob The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTranscodeJob(writer: SerializationWriter, transcodeJob: Partial<TranscodeJob> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!transcodeJob || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<HardwareAccelerator>("accelerator", transcodeJob.accelerator);
+    writer.writeNumberValue("completedSegments", transcodeJob.completedSegments);
+    writer.writeGuidValue("id", transcodeJob.id);
+    writer.writeDateValue("lastAccessAt", transcodeJob.lastAccessAt);
+    writer.writeEnumValue<HlsMedia>("media", transcodeJob.media);
+    writer.writeNumberValue("segmentCount", transcodeJob.segmentCount);
+    writer.writeDateValue("startedAt", transcodeJob.startedAt);
+    writer.writeNumberValue("startSegment", transcodeJob.startSegment);
+    writer.writeObjectValue<Track>("track", transcodeJob.track, serializeTrack);
+    writer.writeGuidValue("trackId", transcodeJob.trackId);
+    writer.writeGuidValue("userId", transcodeJob.userId);
+    writer.writeAdditionalData(transcodeJob.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TranscodeJobPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTranscodeJobPage(writer: SerializationWriter, transcodeJobPage: Partial<TranscodeJobPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!transcodeJobPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<TranscodeJob>("items", transcodeJobPage.items, serializeTranscodeJob);
+    writer.writeNumberValue("limit", transcodeJobPage.limit);
+    writer.writeNumberValue("offset", transcodeJobPage.offset);
+    writer.writeNumberValue("total", transcodeJobPage.total);
+    writer.writeAdditionalData(transcodeJobPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TranscodingSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTranscodingSettings(writer: SerializationWriter, transcodingSettings: Partial<TranscodingSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!transcodingSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("audioBitrateKbps", transcodingSettings.audioBitrateKbps);
+    writer.writeEnumValue<HardwareAccelerationMode>("hardwareAcceleration", transcodingSettings.hardwareAcceleration);
+    writer.writeNumberValue("maxParallelJobs", transcodingSettings.maxParallelJobs);
+    writer.writeNumberValue("maxVideoHeight", transcodingSettings.maxVideoHeight);
+    writer.writeAdditionalData(transcodingSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TranscodingStatus The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTranscodingStatus(writer: SerializationWriter, transcodingStatus: Partial<TranscodingStatus> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!transcodingStatus || isSerializingDerivedType) { return; }
+    writer.writeBooleanValue("available", transcodingStatus.available);
+    writer.writeBooleanValue("cacheAvailable", transcodingStatus.cacheAvailable);
+    writer.writeBooleanValue("ffmpegAvailable", transcodingStatus.ffmpegAvailable);
+    writer.writeObjectValue<HardwareAcceleration>("hardware", transcodingStatus.hardware, serializeHardwareAcceleration);
+    writer.writeNumberValue("maxParallelJobs", transcodingStatus.maxParallelJobs);
+    writer.writeNumberValue("runningJobs", transcodingStatus.runningJobs);
+    writer.writeAdditionalData(transcodingStatus.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3748,6 +4084,21 @@ export function serializeUpdateTrackRating(writer: SerializationWriter, updateTr
     if (!updateTrackRating || isSerializingDerivedType) { return; }
     writer.writeNumberValue("rating", updateTrackRating.rating);
     writer.writeAdditionalData(updateTrackRating.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateTranscodingSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateTranscodingSettings(writer: SerializationWriter, updateTranscodingSettings: Partial<UpdateTranscodingSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateTranscodingSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("audioBitrateKbps", updateTranscodingSettings.audioBitrateKbps);
+    writer.writeEnumValue<HardwareAccelerationMode>("hardwareAcceleration", updateTranscodingSettings.hardwareAcceleration);
+    writer.writeNumberValue("maxParallelJobs", updateTranscodingSettings.maxParallelJobs);
+    writer.writeNumberValue("maxVideoHeight", updateTranscodingSettings.maxVideoHeight);
+    writer.writeAdditionalData(updateTranscodingSettings.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3907,6 +4258,7 @@ export interface Session extends AdditionalDataHolder, Parsable {
     profile?: Profile | null;
 }
 export type SortDirection = (typeof SortDirectionObject)[keyof typeof SortDirectionObject];
+export type StreamProtocol = (typeof StreamProtocolObject)[keyof typeof StreamProtocolObject];
 /**
  * A track of the library: all media files with the same base name in one folder.
  */
@@ -4052,7 +4404,7 @@ export interface TrackPlayback extends AdditionalDataHolder, Parsable {
      */
     contentType?: string | null;
     /**
-     * Duration of the audio file in milliseconds, if known.
+     * Duration of the file in milliseconds, if known.
      */
     durationMilliseconds?: number | null;
     /**
@@ -4068,11 +4420,15 @@ export interface TrackPlayback extends AdditionalDataHolder, Parsable {
      */
     method?: PlaybackMethod | null;
     /**
+     * The file as it is (direct play) or an HLS stream of the sound (transcoding).
+     */
+    protocol?: StreamProtocol | null;
+    /**
      * The ReplayGain tags of the audio file.
      */
     replayGain?: ReplayGain | null;
     /**
-     * Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token; null if the track has to be transcoded. It stays valid until expiresAt and while the session is active.
+     * Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token: the file for direct play, the HLS master playlist for transcoding. Null if the track has to be transcoded and transcoding is unavailable. It stays valid until expiresAt and while the session is active.
      */
     streamUrl?: string | null;
     /**
@@ -4085,7 +4441,188 @@ export interface TrackPlayback extends AdditionalDataHolder, Parsable {
     transcodeReason?: TranscodeReason | null;
 }
 export type TrackSort = (typeof TrackSortObject)[keyof typeof TrackSortObject];
+/**
+ * How the client plays the video of a track, and the signed URL of its stream.
+ */
+export interface TrackVideoPlayback extends AdditionalDataHolder, Parsable {
+    /**
+     * The audioCodec property
+     */
+    audioCodec?: AudioCodec | null;
+    /**
+     * The container property
+     */
+    container?: VideoContainer | null;
+    /**
+     * MIME type the stream is delivered with; null without stream.
+     */
+    contentType?: string | null;
+    /**
+     * Duration of the video in milliseconds, if known.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * When the stream URL expires; null without stream.
+     */
+    expiresAt?: Date | null;
+    /**
+     * Whether the video has sound.
+     */
+    hasAudio?: boolean | null;
+    /**
+     * Height of the picture of the file in pixels, if known.
+     */
+    height?: number | null;
+    /**
+     * Direct play or transcoding.
+     */
+    method?: PlaybackMethod | null;
+    /**
+     * The file as it is (direct play) or an HLS stream (transcoding).
+     */
+    protocol?: StreamProtocol | null;
+    /**
+     * Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token: the file for direct play, the HLS master playlist for transcoding. Null if the video has to be transcoded and transcoding is unavailable. It stays valid until expiresAt and while the session is active.
+     */
+    streamUrl?: string | null;
+    /**
+     * Id of the track.
+     */
+    trackId?: Guid | null;
+    /**
+     * The transcodeReason property
+     */
+    transcodeReason?: TranscodeReason | null;
+    /**
+     * The videoCodec property
+     */
+    videoCodec?: VideoCodec | null;
+    /**
+     * Width of the picture of the file in pixels, if known.
+     */
+    width?: number | null;
+}
+/**
+ * A running transcode.
+ */
+export interface TranscodeJob extends AdditionalDataHolder, Parsable {
+    /**
+     * The encoder of the picture; none for software and for sound only.
+     */
+    accelerator?: HardwareAccelerator | null;
+    /**
+     * Index of the next segment the transcode produces: the segments before it exist.
+     */
+    completedSegments?: number | null;
+    /**
+     * Id of the transcode.
+     */
+    id?: Guid | null;
+    /**
+     * When a client last asked for one of its segments.
+     */
+    lastAccessAt?: Date | null;
+    /**
+     * Video with sound or sound only.
+     */
+    media?: HlsMedia | null;
+    /**
+     * Number of segments of the file.
+     */
+    segmentCount?: number | null;
+    /**
+     * When the transcode started.
+     */
+    startedAt?: Date | null;
+    /**
+     * The segment the transcode started at (0 from the start, later after a seek).
+     */
+    startSegment?: number | null;
+    /**
+     * The track property
+     */
+    track?: Track | null;
+    /**
+     * Id of the track.
+     */
+    trackId?: Guid | null;
+    /**
+     * Id of the profile whose player started it, if known.
+     */
+    userId?: Guid | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface TranscodeJobPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: TranscodeJob[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
 export type TranscodeReason = (typeof TranscodeReasonObject)[keyof typeof TranscodeReasonObject];
+/**
+ * Settings of the transcoding.
+ */
+export interface TranscodingSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Bitrate of transcoded audio (AAC) in kbit/s (128, 160, 192, 256 or 320).
+     */
+    audioBitrateKbps?: number | null;
+    /**
+     * Whether Intel Quick Sync is detected and used for videos.
+     */
+    hardwareAcceleration?: HardwareAccelerationMode | null;
+    /**
+     * How many ffmpeg processes transcode at the same time (1 to 8).
+     */
+    maxParallelJobs?: number | null;
+    /**
+     * Largest height of transcoded videos in pixels (480, 720, 1080, 1440 or 2160); larger videos are scaled down, smaller ones are never scaled up.
+     */
+    maxVideoHeight?: number | null;
+}
+/**
+ * State of the transcoding.
+ */
+export interface TranscodingStatus extends AdditionalDataHolder, Parsable {
+    /**
+     * Whether anything can be transcoded (ffmpeg can be started and the cache can be written).
+     */
+    available?: boolean | null;
+    /**
+     * Whether the cache, which holds the segments, can be written.
+     */
+    cacheAvailable?: boolean | null;
+    /**
+     * Whether ffmpeg can be started.
+     */
+    ffmpegAvailable?: boolean | null;
+    /**
+     * Result of the detection of the graphics hardware.
+     */
+    hardware?: HardwareAcceleration | null;
+    /**
+     * Limit of parallel transcodes from the settings.
+     */
+    maxParallelJobs?: number | null;
+    /**
+     * Number of running transcodes.
+     */
+    runningJobs?: number | null;
+}
 /**
  * Changes the settings of the cache. Missing or null values stay unchanged.
  */
@@ -4187,6 +4724,27 @@ export interface UpdateTrackRating extends AdditionalDataHolder, Parsable {
      * Number of stars from 1 to 5; 0 removes the rating.
      */
     rating?: number | null;
+}
+/**
+ * Changes the settings of the transcoding. Missing or null values stay unchanged. Running transcodes keep their settings; a change of the hardware acceleration starts a new detection.
+ */
+export interface UpdateTranscodingSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Bitrate of transcoded audio (AAC) in kbit/s: 128, 160, 192, 256 or 320.
+     */
+    audioBitrateKbps?: number | null;
+    /**
+     * The hardwareAcceleration property
+     */
+    hardwareAcceleration?: HardwareAccelerationMode | null;
+    /**
+     * How many ffmpeg processes transcode at the same time.
+     */
+    maxParallelJobs?: number | null;
+    /**
+     * Largest height of transcoded videos in pixels: 480, 720, 1080, 1440 or 2160.
+     */
+    maxVideoHeight?: number | null;
 }
 /**
  * Changes a user (profile). Missing or null values stay unchanged.
@@ -4345,6 +4903,8 @@ export interface ValidationProblem extends AdditionalDataHolder, ApiError, Parsa
      */
     type?: string | null;
 }
+export type VideoCodec = (typeof VideoCodecObject)[keyof typeof VideoCodecObject];
+export type VideoContainer = (typeof VideoContainerObject)[keyof typeof VideoContainerObject];
 /**
  * A year of the tracks.
  */
@@ -4395,6 +4955,15 @@ export const ArtistSortObject = {
     FirstSeenAt: "FirstSeenAt",
     Relevance: "Relevance",
 } as const;
+export const AudioCodecObject = {
+    Aac: "Aac",
+    Mp3: "Mp3",
+    Opus: "Opus",
+    Vorbis: "Vorbis",
+    Flac: "Flac",
+    Ac3: "Ac3",
+    Eac3: "Eac3",
+} as const;
 export const AudioFormatObject = {
     Mp3: "Mp3",
     Flac: "Flac",
@@ -4422,12 +4991,53 @@ export const GenreSortObject = {
     TrackCount: "TrackCount",
 } as const;
 /**
+ * Whether Intel Quick Sync is detected and used for videos.
+ */
+export const HardwareAccelerationModeObject = {
+    Auto: "Auto",
+    Off: "Off",
+} as const;
+/**
+ * State of the hardware acceleration.
+ */
+export const HardwareAccelerationStateObject = {
+    Detecting: "Detecting",
+    Active: "Active",
+    Unavailable: "Unavailable",
+    Disabled: "Disabled",
+    Failed: "Failed",
+} as const;
+/**
+ * The encoder that passed the test; none without.
+ */
+export const HardwareAcceleratorObject = {
+    None: "None",
+    Vaapi: "Vaapi",
+    Qsv: "Qsv",
+} as const;
+/**
+ * Why the hardware is not used; null while detecting, active or disabled.
+ */
+export const HardwareUnavailableReasonObject = {
+    Ffmpeg_missing: "ffmpeg_missing",
+    No_device: "no_device",
+    Test_failed: "test_failed",
+    Encode_failed: "encode_failed",
+} as const;
+/**
  * Aggregated status of all health checks.
  */
 export const HealthStatusObject = {
     Healthy: "Healthy",
     Degraded: "Degraded",
     Unhealthy: "Unhealthy",
+} as const;
+/**
+ * Video with sound or sound only.
+ */
+export const HlsMediaObject = {
+    Audio: "Audio",
+    Video: "Video",
 } as const;
 /**
  * Why the scan failed or was interrupted.
@@ -4550,6 +5160,14 @@ export const ProblemCodeObject = {
     CoverNot_found: "cover.not_found",
     StreamTranscoding_required: "stream.transcoding_required",
     StreamFile_missing: "stream.file_missing",
+    TrackNo_video: "track.no_video",
+    TranscodeUnavailable: "transcode.unavailable",
+    TranscodeBusy: "transcode.busy",
+    TranscodeTimeout: "transcode.timeout",
+    TranscodeFailed: "transcode.failed",
+    TranscodeVariant_outdated: "transcode.variant_outdated",
+    TranscodeSegment_not_found: "transcode.segment_not_found",
+    TranscodeJob_not_found: "transcode.job_not_found",
     HistoryNot_found: "history.not_found",
     PlaylistNot_found: "playlist.not_found",
     PlaylistEntry_not_found: "playlist.entry_not_found",
@@ -4595,6 +5213,13 @@ export const SortDirectionObject = {
     Desc: "Desc",
 } as const;
 /**
+ * The file as it is (direct play) or an HLS stream of the sound (transcoding).
+ */
+export const StreamProtocolObject = {
+    File: "File",
+    Hls: "Hls",
+} as const;
+/**
  * Whether the editor can write the tags.
  */
 export const TrackMetadataStatusObject = {
@@ -4620,6 +5245,10 @@ export const TrackSortObject = {
 export const TranscodeReasonObject = {
     Format_unsupported: "format_unsupported",
     Format_unknown: "format_unknown",
+    Container_unsupported: "container_unsupported",
+    Video_codec_unsupported: "video_codec_unsupported",
+    Audio_codec_unsupported: "audio_codec_unsupported",
+    Audio_from_video: "audio_from_video",
 } as const;
 /**
  * Sort key of the user list; ties are sorted by id.
@@ -4641,6 +5270,19 @@ export const ValidationErrorCodeObject = {
     Invalid_format: "invalid_format",
     Invalid_value: "invalid_value",
     Duplicate: "duplicate",
+} as const;
+export const VideoCodecObject = {
+    H264: "H264",
+    Hevc: "Hevc",
+    Vp8: "Vp8",
+    Vp9: "Vp9",
+    Av1: "Av1",
+} as const;
+export const VideoContainerObject = {
+    Mp4: "Mp4",
+    Mov: "Mov",
+    Webm: "Webm",
+    Matroska: "Matroska",
 } as const;
 /* tslint:enable */
 /* eslint-enable */

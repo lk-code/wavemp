@@ -11,7 +11,7 @@ import { type BaseRequestBuilder, type Parsable, type ParsableFactory, type Requ
  */
 export interface CacheRequestBuilder extends BaseRequestBuilder<CacheRequestBuilder> {
     /**
-     * Removes all files of the cache. Covers are created again the next time they are shown or after the next scan.
+     * Removes all files of the cache. Covers are created again the next time they are shown or after the next scan, transcoded segments the next time they are played.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @throws {ProblemDetails} error when the service returns a 401 status code
      * @throws {ProblemDetails} error when the service returns a 403 status code
@@ -26,7 +26,7 @@ export interface CacheRequestBuilder extends BaseRequestBuilder<CacheRequestBuil
      */
      get(requestConfiguration?: RequestConfiguration<object> | undefined) : Promise<CacheUsage | undefined>;
     /**
-     * Removes all files of the cache. Covers are created again the next time they are shown or after the next scan.
+     * Removes all files of the cache. Covers are created again the next time they are shown or after the next scan, transcoded segments the next time they are played.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {RequestInformation}
      */

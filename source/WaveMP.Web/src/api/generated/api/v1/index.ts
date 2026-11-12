@@ -28,6 +28,8 @@ import { SettingsRequestBuilderNavigationMetadata, type SettingsRequestBuilder }
 // @ts-ignore
 import { TracksRequestBuilderNavigationMetadata, TracksRequestBuilderRequestsMetadata, type TracksRequestBuilder } from './tracks/index.js';
 // @ts-ignore
+import { TranscodingRequestBuilderNavigationMetadata, type TranscodingRequestBuilder } from './transcoding/index.js';
+// @ts-ignore
 import { type UsersRequestBuilder, UsersRequestBuilderNavigationMetadata, UsersRequestBuilderRequestsMetadata } from './users/index.js';
 // @ts-ignore
 import { type YearsRequestBuilder, YearsRequestBuilderRequestsMetadata } from './years/index.js';
@@ -91,6 +93,10 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      */
     get tracks(): TracksRequestBuilder;
     /**
+     * The transcoding property
+     */
+    get transcoding(): TranscodingRequestBuilder;
+    /**
      * The users property
      */
     get users(): UsersRequestBuilder;
@@ -151,6 +157,9 @@ export const V1RequestBuilderNavigationMetadata: Record<Exclude<keyof V1RequestB
     tracks: {
         requestsMetadata: TracksRequestBuilderRequestsMetadata,
         navigationMetadata: TracksRequestBuilderNavigationMetadata,
+    },
+    transcoding: {
+        navigationMetadata: TranscodingRequestBuilderNavigationMetadata,
     },
     users: {
         requestsMetadata: UsersRequestBuilderRequestsMetadata,

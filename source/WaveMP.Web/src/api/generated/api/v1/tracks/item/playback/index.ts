@@ -11,7 +11,7 @@ import { type BaseRequestBuilder, type Parsable, type ParsableFactory, type Requ
  */
 export interface PlaybackRequestBuilder extends BaseRequestBuilder<PlaybackRequestBuilder> {
     /**
-     * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element. It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
+     * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded to AAC as an HLS stream (also the sound of tracks that only have a video). The answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element: the file (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable). It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {Promise<TrackPlayback>}
      * @throws {ValidationProblem} error when the service returns a 400 status code
@@ -20,14 +20,14 @@ export interface PlaybackRequestBuilder extends BaseRequestBuilder<PlaybackReque
      */
      get(requestConfiguration?: RequestConfiguration<PlaybackRequestBuilderGetQueryParameters> | undefined) : Promise<TrackPlayback | undefined>;
     /**
-     * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element. It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
+     * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded to AAC as an HLS stream (also the sound of tracks that only have a video). The answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element: the file (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable). It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {RequestInformation}
      */
      toGetRequestInformation(requestConfiguration?: RequestConfiguration<PlaybackRequestBuilderGetQueryParameters> | undefined) : RequestInformation;
 }
 /**
- * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element. It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
+ * Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded to AAC as an HLS stream (also the sound of tracks that only have a video). The answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element: the file (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable). It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.
  */
 export interface PlaybackRequestBuilderGetQueryParameters {
     /**

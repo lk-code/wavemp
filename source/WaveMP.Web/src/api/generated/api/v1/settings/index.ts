@@ -6,6 +6,8 @@ import { CacheRequestBuilderRequestsMetadata, type CacheRequestBuilder } from '.
 // @ts-ignore
 import { LibraryRequestBuilderRequestsMetadata, type LibraryRequestBuilder } from './library/index.js';
 // @ts-ignore
+import { TranscodingRequestBuilderRequestsMetadata, type TranscodingRequestBuilder } from './transcoding/index.js';
+// @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata } from '@microsoft/kiota-abstractions';
 
 /**
@@ -20,6 +22,10 @@ export interface SettingsRequestBuilder extends BaseRequestBuilder<SettingsReque
      * The library property
      */
     get library(): LibraryRequestBuilder;
+    /**
+     * The transcoding property
+     */
+    get transcoding(): TranscodingRequestBuilder;
 }
 /**
  * Uri template for the request builder.
@@ -34,6 +40,9 @@ export const SettingsRequestBuilderNavigationMetadata: Record<Exclude<keyof Sett
     },
     library: {
         requestsMetadata: LibraryRequestBuilderRequestsMetadata,
+    },
+    transcoding: {
+        requestsMetadata: TranscodingRequestBuilderRequestsMetadata,
     },
 };
 /* tslint:enable */
