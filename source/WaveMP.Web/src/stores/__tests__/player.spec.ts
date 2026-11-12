@@ -316,6 +316,8 @@ describe('player store', () => {
         ]
 
         beforeEach(() => {
+            // Replaced as soon as the store creates its audio engine.
+            engine = new FakeEngine({})
             vi.mocked(getVideoPlayback).mockReset()
             vi.mocked(getVideoPlayback).mockImplementation((id) => Promise.resolve(video(id)))
             playerDependencies.createVideoEngine = (_element, events) =>
@@ -377,6 +379,18 @@ describe('player store', () => {
             expect(videoEngine.stop).toHaveBeenCalled()
             expect(engine.loaded.at(-1)).toMatchObject({ url: '/stream/a', position: 45 })
             expect(player.state.playback).toBe('playing')
+        })
+
+        it('loads the video when the stage opens while the audio is still loading', async () => {
+            const player = usePlayerStore()
+
+            player.playTracks(withVideo, 0)
+            player.attachVideo(element)
+            await flushPromises()
+
+            expect(engine.loaded).toEqual([])
+            expect(videoEngine.lastUrl).toBe('/video/a')
+            expect(videoEngine.play).toHaveBeenCalledOnce()
         })
 
         it('continues as audio when the stage closes', async () => {

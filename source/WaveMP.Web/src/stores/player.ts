@@ -663,10 +663,11 @@ export const usePlayerStore = defineStore('player', () => {
         },
     )
 
-    // The video mode changed or the current track has another kind: continue at the position.
+    // The video mode changed or the stage opened or closed: continue at the position. A track that
+    // is still loading for the other output starts again for this one.
     watch(showsVideo, (show) => {
         const kind: Output = show ? 'video' : 'audio'
-        if (kind !== output && loaded && current.value && playback.value !== 'idle') {
+        if (kind !== output && current.value && playback.value !== 'idle') {
             void startCurrent(playback.value === 'playing', position.value, true)
         }
     })
