@@ -8,7 +8,7 @@ using WaveMP.Service.Tokens;
 namespace WaveMP.Service.Controllers;
 
 /// <summary>
-/// The cache of scaled covers and, later, transcoded media, for admins only. Its size limit is part of the settings
+/// The cache of scaled covers and transcoded media (HLS segments), for admins only. Its size limit is part of the settings
 /// (<c>/api/v1/settings/cache</c>).
 /// </summary>
 [ApiController]
@@ -30,7 +30,8 @@ public sealed class CacheController(ICacheService cache) : ControllerBase
     }
 
     /// <summary>
-    /// Removes all files of the cache. Covers are created again the next time they are shown or after the next scan.
+    /// Removes all files of the cache. Covers are created again the next time they are shown or after the next scan,
+    /// transcoded segments the next time they are played.
     /// </summary>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="204">The cache is empty.</response>

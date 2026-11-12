@@ -266,6 +266,54 @@ public class CacheStoreTests
     }
 
     [Test]
+    public async Task CreateTemporaryDirectory_SegmentsOfATranscode_AreCommittedOneByOne()
+    {
+        await _store.InitializeAsync();
+        string folder = _store.CreateTemporaryDirectory();
+        string first = Path.Combine(folder, "seg-00000.ts");
+        string second = Path.Combine(folder, "seg-00001.ts");
+        await File.WriteAllBytesAsync(first, new byte[20]);
+        await File.WriteAllBytesAsync(second, new byte[30]);
+
+        _store.Commit(CacheArea.Transcodes, "0123abcd/00000.ts", first).Should().BeTrue();
+        _store.Commit(CacheArea.Transcodes, "0123abcd/00001.ts", second).Should().BeTrue();
+        _store.DeleteTemporaryDirectory(folder);
+
+        Path.GetDirectoryName(folder).Should().Be(_data.Combine("cache/tmp"));
+        Directory.Exists(folder).Should().BeFalse();
+        _store.GetUsage().Transcodes.Should().Be(new CacheAreaUsage(50, 2));
+        await using Stream? segment = _store.TryOpen(CacheArea.Transcodes, "0123abcd/00001.ts");
+        segment!.Length.Should().Be(30);
+    }
+
+    [Test]
+    public async Task DeleteTemporaryDirectory_MissingFolder_IsFine()
+    {
+        await _store.InitializeAsync();
+
+        _store.Invoking(store => store.DeleteTemporaryDirectory(_data.Combine("cache/tmp/missing")))
+            .Should().NotThrow();
+    }
+
+    [Test]
+    public async Task InitializeAsync_UnfinishedFolders_AreRemoved()
+    {
+        await _store.InitializeAsync();
+        string folder = _store.CreateTemporaryDirectory();
+        await File.WriteAllBytesAsync(Path.Combine(folder, "seg-00000.ts"), [1]);
+
+        await CreateStore().InitializeAsync();
+
+        Directory.Exists(folder).Should().BeFalse();
+    }
+
+    [Test]
+    public void CreateTemporaryDirectory_Unavailable_Throws()
+    {
+        _store.Invoking(store => store.CreateTemporaryDirectory()).Should().Throw<InvalidOperationException>();
+    }
+
+    [Test]
     public async Task InitializeAsync_FolderThatCannotBeWritten_MakesTheStoreUnavailable()
     {
         // A file where the cache folder should be: the folder cannot be created.

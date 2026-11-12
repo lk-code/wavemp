@@ -48,6 +48,18 @@ public interface ICacheStore
     string CreateTemporaryPath(string extension);
 
     /// <summary>
+    /// Creates a new, empty folder in the folder <c>tmp</c> of the cache for a process that writes several files, e.g.
+    /// a transcode; its finished files are moved into an area one by one with <see cref="Commit"/>. Throws if the store
+    /// is unavailable or the folder cannot be created. Unfinished folders are removed on start.
+    /// </summary>
+    string CreateTemporaryDirectory();
+
+    /// <summary>
+    /// Removes a temporary folder with everything in it; missing folders are fine, errors are logged.
+    /// </summary>
+    void DeleteTemporaryDirectory(string path);
+
+    /// <summary>
     /// Moves a finished temporary file into the area under its name, replacing an existing file, and records it as
     /// used. Returns <c>false</c> (and removes the temporary file) if the store is unavailable or the file cannot be
     /// moved. Starts the clean-up in the background if the cache is now larger than its limit.

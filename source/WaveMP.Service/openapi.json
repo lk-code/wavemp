@@ -792,7 +792,7 @@
         "tags": [
           "Cache"
         ],
-        "summary": "Removes all files of the cache. Covers are created again the next time they are shown or after the next scan.",
+        "summary": "Removes all files of the cache. Covers are created again the next time they are shown or after the next scan, transcoded segments the next time they are played.",
         "operationId": "ClearCache",
         "responses": {
           "401": {

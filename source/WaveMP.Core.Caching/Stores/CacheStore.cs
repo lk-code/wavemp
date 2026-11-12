@@ -129,6 +129,34 @@ internal sealed class CacheStore(
         return Path.Combine(TemporaryPath, Guid.NewGuid().ToString("N") + suffix);
     }
 
+    public string CreateTemporaryDirectory()
+    {
+        if (!_available)
+        {
+            throw new InvalidOperationException("The cache is not available.");
+        }
+
+        string path = Path.Combine(TemporaryPath, Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    public void DeleteTemporaryDirectory(string path)
+    {
+        try
+        {
+            Directory.Delete(path, recursive: true);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            // Already gone.
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            logger.LogDebug(exception, "Cannot remove the temporary folder {Path}", path);
+        }
+    }
+
     public bool Commit(CacheArea area, string name, string temporaryPath)
     {
         if (!_available || !CacheFolders.TryGetPath(GetAreaPath(area), name, out string path))

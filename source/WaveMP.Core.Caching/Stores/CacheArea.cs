@@ -11,7 +11,7 @@ public enum CacheArea
     Covers,
 
     /// <summary>
-    /// Transcoded media (folder <c>transcodes</c>); reserved for the transcoding.
+    /// Transcoded media (folder <c>transcodes</c>): the HLS segments, one folder per file version and profile.
     /// </summary>
     Transcodes,
 }
