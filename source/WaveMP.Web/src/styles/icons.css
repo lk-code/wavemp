@@ -267,6 +267,10 @@
         --_icon: var(--wmp-icon-fullscreen);
     }
 
+    [data-icon='exit-fullscreen'] {
+        --_icon: var(--wmp-icon-exit-fullscreen);
+    }
+
     [data-icon='collapse-player'] {
         --_icon: var(--wmp-icon-collapse-player);
     }

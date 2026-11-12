@@ -116,6 +116,8 @@ const sampleQueue = computed(() =>
         .map((track, index) => ({ key: `sample-${index}`, track })),
 )
 const sampleQueueIndex = ref(1)
+const sampleVideoMode = ref(true)
+const sampleVideoTrack = computed(() => sampleTracks(t).find((track) => track.hasVideo))
 const tiles = computed(() => sampleTiles(t))
 const playlistRows = computed<PlaylistTrackRow[]>(() =>
     sampleTracks(t).map((track, index) => ({ id: `sample-entry-${index}`, track })),
@@ -937,7 +939,11 @@ const sampleCacheUsage: CacheUsage = {
                 </div>
                 <div data-part="dev-sample">
                     <div data-part="view" data-view="now-playing">
-                        <NowPlayingStage :track="sampleQueue[sampleQueueIndex]?.track" />
+                        <NowPlayingStage
+                            :track="sampleQueue[sampleQueueIndex]?.track"
+                            :video-mode="sampleVideoMode"
+                            @toggle-video="sampleVideoMode = !sampleVideoMode"
+                        />
                         <PlayQueue
                             :items="sampleQueue"
                             :current-index="sampleQueueIndex"
@@ -947,6 +953,15 @@ const sampleCacheUsage: CacheUsage = {
                                         (item) => item.key === key,
                                     ))
                             "
+                        />
+                    </div>
+                </div>
+                <div data-part="dev-sample">
+                    <div data-part="view" data-view="now-playing">
+                        <NowPlayingStage
+                            :track="sampleVideoTrack"
+                            :video-mode="sampleVideoMode"
+                            @toggle-video="sampleVideoMode = !sampleVideoMode"
                         />
                     </div>
                 </div>

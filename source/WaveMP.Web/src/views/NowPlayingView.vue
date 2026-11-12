@@ -3,13 +3,19 @@ import NowPlayingStage from '@/components/player/NowPlayingStage.vue'
 import PlayQueue from '@/components/player/PlayQueue.vue'
 import { usePlayerStore } from '@/stores/player'
 
-/** Now Playing: the stage with the current track and the queue of the player. */
+/** Now Playing: the stage with the current track (cover or video) and the queue of the player. */
 const player = usePlayerStore()
 </script>
 
 <template>
     <div data-part="view" data-view="now-playing">
-        <NowPlayingStage :track="player.current?.track" />
+        <NowPlayingStage
+            :track="player.current?.track"
+            :video-mode="player.videoMode"
+            @toggle-video="player.toggleVideo"
+            @attach-video="player.attachVideo"
+            @detach-video="player.detachVideo"
+        />
         <PlayQueue
             v-if="player.queue.items.length > 0"
             :items="player.queue.items"

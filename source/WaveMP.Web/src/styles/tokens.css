@@ -151,6 +151,7 @@
         --wmp-icon-muted: url('/icons/phosphor/fill/speaker-x-fill.svg');
         --wmp-icon-compact: url('/icons/phosphor/fill/corners-in-fill.svg');
         --wmp-icon-fullscreen: url('/icons/phosphor/fill/corners-out-fill.svg');
+        --wmp-icon-exit-fullscreen: url('/icons/phosphor/fill/corners-in-fill.svg');
         --wmp-icon-collapse-player: url('/icons/phosphor/fill/caret-down-fill.svg');
         --wmp-icon-settings: url('/icons/phosphor/regular/gear-six.svg');
         --wmp-icon-profile: url('/icons/phosphor/regular/user-circle.svg');

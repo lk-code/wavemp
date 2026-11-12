@@ -5,7 +5,7 @@
 // elements does both. Transcoded tracks arrive as HLS and are attached through hls.js. The engine
 // knows nothing about the queue: the player store decides what plays.
 
-import { browserHlsSupport, type HlsAttachment, type HlsSupport } from './hls'
+import { browserHlsSupport, MediaSourceSlot, type HlsSupport } from './hls'
 
 export interface DeckSource {
     /** URL of the stream. */
@@ -79,13 +79,12 @@ interface Deck {
     readonly audio: HTMLAudioElement
     gain: GainNode | null
     source: DeckSource | null
-    /** The attached HLS stream, if the source is one. */
-    hls: HlsAttachment | null
-    /** Increases with every new source, so a late HLS attachment of an older one is dropped. */
-    loads: number
+    /** The file or HLS stream of the element. */
+    readonly slot: MediaSourceSlot
 }
 
-function finiteOrZero(value: number): number {
+/** A time of a media element in seconds, 0 while unknown. */
+export function finiteOrZero(value: number): number {
     return Number.isFinite(value) && value > 0 ? value : 0
 }
 
@@ -241,7 +240,12 @@ export class AudioEngine {
 
     private createDeck(index: number): Deck {
         const audio = this.environment.createAudio()
-        const deck: Deck = { audio, gain: null, source: null, hls: null, loads: 0 }
+        const deck: Deck = {
+            audio,
+            gain: null,
+            source: null,
+            slot: new MediaSourceSlot(audio, this.environment.hls ?? browserHlsSupport),
+        }
         const active = (): boolean => this.decks[this.current] === deck
         audio.addEventListener('timeupdate', () => {
             if (active()) {
@@ -389,46 +393,15 @@ export class AudioEngine {
 
     /** Sets the source of a deck: a file directly, an HLS stream through the HLS support. */
     private attach(deck: Deck, source: DeckSource): void {
-        this.detachHls(deck)
-        const load = ++deck.loads
-        if (!source.hls) {
-            deck.audio.src = source.url
-            deck.audio.load()
-            return
-        }
-
-        const failed = (error: unknown): void => {
-            if (deck.loads === load && this.decks[this.current] === deck) {
+        deck.slot.set(source.url, source.hls === true, (error) => {
+            if (this.decks[this.current] === deck) {
                 this.events.error?.(error)
             }
-        }
-        const support = this.environment.hls ?? browserHlsSupport
-        support
-            .attach(deck.audio, source.url, failed)
-            .then((attachment) => {
-                if (deck.loads === load) {
-                    deck.hls = attachment
-                } else {
-                    attachment.destroy()
-                }
-            })
-            .catch(failed)
-    }
-
-    private detachHls(deck: Deck): void {
-        deck.loads++
-        const attachment = deck.hls
-        deck.hls = null
-        attachment?.destroy()
+        })
     }
 
     private unload(deck: Deck): void {
         deck.source = null
-        this.detachHls(deck)
-        if (deck.audio.getAttribute('src') !== null) {
-            deck.audio.pause()
-            deck.audio.removeAttribute('src')
-            deck.audio.load()
-        }
+        deck.slot.clear()
     }
 }

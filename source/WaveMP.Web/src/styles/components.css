@@ -1639,6 +1639,58 @@
         overflow-wrap: anywhere;
     }
 
+    [data-part='stage-actions'] {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--wmp-space-s);
+    }
+
+    /* The video: black bars around it, the full-screen button in its corner. */
+    [data-part='video-stage'] {
+        position: relative;
+        display: grid;
+        place-items: center;
+        inline-size: 100%;
+        max-inline-size: 64rem;
+        overflow: hidden;
+        border-radius: var(--wmp-radius-m);
+        background: #000000;
+    }
+
+    [data-part='video'] {
+        display: block;
+        inline-size: 100%;
+        max-block-size: 70vh;
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+        background: #000000;
+    }
+
+    [data-part='video-stage'][data-state~='fullscreen'] {
+        max-inline-size: none;
+        border-radius: 0;
+    }
+
+    [data-part='video-stage'][data-state~='fullscreen'] > [data-part='video'] {
+        block-size: 100%;
+        max-block-size: none;
+        aspect-ratio: auto;
+    }
+
+    [data-part='btn-fullscreen'] {
+        position: absolute;
+        inset-block-end: var(--wmp-space-s);
+        inset-inline-end: var(--wmp-space-s);
+        color: #ffffff;
+        opacity: 0.7;
+    }
+
+    [data-part='video-stage']:hover > [data-part='btn-fullscreen'],
+    [data-part='btn-fullscreen']:focus-visible {
+        opacity: 1;
+    }
+
     /* --- Queue --------------------------------------------------------------------------- */
 
     [data-part='queue'] {

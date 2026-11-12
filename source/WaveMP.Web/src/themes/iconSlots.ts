@@ -72,6 +72,8 @@ export const iconSlots = {
     'favorite-off': { file: regular('heart'), area: 'content' },
     'rating-star': { file: fill('star'), area: 'content' },
     'rating-star-off': { file: regular('star'), area: 'content' },
+    fullscreen: { file: fill('corners-out'), area: 'content' },
+    'exit-fullscreen': { file: fill('corners-in'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },
@@ -85,7 +87,6 @@ export const iconSlots = {
     volume: { file: fill('speaker-high'), area: 'transport' },
     muted: { file: fill('speaker-x'), area: 'transport' },
     compact: { file: fill('corners-in'), area: 'transport' },
-    fullscreen: { file: fill('corners-out'), area: 'transport', reserved: true },
     'collapse-player': { file: fill('caret-down'), area: 'transport' },
 
     // General (menus and dialogs)

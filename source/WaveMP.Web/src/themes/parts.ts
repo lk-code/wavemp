@@ -57,6 +57,11 @@ export const parts = [
     'stage-info',
     'stage-title',
     'stage-subtitle',
+    'stage-actions',
+    'btn-video',
+    'video-stage',
+    'video',
+    'btn-fullscreen',
     'cover',
     'cover-image',
 

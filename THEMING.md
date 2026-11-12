@@ -114,10 +114,15 @@ Example of a desktop layout with the sidebar on the right:
 | `empty-state-title` | `p` | `empty-state` | Title of the message |
 | `empty-state-text` | `p` | `empty-state` | Text of the message |
 | `link` | `a` | `empty-state`, `view`, `section`, `meta-value` | Text link in the content, for example to an album, an artist, a genre or a year |
-| `stage` | `div` | `view` | Stage of the Now Playing page: cover (later also video and visualization) and `stage-info` |
+| `stage` | `div` | `view` | Stage of the Now Playing page: the `cover`, or the `video-stage` of a song with a video while the video is switched on, then `stage-info` and, for songs with a video, `stage-actions` |
 | `stage-info` | `div` | `stage` | Title, artist and album of the current song |
 | `stage-title` | `p` | `stage-info` | Title of the current song |
 | `stage-subtitle` | `p` | `stage-info` | Artist and album of the current song |
+| `stage-actions` | `div` (`role="group"`) | `stage` | Buttons of the stage; only for songs with a video |
+| `btn-video` | `button` (`aria-pressed`) | `stage-actions` | Shows the video of songs instead of their cover (pressed) or the cover only; the choice applies to all songs with a video, the visualization follows later |
+| `video-stage` | `div` | `stage` | The video of the current song with `video` and `btn-fullscreen`; shown in full screen as a whole (a double click switches as well). When it closes, the song continues as audio at the same position |
+| `video` | `video` (`aria-label`) | `video-stage` | The video element; without native controls, the transport bar controls it |
+| `btn-fullscreen` | `button` | `video-stage` | Shows the `video-stage` in full screen (icon `fullscreen`) or leaves it (icon `exit-fullscreen`); disabled where the browser has no full screen. On the iPhone the video element itself goes full screen with the controls of the system |
 | `cover` | `span` | `stage`, `list-group-info`, `now-playing-mini`, `tile`, `detail-header` | Cover: `cover-image`, or the placeholder icon (`data-state="placeholder"`); on tiles and detail pages of artists, genres and years the `icon` of their kind |
 | `cover-image` | `img` (`alt=""`) | `cover` | Picture of the cover, loaded from the server |
 | `list` | `div` (`role="grid"`) | `view` | Table of tracks grouped by album |
@@ -278,7 +283,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | Part | Tokens |
 |---|---|
 | `transport` | `idle`, `playing` or `paused`; additionally `loading` while a song loads or waits for data, and `expanded` while the full-screen player is open (mobile) |
-| `transport-message` | `empty` without a notice, otherwise its kind: `unsupported` (the song needs transcoding, which follows later), `unavailable` (it could not be loaded) or `failed` (it failed to play) |
+| `transport-message` | `empty` without a notice, otherwise its kind: `unsupported` (the browser cannot play the song and the server cannot transcode it), `unavailable` (it could not be loaded) or `failed` (it failed to play) |
 | `btn-play` | `idle`, `playing` or `paused` |
 | `btn-shuffle` | `on` or `off` |
 | `btn-repeat` | `off`, `all` or `one` |
@@ -295,6 +300,8 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `rating` | `rated` or `unrated` |
 | `rating-star` | `on` up to the rating, otherwise `off` |
 | `now-playing-actions` | `empty` while nothing plays |
+| `stage` | `video` while it shows the `video-stage`, otherwise `cover` |
+| `video-stage` | `fullscreen` while it is shown in full screen |
 | `queue-item` | `current` for the current song, `played` for the songs before it |
 | `placeholder-notice`, `cover` | `placeholder` |
 | `now-playing-mini` | `empty` while nothing plays |
@@ -327,7 +334,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
 | `aria-checked` | `color-swatch`; `menu-item` with `role="menuitemradio"`, for example the chosen sort key and direction |
 | `aria-selected` | `list-row` |
-| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, the `button`s of `scope-switch` and other toggle buttons |
+| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, `btn-video`, the `button`s of `scope-switch` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
 | `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate), `meter` (`aria-valuenow` from 0 to 100) |
 | `:disabled` | buttons and inputs |
@@ -606,6 +613,8 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `favorite-off` | `--wmp-icon-favorite-off` | `/icons/phosphor/regular/heart.svg` | Content (`btn-favorite` of anything else) |
 | `rating-star` | `--wmp-icon-rating-star` | `/icons/phosphor/fill/star-fill.svg` | Content (`rating-star` up to the rating) |
 | `rating-star-off` | `--wmp-icon-rating-star-off` | `/icons/phosphor/regular/star.svg` | Content (the other `rating-star`s) |
+| `fullscreen` | `--wmp-icon-fullscreen` | `/icons/phosphor/fill/corners-out-fill.svg` | Content (`btn-fullscreen` of the video) |
+| `exit-fullscreen` | `--wmp-icon-exit-fullscreen` | `/icons/phosphor/fill/corners-in-fill.svg` | Content (`btn-fullscreen` in full screen) |
 | `shuffle` | `--wmp-icon-shuffle` | `/icons/phosphor/fill/shuffle-fill.svg` | Transport |
 | `repeat` | `--wmp-icon-repeat` | `/icons/phosphor/fill/repeat-fill.svg` | Transport |
 | `repeat-one` | `--wmp-icon-repeat-one` | `/icons/phosphor/fill/repeat-once-fill.svg` | Transport |
@@ -617,7 +626,6 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `volume` | `--wmp-icon-volume` | `/icons/phosphor/fill/speaker-high-fill.svg` | Transport |
 | `muted` | `--wmp-icon-muted` | `/icons/phosphor/fill/speaker-x-fill.svg` | Transport |
 | `compact` | `--wmp-icon-compact` | `/icons/phosphor/fill/corners-in-fill.svg` | Transport |
-| `fullscreen` | `--wmp-icon-fullscreen` | `/icons/phosphor/fill/corners-out-fill.svg` | Transport (reserved) |
 | `collapse-player` | `--wmp-icon-collapse-player` | `/icons/phosphor/fill/caret-down-fill.svg` | Transport |
 | `settings` | `--wmp-icon-settings` | `/icons/phosphor/regular/gear-six.svg` | Menus and dialogs |
 | `profile` | `--wmp-icon-profile` | `/icons/phosphor/regular/user-circle.svg` | Menus and dialogs |
@@ -689,6 +697,7 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 ### Changelog
 
 - **Version 2:** favorites, ratings and the home page. Changed: the lists of songs have the new columns `rating` (stars) and `favorite` (heart) at their end, so the defaults of `--wmp-list-columns`, `--wmp-list-columns-playlist` and `--wmp-list-columns-recently-played` have two more columns; the new part `now-playing-actions` of `transport` takes the start of the grid area `mode-switch`, which now ends at the end of its cell (`justify-self: end`). Themes that set these variables have to add the new columns; themes that rearrange `transport` have to place `now-playing-actions`. Added: the parts `btn-favorite`, `rating`, `rating-star`, `scope-switch`, `now-playing-actions`, `shelf`, `shelf-header`, `shelf-title` and `shelf-actions`, their states, the attribute `data-value`, the home page (`data-view="home"`, tab and bottom navigation entry `home`), the library section `favorites`, the tile kind `track`, the `meta-item` `rating` on the page of a song, new values of `data-item` (menu entry `favorite`; detail action `favorite`; `all-music`, `my-music`; the rows `playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated` of `shelf`), the sort key `sort-rating`, the variables `--wmp-favorite-color`, `--wmp-rating-color` and `--wmp-shelf-tile-width` and the icon slots `home`, `track`, `favorite`, `favorite-off`, `rating-star`, `rating-star-off`, `add-favorite` and `remove-favorite`; `tree-favorites` is no longer reserved.
+    - Additions without a version change: videos. The `stage` shows the video of songs with one (`stage-actions`, `btn-video`, `video-stage`, `video`, `btn-fullscreen`, the states `video` and `cover` of `stage` and `fullscreen` of `video-stage`) and the icon slot `exit-fullscreen`; `fullscreen` is no longer reserved and belongs to the content. The notice `unsupported` of `transport-message` now means that the server cannot transcode the song.
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
     - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.
     - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item` (`menu-item` already carried it, now it is documented), the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.

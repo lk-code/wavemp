@@ -134,7 +134,12 @@
     "moveDown": "Nach unten",
     "remove": "Aus der Warteschlange entfernen",
     "clear": "Warteschlange leeren",
-    "playItem": "{title} abspielen"
+    "playItem": "{title} abspielen",
+    "stageActions": "Anzeige",
+    "showVideo": "Video zeigen",
+    "video": "Video des aktuellen Titels",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden"
   },
   "playlists": {
     "emptyTitle": "Noch keine Playlists",

@@ -1,14 +1,15 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
-import type { Track, TrackPlayback } from '@/api/generated/models'
+import type { Track, TrackPlayback, TrackVideoPlayback } from '@/api/generated/models'
 import type { EngineEvents } from '@/player/engine'
-import { getPlayback, recordPlay } from '@/player/api'
+import { getPlayback, getVideoPlayback, recordPlay } from '@/player/api'
 import { playerDependencies, usePlayerStore, type PlayerEngine } from '../player'
 import { useSessionStore } from '../session'
 
 vi.mock('@/player/api', () => ({
     getPlayback: vi.fn(),
+    getVideoPlayback: vi.fn(),
     recordPlay: vi.fn(),
 }))
 
@@ -41,6 +42,10 @@ class FakeEngine implements PlayerEngine {
     }
 }
 
+class FakeVideoEngine extends FakeEngine {
+    readonly dispose = vi.fn()
+}
+
 function track(id: string, extra: Partial<Track> = {}): Track {
     return {
         id,
@@ -66,6 +71,17 @@ function direct(id: string, extra: Partial<TrackPlayback> = {}): TrackPlayback {
 }
 
 const abc = [track('a'), track('b'), track('c')]
+
+/** The video playback of a track with a video file the browser plays. */
+function video(id: string): TrackVideoPlayback {
+    return {
+        trackId: id,
+        method: 'DirectPlay',
+        protocol: 'File',
+        streamUrl: `/video/${id}`,
+        durationMilliseconds: 200_000,
+    }
+}
 
 describe('player store', () => {
     let engine: FakeEngine
@@ -288,6 +304,137 @@ describe('player store', () => {
             { url: '/hls/a/master.m3u8', gain: 1, hls: true },
             0,
         )
+    })
+
+    describe('video', () => {
+        let videoEngine: FakeVideoEngine
+        const element = {} as HTMLVideoElement
+        const withVideo = [
+            track('a', { hasVideo: true }),
+            track('b'),
+            track('c', { hasVideo: true }),
+        ]
+
+        beforeEach(() => {
+            vi.mocked(getVideoPlayback).mockReset()
+            vi.mocked(getVideoPlayback).mockImplementation((id) => Promise.resolve(video(id)))
+            playerDependencies.createVideoEngine = (_element, events) =>
+                (videoEngine = new FakeVideoEngine(events))
+            playerDependencies.videoFormats = () => ({
+                containers: ['Mp4'],
+                videoCodecs: ['H264'],
+                audioCodecs: ['Aac'],
+            })
+        })
+
+        it('plays tracks with a video in the video element of the stage', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            expect(player.showsVideo).toBe(true)
+            expect(getVideoPlayback).toHaveBeenCalledWith('a', {
+                containers: ['Mp4'],
+                videoCodecs: ['H264'],
+                audioCodecs: ['Aac'],
+            })
+            expect(videoEngine.lastUrl).toBe('/video/a')
+            expect(videoEngine.play).toHaveBeenCalledOnce()
+            expect(getPlayback).not.toHaveBeenCalled()
+            expect(player.state.playback).toBe('playing')
+        })
+
+        it('plays tracks with a video as audio while the stage is closed', async () => {
+            const player = usePlayerStore()
+
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            expect(player.showsVideo).toBe(false)
+            expect(getVideoPlayback).not.toHaveBeenCalled()
+            expect(engine.lastUrl).toBe('/stream/a')
+        })
+
+        it('switches between audio and video at the same position', async () => {
+            const player = usePlayerStore()
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+            engine.events.timeupdate?.(30, 200)
+
+            player.attachVideo(element)
+            await flushPromises()
+
+            expect(engine.stop).toHaveBeenCalled()
+            expect(videoEngine.loaded.at(-1)).toEqual({ url: '/video/a', gain: 1, position: 30 })
+            expect(videoEngine.play).toHaveBeenCalledOnce()
+
+            videoEngine.events.timeupdate?.(45, 200)
+            player.toggleVideo()
+            await flushPromises()
+
+            expect(videoEngine.stop).toHaveBeenCalled()
+            expect(engine.loaded.at(-1)).toMatchObject({ url: '/stream/a', position: 45 })
+            expect(player.state.playback).toBe('playing')
+        })
+
+        it('continues as audio when the stage closes', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+            videoEngine.events.timeupdate?.(12, 200)
+            const closed = videoEngine
+
+            player.detachVideo(element)
+            await flushPromises()
+
+            expect(closed.stop).toHaveBeenCalled()
+            expect(closed.dispose).toHaveBeenCalledOnce()
+            expect(engine.loaded.at(-1)).toMatchObject({ url: '/stream/a', position: 12 })
+        })
+
+        it('ignores the events of the engine that does not play', async () => {
+            const player = usePlayerStore()
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+            const audio = engine
+            player.attachVideo(element)
+            await flushPromises()
+
+            audio.events.paused?.()
+            audio.events.ended?.()
+
+            expect(player.state.playback).toBe('playing')
+            expect(player.state.trackId).toBe('a')
+        })
+
+        it('does not prepare the next track while a video plays', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            videoEngine.events.timeupdate?.(185, 200)
+            await flushPromises()
+
+            expect(getPlayback).not.toHaveBeenCalled()
+        })
+
+        it('plays the next track as audio when a video ended', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            videoEngine.events.ended?.()
+            await flushPromises()
+
+            expect(player.state.trackId).toBe('b')
+            expect(engine.lastUrl).toBe('/stream/b')
+            expect(videoEngine.stop).toHaveBeenCalled()
+        })
     })
 
     it('stops when no track of the queue can be played', async () => {

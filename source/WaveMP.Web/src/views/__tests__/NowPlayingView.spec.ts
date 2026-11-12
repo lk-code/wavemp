@@ -8,7 +8,11 @@ import { playerDependencies, usePlayerStore } from '@/stores/player'
 import NowPlayingView from '../NowPlayingView.vue'
 
 vi.mock('@/library/api', () => ({ fetchAlbumCover: vi.fn(), fetchTrackCover: vi.fn() }))
-vi.mock('@/player/api', () => ({ getPlayback: vi.fn(), recordPlay: vi.fn() }))
+vi.mock('@/player/api', () => ({
+    getPlayback: vi.fn(),
+    getVideoPlayback: vi.fn(),
+    recordPlay: vi.fn(),
+}))
 
 function track(id: string): Track {
     return {

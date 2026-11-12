@@ -66,3 +66,62 @@ export const browserHlsSupport: HlsSupport = {
         throw new Error('This browser cannot play HLS.')
     },
 }
+
+/**
+ * The source of one media element: a file set as its src, or an HLS stream attached through the
+ * HLS support. A new source detaches the previous stream; an attachment that completes after a
+ * newer source was set is destroyed at once, and its errors are no longer reported.
+ */
+export class MediaSourceSlot {
+    private attachment: HlsAttachment | null = null
+    private loads = 0
+
+    constructor(
+        private readonly media: HTMLMediaElement,
+        private readonly support: HlsSupport = browserHlsSupport,
+    ) {}
+
+    /** Sets a file or an HLS stream; onError gets the failures of the stream while it is set. */
+    set(url: string, hls: boolean, onError: (error: unknown) => void): void {
+        this.detach()
+        const load = this.loads
+        if (!hls) {
+            this.media.src = url
+            this.media.load()
+            return
+        }
+
+        const failed = (error: unknown): void => {
+            if (this.loads === load) {
+                onError(error)
+            }
+        }
+        this.support
+            .attach(this.media, url, failed)
+            .then((attachment) => {
+                if (this.loads === load) {
+                    this.attachment = attachment
+                } else {
+                    attachment.destroy()
+                }
+            })
+            .catch(failed)
+    }
+
+    /** Detaches the stream and removes the source, so the element stops loading. */
+    clear(): void {
+        this.detach()
+        if (this.media.getAttribute('src') !== null) {
+            this.media.pause()
+            this.media.removeAttribute('src')
+            this.media.load()
+        }
+    }
+
+    private detach(): void {
+        this.loads++
+        const attachment = this.attachment
+        this.attachment = null
+        attachment?.destroy()
+    }
+}

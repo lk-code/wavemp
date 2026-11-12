@@ -3,7 +3,13 @@
 // The ReplayGain setting belongs to the session store.
 
 import { apiClient } from '@/api/client'
-import type { AudioFormat, PlayHistoryEntry, TrackPlayback } from '@/api/generated/models'
+import type {
+    AudioFormat,
+    PlayHistoryEntry,
+    TrackPlayback,
+    TrackVideoPlayback,
+} from '@/api/generated/models'
+import type { VideoFormats } from './videoFormats'
 
 /** How the client plays a track, with the signed stream URL for direct play. */
 export function getPlayback(
@@ -13,6 +19,20 @@ export function getPlayback(
     return apiClient.api.v1.tracks
         .byId(trackId)
         .playback.get({ queryParameters: { audioFormats: [...audioFormats] } })
+}
+
+/** How the client plays the video of a track: the file as it is or an HLS stream. */
+export function getVideoPlayback(
+    trackId: string,
+    formats: VideoFormats,
+): Promise<TrackVideoPlayback | undefined> {
+    return apiClient.api.v1.tracks.byId(trackId).video.playback.get({
+        queryParameters: {
+            videoContainers: [...formats.containers],
+            videoCodecs: [...formats.videoCodecs],
+            audioCodecs: [...formats.audioCodecs],
+        },
+    })
 }
 
 /** Records a play in the history of the current profile. */

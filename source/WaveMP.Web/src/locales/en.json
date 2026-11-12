@@ -134,7 +134,12 @@
     "moveDown": "Move down",
     "remove": "Remove from queue",
     "clear": "Clear queue",
-    "playItem": "Play {title}"
+    "playItem": "Play {title}",
+    "stageActions": "Display",
+    "showVideo": "Show video",
+    "video": "Video of the current song",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   },
   "playlists": {
     "emptyTitle": "No playlists yet",

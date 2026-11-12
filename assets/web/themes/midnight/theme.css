@@ -435,6 +435,17 @@ a[data-part="breadcrumb-link"]:hover {
     color: #1e2329;
 }
 
+/* The video lies in a black glass frame like the cover; its full-screen button glows blue. */
+[data-part="video-stage"] {
+    box-shadow:
+        0 0.5rem 2rem rgb(0 0 0 / 35%),
+        inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+
+[data-part="btn-fullscreen"] > [data-part="icon"] {
+    filter: drop-shadow(0 0 3px rgb(90 180 255 / 60%));
+}
+
 /* Stars of the rating glow blue like the play button, the heart of a favorite glows pink. */
 [data-part="rating-star"][data-state~="on"] > [data-part="icon"] {
     filter: drop-shadow(0 0 2px rgb(59 155 255 / 55%));
