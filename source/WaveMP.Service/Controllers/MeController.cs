@@ -40,7 +40,10 @@ public sealed class MeController(IUserSettingsService settings) : ControllerBase
     /// <param name="request">The changes.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">The changed settings.</response>
-    /// <response code="400">The request is invalid (code <c>request.invalid</c>).</response>
+    /// <response code="400">The request is invalid (code <c>request.invalid</c>), e.g. <c>equalizer.preampDb</c> or an
+    /// entry of <c>equalizer.customGainsDb</c> out of range (<c>out_of_range</c>), not exactly 10 values in
+    /// <c>equalizer.customGainsDb</c> (<c>min_items</c>, <c>max_items</c>), <c>crossfade.seconds</c> or
+    /// <c>sleepTimer.fadeSeconds</c> out of range, or an unknown preset (<c>invalid_format</c>).</response>
     /// <response code="404">The profile was deleted in the meantime (code <c>user.not_found</c>).</response>
     [HttpPatch("settings", Name = "UpdateMySettings")]
     [Consumes("application/json")]
@@ -51,11 +54,7 @@ public sealed class MeController(IUserSettingsService settings) : ControllerBase
         UpdateUserSettingsDto request,
         CancellationToken cancellationToken)
     {
-        UpdateUserSettingsCommand command = new(
-            request.Language?.ToEntity(),
-            request.ReplayGain?.ToEntity(),
-            request.PlayerViewMode?.ToEntity());
-        UserSettings? result = await settings.UpdateAsync(User.GetUserId(), command, cancellationToken);
+        UserSettings? result = await settings.UpdateAsync(User.GetUserId(), request.ToCommand(), cancellationToken);
         return result is null
             ? this.Problem(ProblemCodeDto.UserNotFound, StatusCodes.Status404NotFound)
             : Ok(result.ToDto());

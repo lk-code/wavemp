@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using WaveMP.Core.Users.Settings;
 using WaveMP.Data.Entities;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Mappings;
@@ -51,5 +52,98 @@ public class SettingsMappingExtensionsTests
         dto.Language.Should().Be(LanguageDto.De);
         dto.ReplayGain.Should().Be(ReplayGainModeDto.Album);
         dto.PlayerViewMode.Should().Be(PlayerViewModeDto.Visualization);
+    }
+
+    [Test]
+    public void EqualizerPresets_MapBothWays()
+    {
+        foreach (EqualizerPreset preset in Enum.GetValues<EqualizerPreset>())
+        {
+            EqualizerPresetDto dto = preset.ToDto();
+
+            dto.ToString().Should().Be(preset.ToString());
+            dto.ToEntity().Should().Be(preset);
+        }
+
+        Enum.GetValues<EqualizerPresetDto>().Should().HaveSameCount(Enum.GetValues<EqualizerPreset>());
+    }
+
+    [Test]
+    public void ToDto_Settings_CarriesThePlaybackGroups()
+    {
+        UserSettings settings = new()
+        {
+            EqualizerEnabled = true,
+            EqualizerPreset = EqualizerPreset.Bass,
+            EqualizerPreampDb = -4.5,
+            EqualizerCustomGainsDb = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            CrossfadeSeconds = 8,
+            CrossfadeAlbumsGapless = false,
+            SleepTimerFadeSeconds = 45,
+        };
+
+        UserSettingsDto dto = settings.ToDto();
+
+        dto.Equalizer.Should().BeEquivalentTo(new
+        {
+            Enabled = true,
+            Preset = EqualizerPresetDto.Bass,
+            PreampDb = -4.5,
+            GainsDb = new double[] { 8, 7, 5, 3, 1, 0, 0, 0, 0, 0 },
+            CustomGainsDb = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+        });
+        dto.Crossfade.Should().BeEquivalentTo(new { Seconds = 8, AlbumsGapless = false });
+        dto.SleepTimer.FadeSeconds.Should().Be(45);
+    }
+
+    [Test]
+    public void ToDto_CustomPreset_AppliesTheOwnCurve()
+    {
+        UserSettings settings = new()
+        {
+            EqualizerPreset = EqualizerPreset.Custom,
+            EqualizerCustomGainsDb = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        };
+
+        settings.ToDto().Equalizer.GainsDb.Should().Equal(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    }
+
+    [Test]
+    public void ToCommand_Groups_FillTheCommand()
+    {
+        UpdateUserSettingsDto request = new()
+        {
+            Equalizer = new UpdateEqualizerSettingsDto
+            {
+                Enabled = true,
+                Preset = EqualizerPresetDto.Custom,
+                PreampDb = 2,
+                CustomGainsDb = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            },
+            Crossfade = new UpdateCrossfadeSettingsDto { Seconds = 4, AlbumsGapless = true },
+            SleepTimer = new UpdateSleepTimerSettingsDto { FadeSeconds = 20 },
+        };
+
+        UpdateUserSettingsCommand command = request.ToCommand();
+
+        command.Should().BeEquivalentTo(new
+        {
+            Language = (Language?)null,
+            EqualizerEnabled = true,
+            EqualizerPreset = EqualizerPreset.Custom,
+            EqualizerPreampDb = 2.0,
+            EqualizerCustomGainsDb = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+            CrossfadeSeconds = 4,
+            CrossfadeAlbumsGapless = true,
+            SleepTimerFadeSeconds = 20,
+        });
+    }
+
+    [Test]
+    public void ToCommand_MissingGroups_KeepEverything()
+    {
+        UpdateUserSettingsCommand command = new UpdateUserSettingsDto().ToCommand();
+
+        command.Should().Be(new UpdateUserSettingsCommand());
     }
 }

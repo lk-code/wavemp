@@ -40,6 +40,13 @@ public class ValidationAttributeFailuresTests
             .SetArgDisplayNames("RangeOfIntegers");
         yield return Case(new RangeAttribute(0.5, 1.5), 2.0, new(ValidationErrorCodeDto.OutOfRange))
             .SetArgDisplayNames("RangeOfFractions");
+        yield return Case(new RangeAttribute(-12.0, 12.0), 12.5, new(ValidationErrorCodeDto.OutOfRange, -12, 12))
+            .SetArgDisplayNames("RangeOfFractionsWithWholeLimits");
+        yield return Case(
+                new EachInRangeAttribute(-12, 12),
+                new[] { 0, 12.5 },
+                new(ValidationErrorCodeDto.OutOfRange, -12, 12))
+            .SetArgDisplayNames("EachInRange");
         yield return Case(new RegularExpressionAttribute("^a$"), "b", new(ValidationErrorCodeDto.InvalidFormat))
             .SetArgDisplayNames("Pattern");
         yield return Case(new EmailAddressAttribute(), "nobody", new(ValidationErrorCodeDto.InvalidFormat))

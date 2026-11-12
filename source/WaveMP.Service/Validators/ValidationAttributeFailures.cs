@@ -31,6 +31,10 @@ public static class ValidationAttributeFailures
             MaxLengthAttribute maxLength => IsText(value)
                 ? new(ValidationErrorCodeDto.MaxLength, Max: maxLength.Length)
                 : new(ValidationErrorCodeDto.MaxItems, Max: maxLength.Length),
+            EachInRangeAttribute eachInRange => new(
+                ValidationErrorCodeDto.OutOfRange,
+                eachInRange.Minimum,
+                eachInRange.Maximum),
             RangeAttribute range => new(
                 ValidationErrorCodeDto.OutOfRange,
                 ToLimit(range.Minimum),
@@ -80,6 +84,10 @@ public static class ValidationAttributeFailures
         {
             int number => number,
             long number when number is >= int.MinValue and <= int.MaxValue => (int)number,
+
+            // Limits of fractions only become parameters if they are whole numbers, e.g. -12.0 to 12.0 dB.
+            double number when double.IsInteger(number) && number is >= int.MinValue and <= int.MaxValue =>
+                (int)number,
             _ => null,
         };
     }

@@ -233,6 +233,7 @@ public class ApiIntegrationTests
     [TestCase("GetMyHome", true)]
     [TestCase("GetTrackVideoOffset", true)]
     [TestCase("SetTrackVideoOffset", true)]
+    [TestCase("GetEqualizer", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]

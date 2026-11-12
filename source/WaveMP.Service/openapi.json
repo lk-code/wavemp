@@ -826,6 +826,42 @@
         ]
       }
     },
+    "/api/v1/equalizer": {
+      "get": {
+        "tags": [
+          "Equalizer"
+        ],
+        "summary": "Returns the equalizer: its bands, the limits of the gains and the curves of the presets. A single resource the same for every profile; the settings of a profile are part of `GET /api/v1/me/settings`.",
+        "operationId": "GetEqualizer",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The equalizer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Equalizer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/me/favorites": {
       "get": {
         "tags": [
@@ -2023,7 +2059,7 @@
             }
           },
           "400": {
-            "description": "The request is invalid (code `request.invalid`).",
+            "description": "The request is invalid (code `request.invalid`), e.g. `equalizer.preampDb` or an entry of `equalizer.customGainsDb` out of range (`out_of_range`), not exactly 10 values in `equalizer.customGainsDb` (`min_items`, `max_items`), `crossfade.seconds` or `sleepTimer.fadeSeconds` out of range, or an unknown preset (`invalid_format`).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -7175,6 +7211,175 @@
         },
         "description": "Creates a user (profile)."
       },
+      "CrossfadeSettings": {
+        "required": [
+          "seconds",
+          "albumsGapless"
+        ],
+        "type": "object",
+        "properties": {
+          "seconds": {
+            "type": "integer",
+            "description": "Seconds the players fade from one track into the next, from 0 to 12; 0 (the default) plays the tracks gapless.",
+            "format": "int32"
+          },
+          "albumsGapless": {
+            "type": "boolean",
+            "description": "Whether consecutive tracks of the same album play gapless even with a crossfade; true by default."
+          }
+        },
+        "description": "Crossfade between tracks of the current profile."
+      },
+      "Equalizer": {
+        "required": [
+          "minGainDb",
+          "maxGainDb",
+          "bands",
+          "presets"
+        ],
+        "type": "object",
+        "properties": {
+          "minGainDb": {
+            "type": "integer",
+            "description": "Lowest gain of a band and of the preamp in dB.",
+            "format": "int32"
+          },
+          "maxGainDb": {
+            "type": "integer",
+            "description": "Highest gain of a band and of the preamp in dB.",
+            "format": "int32"
+          },
+          "bands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EqualizerBand"
+            },
+            "description": "The bands from the lowest to the highest frequency; the gains of a curve follow this order."
+          },
+          "presets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EqualizerPresetCurve"
+            },
+            "description": "The curves of all presets except Custom."
+          }
+        },
+        "description": "The equalizer of the players: its bands, the limits of the gains and the curves of the presets. The same for every profile; clients apply the curves with it instead of keeping own tables."
+      },
+      "EqualizerBand": {
+        "required": [
+          "frequencyHz",
+          "filterType",
+          "q"
+        ],
+        "type": "object",
+        "properties": {
+          "frequencyHz": {
+            "type": "integer",
+            "description": "Center frequency of a peaking filter, corner frequency of a shelf filter, in Hz.",
+            "format": "int32"
+          },
+          "filterType": {
+            "description": "Filter of the band.",
+            "$ref": "#/components/schemas/EqualizerFilterType"
+          },
+          "q": {
+            "type": "number",
+            "description": "Quality factor of the filter: the higher, the narrower the band.",
+            "format": "double"
+          }
+        },
+        "description": "A band of the equalizer."
+      },
+      "EqualizerFilterType": {
+        "enum": [
+          "LowShelf",
+          "Peaking",
+          "HighShelf"
+        ],
+        "type": "string",
+        "description": "Filter of a band of the equalizer, like the filter types of common audio APIs (e.g. a biquad filter)."
+      },
+      "EqualizerPreset": {
+        "enum": [
+          "Flat",
+          "Rock",
+          "Pop",
+          "Jazz",
+          "Classical",
+          "Dance",
+          "Bass",
+          "Treble",
+          "Vocal",
+          "Custom"
+        ],
+        "type": "string",
+        "description": "Curve of the equalizer. The curves of the presets come from `GET /api/v1/equalizer`."
+      },
+      "EqualizerPresetCurve": {
+        "required": [
+          "preset",
+          "gainsDb"
+        ],
+        "type": "object",
+        "properties": {
+          "preset": {
+            "description": "The preset.",
+            "$ref": "#/components/schemas/EqualizerPreset"
+          },
+          "gainsDb": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "Gain of every band in dB, from the lowest to the highest frequency."
+          }
+        },
+        "description": "The curve of a preset of the equalizer."
+      },
+      "EqualizerSettings": {
+        "required": [
+          "enabled",
+          "preset",
+          "preampDb",
+          "gainsDb",
+          "customGainsDb"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the players shape the sound with the equalizer; false by default."
+          },
+          "preset": {
+            "description": "The selected curve; Flat by default.",
+            "$ref": "#/components/schemas/EqualizerPreset"
+          },
+          "preampDb": {
+            "type": "number",
+            "description": "Gain in dB before the bands, from -12 to 12; 0 by default.",
+            "format": "double"
+          },
+          "gainsDb": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "The curve that applies, one gain in dB per band from the lowest to the highest frequency: the curve of the preset, or `customGainsDb` for Custom. Read only."
+          },
+          "customGainsDb": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "The own curve of the profile, one gain in dB per band from -12 to 12. It stays when the profile selects a preset."
+          }
+        },
+        "description": "Equalizer of the current profile."
+      },
       "Favorite": {
         "required": [
           "type",
@@ -8862,6 +9067,20 @@
         },
         "description": "A session of a profile."
       },
+      "SleepTimerSettings": {
+        "required": [
+          "fadeSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "fadeSeconds": {
+            "type": "integer",
+            "description": "Seconds the sleep timer fades out the music before it stops, from 1 to 60; 10 by default.",
+            "format": "int32"
+          }
+        },
+        "description": "Sleep timer of the current profile. The running timer itself belongs to the player that plays and is not stored."
+      },
       "SortDirection": {
         "enum": [
           "Asc",
@@ -9555,6 +9774,76 @@
         },
         "description": "Changes the settings of the cache. Missing or null values stay unchanged."
       },
+      "UpdateCrossfadeSettings": {
+        "type": "object",
+        "properties": {
+          "seconds": {
+            "maximum": 12,
+            "minimum": 0,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Seconds the players fade from one track into the next, from 0 to 12; 0 plays the tracks gapless.",
+            "format": "int32"
+          },
+          "albumsGapless": {
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Whether consecutive tracks of the same album play gapless even with a crossfade."
+          }
+        },
+        "description": "Changes the crossfade of the current profile. Missing or null values stay unchanged."
+      },
+      "UpdateEqualizerSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Whether the players shape the sound with the equalizer."
+          },
+          "preset": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The selected curve.",
+                "$ref": "#/components/schemas/EqualizerPreset"
+              }
+            ]
+          },
+          "preampDb": {
+            "maximum": 12,
+            "minimum": -12,
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Gain in dB before the bands, from -12 to 12; rounded to 0.1 dB.",
+            "format": "double"
+          },
+          "customGainsDb": {
+            "maxItems": 10,
+            "minItems": 10,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "description": "The own curve of the profile: exactly one gain per band (10), each from -12 to 12 dB, rounded to 0.1 dB. It does not select the preset Custom by itself; clients send the preset Custom with it to apply the curve."
+          }
+        },
+        "description": "Changes the equalizer of the current profile. Missing or null values stay unchanged."
+      },
       "UpdateLibrarySettings": {
         "type": "object",
         "properties": {
@@ -9655,6 +9944,22 @@
           }
         },
         "description": "Moves an entry of a playlist."
+      },
+      "UpdateSleepTimerSettings": {
+        "type": "object",
+        "properties": {
+          "fadeSeconds": {
+            "maximum": 60,
+            "minimum": 1,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Seconds the sleep timer fades out the music before it stops, from 1 to 60.",
+            "format": "int32"
+          }
+        },
+        "description": "Changes the sleep timer of the current profile. Missing or null values stay unchanged."
       },
       "UpdateTrackMetadata": {
         "type": "object",
@@ -9896,9 +10201,42 @@
                 "$ref": "#/components/schemas/PlayerViewMode"
               }
             ]
+          },
+          "equalizer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Changes of the equalizer.",
+                "$ref": "#/components/schemas/UpdateEqualizerSettings"
+              }
+            ]
+          },
+          "crossfade": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Changes of the crossfade.",
+                "$ref": "#/components/schemas/UpdateCrossfadeSettings"
+              }
+            ]
+          },
+          "sleepTimer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Changes of the sleep timer.",
+                "$ref": "#/components/schemas/UpdateSleepTimerSettings"
+              }
+            ]
           }
         },
-        "description": "Changes the settings of the current profile. Missing or null values stay unchanged."
+        "description": "Changes the settings of the current profile. Missing or null values stay unchanged, also within the groups."
       },
       "User": {
         "required": [
@@ -9981,7 +10319,10 @@
         "required": [
           "language",
           "replayGain",
-          "playerViewMode"
+          "playerViewMode",
+          "equalizer",
+          "crossfade",
+          "sleepTimer"
         ],
         "type": "object",
         "properties": {
@@ -9996,6 +10337,18 @@
           "playerViewMode": {
             "description": "What the Now Playing view shows; Video by default. Clients keep the choice of the profile with it.",
             "$ref": "#/components/schemas/PlayerViewMode"
+          },
+          "equalizer": {
+            "description": "Equalizer of the players.",
+            "$ref": "#/components/schemas/EqualizerSettings"
+          },
+          "crossfade": {
+            "description": "Crossfade between tracks.",
+            "$ref": "#/components/schemas/CrossfadeSettings"
+          },
+          "sleepTimer": {
+            "description": "Sleep timer of the players.",
+            "$ref": "#/components/schemas/SleepTimerSettings"
           }
         },
         "description": "Settings of the current profile."
@@ -10209,6 +10562,9 @@
     },
     {
       "name": "Cache"
+    },
+    {
+      "name": "Equalizer"
     },
     {
       "name": "Favorites"
