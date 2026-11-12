@@ -217,7 +217,15 @@ describe('TrackGroupList', () => {
             [...menu.querySelectorAll('[data-part="menu-item"]')].map((item) =>
                 item.getAttribute('data-item'),
             ),
-        ).toEqual(['play', 'play-next', 'add-to-queue', 'details', 'album', 'artist'])
+        ).toEqual([
+            'play',
+            'play-next',
+            'add-to-queue',
+            'add-to-playlist',
+            'details',
+            'album',
+            'artist',
+        ])
         ;(menu.querySelector('[data-item="details"]') as HTMLElement).click()
         await flushPromises()
         expect(router.currentRoute.value.fullPath).toBe('/library/tracks/opening')
@@ -253,7 +261,7 @@ describe('TrackGroupList', () => {
             [...menu.querySelectorAll('[data-part="menu-item"]')].map((item) =>
                 item.getAttribute('data-item'),
             ),
-        ).toEqual(['details', 'edit-metadata'])
+        ).toEqual(['add-to-playlist', 'details', 'edit-metadata'])
         ;(menu.querySelector('[data-item="edit-metadata"]') as HTMLElement).click()
         await flushPromises()
         expect(router.currentRoute.value.fullPath).toBe('/library/tracks/clip?edit=metadata')
@@ -275,7 +283,7 @@ describe('TrackGroupList', () => {
         const items = [...document.querySelectorAll('[data-part="menu-item"]')].map((item) =>
             item.getAttribute('data-item'),
         )
-        expect(items).toEqual(['details'])
+        expect(items).toEqual(['add-to-playlist', 'details'])
         wrapper.unmount()
     })
 

@@ -42,6 +42,9 @@ import TrackFileList from '@/components/library/TrackFileList.vue'
 import TrackGroupList from '@/components/library/TrackGroupList.vue'
 import NowPlayingStage from '@/components/player/NowPlayingStage.vue'
 import PlayQueue from '@/components/player/PlayQueue.vue'
+import PlaylistTrackList, {
+    type PlaylistTrackRow,
+} from '@/components/playlists/PlaylistTrackList.vue'
 import ProfileSelect from '@/components/profiles/ProfileSelect.vue'
 import ProfileSummary from '@/components/profiles/ProfileSummary.vue'
 import type { ProfileTileData } from '@/components/profiles/ProfileTile.vue'
@@ -112,6 +115,9 @@ const sampleQueue = computed(() =>
 )
 const sampleQueueIndex = ref(1)
 const tiles = computed(() => sampleTiles(t))
+const playlistRows = computed<PlaylistTrackRow[]>(() =>
+    sampleTracks(t).map((track, index) => ({ id: `sample-entry-${index}`, track })),
+)
 const files = sampleFiles()
 const sortSampleMenu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
 const sortSampleItems = computed<MenuItem[]>(() => [
@@ -556,6 +562,64 @@ const sampleCacheUsage: CacheUsage = {
                     <h2 data-part="section-title">{{ t('track.filesTitle') }}</h2>
                     <TrackFileList :files="files" :label="t('files.label')" />
                 </section>
+            </div>
+            <div data-part="view" data-view="playlist">
+                <DetailHeader :title="t('placeholders.playlist', { number: 1 })">
+                    <template #media>
+                        <span data-part="playlist-cover" data-count="2" aria-hidden="true">
+                            <span data-part="playlist-cover-slide" data-state="active">
+                                <BaseCover :src="sampleCover" />
+                            </span>
+                            <span data-part="playlist-cover-slide">
+                                <BaseCover :src="sampleCover" />
+                            </span>
+                        </span>
+                    </template>
+                    <MetaItem field="tracks" :label="t('list.songs')">{{
+                        format.number(playlistRows.length)
+                    }}</MetaItem>
+                    <template #actions>
+                        <BaseButton data-item="rename" icon="edit" :label="t('playlists.rename')" />
+                        <BaseButton
+                            data-item="cover"
+                            icon="change-cover"
+                            :label="t('playlists.changeCover')"
+                        />
+                    </template>
+                </DetailHeader>
+                <PlaylistTrackList
+                    :rows="playlistRows"
+                    :label="t('placeholders.playlist', { number: 1 })"
+                    sortable
+                />
+            </div>
+            <div data-part="dev-samples">
+                <ul data-part="playlist-choices" :aria-label="t('playlists.addDialog.listLabel')">
+                    <li>
+                        <button type="button" data-part="playlist-choice">
+                            <BaseCover :placeholder="false">
+                                <BaseIcon name="playlist" />
+                            </BaseCover>
+                            <span data-part="label">{{
+                                t('placeholders.playlist', { number: 1 })
+                            }}</span>
+                            <span data-part="playlist-choice-count">{{
+                                t('library.songCount', { count: 3 })
+                            }}</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" data-part="playlist-choice" data-state="busy">
+                            <BaseCover :src="sampleCover" />
+                            <span data-part="label">{{
+                                t('placeholders.playlist', { number: 2 })
+                            }}</span>
+                            <span data-part="playlist-choice-count">{{
+                                t('library.songCount', { count: 12 })
+                            }}</span>
+                        </button>
+                    </li>
+                </ul>
             </div>
             <div data-part="dev-samples">
                 <BaseButton

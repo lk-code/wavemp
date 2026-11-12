@@ -46,13 +46,15 @@ export function findLibrarySection(id: unknown) {
 export interface NavigationTreeNode {
     readonly id: string
     readonly labelKey: string
+    /** Text to show instead of the message, e.g. the name of a playlist. */
+    readonly label?: string
     readonly icon: IconSlotName
     readonly to?: RouteLocationRaw
     readonly disabled?: boolean
     readonly children?: readonly NavigationTreeNode[]
 }
 
-/** Tree of the sidebar. "Create Playlist" is disabled until playlists exist (step 10). */
+/** Tree of the sidebar without the playlists of the profile (see buildLibraryTree). */
 export const libraryTree: readonly NavigationTreeNode[] = [
     {
         id: 'playlists',
@@ -64,7 +66,13 @@ export const libraryTree: readonly NavigationTreeNode[] = [
                 id: 'create-playlist',
                 labelKey: 'sidebar.createPlaylist',
                 icon: 'tree-create-playlist',
-                disabled: true,
+                to: { name: 'playlists-new' },
+            },
+            {
+                id: 'recently-played',
+                labelKey: 'playlists.recentlyPlayed',
+                icon: 'tree-recently-played',
+                to: { name: 'playlists-recently-played' },
             },
         ],
     },
@@ -84,3 +92,29 @@ export const libraryTree: readonly NavigationTreeNode[] = [
 
 /** Nodes that are expanded when the app starts. */
 export const initiallyExpanded: readonly string[] = ['playlists', 'library']
+
+/** Id of the tree node of a playlist. */
+export function playlistNodeId(id: string): string {
+    return `playlist:${id}`
+}
+
+/** The tree of the sidebar with the playlists of the profile below "Playlists", in their order. */
+export function buildLibraryTree(
+    playlists: readonly { readonly id?: string | null; readonly name?: string | null }[],
+): NavigationTreeNode[] {
+    const playlistNodes: NavigationTreeNode[] = playlists
+        .filter((playlist): playlist is { id: string; name?: string | null } => !!playlist.id)
+        .map((playlist) => ({
+            id: playlistNodeId(playlist.id),
+            labelKey: 'sidebar.playlist',
+            label: playlist.name ?? '',
+            icon: 'tree-playlist',
+            to: { name: 'playlist', params: { id: playlist.id } },
+        }))
+
+    return libraryTree.map((node) =>
+        node.id === 'playlists'
+            ? { ...node, children: [...(node.children ?? []), ...playlistNodes] }
+            : node,
+    )
+}

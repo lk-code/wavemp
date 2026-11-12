@@ -92,6 +92,14 @@ export const parts = [
     'file-path',
     'file-meta',
 
+    // Playlists
+    'playlist-cover',
+    'playlist-cover-slide',
+    'playlist-choices',
+    'playlist-choice',
+    'playlist-choice-count',
+    'drag-handle',
+
     // Queue
     'queue',
     'queue-list',

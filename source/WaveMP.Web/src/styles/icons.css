@@ -123,6 +123,14 @@
         --_icon: var(--wmp-icon-tree-years);
     }
 
+    [data-icon='tree-recently-played'] {
+        --_icon: var(--wmp-icon-tree-recently-played);
+    }
+
+    [data-icon='tree-playlist'] {
+        --_icon: var(--wmp-icon-tree-playlist);
+    }
+
     [data-icon='tree-favorites'] {
         --_icon: var(--wmp-icon-tree-favorites);
     }
@@ -173,6 +181,18 @@
 
     [data-icon='year'] {
         --_icon: var(--wmp-icon-year);
+    }
+
+    [data-icon='playlist'] {
+        --_icon: var(--wmp-icon-playlist);
+    }
+
+    [data-icon='recently-played'] {
+        --_icon: var(--wmp-icon-recently-played);
+    }
+
+    [data-icon='drag-handle'] {
+        --_icon: var(--wmp-icon-drag-handle);
     }
 
     [data-icon='shuffle'] {
@@ -297,6 +317,18 @@
 
     [data-icon='add-to-queue'] {
         --_icon: var(--wmp-icon-add-to-queue);
+    }
+
+    [data-icon='add-to-playlist'] {
+        --_icon: var(--wmp-icon-add-to-playlist);
+    }
+
+    [data-icon='remove-from-playlist'] {
+        --_icon: var(--wmp-icon-remove-from-playlist);
+    }
+
+    [data-icon='change-cover'] {
+        --_icon: var(--wmp-icon-change-cover);
     }
 
     [data-icon='shuffle-play'] {

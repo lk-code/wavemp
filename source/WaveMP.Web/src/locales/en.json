@@ -27,7 +27,8 @@
     "label": "Library navigation",
     "playlists": "Playlists",
     "createPlaylist": "Create Playlist",
-    "library": "Library"
+    "library": "Library",
+    "playlist": "Playlist"
   },
   "library": {
     "recentlyAdded": "Recently Added",
@@ -68,7 +69,9 @@
       "number": "#",
       "title": "Title",
       "duration": "Length",
-      "artist": "Artist"
+      "artist": "Artist",
+      "handle": "Move",
+      "album": "Album"
     },
     "hasVideo": "Video available",
     "album": "Album",
@@ -87,7 +90,8 @@
     "album": "Placeholder Album {number}",
     "artist": "Placeholder Artist {number}",
     "track": "Placeholder Track {number}",
-    "genre": "Placeholder Genre {number}"
+    "genre": "Placeholder Genre {number}",
+    "playlist": "Placeholder Playlist {number}"
   },
   "player": {
     "label": "Player",
@@ -130,7 +134,59 @@
   "playlists": {
     "emptyTitle": "No playlists yet",
     "emptyText": "Playlists you create will appear here.",
-    "create": "Create playlist"
+    "create": "Create playlist",
+    "recentlyPlayed": "Recently Played",
+    "automatic": "Automatic playlist",
+    "lastPlayed": "Last played",
+    "rename": "Rename",
+    "changeCover": "Change cover",
+    "removeCover": "Remove cover",
+    "delete": "Delete playlist",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeEntry": "Remove from playlist",
+    "dragHandle": "Drag to move",
+    "toPlaylists": "To the playlists",
+    "noEntriesTitle": "This playlist is empty",
+    "noEntriesText": "Add songs with \"Add to playlist\" in the menu of a song.",
+    "recentlyPlayedEmptyTitle": "Nothing played yet",
+    "recentlyPlayedEmptyText": "Songs you listen to will appear here.",
+    "dialog": {
+      "createTitle": "New playlist",
+      "renameTitle": "Rename playlist",
+      "name": "Name",
+      "create": "Create",
+      "rename": "Rename"
+    },
+    "deleteDialog": {
+      "title": "Delete playlist",
+      "text": "Delete the playlist \"{name}\"? The songs stay in the library.",
+      "confirm": "Delete"
+    },
+    "addDialog": {
+      "title": "Add to playlist",
+      "loading": "Loading playlists...",
+      "empty": "You have no playlists yet. Create one for this song.",
+      "listLabel": "Playlists",
+      "newPlaylist": "New playlist"
+    },
+    "errors": {
+      "notFound": "This playlist does not exist (any more).",
+      "trackNotFound": "A song is no longer in the library.",
+      "full": "The playlist has reached its maximum number of songs.",
+      "nameRequired": "Please enter a name.",
+      "nameInvalid": "This name cannot be used.",
+      "saveFailed": "The playlist could not be saved.",
+      "addFailed": "The song could not be added.",
+      "loadFailed": "The playlists could not be loaded.",
+      "moveFailed": "The song could not be moved.",
+      "removeFailed": "The song could not be removed.",
+      "deleteFailed": "The playlist could not be deleted.",
+      "coverType": "Please choose a JPEG, PNG or WebP picture.",
+      "coverSize": "The picture is too large (at most 10 MB).",
+      "coverUnreadable": "The picture is damaged and cannot be read.",
+      "coverFailed": "The cover could not be changed."
+    }
   },
   "server": {
     "status": "Server status",
@@ -599,7 +655,8 @@
     "editMetadata": "Edit metadata",
     "play": "Play",
     "playNext": "Play next",
-    "addToQueue": "Add to queue"
+    "addToQueue": "Add to queue",
+    "addToPlaylist": "Add to playlist"
   },
   "validation": {
     "required": "This field is required.",

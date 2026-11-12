@@ -15,6 +15,8 @@ import LibraryView from '@/views/library/LibraryView.vue'
 import SearchView from '@/views/library/SearchView.vue'
 import TrackView from '@/views/library/TrackView.vue'
 import YearView from '@/views/library/YearView.vue'
+import PlaylistView from '@/views/playlists/PlaylistView.vue'
+import RecentlyPlayedView from '@/views/playlists/RecentlyPlayedView.vue'
 import {
     defaultLibrarySection,
     librarySectionPattern,
@@ -124,6 +126,26 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             path: '/playlists',
             name: 'playlists',
             component: PlaylistsView,
+            meta: { tab: 'playlists' },
+        },
+        {
+            path: '/playlists/new',
+            name: 'playlists-new',
+            component: PlaylistsView,
+            props: { create: true },
+            meta: { tab: 'playlists' },
+        },
+        {
+            path: '/playlists/recently-played',
+            name: 'playlists-recently-played',
+            component: RecentlyPlayedView,
+            meta: { tab: 'playlists' },
+        },
+        {
+            path: '/playlists/:id',
+            name: 'playlist',
+            component: PlaylistView,
+            props: true,
             meta: { tab: 'playlists' },
         },
         { path: '/settings', name: 'settings', component: SettingsView },

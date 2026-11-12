@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import BaseTree from '@/components/base/BaseTree.vue'
 import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
 import { activeTreeId, type RouteInfo } from '@/navigation/breadcrumb'
-import { initiallyExpanded, libraryTree, type NavigationTreeNode } from '@/navigation/libraryTree'
+import {
+    buildLibraryTree,
+    initiallyExpanded,
+    type NavigationTreeNode,
+} from '@/navigation/libraryTree'
+import { usePlaylistsStore } from '@/stores/playlists'
+import { useSessionStore } from '@/stores/session'
 
 const props = withDefaults(
     defineProps<{
@@ -23,13 +29,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const route = useRoute()
+const playlists = usePlaylistsStore()
+const session = useSessionStore()
 
 const expanded = ref<string[]>([...initiallyExpanded])
 
 function toTreeNode(node: NavigationTreeNode): TreeNode {
     return {
         id: node.id,
-        label: t(node.labelKey),
+        label: node.label ?? t(node.labelKey),
         icon: node.icon,
         to: node.to,
         disabled: node.disabled,
@@ -37,8 +45,20 @@ function toTreeNode(node: NavigationTreeNode): TreeNode {
     }
 }
 
-const nodes = computed(() => libraryTree.map(toTreeNode))
+const nodes = computed(() => buildLibraryTree(playlists.playlists).map(toTreeNode))
 const active = computed(() => activeTreeId(props.location ?? route))
+
+// The playlists of the profile below "Playlists", loaded again for every session.
+watch(
+    () => session.token,
+    (token) => {
+        if (token) {
+            void playlists.ensureLoaded()
+        }
+    },
+    // After the store forgot the playlists of the previous session.
+    { immediate: true, flush: 'post' },
+)
 </script>
 
 <template>

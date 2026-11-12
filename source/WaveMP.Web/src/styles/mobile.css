@@ -352,6 +352,19 @@
             display: none;
         }
 
+        /* Playlists keep the handle (large enough for a finger) and leave album and detail out. */
+        [data-view='playlist'] [data-part='list'] {
+            --wmp-list-columns: 2.75rem 2rem minmax(0, 1fr) auto;
+        }
+
+        [data-part='list']
+            :is([data-part='list-column'], [data-part='list-cell']):is(
+                [data-column='album'],
+                [data-column='detail']
+            ) {
+            display: none;
+        }
+
         [data-part='list-row'] {
             min-block-size: 2.75rem;
         }

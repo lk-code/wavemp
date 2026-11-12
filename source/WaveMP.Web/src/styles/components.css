@@ -75,7 +75,8 @@
             [data-variant='round'],
             [data-part='now-playing-mini'],
             [data-part='badge'],
-            [data-part='tree-toggle']
+            [data-part='tree-toggle'],
+            [data-part='drag-handle']
         )
         > [data-part='label'] {
         position: absolute;
@@ -1225,6 +1226,133 @@
     [data-part='tile-subtitle'] {
         color: var(--wmp-color-text-muted);
         font-size: var(--wmp-font-size-s);
+    }
+
+    /* --- Playlists ---------------------------------------------------------------------- */
+
+    /* The covers of some tracks lie on top of each other; the active one fades in. */
+    [data-part='playlist-cover'] {
+        display: grid;
+        flex: none;
+        inline-size: var(--wmp-cover-size);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: var(--wmp-radius-s);
+        background: var(--wmp-image-cover-placeholder);
+    }
+
+    [data-part='playlist-cover-slide'] {
+        display: grid;
+        grid-area: 1 / 1;
+        min-inline-size: 0;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+    }
+
+    [data-part='playlist-cover-slide'][data-state~='active'] {
+        opacity: 1;
+    }
+
+    [data-part='playlist-cover-slide'] > [data-part='cover'] {
+        inline-size: 100%;
+        border-radius: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        [data-part='playlist-cover-slide'] {
+            transition: none;
+        }
+    }
+
+    [data-part='tile'] > [data-part='playlist-cover'] {
+        inline-size: 100%;
+    }
+
+    [data-part='detail-header'] > [data-part='playlist-cover'] {
+        inline-size: min(var(--wmp-cover-size-l), 100%);
+    }
+
+    [data-view='playlist'] [data-part='list'] {
+        --wmp-list-columns: var(--wmp-list-columns-playlist);
+    }
+
+    [data-view='recently-played'] [data-part='list'] {
+        --wmp-list-columns: var(--wmp-list-columns-recently-played);
+    }
+
+    [data-part='list'][data-state~='busy'] {
+        cursor: progress;
+    }
+
+    [data-part='drag-handle'] {
+        --wmp-icon-size: var(--wmp-icon-size-s);
+
+        display: grid;
+        place-items: center;
+        min-block-size: var(--wmp-list-row-height);
+        color: var(--wmp-color-text-muted);
+        cursor: grab;
+        touch-action: none;
+    }
+
+    /* SortableJS marks the place where a dragged row lands with this class. */
+    [data-part='list-row'].sortable-ghost {
+        opacity: 0.4;
+    }
+
+    [data-part='playlist-choices'] {
+        display: grid;
+        gap: var(--wmp-space-xs);
+        max-block-size: min(50vh, 24rem);
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        list-style: none;
+    }
+
+    [data-part='playlist-choice'] {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--wmp-space-s);
+        inline-size: 100%;
+        padding: var(--wmp-space-xs);
+        border: 0;
+        border-radius: var(--wmp-radius-s);
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
+    }
+
+    [data-part='playlist-choice']:hover:not(:disabled) {
+        background: var(--wmp-color-hover);
+    }
+
+    [data-part='playlist-choice']:disabled {
+        cursor: default;
+    }
+
+    [data-part='playlist-choice'][data-state~='busy'] {
+        cursor: progress;
+    }
+
+    [data-part='playlist-choice'] > :is([data-part='cover'], [data-part='playlist-cover']) {
+        inline-size: var(--wmp-cover-size-mini);
+    }
+
+    [data-part='playlist-choice'] > [data-part='label'] {
+        min-inline-size: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    [data-part='playlist-choice-count'] {
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+        white-space: nowrap;
     }
 
     /* The cover and the details side by side; below each other where the space is too small. */

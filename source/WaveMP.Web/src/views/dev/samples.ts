@@ -107,6 +107,20 @@ export function sampleTiles(t: Translate): Tile[] {
             subtitle: t('library.songCount', { count: 4 }),
             to: { name: 'library-year', params: { year: '2006' } },
         },
+        {
+            id: 'playlist',
+            kind: 'playlist',
+            title: t('placeholders.playlist', { number: 1 }),
+            subtitle: t('library.songCount', { count: 3 }),
+            to: { name: 'playlist', params: { id: 'sample-playlist-1' } },
+        },
+        {
+            id: 'recently-played',
+            kind: 'recently-played',
+            title: t('playlists.recentlyPlayed'),
+            subtitle: t('playlists.automatic'),
+            to: { name: 'playlists-recently-played' },
+        },
     ]
 }
 

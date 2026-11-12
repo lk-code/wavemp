@@ -431,8 +431,8 @@ a[data-part='breadcrumb-link']:hover {
 /* --- Library: tiles, detail pages, files ------------------------------------------------------- */
 
 /* Covers are glossy pictures with a soft shadow; a light reflection lies on their upper half. */
-[data-part='tile'] > [data-part='cover'],
-[data-part='detail-header'] > [data-part='cover'] {
+[data-part='tile'] > :is([data-part='cover'], [data-part='playlist-cover']),
+[data-part='detail-header'] > :is([data-part='cover'], [data-part='playlist-cover']) {
     position: relative;
     border-radius: 0.1875rem;
     box-shadow:
@@ -440,8 +440,8 @@ a[data-part='breadcrumb-link']:hover {
         0 0 0 1px rgb(0 0 0 / 12%);
 }
 
-[data-part='tile'] > [data-part='cover']::after,
-[data-part='detail-header'] > [data-part='cover']::after {
+[data-part='tile'] > :is([data-part='cover'], [data-part='playlist-cover'])::after,
+[data-part='detail-header'] > :is([data-part='cover'], [data-part='playlist-cover'])::after {
     position: absolute;
     inset: 0 0 50%;
     border-radius: inherit;
@@ -465,7 +465,7 @@ a[data-part='breadcrumb-link']:hover {
 }
 
 /* Hovered tiles glow light blue around their cover. */
-[data-part='tile']:is(:hover, :focus-visible) > [data-part='cover'] {
+[data-part='tile']:is(:hover, :focus-visible) > :is([data-part='cover'], [data-part='playlist-cover']) {
     box-shadow:
         0 2px 6px rgb(0 0 0 / 28%),
         0 0 0 1px rgb(31 111 214 / 45%),
@@ -490,7 +490,7 @@ a[data-part='breadcrumb-link']:hover {
     border-block-end: 1px solid #dfe4ea;
 }
 
-[data-part='detail-header'] > [data-part='cover'] {
+[data-part='detail-header'] > :is([data-part='cover'], [data-part='playlist-cover']) {
     box-shadow:
         0 0.5rem 1.5rem rgb(0 0 0 / 30%),
         0 0 0 1px rgb(0 0 0 / 12%);
@@ -1105,6 +1105,31 @@ a[data-part='breadcrumb-link']:hover {
     box-shadow: inset 0 0 0 1px #9cc8f0;
 }
 
+/* --- Playlists ------------------------------------------------------------------------------- */
+
+[data-part='drag-handle'] {
+    --wmp-icon-fill: linear-gradient(#a7b3c0, #7d8a99);
+}
+
+[data-part='list-row']:hover [data-part='drag-handle'] {
+    --wmp-icon-fill: linear-gradient(#4a90d9, #1f6fd6);
+}
+
+[data-part='playlist-choice'] {
+    border: 1px solid transparent;
+}
+
+[data-part='playlist-choice']:hover:not(:disabled),
+[data-part='playlist-choice']:focus-visible {
+    border-color: #c5e1fb;
+    background: linear-gradient(#f4faff, #e3f1fe);
+}
+
+[data-part='playlist-choice'][data-state~='busy'] {
+    border-color: #9cc8f0;
+    background: linear-gradient(#e3f1fe, #cfe6fc);
+}
+
 /* --- Desktop layout --------------------------------------------------------------------------- */
 
 @media (width >= 64rem) {
@@ -1118,6 +1143,10 @@ a[data-part='breadcrumb-link']:hover {
         --wmp-button-height: 1.5rem;
         --wmp-list-row-height: 1.5rem;
         --wmp-list-columns: 2.25rem minmax(0, 2fr) 4rem minmax(0, 1.4fr);
+        --wmp-list-columns-playlist: 1.5rem 2.25rem minmax(0, 2fr) 4rem minmax(0, 1.4fr)
+            minmax(0, 1.4fr);
+        --wmp-list-columns-recently-played: 2.25rem minmax(0, 2fr) 4rem minmax(0, 1.4fr)
+            minmax(0, 1.4fr) 8.5rem;
         --wmp-list-group-info-width: 11rem;
         --wmp-cover-size: 9rem;
         --wmp-cover-size-mini: 2.75rem;
@@ -1187,7 +1216,7 @@ a[data-part='breadcrumb-link']:hover {
         padding: 0.75rem 0.75rem 1rem;
     }
 
-    [data-part='detail-header'] > [data-part='cover'] {
+    [data-part='detail-header'] > :is([data-part='cover'], [data-part='playlist-cover']) {
         inline-size: 11rem;
     }
 

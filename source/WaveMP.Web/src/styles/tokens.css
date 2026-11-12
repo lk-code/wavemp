@@ -113,6 +113,8 @@
         --wmp-icon-tree-songs: url('/icons/phosphor/duotone/music-note-duotone.svg');
         --wmp-icon-tree-genres: url('/icons/phosphor/duotone/guitar-duotone.svg');
         --wmp-icon-tree-years: url('/icons/phosphor/duotone/calendar-blank-duotone.svg');
+        --wmp-icon-tree-recently-played: url('/icons/phosphor/duotone/headphones-duotone.svg');
+        --wmp-icon-tree-playlist: url('/icons/phosphor/duotone/music-notes-simple-duotone.svg');
         --wmp-icon-tree-favorites: url('/icons/phosphor/duotone/heart-duotone.svg');
         --wmp-icon-tree-expand: url('/icons/phosphor/regular/plus-square.svg');
         --wmp-icon-tree-collapse: url('/icons/phosphor/regular/minus-square.svg');
@@ -126,6 +128,9 @@
         --wmp-icon-artist: url('/icons/phosphor/fill/microphone-stage-fill.svg');
         --wmp-icon-genre: url('/icons/phosphor/fill/guitar-fill.svg');
         --wmp-icon-year: url('/icons/phosphor/fill/calendar-blank-fill.svg');
+        --wmp-icon-playlist: url('/icons/phosphor/fill/playlist-fill.svg');
+        --wmp-icon-recently-played: url('/icons/phosphor/fill/headphones-fill.svg');
+        --wmp-icon-drag-handle: url('/icons/phosphor/regular/dots-six-vertical.svg');
         --wmp-icon-shuffle: url('/icons/phosphor/fill/shuffle-fill.svg');
         --wmp-icon-repeat: url('/icons/phosphor/fill/repeat-fill.svg');
         --wmp-icon-repeat-one: url('/icons/phosphor/fill/repeat-once-fill.svg');
@@ -157,6 +162,9 @@
         --wmp-icon-play-now: url('/icons/phosphor/regular/play.svg');
         --wmp-icon-play-next: url('/icons/phosphor/regular/queue.svg');
         --wmp-icon-add-to-queue: url('/icons/phosphor/regular/list-plus.svg');
+        --wmp-icon-add-to-playlist: url('/icons/phosphor/regular/playlist.svg');
+        --wmp-icon-remove-from-playlist: url('/icons/phosphor/regular/minus-circle.svg');
+        --wmp-icon-change-cover: url('/icons/phosphor/regular/image-square.svg');
         --wmp-icon-shuffle-play: url('/icons/phosphor/regular/shuffle.svg');
         --wmp-icon-move-up: url('/icons/phosphor/regular/caret-up.svg');
         --wmp-icon-move-down: url('/icons/phosphor/regular/caret-down.svg');
@@ -205,6 +213,10 @@
         --wmp-tile-width: 9rem;
         --wmp-list-row-height: 2rem;
         --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr);
+        --wmp-list-columns-playlist: 2rem 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)
+            minmax(0, 1.5fr);
+        --wmp-list-columns-recently-played: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)
+            minmax(0, 1.5fr) 10rem;
         --wmp-list-group-info-width: 11rem;
         --wmp-avatar-size: 2rem;
         --wmp-avatar-size-l: 6rem;

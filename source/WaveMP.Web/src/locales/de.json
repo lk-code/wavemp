@@ -27,7 +27,8 @@
     "label": "Bibliotheksnavigation",
     "playlists": "Playlists",
     "createPlaylist": "Playlist erstellen",
-    "library": "Bibliothek"
+    "library": "Bibliothek",
+    "playlist": "Playlist"
   },
   "library": {
     "recentlyAdded": "Zuletzt hinzugefügt",
@@ -68,7 +69,9 @@
       "number": "Nr.",
       "title": "Titel",
       "duration": "Länge",
-      "artist": "Interpret"
+      "artist": "Interpret",
+      "handle": "Verschieben",
+      "album": "Album"
     },
     "hasVideo": "Video vorhanden",
     "album": "Album",
@@ -87,7 +90,8 @@
     "album": "Platzhalter-Album {number}",
     "artist": "Platzhalter-Interpret {number}",
     "track": "Platzhalter-Titel {number}",
-    "genre": "Platzhalter-Genre {number}"
+    "genre": "Platzhalter-Genre {number}",
+    "playlist": "Platzhalter-Playlist {number}"
   },
   "player": {
     "label": "Player",
@@ -130,7 +134,59 @@
   "playlists": {
     "emptyTitle": "Noch keine Playlists",
     "emptyText": "Playlists, die du erstellst, erscheinen hier.",
-    "create": "Playlist erstellen"
+    "create": "Playlist erstellen",
+    "recentlyPlayed": "Zuletzt gespielt",
+    "automatic": "Automatische Playlist",
+    "lastPlayed": "Zuletzt gespielt",
+    "rename": "Umbenennen",
+    "changeCover": "Cover ändern",
+    "removeCover": "Cover entfernen",
+    "delete": "Playlist löschen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "removeEntry": "Aus Playlist entfernen",
+    "dragHandle": "Zum Verschieben ziehen",
+    "toPlaylists": "Zu den Playlists",
+    "noEntriesTitle": "Diese Playlist ist leer",
+    "noEntriesText": "Füge Titel über „Zur Playlist hinzufügen“ im Menü eines Titels hinzu.",
+    "recentlyPlayedEmptyTitle": "Noch nichts gespielt",
+    "recentlyPlayedEmptyText": "Titel, die du hörst, erscheinen hier.",
+    "dialog": {
+      "createTitle": "Neue Playlist",
+      "renameTitle": "Playlist umbenennen",
+      "name": "Name",
+      "create": "Erstellen",
+      "rename": "Umbenennen"
+    },
+    "deleteDialog": {
+      "title": "Playlist löschen",
+      "text": "Die Playlist „{name}“ löschen? Die Titel bleiben in der Bibliothek.",
+      "confirm": "Löschen"
+    },
+    "addDialog": {
+      "title": "Zur Playlist hinzufügen",
+      "loading": "Playlists werden geladen …",
+      "empty": "Du hast noch keine Playlists. Erstelle eine für diesen Titel.",
+      "listLabel": "Playlists",
+      "newPlaylist": "Neue Playlist"
+    },
+    "errors": {
+      "notFound": "Diese Playlist gibt es nicht (mehr).",
+      "trackNotFound": "Ein Titel ist nicht mehr in der Bibliothek.",
+      "full": "Die Playlist hat die größte mögliche Zahl an Titeln erreicht.",
+      "nameRequired": "Bitte gib einen Namen ein.",
+      "nameInvalid": "Dieser Name kann nicht verwendet werden.",
+      "saveFailed": "Die Playlist konnte nicht gespeichert werden.",
+      "addFailed": "Der Titel konnte nicht hinzugefügt werden.",
+      "loadFailed": "Die Playlists konnten nicht geladen werden.",
+      "moveFailed": "Der Titel konnte nicht verschoben werden.",
+      "removeFailed": "Der Titel konnte nicht entfernt werden.",
+      "deleteFailed": "Die Playlist konnte nicht gelöscht werden.",
+      "coverType": "Bitte wähle ein JPEG-, PNG- oder WebP-Bild.",
+      "coverSize": "Das Bild ist zu groß (höchstens 10 MB).",
+      "coverUnreadable": "Das Bild ist beschädigt und kann nicht gelesen werden.",
+      "coverFailed": "Das Cover konnte nicht geändert werden."
+    }
   },
   "server": {
     "status": "Serverstatus",
@@ -599,7 +655,8 @@
     "editMetadata": "Metadaten bearbeiten",
     "play": "Abspielen",
     "playNext": "Als Nächstes abspielen",
-    "addToQueue": "Zur Warteschlange hinzufügen"
+    "addToQueue": "Zur Warteschlange hinzufügen",
+    "addToPlaylist": "Zur Playlist hinzufügen"
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",

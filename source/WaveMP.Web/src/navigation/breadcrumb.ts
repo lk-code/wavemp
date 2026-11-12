@@ -1,7 +1,7 @@
 // Location of the current page: breadcrumb, page title and the active entry of the sidebar tree.
 
 import type { RouteLocationRaw } from 'vue-router'
-import { findLibrarySection, type LibrarySection } from './libraryTree'
+import { findLibrarySection, playlistNodeId, type LibrarySection } from './libraryTree'
 
 export interface Crumb {
     readonly id: string
@@ -35,19 +35,35 @@ const detailSections: Readonly<Record<string, LibrarySection>> = {
 }
 
 /**
- * The crumbs of a page. Detail pages (album, artist, genre, year, track) end with their name,
- * once it is known; until then with their section.
+ * The crumbs of a page. Detail pages (album, artist, genre, year, track, playlist) end with their
+ * name, once it is known; until then with their section.
  */
 export function buildBreadcrumb(route: RouteInfo, detailTitle?: string | null): Crumb[] {
     const crumbs: Crumb[] = [{ id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } }]
     const library: Crumb = { id: 'library', labelKey: 'nav.library', to: { name: 'library' } }
+    const playlistsCrumb: Crumb = {
+        id: 'playlists',
+        labelKey: 'nav.playlists',
+        to: { name: 'playlists' },
+    }
 
     switch (route.name) {
         case 'now-playing':
             crumbs.push({ id: 'now-playing', labelKey: 'nav.nowPlaying' })
             break
         case 'playlists':
+        case 'playlists-new':
             crumbs.push({ id: 'playlists', labelKey: 'nav.playlists' })
+            break
+        case 'playlists-recently-played':
+            crumbs.push(playlistsCrumb)
+            crumbs.push({ id: 'recently-played', labelKey: 'playlists.recentlyPlayed' })
+            break
+        case 'playlist':
+            crumbs.push(playlistsCrumb)
+            if (detailTitle) {
+                crumbs.push({ id: 'playlist', labelKey: 'nav.playlists', label: detailTitle })
+            }
             break
         case 'library-section': {
             crumbs.push(library)
@@ -122,5 +138,16 @@ export function activeTreeId(route: RouteInfo): string | undefined {
         return detailSections[route.name]
     }
 
-    return route.name === 'playlists' ? 'playlists' : undefined
+    switch (route.name) {
+        case 'playlists':
+            return 'playlists'
+        case 'playlists-new':
+            return 'create-playlist'
+        case 'playlists-recently-played':
+            return 'recently-played'
+        case 'playlist':
+            return typeof route.params.id === 'string' ? playlistNodeId(route.params.id) : undefined
+        default:
+            return undefined
+    }
 }

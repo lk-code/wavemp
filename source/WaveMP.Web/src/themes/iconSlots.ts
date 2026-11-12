@@ -46,6 +46,8 @@ export const iconSlots = {
     'tree-songs': { file: duotone('music-note'), area: 'sidebar' },
     'tree-genres': { file: duotone('guitar'), area: 'sidebar' },
     'tree-years': { file: duotone('calendar-blank'), area: 'sidebar' },
+    'tree-recently-played': { file: duotone('headphones'), area: 'sidebar' },
+    'tree-playlist': { file: duotone('music-notes-simple'), area: 'sidebar' },
     'tree-favorites': { file: duotone('heart'), area: 'sidebar', reserved: true },
     'tree-expand': { file: regular('plus-square'), area: 'sidebar' },
     'tree-collapse': { file: regular('minus-square'), area: 'sidebar' },
@@ -61,6 +63,9 @@ export const iconSlots = {
     artist: { file: fill('microphone-stage'), area: 'content' },
     genre: { file: fill('guitar'), area: 'content' },
     year: { file: fill('calendar-blank'), area: 'content' },
+    playlist: { file: fill('playlist'), area: 'content' },
+    'recently-played': { file: fill('headphones'), area: 'content' },
+    'drag-handle': { file: regular('dots-six-vertical'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },
@@ -96,6 +101,9 @@ export const iconSlots = {
     'play-now': { file: regular('play'), area: 'general' },
     'play-next': { file: regular('queue'), area: 'general' },
     'add-to-queue': { file: regular('list-plus'), area: 'general' },
+    'add-to-playlist': { file: regular('playlist'), area: 'general' },
+    'remove-from-playlist': { file: regular('minus-circle'), area: 'general' },
+    'change-cover': { file: regular('image-square'), area: 'general' },
     'shuffle-play': { file: regular('shuffle'), area: 'general' },
     'move-up': { file: regular('caret-up'), area: 'general' },
     'move-down': { file: regular('caret-down'), area: 'general' },

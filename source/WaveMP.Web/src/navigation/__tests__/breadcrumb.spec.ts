@@ -80,6 +80,40 @@ describe('activeTreeId', () => {
             activeTreeId({ name: 'library-section', params: { section: 'unknown' } }),
         ).toBeUndefined()
     })
+
+    it('selects the node of a playlist page', () => {
+        expect(activeTreeId({ name: 'playlists-new', params: {} })).toBe('create-playlist')
+        expect(activeTreeId({ name: 'playlists-recently-played', params: {} })).toBe(
+            'recently-played',
+        )
+        expect(activeTreeId({ name: 'playlist', params: { id: 'p1' } })).toBe('playlist:p1')
+    })
+})
+
+describe('playlist pages', () => {
+    const playlists = { id: 'playlists', labelKey: 'nav.playlists', to: { name: 'playlists' } }
+
+    it('show the overview below music, also while a new playlist is created', () => {
+        for (const name of ['playlists', 'playlists-new']) {
+            expect(buildBreadcrumb({ name, params: {} }).map((c) => c.id)).toEqual([
+                'music',
+                'playlists',
+            ])
+        }
+    })
+
+    it('show recently played and a playlist below the overview', () => {
+        expect(buildBreadcrumb({ name: 'playlists-recently-played', params: {} })).toEqual([
+            { id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } },
+            playlists,
+            { id: 'recently-played', labelKey: 'playlists.recentlyPlayed' },
+        ])
+        expect(buildBreadcrumb({ name: 'playlist', params: { id: 'p1' } }, 'Road Trip')).toEqual([
+            { id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } },
+            playlists,
+            { id: 'playlist', labelKey: 'nav.playlists', label: 'Road Trip' },
+        ])
+    })
 })
 
 describe('detail pages', () => {
