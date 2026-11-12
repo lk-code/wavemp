@@ -63,6 +63,10 @@ export interface Album extends AdditionalDataHolder, Parsable {
      */
     isCompilation?: boolean | null;
     /**
+     * Whether the current profile marked the album as favorite.
+     */
+    isFavorite?: boolean | null;
+    /**
      * The title property
      */
     title?: string | null;
@@ -134,6 +138,10 @@ export interface Artist extends AdditionalDataHolder, Parsable {
      * The id property
      */
     id?: Guid | null;
+    /**
+     * Whether the current profile marked the artist as favorite.
+     */
+    isFavorite?: boolean | null;
     /**
      * Name as first found in the media files.
      */
@@ -390,6 +398,24 @@ export interface CreatedSession extends AdditionalDataHolder, Parsable {
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Favorite}
+ */
+// @ts-ignore
+export function createFavoriteFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoFavorite;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {FavoritePage}
+ */
+// @ts-ignore
+export function createFavoritePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoFavoritePage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {Genre}
  */
 // @ts-ignore
@@ -413,6 +439,15 @@ export function createGenrePageFromDiscriminatorValue(parseNode: ParseNode | und
 // @ts-ignore
 export function createHealthFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoHealth;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Home}
+ */
+// @ts-ignore
+export function createHomeFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoHome;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -776,6 +811,15 @@ export function createUpdateTrackMetadataFromDiscriminatorValue(parseNode: Parse
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateTrackRating}
+ */
+// @ts-ignore
+export function createUpdateTrackRatingFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateTrackRating;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {UpdateUser}
  */
 // @ts-ignore
@@ -914,6 +958,7 @@ export function deserializeIntoAlbum(album: Partial<Album> | undefined = {}) : R
         "hasCover": n => { album.hasCover = n.getBooleanValue(); },
         "id": n => { album.id = n.getGuidValue(); },
         "isCompilation": n => { album.isCompilation = n.getBooleanValue(); },
+        "isFavorite": n => { album.isFavorite = n.getBooleanValue(); },
         "title": n => { album.title = n.getStringValue(); },
         "trackCount": n => { album.trackCount = n.getNumberValue(); },
         "year": n => { album.year = n.getNumberValue(); },
@@ -958,6 +1003,7 @@ export function deserializeIntoArtist(artist: Partial<Artist> | undefined = {}) 
         "albumCount": n => { artist.albumCount = n.getNumberValue(); },
         "firstSeenAt": n => { artist.firstSeenAt = n.getDateValue(); },
         "id": n => { artist.id = n.getGuidValue(); },
+        "isFavorite": n => { artist.isFavorite = n.getBooleanValue(); },
         "name": n => { artist.name = n.getStringValue(); },
         "trackCount": n => { artist.trackCount = n.getNumberValue(); },
     }
@@ -1090,6 +1136,36 @@ export function deserializeIntoCreateUser(createUser: Partial<CreateUser> | unde
 }
 /**
  * The deserialization information for the current model
+ * @param Favorite The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoFavorite(favorite: Partial<Favorite> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "addedAt": n => { favorite.addedAt = n.getDateValue(); },
+        "album": n => { favorite.album = n.getObjectValue<Album>(createAlbumFromDiscriminatorValue); },
+        "artist": n => { favorite.artist = n.getObjectValue<Artist>(createArtistFromDiscriminatorValue); },
+        "itemId": n => { favorite.itemId = n.getGuidValue(); },
+        "track": n => { favorite.track = n.getObjectValue<Track>(createTrackFromDiscriminatorValue); },
+        "type": n => { favorite.type = n.getEnumValue<FavoriteType>(FavoriteTypeObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param FavoritePage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoFavoritePage(favoritePage: Partial<FavoritePage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { favoritePage.items = n.getCollectionOfObjectValues<Favorite>(createFavoriteFromDiscriminatorValue); },
+        "limit": n => { favoritePage.limit = n.getNumberValue(); },
+        "offset": n => { favoritePage.offset = n.getNumberValue(); },
+        "total": n => { favoritePage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param Genre The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1125,6 +1201,21 @@ export function deserializeIntoHealth(health: Partial<Health> | undefined = {}) 
     return {
         "status": n => { health.status = n.getEnumValue<HealthStatus>(HealthStatusObject); },
         "version": n => { health.version = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param Home The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoHome(home: Partial<Home> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "favorites": n => { home.favorites = n.getObjectValue<FavoritePage>(createFavoritePageFromDiscriminatorValue); },
+        "playlists": n => { home.playlists = n.getObjectValue<PlaylistPage>(createPlaylistPageFromDiscriminatorValue); },
+        "recentlyAdded": n => { home.recentlyAdded = n.getObjectValue<AlbumPage>(createAlbumPageFromDiscriminatorValue); },
+        "recentlyPlayed": n => { home.recentlyPlayed = n.getObjectValue<RecentlyPlayedTrackPage>(createRecentlyPlayedTrackPageFromDiscriminatorValue); },
+        "topRated": n => { home.topRated = n.getObjectValue<TrackPage>(createTrackPageFromDiscriminatorValue); },
     }
 }
 /**
@@ -1571,6 +1662,8 @@ export function deserializeIntoTrack(track: Partial<Track> | undefined = {}) : R
         "hasCover": n => { track.hasCover = n.getBooleanValue(); },
         "hasVideo": n => { track.hasVideo = n.getBooleanValue(); },
         "id": n => { track.id = n.getGuidValue(); },
+        "isFavorite": n => { track.isFavorite = n.getBooleanValue(); },
+        "rating": n => { track.rating = n.getNumberValue(); },
         "title": n => { track.title = n.getStringValue(); },
         "trackNumber": n => { track.trackNumber = n.getNumberValue(); },
         "year": n => { track.year = n.getNumberValue(); },
@@ -1695,6 +1788,17 @@ export function deserializeIntoUpdateTrackMetadata(updateTrackMetadata: Partial<
         "title": n => { updateTrackMetadata.title = n.getStringValue(); },
         "trackNumber": n => { updateTrackMetadata.trackNumber = n.getNumberValue(); },
         "year": n => { updateTrackMetadata.year = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateTrackRating The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateTrackRating(updateTrackRating: Partial<UpdateTrackRating> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "rating": n => { updateTrackRating.rating = n.getNumberValue(); },
     }
 }
 /**
@@ -1825,6 +1929,57 @@ export function deserializeIntoYearPage(yearPage: Partial<YearPage> | undefined 
     }
 }
 /**
+ * A favorite of the current profile: a track, an album or an artist. Exactly the member of its type is set.
+ */
+export interface Favorite extends AdditionalDataHolder, Parsable {
+    /**
+     * When the profile marked it.
+     */
+    addedAt?: Date | null;
+    /**
+     * The album property
+     */
+    album?: Album | null;
+    /**
+     * The artist property
+     */
+    artist?: Artist | null;
+    /**
+     * Id of the track, album or artist.
+     */
+    itemId?: Guid | null;
+    /**
+     * The track property
+     */
+    track?: Track | null;
+    /**
+     * What a favorite marks.
+     */
+    type?: FavoriteType | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface FavoritePage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Favorite[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type FavoriteType = (typeof FavoriteTypeObject)[keyof typeof FavoriteTypeObject];
+/**
  * A genre of the tracks; genres that differ only in case are one genre.
  */
 export interface Genre extends AdditionalDataHolder, Parsable {
@@ -1877,6 +2032,31 @@ export interface Health extends AdditionalDataHolder, Parsable {
     version?: string | null;
 }
 export type HealthStatus = (typeof HealthStatusObject)[keyof typeof HealthStatusObject];
+/**
+ * The home page of the current profile: every row is the first page of its list, total tells how many items the whole list has.
+ */
+export interface Home extends AdditionalDataHolder, Parsable {
+    /**
+     * The favorite tracks, albums and artists, the newest first (ListMyFavorites).
+     */
+    favorites?: FavoritePage | null;
+    /**
+     * The own playlists, the last changed first (ListMyPlaylists).
+     */
+    playlists?: PlaylistPage | null;
+    /**
+     * The albums found last (ListAlbums with sort FirstSeenAt).
+     */
+    recentlyAdded?: AlbumPage | null;
+    /**
+     * The tracks played last (ListMyRecentlyPlayedTracks).
+     */
+    recentlyPlayed?: RecentlyPlayedTrackPage | null;
+    /**
+     * Only the rated tracks, the most stars first, then the latest rating (like ListTracks with sort Rating).
+     */
+    topRated?: TrackPage | null;
+}
 /**
  * A background job with its schedule, its next and its last run.
  */
@@ -2670,6 +2850,7 @@ export function serializeAlbum(writer: SerializationWriter, album: Partial<Album
     writer.writeBooleanValue("hasCover", album.hasCover);
     writer.writeGuidValue("id", album.id);
     writer.writeBooleanValue("isCompilation", album.isCompilation);
+    writer.writeBooleanValue("isFavorite", album.isFavorite);
     writer.writeStringValue("title", album.title);
     writer.writeNumberValue("trackCount", album.trackCount);
     writer.writeNumberValue("year", album.year);
@@ -2717,6 +2898,7 @@ export function serializeArtist(writer: SerializationWriter, artist: Partial<Art
     writer.writeNumberValue("albumCount", artist.albumCount);
     writer.writeDateValue("firstSeenAt", artist.firstSeenAt);
     writer.writeGuidValue("id", artist.id);
+    writer.writeBooleanValue("isFavorite", artist.isFavorite);
     writer.writeStringValue("name", artist.name);
     writer.writeNumberValue("trackCount", artist.trackCount);
     writer.writeAdditionalData(artist.additionalData);
@@ -2859,6 +3041,38 @@ export function serializeCreateUser(writer: SerializationWriter, createUser: Par
 }
 /**
  * Serializes information the current object
+ * @param Favorite The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeFavorite(writer: SerializationWriter, favorite: Partial<Favorite> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!favorite || isSerializingDerivedType) { return; }
+    writer.writeDateValue("addedAt", favorite.addedAt);
+    writer.writeObjectValue<Album>("album", favorite.album, serializeAlbum);
+    writer.writeObjectValue<Artist>("artist", favorite.artist, serializeArtist);
+    writer.writeGuidValue("itemId", favorite.itemId);
+    writer.writeObjectValue<Track>("track", favorite.track, serializeTrack);
+    writer.writeEnumValue<FavoriteType>("type", favorite.type);
+    writer.writeAdditionalData(favorite.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param FavoritePage The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeFavoritePage(writer: SerializationWriter, favoritePage: Partial<FavoritePage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!favoritePage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Favorite>("items", favoritePage.items, serializeFavorite);
+    writer.writeNumberValue("limit", favoritePage.limit);
+    writer.writeNumberValue("offset", favoritePage.offset);
+    writer.writeNumberValue("total", favoritePage.total);
+    writer.writeAdditionalData(favoritePage.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param Genre The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -2898,6 +3112,22 @@ export function serializeHealth(writer: SerializationWriter, health: Partial<Hea
     writer.writeEnumValue<HealthStatus>("status", health.status);
     writer.writeStringValue("version", health.version);
     writer.writeAdditionalData(health.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param Home The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeHome(writer: SerializationWriter, home: Partial<Home> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!home || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<FavoritePage>("favorites", home.favorites, serializeFavoritePage);
+    writer.writeObjectValue<PlaylistPage>("playlists", home.playlists, serializePlaylistPage);
+    writer.writeObjectValue<AlbumPage>("recentlyAdded", home.recentlyAdded, serializeAlbumPage);
+    writer.writeObjectValue<RecentlyPlayedTrackPage>("recentlyPlayed", home.recentlyPlayed, serializeRecentlyPlayedTrackPage);
+    writer.writeObjectValue<TrackPage>("topRated", home.topRated, serializeTrackPage);
+    writer.writeAdditionalData(home.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3371,6 +3601,8 @@ export function serializeTrack(writer: SerializationWriter, track: Partial<Track
     writer.writeBooleanValue("hasCover", track.hasCover);
     writer.writeBooleanValue("hasVideo", track.hasVideo);
     writer.writeGuidValue("id", track.id);
+    writer.writeBooleanValue("isFavorite", track.isFavorite);
+    writer.writeNumberValue("rating", track.rating);
     writer.writeStringValue("title", track.title);
     writer.writeNumberValue("trackNumber", track.trackNumber);
     writer.writeNumberValue("year", track.year);
@@ -3504,6 +3736,18 @@ export function serializeUpdateTrackMetadata(writer: SerializationWriter, update
     writer.writeNumberValue("trackNumber", updateTrackMetadata.trackNumber);
     writer.writeNumberValue("year", updateTrackMetadata.year);
     writer.writeAdditionalData(updateTrackMetadata.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateTrackRating The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateTrackRating(writer: SerializationWriter, updateTrackRating: Partial<UpdateTrackRating> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateTrackRating || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("rating", updateTrackRating.rating);
+    writer.writeAdditionalData(updateTrackRating.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3707,6 +3951,14 @@ export interface Track extends AdditionalDataHolder, Parsable {
      * The id property
      */
     id?: Guid | null;
+    /**
+     * Whether the current profile marked the track as favorite.
+     */
+    isFavorite?: boolean | null;
+    /**
+     * Rating of the current profile: 1 to 5 stars, 0 if not rated.
+     */
+    rating?: number | null;
     /**
      * The title property
      */
@@ -3926,6 +4178,15 @@ export interface UpdateTrackMetadata extends AdditionalDataHolder, Parsable {
      * New year.
      */
     year?: number | null;
+}
+/**
+ * Rates a track for the current profile.
+ */
+export interface UpdateTrackRating extends AdditionalDataHolder, Parsable {
+    /**
+     * Number of stars from 1 to 5; 0 removes the rating.
+     */
+    rating?: number | null;
 }
 /**
  * Changes a user (profile). Missing or null values stay unchanged.
@@ -4148,6 +4409,14 @@ export const AudioFormatObject = {
     WavPcm: "WavPcm",
     AiffPcm: "AiffPcm",
 } as const;
+/**
+ * What a favorite marks.
+ */
+export const FavoriteTypeObject = {
+    Track: "Track",
+    Album: "Album",
+    Artist: "Artist",
+} as const;
 export const GenreSortObject = {
     Name: "Name",
     TrackCount: "TrackCount",
@@ -4343,6 +4612,7 @@ export const TrackSortObject = {
     Genre: "Genre",
     FirstSeenAt: "FirstSeenAt",
     Relevance: "Relevance",
+    Rating: "Rating",
 } as const;
 /**
  * Why the track has to be transcoded; null for direct play.

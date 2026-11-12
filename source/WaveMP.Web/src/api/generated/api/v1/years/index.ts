@@ -38,6 +38,10 @@ export interface YearsRequestBuilderGetQueryParameters {
      */
     limit?: number;
     /**
+     * Only years of the "my music" of the current profile, counted over these tracks.
+     */
+    myMusic?: boolean;
+    /**
      * Number of years to skip.
      */
     offset?: number;
@@ -45,7 +49,7 @@ export interface YearsRequestBuilderGetQueryParameters {
 /**
  * Uri template for the request builder.
  */
-export const YearsRequestBuilderUriTemplate = "{+baseurl}/api/v1/years{?direction*,limit*,offset*}";
+export const YearsRequestBuilderUriTemplate = "{+baseurl}/api/v1/years{?direction*,limit*,myMusic*,offset*}";
 /**
  * Metadata for all the requests in the request builder.
  */

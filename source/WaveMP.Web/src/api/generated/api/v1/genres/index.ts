@@ -38,6 +38,10 @@ export interface GenresRequestBuilderGetQueryParameters {
      */
     limit?: number;
     /**
+     * Only genres of the "my music" of the current profile, counted over these tracks.
+     */
+    myMusic?: boolean;
+    /**
      * Number of genres to skip.
      */
     offset?: number;
@@ -53,7 +57,7 @@ export interface GenresRequestBuilderGetQueryParameters {
 /**
  * Uri template for the request builder.
  */
-export const GenresRequestBuilderUriTemplate = "{+baseurl}/api/v1/genres{?direction*,limit*,offset*,q*,sort*}";
+export const GenresRequestBuilderUriTemplate = "{+baseurl}/api/v1/genres{?direction*,limit*,myMusic*,offset*,q*,sort*}";
 /**
  * Metadata for all the requests in the request builder.
  */

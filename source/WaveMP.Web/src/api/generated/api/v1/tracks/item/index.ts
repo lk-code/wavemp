@@ -12,6 +12,8 @@ import { MetadataRequestBuilderRequestsMetadata, type MetadataRequestBuilder } f
 // @ts-ignore
 import { PlaybackRequestBuilderRequestsMetadata, type PlaybackRequestBuilder } from './playback/index.js';
 // @ts-ignore
+import { RatingRequestBuilderRequestsMetadata, type RatingRequestBuilder } from './rating/index.js';
+// @ts-ignore
 import { StreamRequestBuilderRequestsMetadata, type StreamRequestBuilder } from './stream/index.js';
 // @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata, type Parsable, type ParsableFactory, type RequestConfiguration, type RequestInformation, type RequestsMetadata } from '@microsoft/kiota-abstractions';
@@ -36,6 +38,10 @@ export interface TracksItemRequestBuilder extends BaseRequestBuilder<TracksItemR
      * The playback property
      */
     get playback(): PlaybackRequestBuilder;
+    /**
+     * The rating property
+     */
+    get rating(): RatingRequestBuilder;
     /**
      * The stream property
      */
@@ -74,6 +80,9 @@ export const TracksItemRequestBuilderNavigationMetadata: Record<Exclude<keyof Tr
     },
     playback: {
         requestsMetadata: PlaybackRequestBuilderRequestsMetadata,
+    },
+    rating: {
+        requestsMetadata: RatingRequestBuilderRequestsMetadata,
     },
     stream: {
         requestsMetadata: StreamRequestBuilderRequestsMetadata,

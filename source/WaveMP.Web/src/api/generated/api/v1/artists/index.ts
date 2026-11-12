@@ -46,6 +46,10 @@ export interface ArtistsRequestBuilderGetQueryParameters {
      */
     limit?: number;
     /**
+     * Only artists of the "my music" of the current profile, as track or album artist.
+     */
+    myMusic?: boolean;
+    /**
      * Number of artists to skip.
      */
     offset?: number;
@@ -61,7 +65,7 @@ export interface ArtistsRequestBuilderGetQueryParameters {
 /**
  * Uri template for the request builder.
  */
-export const ArtistsRequestBuilderUriTemplate = "{+baseurl}/api/v1/artists{?direction*,limit*,offset*,q*,sort*}";
+export const ArtistsRequestBuilderUriTemplate = "{+baseurl}/api/v1/artists{?direction*,limit*,myMusic*,offset*,q*,sort*}";
 /**
  * Metadata for all the navigation properties in the request builder.
  */

@@ -46,7 +46,7 @@ export interface TracksRequestBuilderGetQueryParameters {
      */
     artistId?: Guid;
     /**
-     * Sort direction of the key; descending by default for FirstSeenAt and Relevance, otherwise ascending. Disc and track number always ascend.
+     * Sort direction of the key; descending by default for FirstSeenAt, Relevance and Rating, otherwise ascending. Disc and track number always ascend.
      */
     direction?: SortDirection;
     /**
@@ -65,6 +65,10 @@ export interface TracksRequestBuilderGetQueryParameters {
      * Maximum number of tracks of the page.
      */
     limit?: number;
+    /**
+     * Only tracks of the "my music" of the current profile: rated, marked as favorite (also through their album or artist) or in one of its playlists. Combines with all other filters.
+     */
+    myMusic?: boolean;
     /**
      * Number of tracks to skip.
      */
@@ -85,7 +89,7 @@ export interface TracksRequestBuilderGetQueryParameters {
 /**
  * Uri template for the request builder.
  */
-export const TracksRequestBuilderUriTemplate = "{+baseurl}/api/v1/tracks{?albumId*,artistId*,direction*,genre*,hasAudio*,hasVideo*,limit*,offset*,q*,sort*,year*}";
+export const TracksRequestBuilderUriTemplate = "{+baseurl}/api/v1/tracks{?albumId*,artistId*,direction*,genre*,hasAudio*,hasVideo*,limit*,myMusic*,offset*,q*,sort*,year*}";
 /**
  * Metadata for all the navigation properties in the request builder.
  */

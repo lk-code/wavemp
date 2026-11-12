@@ -54,6 +54,10 @@ export interface AlbumsRequestBuilderGetQueryParameters {
      */
     limit?: number;
     /**
+     * Only albums with tracks of the "my music" of the current profile. Combines with all other filters.
+     */
+    myMusic?: boolean;
+    /**
      * Number of albums to skip.
      */
     offset?: number;
@@ -73,7 +77,7 @@ export interface AlbumsRequestBuilderGetQueryParameters {
 /**
  * Uri template for the request builder.
  */
-export const AlbumsRequestBuilderUriTemplate = "{+baseurl}/api/v1/albums{?artistId*,direction*,genre*,limit*,offset*,q*,sort*,year*}";
+export const AlbumsRequestBuilderUriTemplate = "{+baseurl}/api/v1/albums{?artistId*,direction*,genre*,limit*,myMusic*,offset*,q*,sort*,year*}";
 /**
  * Metadata for all the navigation properties in the request builder.
  */
