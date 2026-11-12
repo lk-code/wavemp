@@ -3,6 +3,7 @@ import { createUser, deleteUser, uniqueSuffix, type TestUser } from './helpers/a
 import {
     builtInAdminTile,
     chooseFromProfileMenu,
+    homeUrl,
     navigationLabels,
     profileButton,
     profileTile,
@@ -33,12 +34,12 @@ test('selects a profile and remembers it', async ({ page }) => {
 
     await profileTile(page, user.name).click()
 
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(profileButton(page).locator("[data-part='avatar-initials']")).toHaveText('EL')
 
     await page.reload()
 
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(profileButton(page)).toBeVisible()
     await profileButton(page).click()
     // Only the open menu: the menus of the songs and of the sort options are in the page as well.
@@ -49,13 +50,13 @@ test('selects a profile and remembers it', async ({ page }) => {
 
     // Profiles without the role admin never reach the profile administration.
     await page.goto('/admin/users')
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
 })
 
 test('switches the profile through the menu', async ({ page }) => {
     await page.goto('/profiles')
     await profileTile(page, user.name).click()
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
 
     await chooseFromProfileMenu(page, 'switch-profile')
 
@@ -64,7 +65,7 @@ test('switches the profile through the menu', async ({ page }) => {
 
     await builtInAdminTile(page).click()
 
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(profileButton(page).locator("[data-part='avatar-initials']")).toHaveText('A')
     await profileButton(page).click()
     await expect(
@@ -75,14 +76,14 @@ test('switches the profile through the menu', async ({ page }) => {
 test('keeps the language per profile', async ({ page }) => {
     await page.goto('/profiles')
     await profileTile(page, user.name).click()
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
 
     await chooseFromProfileMenu(page, 'settings')
     await expect(page).toHaveURL(/\/settings$/)
     await page.locator("[data-field='language'] [data-part='select']").selectOption('de')
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'de')
-    expect(await navigationLabels(page)).toEqual(['Aktuelle Wiedergabe', 'Bibliothek', 'Playlists'])
+    expect(await navigationLabels(page)).toEqual(['Startseite', 'Aktuelle Wiedergabe', 'Bibliothek', 'Playlists'])
     await expect(page.locator("[data-part='content-title']")).toHaveText('Einstellungen')
 
     await page.goto('/library/songs')
@@ -106,12 +107,12 @@ test('keeps the language per profile', async ({ page }) => {
 
     // The language is stored on the server: selecting the profile again brings it back.
     await profileTile(page, user.name).click()
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(page.locator('html')).toHaveAttribute('lang', 'de')
 
     await chooseFromProfileMenu(page, 'switch-profile')
     await builtInAdminTile(page).click()
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
-    expect(await navigationLabels(page)).toEqual(['Now Playing', 'Library', 'Playlists'])
+    expect(await navigationLabels(page)).toEqual(['Home', 'Now Playing', 'Library', 'Playlists'])
 })

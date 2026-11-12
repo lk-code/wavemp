@@ -1,5 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 
+/** Address of the home page, the start page after the profile selection. */
+export const homeUrl = /^https?:\/\/[^/]+\/$/
+
 /** Labels of the main navigation: tabs on the desktop, bottom navigation on mobile. */
 export async function navigationLabels(page: Page): Promise<string[]> {
     const labels = page
@@ -7,7 +10,7 @@ export async function navigationLabels(page: Page): Promise<string[]> {
             "[data-part='tab'] > [data-part='label'], [data-part='bottom-nav-item'] > [data-part='label']",
         )
         .filter({ visible: true })
-    await expect(labels).toHaveCount(3)
+    await expect(labels).toHaveCount(4)
     return labels.allTextContents()
 }
 

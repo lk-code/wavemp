@@ -1,13 +1,17 @@
 import { expect, test } from '@playwright/test'
-import { builtInAdminTile } from './helpers/navigation'
+import { builtInAdminTile, homeUrl } from './helpers/navigation'
 import { emptyStorageState } from './helpers/storage'
 
-test('start page opens the library and shows a healthy server', async ({ page }) => {
+test('start page opens the home page and shows a healthy server', async ({ page }) => {
     await page.goto('/')
 
     await expect(page).toHaveTitle('WaveMP')
-    await expect(page).toHaveURL(/\/library\/songs$/)
+    await expect(page).toHaveURL(homeUrl)
     await expect(page.locator("[data-part='app']")).toBeVisible()
+    await expect(page.locator("[data-part='view'][data-view='home']")).toBeVisible()
+    await expect(
+        page.locator("[data-part='shelf'][data-item='recently-added'] [data-part='tile']").first(),
+    ).toBeVisible()
     await expect(page.locator("[data-part='server-status']")).toHaveAttribute(
         'data-state',
         'healthy',

@@ -19,7 +19,7 @@ test('shows the bottom navigation instead of tabs, history and sidebar', async (
 
     const bottomNav = part(page, 'bottom-nav')
     await expect(bottomNav).toBeVisible()
-    await expect(part(page, 'bottom-nav-item')).toHaveCount(3)
+    await expect(part(page, 'bottom-nav-item')).toHaveCount(4)
     const navBox = await box(bottomNav)
     expect(navBox.y + navBox.height).toBeCloseTo(viewport.height, 0)
     await expect(part(page, 'bottom-nav-item').filter({ hasText: 'Library' })).toHaveAttribute(

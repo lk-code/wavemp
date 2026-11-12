@@ -62,7 +62,7 @@ test('shows all desktop areas and hides the mobile ones', async ({ page }) => {
     for (const name of visible) {
         await expect(part(page, name), name).toBeVisible()
     }
-    await expect(part(page, 'tab')).toHaveCount(3)
+    await expect(part(page, 'tab')).toHaveCount(4)
     await expect(part(page, 'tree-item').first()).toBeVisible()
     await expect(part(page, 'list-group').first()).toBeVisible()
     await expect(part(page, 'list-row').first()).toBeVisible()
@@ -106,7 +106,7 @@ test('loads the theme Midnight with its graphics and icons', async ({ page }) =>
     await page.goto('/library/songs')
 
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'midnight')
-    await expect(page.locator('html')).toHaveAttribute('data-theme-api', '1')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-api', '2')
     await expect(page.locator('link#wavemp-theme')).toHaveAttribute(
         'href',
         '/themes/midnight/theme.css',
@@ -198,12 +198,12 @@ test('shows the songs of the library grouped by album', async ({ page }) => {
     await expect(part(page, 'placeholder-notice')).toHaveCount(0)
     await expect(part(page, 'list')).not.toHaveAttribute('data-state', 'placeholder')
     const columns = part(page, 'list-column')
-    await expect(columns).toHaveCount(4)
+    await expect(columns).toHaveCount(6)
     expect(
         await columns.evaluateAll((elements) =>
             elements.map((element) => element.getAttribute('data-column')),
         ),
-    ).toEqual(['number', 'title', 'duration', 'artist'])
+    ).toEqual(['number', 'title', 'duration', 'artist', 'rating', 'favorite'])
 
     const group = part(page, 'list-group').first()
     await expect(group.locator("[data-part='list-group-header']")).toHaveText('E2E Album')

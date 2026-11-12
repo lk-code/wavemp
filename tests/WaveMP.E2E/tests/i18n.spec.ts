@@ -32,7 +32,7 @@ test.describe('selected profile in a German browser', () => {
         await page.goto('/library/songs')
 
         await expect(page.locator('html')).toHaveAttribute('lang', 'en')
-        expect(await navigationLabels(page)).toEqual(['Now Playing', 'Library', 'Playlists'])
+        expect(await navigationLabels(page)).toEqual(['Home', 'Now Playing', 'Library', 'Playlists'])
         await expect(page.locator("[data-part='list-column'][data-column='title']")).toHaveText(
             'Title',
         )
