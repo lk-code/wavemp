@@ -8,6 +8,8 @@
 #   E2E Artist/Video Only.mp4                          music video without audio file
 #   Loose Artist - Loose Song.mp3 + .webm              audio without tags in the root, with a
 #                                                      music video browsers play as it is (VP9, Opus)
+# All songs last 2 seconds, except Loose Song: it lasts 20 seconds, so the tests can switch the
+# view of Now Playing while it plays.
 # The files are made writable for everyone: the metadata editor test writes tags, and the container
 # runs as another user (1654) than the one who creates the media.
 #
@@ -27,11 +29,12 @@ ff() {
 }
 
 audio() {
-    # $1 frequency, $2 output file, further arguments: codec options and tags
+    # $1 frequency, $2 duration in seconds, $3 output file, further arguments: codec options and tags
     frequency="$1"
-    output="$2"
-    shift 2
-    ff -f lavfi -i "sine=frequency=$frequency:duration=2" -ac 2 "$@" "$output"
+    duration="$2"
+    output="$3"
+    shift 3
+    ff -f lavfi -i "sine=frequency=$frequency:duration=$duration" -ac 2 "$@" "$output"
 }
 
 video() {
@@ -40,16 +43,16 @@ video() {
         -c:v mpeg4 -q:v 5 -pix_fmt yuv420p -c:a aac -b:a 64k -shortest "$2"
 }
 
-audio 440 "$album/01 - First Song.mp3" -c:a libmp3lame -b:a 128k \
+audio 440 2 "$album/01 - First Song.mp3" -c:a libmp3lame -b:a 128k \
     -metadata title="First Song" -metadata artist="E2E Artist" \
     -metadata album="E2E Album" -metadata track=1 -metadata date=2026 \
     -metadata genre="E2E Genre"
-audio 550 "$album/02 - Second Song.flac" -c:a flac
+audio 550 2 "$album/02 - Second Song.flac" -c:a flac
 video 320x240 "$album/02 - Second Song.mp4"
 ff -f lavfi -i "testsrc=size=300x300:rate=1" -frames:v 1 -update 1 "$album/cover.jpg"
 video 320x240 "$artist/Video Only.mp4"
-audio 660 "$target/Loose Artist - Loose Song.mp3" -c:a libmp3lame -b:a 128k
-ff -f lavfi -i "testsrc=size=320x240:rate=10:duration=2" -f lavfi -i "sine=frequency=660:duration=2" \
+audio 660 20 "$target/Loose Artist - Loose Song.mp3" -c:a libmp3lame -b:a 128k
+ff -f lavfi -i "testsrc=size=320x240:rate=10:duration=20" -f lavfi -i "sine=frequency=660:duration=20" \
     -c:v libvpx-vp9 -b:v 200k -deadline realtime -cpu-used 8 -pix_fmt yuv420p \
     -c:a libopus -b:a 64k -shortest "$target/Loose Artist - Loose Song.webm"
 

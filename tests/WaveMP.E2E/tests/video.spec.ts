@@ -3,7 +3,7 @@ import { adminHeaders, findTrackId } from './helpers/api'
 import { adminNavItem } from './helpers/navigation'
 
 // Videos and transcoding with the synthetic test media of scripts/generate-media.sh:
-//   Loose Song: MP3 with a VP9/Opus WebM video, which the browser plays as it is
+//   Loose Song: MP3 with a VP9/Opus WebM video, which the browser plays as it is (20 seconds)
 //   Second Song: FLAC with an MPEG-4 Part 2 video, which no browser plays: the server transcodes
 //   it to HLS with ffmpeg (in software, the test machine has no render device)
 
@@ -28,19 +28,28 @@ function readyState(video: Locator): Promise<number> {
     return video.evaluate((element: HTMLVideoElement) => element.readyState)
 }
 
-test('shows the video of a song on the Now Playing stage and switches back to the cover', async ({
-    page,
-    request,
-}) => {
+// The view of Now Playing belongs to the profile. The built-in admin, whose session these tests
+// share, keeps the default "Video"; stage-modes.spec.ts switches the view with its own profiles.
+test.beforeAll(async ({ request }) => {
+    const response = await request.patch('/api/v1/me/settings', {
+        data: { playerViewMode: 'Video' },
+        headers: await adminHeaders(request),
+    })
+    expect(response.status()).toBe(200)
+})
+
+test('shows the video of a song on the Now Playing stage', async ({ page, request }) => {
     const id = await findTrackId(request, 'Loose Song')
     await playSong(page, id)
     await openNowPlaying(page)
 
     const stage = part(page, 'stage')
     await expect(stage).toHaveAttribute('data-state', 'video')
-    await expect(part(page, 'btn-video')).toHaveAttribute('aria-pressed', 'true')
+    await expect(part(page, 'btn-view-video')).toHaveAttribute('aria-pressed', 'true')
     const video = part(page, 'video')
     await expect(video).toBeVisible()
+    // The audio leads: the video plays without sound.
+    expect(await video.evaluate((element: HTMLVideoElement) => element.muted)).toBe(true)
     // The browser plays the WebM file as it is, through the signed URL of the video.
     await expect
         .poll(() => video.evaluate((element: HTMLVideoElement) => element.currentSrc))
@@ -48,10 +57,6 @@ test('shows the video of a song on the Now Playing stage and switches back to th
     await expect.poll(() => readyState(video), { timeout: 15_000 }).toBeGreaterThanOrEqual(1)
     await expect(part(page, 'btn-fullscreen')).toBeEnabled()
 
-    await part(page, 'btn-video').click()
-
-    await expect(stage).toHaveAttribute('data-state', 'cover')
-    await expect(part(page, 'video-stage')).toHaveCount(0)
     await expect(part(page, 'stage-title')).toHaveText('Loose Song')
 })
 

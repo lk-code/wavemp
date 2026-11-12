@@ -106,7 +106,7 @@ test('loads the theme Midnight with its graphics and icons', async ({ page }) =>
     await page.goto('/library/songs')
 
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'midnight')
-    await expect(page.locator('html')).toHaveAttribute('data-theme-api', '2')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-api', '3')
     await expect(page.locator('link#wavemp-theme')).toHaveAttribute(
         'href',
         '/themes/midnight/theme.css',
