@@ -260,7 +260,7 @@ Example of a desktop layout with the sidebar on the right:
 | `icon-glyph` | `span` | `icon` | Masked shape of the icon |
 | `label` | `span` | any | Text of a button, entry or area |
 | `indicator` | `span` | `tab` | Small arrow of the active tab |
-| `slider` | `div` | `seek`, `volume`, any | Slider with `slider-track` and `slider-thumb` |
+| `slider` | `div` | `seek`, `volume`, `equalizer-band`, any | Slider with `slider-track` and `slider-thumb`; horizontal, or vertical (`data-orientation="vertical"`, from the bottom to the top) in the equalizer |
 | `slider-track` | `div` | `slider` | Track of the slider |
 | `slider-fill` | `div` | `slider-track` | Filled part of the track |
 | `slider-thumb` | `div` (`role="slider"`) | `slider` | Knob, focusable |
@@ -367,6 +367,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
+| `data-orientation` | `slider` | `horizontal`, `vertical`; also as `aria-orientation` on `slider-thumb` |
 | `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `home`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`, `not-found` |
 | `data-kind` | `tile` | `album`, `artist`, `track`, `genre`, `year`, `playlist`, `recently-played` |
 | `data-kind` | `stage-view` | `cover`, `video`, `visualization` |
@@ -533,6 +534,7 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-round-button-size` | `2rem` | Size of round buttons |
 | `--wmp-play-button-size` | `3rem` | Size of `btn-play` |
 | `--wmp-slider-thumb-size` | `0.875rem` | Size of `slider-thumb` |
+| `--wmp-equalizer-slider-height` | `10rem` | Height of the vertical `slider`s in `equalizer-band` |
 | `--wmp-cover-size` | `8rem` | Size of covers in the list |
 | `--wmp-cover-size-mini` | `2.5rem` | Size of the cover in `now-playing-mini` |
 | `--wmp-cover-size-l` | `12rem` | Size of the cover in `detail-header` |

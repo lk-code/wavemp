@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ratio, valueForKey, valueFromPointer, type SliderOptions } from './slider'
+import {
+    ratio,
+    valueForKey,
+    valueFromPointer,
+    valueFromPointerVertical,
+    type SliderOptions,
+} from './slider'
 
 const props = withDefaults(
     defineProps<{
@@ -13,8 +19,18 @@ const props = withDefaults(
         /** Readable value for assistive technology, e.g. "1:05 of 3:20" or "80 %". */
         valueText?: string
         disabled?: boolean
+        /** Vertical sliders grow from the bottom (min) to the top (max), e.g. in the equalizer. */
+        orientation?: 'horizontal' | 'vertical'
     }>(),
-    { min: 0, max: 1, step: 0.01, largeStep: 0.1, valueText: undefined, disabled: false },
+    {
+        min: 0,
+        max: 1,
+        step: 0.01,
+        largeStep: 0.1,
+        valueText: undefined,
+        disabled: false,
+        orientation: 'horizontal',
+    },
 )
 
 const value = defineModel<number>({ required: true })
@@ -38,7 +54,12 @@ function update(next: number): void {
 
 function fromPointer(event: PointerEvent): void {
     const element = event.currentTarget as HTMLElement
-    update(valueFromPointer(event.clientX, element.getBoundingClientRect(), options.value))
+    const rect = element.getBoundingClientRect()
+    update(
+        props.orientation === 'vertical'
+            ? valueFromPointerVertical(event.clientY, rect, options.value)
+            : valueFromPointer(event.clientX, rect, options.value),
+    )
 }
 
 function onPointerDown(event: PointerEvent): void {
@@ -80,6 +101,7 @@ function onKeydown(event: KeyboardEvent): void {
 <template>
     <div
         data-part="slider"
+        :data-orientation="orientation"
         :data-state="
             [disabled ? 'disabled' : undefined, dragging ? 'dragging' : undefined]
                 .filter(Boolean)
@@ -106,7 +128,7 @@ function onKeydown(event: KeyboardEvent): void {
             :aria-valuenow="value"
             :aria-valuetext="valueText"
             :aria-disabled="disabled ? 'true' : undefined"
-            aria-orientation="horizontal"
+            :aria-orientation="orientation"
             @keydown="onKeydown"
         ></div>
     </div>

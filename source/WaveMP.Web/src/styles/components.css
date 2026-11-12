@@ -1537,6 +1537,35 @@
         opacity: 0.5;
     }
 
+    /* Vertical: from the bottom (min) to the top (max), e.g. the bands of the equalizer. */
+    [data-part='slider'][data-orientation='vertical'] {
+        justify-items: center;
+        inline-size: auto;
+        min-inline-size: calc(var(--wmp-slider-thumb-size) + 0.25rem);
+        block-size: var(--wmp-equalizer-slider-height);
+        min-block-size: 0;
+    }
+
+    [data-part='slider'][data-orientation='vertical'] > [data-part='slider-track'] {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        inline-size: 0.25rem;
+        block-size: 100%;
+    }
+
+    [data-part='slider'][data-orientation='vertical'] [data-part='slider-fill'] {
+        inline-size: 100%;
+        block-size: calc(var(--_value) * 100%);
+    }
+
+    [data-part='slider'][data-orientation='vertical'] > [data-part='slider-thumb'] {
+        justify-self: center;
+        align-self: end;
+        margin-inline-start: 0;
+        margin-block-end: calc(var(--_value) * (100% - var(--wmp-slider-thumb-size)));
+    }
+
     /* --- Transport ----------------------------------------------------------------------- */
 
     [data-part='now-playing-mini'] {

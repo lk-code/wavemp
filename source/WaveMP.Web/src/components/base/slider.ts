@@ -68,3 +68,17 @@ export function valueForKey(key: string, value: number, options: SliderOptions):
             return null
     }
 }
+
+/** Value at a vertical pointer position within the slider: the bottom is min, the top max. */
+export function valueFromPointerVertical(
+    clientY: number,
+    rect: { readonly top: number; readonly height: number },
+    options: SliderOptions,
+): number {
+    if (rect.height <= 0) {
+        return options.min
+    }
+
+    const position = clamp((rect.top + rect.height - clientY) / rect.height, 0, 1)
+    return roundToStep(options.min + position * (options.max - options.min), options)
+}
