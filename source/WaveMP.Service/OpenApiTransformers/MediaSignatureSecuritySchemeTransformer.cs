@@ -23,7 +23,8 @@ internal sealed class MediaSignatureSecuritySchemeTransformer : IOpenApiDocument
             Name = MediaSignatureDefaults.SignatureParameter,
             Description = "Signed media URL for players that cannot send a token header. Use the URL as issued "
                 + "(for example streamUrl of GetTrackPlayback): its query carries uid, sid, exp and sig. It is only "
-                + "valid for one kind of media of one track, until it expires and while the session is active.",
+                + "valid for one kind of media of one track, until it expires and while the session is active. The "
+                + "HLS playlists carry the same query in the URIs of their playlists and segments.",
         };
 
         return Task.CompletedTask;

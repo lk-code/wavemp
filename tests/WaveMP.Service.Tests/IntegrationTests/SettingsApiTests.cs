@@ -146,4 +146,82 @@ public class SettingsApiTests
         unchanged.MaxSizeMegabytes.Should().Be(2000);
         await factory.DeleteDatabaseAsync();
     }
+
+    [Test]
+    public async Task TranscodingSettings_OfANewInstallation_AreTheDefaults()
+    {
+        await using WaveMpWebApplicationFactory factory = new(DatabaseName + "_transcoding", freshDatabase: true);
+        using HttpClient admin = await factory.CreateAdminClientAsync();
+
+        HttpResponseMessage response = await admin.GetAsync("/api/v1/settings/transcoding");
+
+        string content = await response.Content.ReadAsStringAsync();
+        response.StatusCode.Should().Be(HttpStatusCode.OK, content);
+        content.Should().Contain("\"hardwareAcceleration\":\"Auto\"");
+        TranscodingSettingsDto settings =
+            (await response.Content.ReadFromJsonAsync<TranscodingSettingsDto>(HttpClientExtensions.JsonOptions))!;
+        settings.Should().BeEquivalentTo(new TranscodingSettingsDto
+        {
+            HardwareAcceleration = HardwareAccelerationModeDto.Auto,
+            MaxParallelJobs = 2,
+            MaxVideoHeight = 1080,
+            AudioBitrateKbps = 256,
+        });
+        await factory.DeleteDatabaseAsync();
+    }
+
+    [Test]
+    public async Task UpdateTranscodingSettings_WithValidValues_KeepsThemOverARestart()
+    {
+        TranscodingSettingsDto updated;
+        await using (WaveMpWebApplicationFactory first = new(DatabaseName + "_transcoding", freshDatabase: true))
+        {
+            using HttpClient admin = await first.CreateAdminClientAsync();
+            HttpResponseMessage response = await admin.SendJsonAsync(
+                "PATCH",
+                "/api/v1/settings/transcoding",
+                """{ "hardwareAcceleration": "Off", "maxParallelJobs": 4, "maxVideoHeight": 720 }""");
+            response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+            updated = (await response.Content.ReadFromJsonAsync<TranscodingSettingsDto>(
+                HttpClientExtensions.JsonOptions))!;
+        }
+
+        await using WaveMpWebApplicationFactory second = new(DatabaseName + "_transcoding");
+        using HttpClient restarted = await second.CreateAdminClientAsync();
+        TranscodingSettingsDto loaded =
+            await restarted.GetJsonAsync<TranscodingSettingsDto>("/api/v1/settings/transcoding");
+
+        TranscodingSettingsDto expected = new()
+        {
+            HardwareAcceleration = HardwareAccelerationModeDto.Off,
+            MaxParallelJobs = 4,
+            MaxVideoHeight = 720,
+            AudioBitrateKbps = 256,
+        };
+        updated.Should().BeEquivalentTo(expected);
+        loaded.Should().BeEquivalentTo(expected);
+        await second.DeleteDatabaseAsync();
+    }
+
+    [TestCase("{\"maxParallelJobs\":0}", "maxParallelJobs")]
+    [TestCase("{\"maxParallelJobs\":9}", "maxParallelJobs")]
+    [TestCase("{\"maxVideoHeight\":1000}", "maxVideoHeight")]
+    [TestCase("{\"audioBitrateKbps\":100}", "audioBitrateKbps")]
+    [TestCase("{\"hardwareAcceleration\":\"Always\"}", "hardwareAcceleration")]
+    public async Task UpdateTranscodingSettings_WithInvalidValue_ReportsTheField(string body, string field)
+    {
+        await using WaveMpWebApplicationFactory factory =
+            new(DatabaseName + "_transcoding_invalid", freshDatabase: true);
+        using HttpClient admin = await factory.CreateAdminClientAsync();
+
+        HttpResponseMessage response = await admin.SendJsonAsync("PATCH", "/api/v1/settings/transcoding", body);
+        TranscodingSettingsDto unchanged =
+            await admin.GetJsonAsync<TranscodingSettingsDto>("/api/v1/settings/transcoding");
+
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Select(error => error.Field).Should().Contain(field);
+        unchanged.MaxParallelJobs.Should().Be(2);
+        unchanged.MaxVideoHeight.Should().Be(1080);
+        await factory.DeleteDatabaseAsync();
+    }
 }

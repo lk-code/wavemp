@@ -41,6 +41,7 @@
     <ProjectReference Include="..\WaveMP.Core.Scanning\WaveMP.Core.Scanning.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Settings\WaveMP.Core.Settings.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Streaming\WaveMP.Core.Streaming.csproj" />
+    <ProjectReference Include="..\WaveMP.Core.Transcoding\WaveMP.Core.Transcoding.csproj" />
     <ProjectReference Include="..\WaveMP.Core.Users\WaveMP.Core.Users.csproj" />
     <ProjectReference Include="..\WaveMP.Data\WaveMP.Data.csproj" />
   </ItemGroup>

@@ -131,6 +131,7 @@ public class StreamingApiTests
             (await response.Content.ReadFromJsonAsync<TrackPlaybackDto>(HttpClientExtensions.JsonOptions))!;
         playback.TrackId.Should().Be(Track("Gain").Id);
         playback.Method.Should().Be(PlaybackMethodDto.DirectPlay);
+        playback.Protocol.Should().Be(StreamProtocolDto.File);
         playback.Format.Should().Be(AudioFormatDto.Flac);
         playback.TranscodeReason.Should().BeNull();
         playback.ContentType.Should().Be("audio/flac");
@@ -166,7 +167,7 @@ public class StreamingApiTests
     }
 
     [Test]
-    public async Task GetTrackPlayback_UnsupportedFormat_ReturnsTranscodeWithoutStream()
+    public async Task GetTrackPlayback_UnsupportedFormat_ReturnsTranscodeWithHlsStream()
     {
         HttpResponseMessage response = await _user.GetAsync(PlaybackPath("Gain", "audioFormats=Mp3"));
 
@@ -178,9 +179,10 @@ public class StreamingApiTests
         playback.Method.Should().Be(PlaybackMethodDto.Transcode);
         playback.Format.Should().Be(AudioFormatDto.Flac);
         playback.TranscodeReason.Should().Be(TranscodeReasonDto.FormatUnsupported);
-        playback.StreamUrl.Should().BeNull();
-        playback.ExpiresAt.Should().BeNull();
-        playback.ContentType.Should().BeNull();
+        playback.Protocol.Should().Be(StreamProtocolDto.Hls);
+        playback.StreamUrl.Should().StartWith($"/api/v1/tracks/{Track("Gain").Id}/hls/master.m3u8?media=Audio&uid=");
+        playback.ExpiresAt.Should().NotBeNull();
+        playback.ContentType.Should().Be("application/vnd.apple.mpegurl");
         playback.ReplayGain.TrackGain.Should().NotBeNull();
     }
 
@@ -192,7 +194,8 @@ public class StreamingApiTests
         playback.Method.Should().Be(PlaybackMethodDto.Transcode);
         playback.Format.Should().BeNull();
         playback.TranscodeReason.Should().Be(TranscodeReasonDto.FormatUnknown);
-        playback.StreamUrl.Should().BeNull();
+        playback.Protocol.Should().Be(StreamProtocolDto.Hls);
+        playback.StreamUrl.Should().Contain("/hls/master.m3u8?media=Audio&");
     }
 
     [Test]
@@ -255,6 +258,8 @@ public class StreamingApiTests
         playback.Method.Should().Be(PlaybackMethodDto.Transcode);
         playback.TranscodeReason.Should().Be(TranscodeReasonDto.AudioFromVideo);
         playback.Format.Should().BeNull();
+        playback.Protocol.Should().Be(StreamProtocolDto.Hls);
+        playback.StreamUrl.Should().Contain("/hls/master.m3u8?media=Audio&");
         playback.ReplayGain.Should().BeEquivalentTo(new ReplayGainDto());
     }
 

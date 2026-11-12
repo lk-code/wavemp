@@ -5,6 +5,7 @@ using WaveMP.Core.Streaming.Decisions;
 using WaveMP.Core.Streaming.Formats;
 using WaveMP.Core.Streaming.Signatures;
 using WaveMP.Core.Streaming.Sources;
+using WaveMP.Core.Transcoding.Services;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Extensions;
 using WaveMP.Service.Mappings;
@@ -14,13 +15,17 @@ using WaveMP.Service.Tokens;
 namespace WaveMP.Service.Controllers;
 
 /// <summary>
-/// Playback of the audio of tracks: the decision between direct play and transcoding, and the stream of the file.
+/// Playback of the audio of tracks: the decision between direct play and transcoding, and the stream of the file. The
+/// transcoded HLS stream is delivered by the HLS endpoints of the track.
 /// </summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/tracks/{id:guid}")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-public sealed class TrackStreamsController(IStreamService streams, MediaUrlFactory urls) : ControllerBase
+public sealed class TrackStreamsController(
+    IStreamService streams,
+    ITranscodingService transcoding,
+    MediaUrlFactory urls) : ControllerBase
 {
     /// <summary>
     /// Maximum number of formats a client sends.
@@ -35,18 +40,19 @@ public sealed class TrackStreamsController(IStreamService streams, MediaUrlFacto
 
     /// <summary>
     /// Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise
-    /// transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that
-    /// works without the session token, for example in an audio element. It is valid for some time plus the duration
-    /// of the track and while the session is active; clients ask again for a new one when it has expired. The answer
-    /// also carries the ReplayGain tags of the file.
+    /// transcoded to AAC as an HLS stream (also the sound of tracks that only have a video). The answer contains a
+    /// signed, short-lived stream URL that works without the session token, for example in an audio element: the file
+    /// (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable). It is valid for
+    /// some time plus the duration of the track and while the session is active; clients ask again for a new one when
+    /// it has expired. The answer also carries the ReplayGain tags of the file.
     /// </summary>
     /// <param name="id">Id of the track.</param>
     /// <param name="audioFormats">The audio formats the client plays (1 to 20, repeated query parameter).</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">How the client plays the track.</response>
     /// <response code="400">Missing, too many or invalid formats (code <c>request.invalid</c>).</response>
-    /// <response code="404">The track does not exist (code <c>track.not_found</c>), has no audio file (code
-    /// <c>track.no_audio</c>) or its audio file is gone since the last scan (code <c>stream.file_missing</c>).
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>), has neither an audio file nor a
+    /// video (code <c>track.no_audio</c>) or its file is gone since the last scan (code <c>stream.file_missing</c>).
     /// </response>
     [HttpGet("playback", Name = "GetTrackPlayback")]
     [ProducesResponseType<TrackPlaybackDto>(StatusCodes.Status200OK, "application/json")]
@@ -68,9 +74,12 @@ public sealed class TrackStreamsController(IStreamService streams, MediaUrlFacto
             return NotFound(result.Status);
         }
 
+        TimeSpan? duration = result.Source.Duration;
         MediaUrl? stream = result.Decision.Method == PlaybackMethod.DirectPlay
-            ? urls.CreateAudioStreamUrl(HttpContext, id, result.Source.Duration)
-            : null;
+            ? urls.CreateAudioStreamUrl(HttpContext, id, duration)
+            : transcoding.IsAvailable && duration > TimeSpan.Zero
+                ? urls.CreateHlsMasterUrl(HttpContext, id, HlsMediaDto.Audio, duration)
+                : null;
         Response.Headers.CacheControl = "no-store";
         return Ok(result.Source.ToDto(result.Decision, stream));
     }

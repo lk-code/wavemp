@@ -9,8 +9,8 @@ namespace WaveMP.Service.Mappings;
 public static class StreamingMappingExtensions
 {
     /// <summary>
-    /// The playback of a found track; <paramref name="stream"/> is the signed URL of its stream, <c>null</c> if the
-    /// track has to be transcoded.
+    /// The playback of a found track; <paramref name="stream"/> is the signed URL of its file (direct play) or of its
+    /// HLS master playlist (transcoding), <c>null</c> if transcoding is unavailable.
     /// </summary>
     public static TrackPlaybackDto ToDto(
         this StreamSource source,
@@ -21,15 +21,142 @@ public static class StreamingMappingExtensions
         {
             TrackId = source.TrackId,
             Method = decision.Method.ToDto(),
+            Protocol = ProtocolOf(decision.Method),
             Format = decision.Format?.ToDto(),
             TranscodeReason = decision.Reason?.ToDto(),
-            ContentType = stream is null ? null : source.ContentType,
+            ContentType = ContentTypeOf(decision.Method, source.ContentType, stream),
             StreamUrl = stream?.Url,
             ExpiresAt = stream?.ExpiresAt,
             DurationMilliseconds = source.Duration is { } duration
                 ? (long)Math.Round(duration.TotalMilliseconds)
                 : null,
             ReplayGain = source.ReplayGain.ToDto(),
+        };
+    }
+
+    /// <summary>
+    /// The video playback of a found track; <paramref name="stream"/> is the signed URL of its file (direct play) or of
+    /// its HLS master playlist (transcoding), <c>null</c> if transcoding is unavailable.
+    /// </summary>
+    public static TrackVideoPlaybackDto ToDto(
+        this VideoSource source,
+        VideoPlaybackDecision decision,
+        MediaUrl? stream)
+    {
+        return new TrackVideoPlaybackDto
+        {
+            TrackId = source.TrackId,
+            Method = decision.Method.ToDto(),
+            Protocol = ProtocolOf(decision.Method),
+            TranscodeReason = decision.Reason?.ToDto(),
+            Container = source.Container?.ToDto(),
+            VideoCodec = source.VideoCodec?.ToDto(),
+            AudioCodec = source.AudioCodec?.ToDto(),
+            HasAudio = source.HasAudio,
+            Width = source.Width,
+            Height = source.Height,
+            ContentType = ContentTypeOf(decision.Method, source.ContentType, stream),
+            StreamUrl = stream?.Url,
+            ExpiresAt = stream?.ExpiresAt,
+            DurationMilliseconds = source.Duration is { } duration
+                ? (long)Math.Round(duration.TotalMilliseconds)
+                : null,
+        };
+    }
+
+    public static StreamProtocolDto ProtocolOf(PlaybackMethod method)
+    {
+        return method == PlaybackMethod.DirectPlay ? StreamProtocolDto.File : StreamProtocolDto.Hls;
+    }
+
+    public static VideoCapabilities ToCapabilities(
+        VideoContainerDto[]? containers,
+        VideoCodecDto[]? videoCodecs,
+        AudioCodecDto[]? audioCodecs)
+    {
+        return new VideoCapabilities(
+            (containers ?? []).Select(ToEntity).ToHashSet(),
+            (videoCodecs ?? []).Select(ToEntity).ToHashSet(),
+            (audioCodecs ?? []).Select(ToEntity).ToHashSet());
+    }
+
+    public static VideoContainerDto ToDto(this VideoContainer container)
+    {
+        return container switch
+        {
+            VideoContainer.Mp4 => VideoContainerDto.Mp4,
+            VideoContainer.Mov => VideoContainerDto.Mov,
+            VideoContainer.Webm => VideoContainerDto.Webm,
+            VideoContainer.Matroska => VideoContainerDto.Matroska,
+            _ => throw new ArgumentOutOfRangeException(nameof(container), container, "Unknown container."),
+        };
+    }
+
+    public static VideoContainer ToEntity(this VideoContainerDto container)
+    {
+        return container switch
+        {
+            VideoContainerDto.Mp4 => VideoContainer.Mp4,
+            VideoContainerDto.Mov => VideoContainer.Mov,
+            VideoContainerDto.Webm => VideoContainer.Webm,
+            VideoContainerDto.Matroska => VideoContainer.Matroska,
+            _ => throw new ArgumentOutOfRangeException(nameof(container), container, "Unknown container."),
+        };
+    }
+
+    public static VideoCodecDto ToDto(this VideoCodec codec)
+    {
+        return codec switch
+        {
+            VideoCodec.H264 => VideoCodecDto.H264,
+            VideoCodec.Hevc => VideoCodecDto.Hevc,
+            VideoCodec.Vp8 => VideoCodecDto.Vp8,
+            VideoCodec.Vp9 => VideoCodecDto.Vp9,
+            VideoCodec.Av1 => VideoCodecDto.Av1,
+            _ => throw new ArgumentOutOfRangeException(nameof(codec), codec, "Unknown video codec."),
+        };
+    }
+
+    public static VideoCodec ToEntity(this VideoCodecDto codec)
+    {
+        return codec switch
+        {
+            VideoCodecDto.H264 => VideoCodec.H264,
+            VideoCodecDto.Hevc => VideoCodec.Hevc,
+            VideoCodecDto.Vp8 => VideoCodec.Vp8,
+            VideoCodecDto.Vp9 => VideoCodec.Vp9,
+            VideoCodecDto.Av1 => VideoCodec.Av1,
+            _ => throw new ArgumentOutOfRangeException(nameof(codec), codec, "Unknown video codec."),
+        };
+    }
+
+    public static AudioCodecDto ToDto(this AudioCodec codec)
+    {
+        return codec switch
+        {
+            AudioCodec.Aac => AudioCodecDto.Aac,
+            AudioCodec.Mp3 => AudioCodecDto.Mp3,
+            AudioCodec.Opus => AudioCodecDto.Opus,
+            AudioCodec.Vorbis => AudioCodecDto.Vorbis,
+            AudioCodec.Flac => AudioCodecDto.Flac,
+            AudioCodec.Ac3 => AudioCodecDto.Ac3,
+            AudioCodec.Eac3 => AudioCodecDto.Eac3,
+            _ => throw new ArgumentOutOfRangeException(nameof(codec), codec, "Unknown audio codec."),
+        };
+    }
+
+    public static AudioCodec ToEntity(this AudioCodecDto codec)
+    {
+        return codec switch
+        {
+            AudioCodecDto.Aac => AudioCodec.Aac,
+            AudioCodecDto.Mp3 => AudioCodec.Mp3,
+            AudioCodecDto.Opus => AudioCodec.Opus,
+            AudioCodecDto.Vorbis => AudioCodec.Vorbis,
+            AudioCodecDto.Flac => AudioCodec.Flac,
+            AudioCodecDto.Ac3 => AudioCodec.Ac3,
+            AudioCodecDto.Eac3 => AudioCodec.Eac3,
+            _ => throw new ArgumentOutOfRangeException(nameof(codec), codec, "Unknown audio codec."),
         };
     }
 
@@ -106,5 +233,15 @@ public static class StreamingMappingExtensions
             AudioFormatDto.AiffPcm => AudioFormat.AiffPcm,
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unknown audio format."),
         };
+    }
+
+    private static string? ContentTypeOf(PlaybackMethod method, string fileContentType, MediaUrl? stream)
+    {
+        if (stream is null)
+        {
+            return null;
+        }
+
+        return method == PlaybackMethod.DirectPlay ? fileContentType : VideoContentTypes.HlsPlaylist;
     }
 }

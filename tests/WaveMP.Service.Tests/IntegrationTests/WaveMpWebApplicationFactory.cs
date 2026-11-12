@@ -64,11 +64,14 @@ public sealed class WaveMpWebApplicationFactory(
         settings["DATA_PATH"] = _data.Path;
         // The periodic scan would start one minute after the start; tests start scans themselves.
         settings["Scanning:StartupDelay"] = "1.00:00:00";
+        // Short HLS segments, so the synthetic videos of a few seconds have several.
+        settings["Transcoding:SegmentDuration"] = "00:00:02";
         if (Environment.GetEnvironmentVariable("FFMPEG_PATH") is { Length: > 0 } ffmpeg)
         {
             string extension = OperatingSystem.IsWindows() ? ".exe" : string.Empty;
             settings["Metadata:FfprobePath"] = Path.Combine(ffmpeg, "ffprobe" + extension);
             settings["Caching:FfmpegPath"] = Path.Combine(ffmpeg, "ffmpeg" + extension);
+            settings["Transcoding:FfmpegPath"] = Path.Combine(ffmpeg, "ffmpeg" + extension);
         }
 
         builder.ConfigureAppConfiguration(configuration => configuration.AddInMemoryCollection(settings));

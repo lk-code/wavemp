@@ -20,7 +20,8 @@ namespace WaveMP.Service.Controllers;
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
 public sealed class SettingsController(
     ILibrarySettingsService librarySettings,
-    ICacheSettingsService cacheSettings) : ControllerBase
+    ICacheSettingsService cacheSettings,
+    ITranscodingSettingsService transcodingSettings) : ControllerBase
 {
     /// <summary>
     /// Returns the settings of the media library.
@@ -105,6 +106,57 @@ public sealed class SettingsController(
         }
 
         foreach (CacheSettingsValidationError error in result.Errors)
+        {
+            ModelState.AddValidationError(
+                error.Field.ToJsonName(),
+                error.Reason.ToCode(),
+                error.Minimum,
+                error.Maximum);
+        }
+
+        return ValidationProblem();
+    }
+
+    /// <summary>
+    /// Returns the settings of the transcoding.
+    /// </summary>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The transcoding settings.</response>
+    [HttpGet("transcoding", Name = "GetTranscodingSettings")]
+    [ProducesResponseType<TranscodingSettingsDto>(StatusCodes.Status200OK, "application/json")]
+    public async Task<ActionResult<TranscodingSettingsDto>> GetTranscodingSettingsAsync(
+        CancellationToken cancellationToken)
+    {
+        TranscodingSettings settings = await transcodingSettings.GetAsync(cancellationToken);
+        return Ok(settings.ToDto());
+    }
+
+    /// <summary>
+    /// Changes the settings of the transcoding. Missing or null values stay unchanged. New transcodes use the new
+    /// values at once, running ones keep theirs; a change of the hardware acceleration starts a new detection of the
+    /// graphics hardware in the background.
+    /// </summary>
+    /// <param name="request">The changes.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The changed settings.</response>
+    /// <response code="400">The request is invalid (code <c>request.invalid</c>, errors by field).</response>
+    [HttpPatch("transcoding", Name = "UpdateTranscodingSettings")]
+    [Consumes("application/json")]
+    [ProducesResponseType<TranscodingSettingsDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    public async Task<ActionResult<TranscodingSettingsDto>> UpdateTranscodingSettingsAsync(
+        UpdateTranscodingSettingsDto request,
+        CancellationToken cancellationToken)
+    {
+        TranscodingSettingsResult result = await transcodingSettings.UpdateAsync(
+            request.ToCommand(),
+            cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Settings.ToDto());
+        }
+
+        foreach (TranscodingSettingsValidationError error in result.Errors)
         {
             ModelState.AddValidationError(
                 error.Field.ToJsonName(),

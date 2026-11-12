@@ -3919,6 +3919,559 @@
         ]
       }
     },
+    "/api/v1/settings/transcoding": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Returns the settings of the transcoding.",
+        "operationId": "GetTranscodingSettings",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The transcoding settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscodingSettings"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Changes the settings of the transcoding. Missing or null values stay unchanged. New transcodes use the new values at once, running ones keep theirs; a change of the hardware acceleration starts a new detection of the graphics hardware in the background.",
+        "operationId": "UpdateTranscodingSettings",
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTranscodingSettings"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTranscodingSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The changed settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscodingSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid (code `request.invalid`, errors by field).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/hls/master.m3u8": {
+      "get": {
+        "tags": [
+          "TrackHls"
+        ],
+        "summary": "Returns the HLS master playlist of a track with its one variant. The URI of the media playlist is relative and carries the signed query.",
+        "operationId": "GetTrackHlsMasterPlaylist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "media",
+            "in": "query",
+            "description": "The video with its sound (default) or only the sound.",
+            "schema": {
+              "default": "Video",
+              "$ref": "#/components/schemas/HlsMedia"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "description": "Signed media URL: id of the user the URL was issued to.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "query",
+            "description": "Signed media URL: id of the session the URL was issued in.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "description": "Signed media URL: expiry in Unix seconds.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sig",
+            "in": "query",
+            "description": "Signed media URL: Base64Url-encoded signature.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The master playlist.",
+            "content": {
+              "application/vnd.apple.mpegurl": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid media (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`), has no video (code `track.no_video`) or no sound (code `track.no_audio`), or its file is gone since the last scan (code `stream.file_missing`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The duration of the file is unknown (code `transcode.failed`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Nothing can be transcoded (code `transcode.unavailable`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          },
+          {
+            "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/hls/{media}/{variant}/main.m3u8": {
+      "get": {
+        "tags": [
+          "TrackHls"
+        ],
+        "summary": "Returns the HLS media playlist of a variant: all segments of the file with their durations. The URIs of the segments are relative and carry the signed query.",
+        "operationId": "GetTrackHlsMediaPlaylist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "media",
+            "in": "path",
+            "description": "The video with its sound or only the sound.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/HlsMedia"
+            }
+          },
+          {
+            "name": "variant",
+            "in": "path",
+            "description": "The variant from the master playlist.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "description": "Signed media URL: id of the user the URL was issued to.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "query",
+            "description": "Signed media URL: id of the session the URL was issued in.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "description": "Signed media URL: expiry in Unix seconds.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sig",
+            "in": "query",
+            "description": "Signed media URL: Base64Url-encoded signature.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The media playlist.",
+            "content": {
+              "application/vnd.apple.mpegurl": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid media (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "As for the master playlist, or the variant is outdated because the file or the settings changed (code `transcode.variant_outdated`; load the master playlist again).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The duration of the file is unknown (code `transcode.failed`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Nothing can be transcoded (code `transcode.unavailable`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          },
+          {
+            "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/hls/{media}/{variant}/segments/{index}": {
+      "get": {
+        "tags": [
+          "TrackHls"
+        ],
+        "summary": "Returns a segment of a variant (MPEG-TS). A missing segment is transcoded first: the request waits until it is ready, and a segment far from the running transcode (a seek) starts a new transcode at the segment.",
+        "operationId": "GetTrackHlsSegment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "media",
+            "in": "path",
+            "description": "The video with its sound or only the sound.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/HlsMedia"
+            }
+          },
+          {
+            "name": "variant",
+            "in": "path",
+            "description": "The variant from the master playlist.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "description": "Index of the segment, from 0.",
+            "required": true,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "description": "Signed media URL: id of the user the URL was issued to.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "query",
+            "description": "Signed media URL: id of the session the URL was issued in.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "description": "Signed media URL: expiry in Unix seconds.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sig",
+            "in": "query",
+            "description": "Signed media URL: Base64Url-encoded signature.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The segment.",
+            "content": {
+              "video/mp2t": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid media (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "As for the media playlist, or the variant has no such segment (code `transcode.segment_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "ffmpeg failed (code `transcode.failed`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Nothing can be transcoded (code `transcode.unavailable`), all transcode slots are in use (code `transcode.busy`) or the segment was not ready in time (code `transcode.timeout`); the last two with Retry-After.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          },
+          {
+            "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/tracks": {
       "get": {
         "tags": [
@@ -4621,7 +5174,7 @@
         "tags": [
           "TrackStreams"
         ],
-        "summary": "Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded (not available yet). For direct play, the answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element. It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.",
+        "summary": "Decides how the client plays the audio of a track: directly, if it supports the format of the file, otherwise transcoded to AAC as an HLS stream (also the sound of tracks that only have a video). The answer contains a signed, short-lived stream URL that works without the session token, for example in an audio element: the file (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable). It is valid for some time plus the duration of the track and while the session is active; clients ask again for a new one when it has expired. The answer also carries the ReplayGain tags of the file.",
         "operationId": "GetTrackPlayback",
         "parameters": [
           {
@@ -4678,7 +5231,7 @@
             }
           },
           "404": {
-            "description": "The track does not exist (code `track.not_found`), has no audio file (code `track.no_audio`) or its audio file is gone since the last scan (code `stream.file_missing`).",
+            "description": "The track does not exist (code `track.not_found`), has neither an audio file nor a video (code `track.no_audio`) or its file is gone since the last scan (code `stream.file_missing`).",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4946,6 +5499,472 @@
           },
           {
             "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/video/playback": {
+      "get": {
+        "tags": [
+          "TrackVideos"
+        ],
+        "summary": "Decides how the client plays the video of a track from what it supports: directly, if it plays the container, the video codec (H.264 only as 8 bit 4:2:0) and the audio codec of the file, otherwise transcoded to H.264 and AAC as an HLS stream. Videos read by an older version of the scan are transcoded until the next scan. The answer contains a signed, short-lived stream URL that works without the session token, for example in a video element: the file (protocol File) or the HLS master playlist (protocol Hls; null if transcoding is unavailable).",
+        "operationId": "GetTrackVideoPlayback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "videoContainers",
+            "in": "query",
+            "description": "The containers the client plays (at most 20, repeated query parameter).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/VideoContainer"
+              }
+            }
+          },
+          {
+            "name": "videoCodecs",
+            "in": "query",
+            "description": "The video codecs the client plays (at most 20, repeated query parameter).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/VideoCodec"
+              }
+            }
+          },
+          {
+            "name": "audioCodecs",
+            "in": "query",
+            "description": "The audio codecs the client plays in videos (at most 20, repeated query parameter).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AudioCodec"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "How the client plays the video.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackVideoPlayback"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Too many or invalid values (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`), has no video (code `track.no_video`) or its video is gone since the last scan (code `stream.file_missing`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/video": {
+      "get": {
+        "tags": [
+          "TrackVideos"
+        ],
+        "summary": "Streams the video of a track as it is, with HTTP range requests (Accept-Ranges: bytes, 206 Partial Content), a strong ETag of the file version, Last-Modified and Cache-Control: private, no-cache. Besides the session token, it accepts the signed URL of GetTrackVideoPlayback (query uid, sid, exp and sig), because video elements, casting devices and players cannot send a token header.",
+        "operationId": "StreamTrackVideo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "description": "Signed media URL: id of the user the URL was issued to.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sid",
+            "in": "query",
+            "description": "Signed media URL: id of the session the URL was issued in.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "description": "Signed media URL: expiry in Unix seconds.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "sig",
+            "in": "query",
+            "description": "Signed media URL: Base64Url-encoded signature.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The whole file.",
+            "content": {
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/quicktime": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/webm": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/x-matroska": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "The requested range of the file.",
+            "content": {
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/quicktime": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/webm": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/x-matroska": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`), has no video (code `track.no_video`) or its video is gone since the last scan (code `stream.file_missing`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "The requested range is outside the file; as usual for range requests, without body and with Content-Range: bytes */length.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          },
+          {
+            "MediaSignature": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transcoding/status": {
+      "get": {
+        "tags": [
+          "Transcoding"
+        ],
+        "summary": "Returns whether transcoding works, the result of the detection of the graphics hardware (Intel Quick Sync) and how many transcodes run.",
+        "operationId": "GetTranscodingStatus",
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The state of the transcoding.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscodingStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transcoding/jobs": {
+      "get": {
+        "tags": [
+          "Transcoding"
+        ],
+        "summary": "Lists the running transcodes, newest first.",
+        "operationId": "ListTranscodeJobs",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of transcodes to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of transcodes of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "A page of running transcodes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscodeJobPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid paging (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/transcoding/jobs/{jobId}": {
+      "delete": {
+        "tags": [
+          "Transcoding"
+        ],
+        "summary": "Stops a running transcode. A player that still needs its segments starts a new one.",
+        "operationId": "CancelTranscodeJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "Id of the transcode.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The transcode was stopped."
+          },
+          "404": {
+            "description": "No transcode with the id is running (code `transcode.job_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
           }
         ]
       }
@@ -5769,6 +6788,18 @@
         ],
         "type": "string"
       },
+      "AudioCodec": {
+        "enum": [
+          "Aac",
+          "Mp3",
+          "Opus",
+          "Vorbis",
+          "Flac",
+          "Ac3",
+          "Eac3"
+        ],
+        "type": "string"
+      },
       "AudioFormat": {
         "enum": [
           "Mp3",
@@ -6149,6 +7180,87 @@
         ],
         "type": "string"
       },
+      "HardwareAcceleration": {
+        "required": [
+          "state",
+          "accelerator"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "description": "State of the hardware acceleration.",
+            "$ref": "#/components/schemas/HardwareAccelerationState"
+          },
+          "accelerator": {
+            "description": "The encoder that passed the test; none without.",
+            "$ref": "#/components/schemas/HardwareAccelerator"
+          },
+          "device": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The render device that was tested, if any."
+          },
+          "reason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Why the hardware is not used; null while detecting, active or disabled.",
+                "$ref": "#/components/schemas/HardwareUnavailableReason"
+              }
+            ]
+          },
+          "detectedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the detection finished; null while detecting.",
+            "format": "date-time"
+          }
+        },
+        "description": "Result of the detection of the graphics hardware."
+      },
+      "HardwareAccelerationMode": {
+        "enum": [
+          "Auto",
+          "Off"
+        ],
+        "type": "string",
+        "description": "Whether Intel Quick Sync is detected and used for transcoding videos."
+      },
+      "HardwareAccelerationState": {
+        "enum": [
+          "Detecting",
+          "Active",
+          "Unavailable",
+          "Disabled",
+          "Failed"
+        ],
+        "type": "string",
+        "description": "State of the hardware acceleration of the transcoding."
+      },
+      "HardwareAccelerator": {
+        "enum": [
+          "None",
+          "Vaapi",
+          "Qsv"
+        ],
+        "type": "string",
+        "description": "An encoder of the graphics hardware."
+      },
+      "HardwareUnavailableReason": {
+        "enum": [
+          "ffmpeg_missing",
+          "no_device",
+          "test_failed",
+          "encode_failed"
+        ],
+        "type": "string"
+      },
       "Health": {
         "required": [
           "status",
@@ -6175,6 +7287,14 @@
         ],
         "type": "string",
         "description": "Aggregated health status."
+      },
+      "HlsMedia": {
+        "enum": [
+          "Audio",
+          "Video"
+        ],
+        "type": "string",
+        "description": "What an HLS stream of a track carries."
       },
       "Home": {
         "required": [
@@ -6995,6 +8115,14 @@
           "cover.not_found",
           "stream.transcoding_required",
           "stream.file_missing",
+          "track.no_video",
+          "transcode.unavailable",
+          "transcode.busy",
+          "transcode.timeout",
+          "transcode.failed",
+          "transcode.variant_outdated",
+          "transcode.segment_not_found",
+          "transcode.job_not_found",
           "history.not_found",
           "playlist.not_found",
           "playlist.entry_not_found",
@@ -7572,6 +8700,14 @@
         ],
         "type": "string"
       },
+      "StreamProtocol": {
+        "enum": [
+          "File",
+          "Hls"
+        ],
+        "type": "string",
+        "description": "How the stream of `streamUrl` is delivered."
+      },
       "Track": {
         "required": [
           "id",
@@ -7802,6 +8938,7 @@
         "required": [
           "trackId",
           "method",
+          "protocol",
           "replayGain"
         ],
         "type": "object",
@@ -7814,6 +8951,10 @@
           "method": {
             "description": "Direct play or transcoding.",
             "$ref": "#/components/schemas/PlaybackMethod"
+          },
+          "protocol": {
+            "description": "The file as it is (direct play) or an HLS stream of the sound (transcoding).",
+            "$ref": "#/components/schemas/StreamProtocol"
           },
           "format": {
             "oneOf": [
@@ -7849,7 +8990,7 @@
               "null",
               "string"
             ],
-            "description": "Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token; null if the track has to be transcoded. It stays valid until expiresAt and while the session is active."
+            "description": "Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token: the file for direct play, the HLS master playlist for transcoding. Null if the track has to be transcoded and transcoding is unavailable. It stays valid until expiresAt and while the session is active."
           },
           "expiresAt": {
             "type": [
@@ -7864,7 +9005,7 @@
               "null",
               "integer"
             ],
-            "description": "Duration of the audio file in milliseconds, if known.",
+            "description": "Duration of the file in milliseconds, if known.",
             "format": "int64"
           },
           "replayGain": {
@@ -7889,6 +9030,238 @@
         ],
         "type": "string"
       },
+      "TrackVideoPlayback": {
+        "required": [
+          "trackId",
+          "method",
+          "protocol",
+          "hasAudio"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track.",
+            "format": "uuid"
+          },
+          "method": {
+            "description": "Direct play or transcoding.",
+            "$ref": "#/components/schemas/PlaybackMethod"
+          },
+          "protocol": {
+            "description": "The file as it is (direct play) or an HLS stream (transcoding).",
+            "$ref": "#/components/schemas/StreamProtocol"
+          },
+          "transcodeReason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Why the video has to be transcoded; null for direct play.",
+                "$ref": "#/components/schemas/TranscodeReason"
+              }
+            ]
+          },
+          "container": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Container of the file; null if it is none of the containers clients play directly.",
+                "$ref": "#/components/schemas/VideoContainer"
+              }
+            ]
+          },
+          "videoCodec": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Codec of the picture; null if it is none of the codecs clients play directly.",
+                "$ref": "#/components/schemas/VideoCodec"
+              }
+            ]
+          },
+          "audioCodec": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Codec of the sound; null without sound or if it is none of the codecs clients play directly.",
+                "$ref": "#/components/schemas/AudioCodec"
+              }
+            ]
+          },
+          "hasAudio": {
+            "type": "boolean",
+            "description": "Whether the video has sound."
+          },
+          "width": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Width of the picture of the file in pixels, if known.",
+            "format": "int32"
+          },
+          "height": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Height of the picture of the file in pixels, if known.",
+            "format": "int32"
+          },
+          "contentType": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "MIME type the stream is delivered with; null without stream."
+          },
+          "streamUrl": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Signed, short-lived URL of the stream (path with query, relative to the server), for players that cannot send the session token: the file for direct play, the HLS master playlist for transcoding. Null if the video has to be transcoded and transcoding is unavailable. It stays valid until expiresAt and while the session is active."
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the stream URL expires; null without stream.",
+            "format": "date-time"
+          },
+          "durationMilliseconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Duration of the video in milliseconds, if known.",
+            "format": "int64"
+          }
+        },
+        "description": "How the client plays the video of a track, and the signed URL of its stream."
+      },
+      "TranscodeJob": {
+        "required": [
+          "id",
+          "trackId",
+          "media",
+          "accelerator",
+          "startSegment",
+          "completedSegments",
+          "segmentCount",
+          "startedAt",
+          "lastAccessAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the transcode.",
+            "format": "uuid"
+          },
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track.",
+            "format": "uuid"
+          },
+          "track": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The track; null if it was removed in the meantime.",
+                "$ref": "#/components/schemas/Track"
+              }
+            ]
+          },
+          "media": {
+            "description": "Video with sound or sound only.",
+            "$ref": "#/components/schemas/HlsMedia"
+          },
+          "accelerator": {
+            "description": "The encoder of the picture; none for software and for sound only.",
+            "$ref": "#/components/schemas/HardwareAccelerator"
+          },
+          "startSegment": {
+            "type": "integer",
+            "description": "The segment the transcode started at (0 from the start, later after a seek).",
+            "format": "int32"
+          },
+          "completedSegments": {
+            "type": "integer",
+            "description": "Index of the next segment the transcode produces: the segments before it exist.",
+            "format": "int32"
+          },
+          "segmentCount": {
+            "type": "integer",
+            "description": "Number of segments of the file.",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "When the transcode started.",
+            "format": "date-time"
+          },
+          "lastAccessAt": {
+            "type": "string",
+            "description": "When a client last asked for one of its segments.",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Id of the profile whose player started it, if known.",
+            "format": "uuid"
+          }
+        },
+        "description": "A running transcode."
+      },
+      "TranscodeJobPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranscodeJob"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
       "TranscodeReason": {
         "enum": [
           "format_unsupported",
@@ -7899,6 +9272,77 @@
           "audio_from_video"
         ],
         "type": "string"
+      },
+      "TranscodingSettings": {
+        "required": [
+          "hardwareAcceleration",
+          "maxParallelJobs",
+          "maxVideoHeight",
+          "audioBitrateKbps"
+        ],
+        "type": "object",
+        "properties": {
+          "hardwareAcceleration": {
+            "description": "Whether Intel Quick Sync is detected and used for videos.",
+            "$ref": "#/components/schemas/HardwareAccelerationMode"
+          },
+          "maxParallelJobs": {
+            "type": "integer",
+            "description": "How many ffmpeg processes transcode at the same time (1 to 8).",
+            "format": "int32"
+          },
+          "maxVideoHeight": {
+            "type": "integer",
+            "description": "Largest height of transcoded videos in pixels (480, 720, 1080, 1440 or 2160); larger videos are scaled down, smaller ones are never scaled up.",
+            "format": "int32"
+          },
+          "audioBitrateKbps": {
+            "type": "integer",
+            "description": "Bitrate of transcoded audio (AAC) in kbit/s (128, 160, 192, 256 or 320).",
+            "format": "int32"
+          }
+        },
+        "description": "Settings of the transcoding."
+      },
+      "TranscodingStatus": {
+        "required": [
+          "available",
+          "ffmpegAvailable",
+          "cacheAvailable",
+          "hardware",
+          "runningJobs",
+          "maxParallelJobs"
+        ],
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "Whether anything can be transcoded (ffmpeg can be started and the cache can be written)."
+          },
+          "ffmpegAvailable": {
+            "type": "boolean",
+            "description": "Whether ffmpeg can be started."
+          },
+          "cacheAvailable": {
+            "type": "boolean",
+            "description": "Whether the cache, which holds the segments, can be written."
+          },
+          "hardware": {
+            "description": "Result of the detection of the graphics hardware.",
+            "$ref": "#/components/schemas/HardwareAcceleration"
+          },
+          "runningJobs": {
+            "type": "integer",
+            "description": "Number of running transcodes.",
+            "format": "int32"
+          },
+          "maxParallelJobs": {
+            "type": "integer",
+            "description": "Limit of parallel transcodes from the settings.",
+            "format": "int32"
+          }
+        },
+        "description": "State of the transcoding."
       },
       "UpdateCacheSettings": {
         "type": "object",
@@ -8116,6 +9560,49 @@
           }
         },
         "description": "Rates a track for the current profile."
+      },
+      "UpdateTranscodingSettings": {
+        "type": "object",
+        "properties": {
+          "hardwareAcceleration": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Whether Intel Quick Sync is detected and used for videos.",
+                "$ref": "#/components/schemas/HardwareAccelerationMode"
+              }
+            ]
+          },
+          "maxParallelJobs": {
+            "maximum": 8,
+            "minimum": 1,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "How many ffmpeg processes transcode at the same time.",
+            "format": "int32"
+          },
+          "maxVideoHeight": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Largest height of transcoded videos in pixels: 480, 720, 1080, 1440 or 2160.",
+            "format": "int32"
+          },
+          "audioBitrateKbps": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Bitrate of transcoded audio (AAC) in kbit/s: 128, 160, 192, 256 or 320.",
+            "format": "int32"
+          }
+        },
+        "description": "Changes the settings of the transcoding. Missing or null values stay unchanged. Running transcodes keep their settings; a change of the hardware acceleration starts a new detection."
       },
       "UpdateUser": {
         "type": "object",
@@ -8390,6 +9877,25 @@
         },
         "description": "Problem Details (RFC 9457) of a request that failed validation (400, code `request.invalid`). Instead of texts, every error names its field and a machine-readable code with its limits; clients translate them."
       },
+      "VideoCodec": {
+        "enum": [
+          "H264",
+          "Hevc",
+          "Vp8",
+          "Vp9",
+          "Av1"
+        ],
+        "type": "string"
+      },
+      "VideoContainer": {
+        "enum": [
+          "Mp4",
+          "Mov",
+          "Webm",
+          "Matroska"
+        ],
+        "type": "string"
+      },
       "Year": {
         "required": [
           "year",
@@ -8458,7 +9964,7 @@
       },
       "MediaSignature": {
         "type": "apiKey",
-        "description": "Signed media URL for players that cannot send a token header. Use the URL as issued (for example streamUrl of GetTrackPlayback): its query carries uid, sid, exp and sig. It is only valid for one kind of media of one track, until it expires and while the session is active.",
+        "description": "Signed media URL for players that cannot send a token header. Use the URL as issued (for example streamUrl of GetTrackPlayback): its query carries uid, sid, exp and sig. It is only valid for one kind of media of one track, until it expires and while the session is active. The HLS playlists carry the same query in the URIs of their playlists and segments.",
         "name": "sig",
         "in": "query"
       }
@@ -8523,10 +10029,19 @@
       "name": "Settings"
     },
     {
+      "name": "TrackHls"
+    },
+    {
       "name": "Tracks"
     },
     {
       "name": "TrackStreams"
+    },
+    {
+      "name": "TrackVideos"
+    },
+    {
+      "name": "Transcoding"
     },
     {
       "name": "Users"

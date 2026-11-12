@@ -156,17 +156,66 @@ public enum ProblemCodeDto
     CoverNotFound,
 
     /// <summary>
-    /// The client supports none of the formats the audio file of the track could be streamed in; it has to be
-    /// transcoded, which is not available yet (406).
+    /// The client supports none of the formats the audio file of the track could be streamed in; it has to play the
+    /// transcoded HLS stream that GetTrackPlayback offers instead (406).
     /// </summary>
     [JsonStringEnumMemberName("stream.transcoding_required")]
     StreamTranscodingRequired,
 
     /// <summary>
-    /// The audio file of the track is gone since the last scan (404).
+    /// The audio file or video of the track is gone since the last scan (404).
     /// </summary>
     [JsonStringEnumMemberName("stream.file_missing")]
     StreamFileMissing,
+
+    /// <summary>
+    /// The track has no video (404).
+    /// </summary>
+    [JsonStringEnumMemberName("track.no_video")]
+    TrackNoVideo,
+
+    /// <summary>
+    /// Nothing can be transcoded: ffmpeg cannot be started or the cache cannot be written (503).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.unavailable")]
+    TranscodeUnavailable,
+
+    /// <summary>
+    /// All transcode slots are in use; try again after Retry-After seconds (503).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.busy")]
+    TranscodeBusy,
+
+    /// <summary>
+    /// The segment was not ready in time; try again after Retry-After seconds (503).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.timeout")]
+    TranscodeTimeout,
+
+    /// <summary>
+    /// The file cannot be transcoded: ffmpeg failed or the duration of the file is unknown (500).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.failed")]
+    TranscodeFailed,
+
+    /// <summary>
+    /// The HLS playlist belongs to an older version of the file or of the transcoding settings; the client loads the
+    /// master playlist again (404).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.variant_outdated")]
+    TranscodeVariantOutdated,
+
+    /// <summary>
+    /// The HLS variant has no such segment (404).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.segment_not_found")]
+    TranscodeSegmentNotFound,
+
+    /// <summary>
+    /// No transcode with the id is running (404).
+    /// </summary>
+    [JsonStringEnumMemberName("transcode.job_not_found")]
+    TranscodeJobNotFound,
 
     /// <summary>
     /// The entry of the play history does not exist or belongs to another profile (404).
