@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 import { statusOf } from '@/api/problems'
 import { fetchAlbumCover, fetchTrackCover } from '@/library/api'
 import { defaultCoverSize, type CoverSize } from '@/library/covers'
+import { fetchPlaylistCover } from '@/playlists/api'
 
-export type CoverKind = 'album' | 'track'
+export type CoverKind = 'album' | 'track' | 'playlist'
 
 /** Covers kept loaded without a component that shows them, the least recently used go first. */
 export const maxCachedCovers = 100
@@ -22,20 +23,31 @@ interface Entry {
  * an entry of its own. Components acquire a cover while they show it and release it afterwards;
  * requests for the same cover and size are shared. The browser keeps the pictures as well and asks
  * the API with their ETag whether they changed. A missing cover (404) is remembered as null, other
- * errors are not, so the next attempt loads again.
+ * errors are not, so the next attempt loads again. Own covers of playlists carry the version the
+ * API names, so a new picture gets a new entry instead of the one already loaded.
  */
 export const useCoversStore = defineStore('covers', () => {
     const entries = new Map<string, Entry>()
     let clock = 0
 
-    function keyOf(kind: CoverKind, id: string, size: CoverSize): string {
-        return `${kind}:${id}:${size}`
+    function keyOf(kind: CoverKind, id: string, size: CoverSize, version?: string): string {
+        return version ? `${kind}:${id}:${version}:${size}` : `${kind}:${id}:${size}`
+    }
+
+    function fetchCover(kind: CoverKind, id: string, size: CoverSize) {
+        switch (kind) {
+            case 'album':
+                return fetchAlbumCover(id, size)
+            case 'playlist':
+                return fetchPlaylistCover(id, size)
+            default:
+                return fetchTrackCover(id, size)
+        }
     }
 
     async function load(kind: CoverKind, id: string, size: CoverSize): Promise<string | null> {
         try {
-            const buffer =
-                kind === 'album' ? await fetchAlbumCover(id, size) : await fetchTrackCover(id, size)
+            const buffer = await fetchCover(kind, id, size)
             return buffer && buffer.byteLength > 0 ? URL.createObjectURL(new Blob([buffer])) : null
         } catch (error) {
             if (statusOf(error) === 404) {
@@ -71,14 +83,15 @@ export const useCoversStore = defineStore('covers', () => {
 
     /**
      * The object URL of a cover in the size, or null if there is none; release it with the same
-     * size when it is not shown.
+     * size (and version) when it is not shown.
      */
     function acquire(
         kind: CoverKind,
         id: string,
         size: CoverSize = defaultCoverSize,
+        version?: string,
     ): Promise<string | null> {
-        const key = keyOf(kind, id, size)
+        const key = keyOf(kind, id, size, version)
         let entry = entries.get(key)
         if (!entry) {
             entry = { url: null, loaded: false, pending: null, refs: 0, used: 0 }
@@ -114,8 +127,13 @@ export const useCoversStore = defineStore('covers', () => {
         return pending
     }
 
-    function release(kind: CoverKind, id: string, size: CoverSize = defaultCoverSize): void {
-        const key = keyOf(kind, id, size)
+    function release(
+        kind: CoverKind,
+        id: string,
+        size: CoverSize = defaultCoverSize,
+        version?: string,
+    ): void {
+        const key = keyOf(kind, id, size, version)
         const entry = entries.get(key)
         if (!entry) {
             return

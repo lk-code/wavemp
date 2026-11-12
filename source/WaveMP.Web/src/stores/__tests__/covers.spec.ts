@@ -8,6 +8,10 @@ const api = vi.hoisted(() => ({
 
 vi.mock('@/library/api', () => api)
 
+const playlistApi = vi.hoisted(() => ({ fetchPlaylistCover: vi.fn() }))
+
+vi.mock('@/playlists/api', () => playlistApi)
+
 const { maxCachedCovers, useCoversStore } = await import('../covers')
 
 describe('covers store', () => {
@@ -20,6 +24,7 @@ describe('covers store', () => {
         created = 0
         api.fetchAlbumCover.mockReset().mockResolvedValue(new Uint8Array([1, 2, 3]).buffer)
         api.fetchTrackCover.mockReset().mockResolvedValue(new Uint8Array([4]).buffer)
+        playlistApi.fetchPlaylistCover.mockReset().mockResolvedValue(new Uint8Array([5]).buffer)
         createObjectURL.mockClear()
         revokeObjectURL.mockClear()
         vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
@@ -60,6 +65,23 @@ describe('covers store', () => {
         expect(api.fetchAlbumCover).toHaveBeenNthCalledWith(1, 'a', 96)
         expect(api.fetchAlbumCover).toHaveBeenNthCalledWith(2, 'a', 1000)
         expect(store.size()).toBe(2)
+    })
+
+    it('loads every version of the own cover of a playlist on its own', async () => {
+        const store = useCoversStore()
+
+        const first = await store.acquire('playlist', 'p', 300, 'v1')
+        const again = await store.acquire('playlist', 'p', 300, 'v1')
+        const changed = await store.acquire('playlist', 'p', 300, 'v2')
+        store.release('playlist', 'p', 300, 'v1')
+        store.release('playlist', 'p', 300, 'v1')
+
+        expect(again).toBe(first)
+        expect(changed).not.toBe(first)
+        expect(playlistApi.fetchPlaylistCover).toHaveBeenCalledTimes(2)
+        expect(playlistApi.fetchPlaylistCover).toHaveBeenCalledWith('p', 300)
+        expect(api.fetchAlbumCover).not.toHaveBeenCalled()
+        expect(api.fetchTrackCover).not.toHaveBeenCalled()
     })
 
     it('loads covers of tracks through their endpoint', async () => {

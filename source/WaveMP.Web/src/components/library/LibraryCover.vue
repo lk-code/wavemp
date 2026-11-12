@@ -6,22 +6,24 @@ import { coverSizeFor, type CoverSize } from '@/library/covers'
 import { useCoversStore, type CoverKind } from '@/stores/covers'
 
 /**
- * Cover of an album or track from the API. It is loaded once it comes near the viewport, in the
- * size the theme shows it with (its width times the pixel density), and freed when the component
- * goes; until then, and without a cover, the placeholder of the theme shows.
+ * Cover of an album, track or playlist from the API. It is loaded once it comes near the viewport,
+ * in the size the theme shows it with (its width times the pixel density), and freed when the
+ * component goes; until then, and without a cover, the placeholder of the theme shows.
  */
 const props = defineProps<{
     kind: CoverKind
     id: string | null | undefined
     /** Whether the API has a cover (hasCover); otherwise nothing is loaded. */
     available: boolean
+    /** Version of the own cover of a playlist; a new version loads the new picture. */
+    version?: string
 }>()
 
 const covers = useCoversStore()
 const cover = ref<InstanceType<typeof BaseCover> | null>(null)
 const visible = useInView(cover)
 const src = ref<string | null>(null)
-let held: { kind: CoverKind; id: string; size: CoverSize } | null = null
+let held: { kind: CoverKind; id: string; size: CoverSize; version?: string } | null = null
 
 /** The size of the API for the shown width of the cover. */
 function measure(): CoverSize {
@@ -33,7 +35,7 @@ function measure(): CoverSize {
 
 function release(): void {
     if (held) {
-        covers.release(held.kind, held.id, held.size)
+        covers.release(held.kind, held.id, held.size, held.version)
         held = null
     }
 
@@ -42,8 +44,8 @@ function release(): void {
 
 /** Loads the cover once it is visible; runs after rendering, so the shown width is known. */
 async function update(): Promise<void> {
-    const { kind, id, available } = props
-    if (held && (held.kind !== kind || held.id !== id || !available)) {
+    const { kind, id, available, version } = props
+    if (held && (held.kind !== kind || held.id !== id || held.version !== version || !available)) {
         release()
     }
 
@@ -51,17 +53,19 @@ async function update(): Promise<void> {
         return
     }
 
-    const current = { kind, id, size: measure() }
+    const current = { kind, id, size: measure(), version }
     held = current
-    const url = await covers.acquire(kind, id, current.size)
+    const url = await covers.acquire(kind, id, current.size, version)
     if (held === current) {
         src.value = url
     }
 }
 
-watch(() => [props.kind, props.id, props.available, visible.value] as const, update, {
-    flush: 'post',
-})
+watch(
+    () => [props.kind, props.id, props.available, props.version, visible.value] as const,
+    update,
+    { flush: 'post' },
+)
 
 onMounted(update)
 onBeforeUnmount(release)
