@@ -75,10 +75,22 @@ RUN apk add --no-cache ffmpeg icu-data-full icu-libs \
     && ffmpeg -hide_banner -version > /licenses/ffmpeg/VERSION \
     && chown "$APP_UID" /data
 
+# Hardware transcoding with Intel Quick Sync (amd64 only): the VA-API drivers (iHD for current
+# GPUs, i965 for older ones) and the oneVPL runtime for h264_qsv. They are only used when a render
+# device (/dev/dri) is passed into the container; otherwise videos are transcoded in software.
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        apk add --no-cache intel-media-driver libva-intel-driver onevpl-intel-gpu; \
+    fi
+
 COPY LICENSE /licenses/wavemp/LICENSE
 COPY assets/licenses/ffmpeg/ /licenses/ffmpeg/
 COPY assets/licenses/icu/ /licenses/icu/
 COPY assets/licenses/taglibsharp/ /licenses/taglibsharp/
+COPY assets/licenses/intel-media-driver/ /licenses/intel-media-driver/
+COPY assets/licenses/libva-intel-driver/ /licenses/libva-intel-driver/
+COPY assets/licenses/onevpl-intel-gpu/ /licenses/onevpl-intel-gpu/
+COPY assets/licenses/intel-gmmlib/ /licenses/intel-gmmlib/
 COPY assets/web/icons/phosphor/LICENSE /licenses/phosphor-icons/LICENSE
 
 WORKDIR /app
