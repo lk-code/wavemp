@@ -167,6 +167,7 @@ public static class ServiceCollectionExtensions
             options.AddSchemaTransformer<StringEnumSchemaTransformer>();
             options.AddDocumentTransformer(AddProblemCodeAsync);
             options.AddDocumentTransformer<BinaryContentSchemaTransformer>();
+            options.AddOperationTransformer<BinaryRequestBodyTransformer>();
             options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
             options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
             options.AddDocumentTransformer<MediaSignatureSecuritySchemeTransformer>();

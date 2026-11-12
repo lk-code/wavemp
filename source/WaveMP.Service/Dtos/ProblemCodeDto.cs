@@ -173,4 +173,40 @@ public enum ProblemCodeDto
     /// </summary>
     [JsonStringEnumMemberName("history.not_found")]
     HistoryNotFound,
+
+    /// <summary>
+    /// The playlist does not exist or belongs to another profile (404).
+    /// </summary>
+    [JsonStringEnumMemberName("playlist.not_found")]
+    PlaylistNotFound,
+
+    /// <summary>
+    /// The entry does not exist in this playlist (404).
+    /// </summary>
+    [JsonStringEnumMemberName("playlist.entry_not_found")]
+    PlaylistEntryNotFound,
+
+    /// <summary>
+    /// The playlist would have more entries than allowed (409).
+    /// </summary>
+    [JsonStringEnumMemberName("playlist.full")]
+    PlaylistFull,
+
+    /// <summary>
+    /// The uploaded picture is not a JPEG, PNG or WebP (415).
+    /// </summary>
+    [JsonStringEnumMemberName("cover.unsupported_format")]
+    CoverUnsupportedFormat,
+
+    /// <summary>
+    /// The uploaded picture is larger than allowed (413).
+    /// </summary>
+    [JsonStringEnumMemberName("cover.too_large")]
+    CoverTooLarge,
+
+    /// <summary>
+    /// The uploaded picture is damaged and cannot be read (422).
+    /// </summary>
+    [JsonStringEnumMemberName("cover.unreadable")]
+    CoverUnreadable,
 }

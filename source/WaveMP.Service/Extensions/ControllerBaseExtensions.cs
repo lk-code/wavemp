@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using WaveMP.Core.Caching.Covers;
 using WaveMP.Core.Library.Covers;
+using WaveMP.Core.Playlists.Playlists;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Problems;
 
@@ -55,6 +56,33 @@ public static class ControllerBaseExtensions
             default:
                 return controller.Problem(ProblemCodeDto.CoverNotFound, StatusCodes.Status404NotFound);
         }
+    }
+
+    /// <summary>
+    /// The Problem Details response of a failed change of a playlist: 404 if the playlist, the entry or a track does
+    /// not exist, 409 if the playlist would be too long. Statuses that concern a single field of the request
+    /// (<see cref="PlaylistStatus.InvalidName"/>, <see cref="PlaylistStatus.InvalidPosition"/>) are validation errors
+    /// that the controller reports itself; here they become a plain 400.
+    /// </summary>
+    public static ObjectResult PlaylistProblem(this ControllerBase controller, PlaylistStatus status)
+    {
+        return status switch
+        {
+            PlaylistStatus.NotFound => controller.Problem(
+                ProblemCodeDto.PlaylistNotFound,
+                StatusCodes.Status404NotFound),
+            PlaylistStatus.EntryNotFound => controller.Problem(
+                ProblemCodeDto.PlaylistEntryNotFound,
+                StatusCodes.Status404NotFound),
+            PlaylistStatus.TrackNotFound => controller.Problem(
+                ProblemCodeDto.TrackNotFound,
+                StatusCodes.Status404NotFound),
+            PlaylistStatus.Full => controller.Problem(ProblemCodeDto.PlaylistFull, StatusCodes.Status409Conflict),
+            PlaylistStatus.InvalidName or PlaylistStatus.InvalidPosition => controller.Problem(
+                ProblemCodeDto.RequestInvalid,
+                StatusCodes.Status400BadRequest),
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Not a failure."),
+        };
     }
 
     /// <summary>

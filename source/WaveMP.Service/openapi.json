@@ -1613,6 +1613,1026 @@
         ]
       }
     },
+    "/api/v1/me/playlists/{id}/cover": {
+      "get": {
+        "tags": [
+          "PlaylistCovers"
+        ],
+        "summary": "Returns the own cover of a playlist as square WebP picture of 96, 300 or 1000 pixels (the requested size rounded up, at most 1000; never larger than the uploaded picture). Every picture carries a strong ETag of its version and size, Last-Modified and Cache-Control: private, no-cache; a request with a matching If-None-Match returns 304.",
+        "operationId": "GetMyPlaylistCover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Largest width and height in pixels the client shows the picture with (1 to 4096); the server rounds it up to 96, 300 or 1000. The largest picture if missing.",
+            "schema": {
+              "maximum": 4096,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The picture.",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid size (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`) or has no own cover (code `cover.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "PlaylistCovers"
+        ],
+        "summary": "Uploads the own cover of a playlist as the raw bytes of a JPEG, PNG or WebP picture (10 MiB at most by default). The server cuts the largest square out of the middle, scales it down and stores it as WebP; the uploaded file itself is not kept. Replaces an earlier own cover.",
+        "operationId": "SetMyPlaylistCover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The playlist with its new cover.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The picture is too large (code `cover.too_large`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The content is not a JPEG, PNG or WebP picture (code `cover.unsupported_format`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The picture is damaged (code `cover.unreadable`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Pictures cannot be processed, ffmpeg is missing (code `service.unavailable`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "PlaylistCovers"
+        ],
+        "summary": "Removes the own cover of a playlist; the playlist then shows the covers of its tracks again. Succeeds also without an own cover.",
+        "operationId": "DeleteMyPlaylistCover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The playlist has no own cover."
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/playlists/{id}/tracks": {
+      "get": {
+        "tags": [
+          "PlaylistEntries"
+        ],
+        "summary": "Lists the entries of a playlist in their order. Entries of tracks that left the library are gone.",
+        "operationId": "ListMyPlaylistEntries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of entries to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of entries of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaylistEntryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "PlaylistEntries"
+        ],
+        "summary": "Adds tracks to a playlist, at the end or at a position. The same track can be added several times.",
+        "operationId": "AddMyPlaylistEntries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPlaylistEntries"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPlaylistEntries"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new entries and the changed playlist; Location points to the first new entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddedPlaylistEntries"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, e.g. a position after the end (code `request.invalid`, `out_of_range` with the largest allowed position as max).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`) or a track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The playlist would have more entries than allowed (code `playlist.full`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/playlists/{id}/tracks/{entryId}": {
+      "get": {
+        "tags": [
+          "PlaylistEntries"
+        ],
+        "summary": "Returns an entry of a playlist with its current position.",
+        "operationId": "GetMyPlaylistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "description": "Id of the entry.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaylistEntry"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`) or the entry does not exist in it (code `playlist.entry_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "PlaylistEntries"
+        ],
+        "summary": "Moves an entry of a playlist to another position.",
+        "operationId": "UpdateMyPlaylistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "description": "Id of the entry.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaylistEntry"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaylistEntry"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The moved entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaylistEntry"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, e.g. a position after the last entry (code `request.invalid`, `out_of_range` with the largest allowed position as max).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`) or the entry does not exist in it (code `playlist.entry_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "PlaylistEntries"
+        ],
+        "summary": "Removes an entry from a playlist; the entries after it move up. Other entries of the same track stay.",
+        "operationId": "DeleteMyPlaylistEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "description": "Id of the entry.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The entry is removed."
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`) or the entry does not exist in it (code `playlist.entry_not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/playlists": {
+      "get": {
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Lists the playlists of the current profile, sorted and optionally searched.",
+        "operationId": "ListMyPlaylists",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of playlists to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of playlists of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort key; Name by default.",
+            "schema": {
+              "default": "Name",
+              "$ref": "#/components/schemas/PlaylistSort"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Sort direction; ascending by default.",
+            "schema": {
+              "default": "Asc",
+              "$ref": "#/components/schemas/SortDirection"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text: only playlists whose name contains it, without regard to case.",
+            "schema": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of playlists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaylistPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Creates a playlist of the current profile, optionally with its first tracks.",
+        "operationId": "CreateMyPlaylist",
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaylist"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlaylist"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new playlist; Location points to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, e.g. a name of spaces only (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "More tracks than a playlist may have (code `playlist.full`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/playlists/{id}": {
+      "get": {
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Returns a playlist of the current profile.",
+        "operationId": "GetMyPlaylist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The playlist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Renames a playlist of the current profile.",
+        "operationId": "UpdateMyPlaylist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaylist"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlaylist"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The changed playlist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Deletes a playlist of the current profile with its entries and its cover. The tracks stay in the library.",
+        "operationId": "DeleteMyPlaylist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the playlist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The playlist is deleted."
+          },
+          "404": {
+            "description": "The playlist does not exist or belongs to another profile (code `playlist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/profiles": {
       "get": {
         "tags": [
@@ -1668,6 +2688,78 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/me/recently-played": {
+      "get": {
+        "tags": [
+          "RecentlyPlayed"
+        ],
+        "summary": "Lists the tracks the current profile played last, newest first: every track once, at its last play, at most 100 tracks by default. Tracks that left the library are gone.",
+        "operationId": "ListMyRecentlyPlayedTracks",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of tracks to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of tracks of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of tracks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentlyPlayedTrackPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/api/v1/scans": {
@@ -3845,6 +4937,55 @@
   },
   "components": {
     "schemas": {
+      "AddedPlaylistEntries": {
+        "required": [
+          "entries",
+          "playlist"
+        ],
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaylistEntry"
+            },
+            "description": "The new entries, in the order of the request."
+          },
+          "playlist": {
+            "$ref": "#/components/schemas/Playlist"
+          }
+        },
+        "description": "The entries added to a playlist and the playlist afterwards."
+      },
+      "AddPlaylistEntries": {
+        "required": [
+          "trackIds"
+        ],
+        "type": "object",
+        "properties": {
+          "trackIds": {
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The tracks to add, in this order; duplicates are allowed."
+          },
+          "position": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Position of the first added entry, from 0 to the number of entries; the entries from there move back. At the end if missing.",
+            "format": "int32"
+          }
+        },
+        "description": "Adds tracks to a playlist."
+      },
       "Album": {
         "required": [
           "id",
@@ -4216,6 +5357,33 @@
           }
         },
         "description": "Records a play of a track in the play history of the current profile."
+      },
+      "CreatePlaylist": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "description": "Name of the playlist, 1 to 100 characters; spaces at the ends are removed. Names do not need to be unique."
+          },
+          "trackIds": {
+            "maxItems": 500,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Tracks the playlist starts with, in this order; duplicates are allowed. Empty if missing."
+          }
+        },
+        "description": "Creates a playlist of the current profile."
       },
       "CreateSession": {
         "required": [
@@ -4922,6 +6090,194 @@
         },
         "description": "One page of a collection."
       },
+      "Playlist": {
+        "required": [
+          "id",
+          "name",
+          "trackCount",
+          "durationMilliseconds",
+          "cover",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "trackCount": {
+            "type": "integer",
+            "description": "Number of entries; a track can be in the playlist more than once.",
+            "format": "int32"
+          },
+          "durationMilliseconds": {
+            "type": "integer",
+            "description": "Total duration of all entries in milliseconds.",
+            "format": "int64"
+          },
+          "cover": {
+            "description": "What the client shows as cover of the playlist.",
+            "$ref": "#/components/schemas/PlaylistCover"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the name, the entries or the cover changed last.",
+            "format": "date-time"
+          }
+        },
+        "description": "A playlist of the current profile."
+      },
+      "PlaylistCover": {
+        "required": [
+          "kind",
+          "trackIds"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/PlaylistCoverKind"
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Version of the uploaded picture, only with Custom; it changes with every upload, so clients can use it as part of their cache key."
+          },
+          "trackIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Ids of the tracks whose covers make up the cover, in the order of the playlist; only with Tracks, otherwise empty. Their pictures come from the cover endpoint of the tracks."
+          }
+        },
+        "description": "The cover of a playlist: an uploaded picture (Custom), else the covers of up to four tracks of different albums from the start of the playlist (Tracks), else none."
+      },
+      "PlaylistCoverKind": {
+        "enum": [
+          "Custom",
+          "Tracks",
+          "None"
+        ],
+        "type": "string",
+        "description": "Where the cover of a playlist comes from."
+      },
+      "PlaylistEntry": {
+        "required": [
+          "id",
+          "position",
+          "addedAt",
+          "track"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the entry; it stays the same when the entry moves.",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "description": "Position of the entry in the playlist, starting at 0.",
+            "format": "int32"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "track": {
+            "$ref": "#/components/schemas/Track"
+          }
+        },
+        "description": "An entry of a playlist: a track at a position. The same track can have several entries."
+      },
+      "PlaylistEntryPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaylistEntry"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "PlaylistPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Playlist"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "PlaylistSort": {
+        "enum": [
+          "Name",
+          "CreatedAt",
+          "UpdatedAt"
+        ],
+        "type": "string",
+        "description": "Sort key of the playlist list; ties are sorted by id."
+      },
       "ProblemCode": {
         "enum": [
           "request.invalid",
@@ -4950,7 +6306,13 @@
           "cover.not_found",
           "stream.transcoding_required",
           "stream.file_missing",
-          "history.not_found"
+          "history.not_found",
+          "playlist.not_found",
+          "playlist.entry_not_found",
+          "playlist.full",
+          "cover.unsupported_format",
+          "cover.too_large",
+          "cover.unreadable"
         ],
         "type": "string",
         "description": "Machine-readable code of a problem, part of every Problem Details response. Clients translate it."
@@ -5047,6 +6409,58 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Profile"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "RecentlyPlayedTrack": {
+        "required": [
+          "lastPlayedAt",
+          "track"
+        ],
+        "type": "object",
+        "properties": {
+          "lastPlayedAt": {
+            "type": "string",
+            "description": "When the last play of the track started.",
+            "format": "date-time"
+          },
+          "track": {
+            "$ref": "#/components/schemas/Track"
+          }
+        },
+        "description": "A track of the automatic list \"Recently played\": every track once, at its last play."
+      },
+      "RecentlyPlayedTrackPage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentlyPlayedTrack"
             },
             "description": "Items of the page, at most limit."
           },
@@ -5864,6 +7278,40 @@
         },
         "description": "Changes the settings of the media library. Missing or null values stay unchanged."
       },
+      "UpdatePlaylist": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New name, 1 to 100 characters; spaces at the ends are removed."
+          }
+        },
+        "description": "Changes a playlist. Missing or null values stay unchanged."
+      },
+      "UpdatePlaylistEntry": {
+        "required": [
+          "position"
+        ],
+        "type": "object",
+        "properties": {
+          "position": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "New position of the entry, from 0 to the number of entries minus one; the entries in between move by one.",
+            "format": "int32"
+          }
+        },
+        "description": "Moves an entry of a playlist."
+      },
       "UpdateTrackMetadata": {
         "type": "object",
         "properties": {
@@ -6318,7 +7766,19 @@
       "name": "Me"
     },
     {
+      "name": "PlaylistCovers"
+    },
+    {
+      "name": "PlaylistEntries"
+    },
+    {
+      "name": "Playlists"
+    },
+    {
       "name": "Profiles"
+    },
+    {
+      "name": "RecentlyPlayed"
     },
     {
       "name": "Scans"

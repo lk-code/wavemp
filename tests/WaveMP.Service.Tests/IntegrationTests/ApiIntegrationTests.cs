@@ -226,6 +226,7 @@ public class ApiIntegrationTests
     [TestCase("GetTrackPlayback", true)]
     [TestCase("CreateMyHistoryEntry", true)]
     [TestCase("ListMyHistory", true)]
+    [TestCase("SetMyPlaylistCover", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -351,8 +352,32 @@ public class ApiIntegrationTests
         document["components"]!["schemas"]!.AsObject().Should().NotContainKey("IFormFile");
     }
 
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesTheUploadOfPlaylistCoversAsBinaryImages()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        JsonNode upload = FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == "SetMyPlaylistCover");
+        JsonNode cover = FindOperations(document)
+            .Single(operation => operation["operationId"]!.GetValue<string>() == "GetMyPlaylistCover");
+
+        upload["requestBody"]!["required"]!.GetValue<bool>().Should().BeTrue();
+        JsonObject content = upload["requestBody"]!["content"]!.AsObject();
+        content.Select(entry => entry.Key).Should().BeEquivalentTo(["image/jpeg", "image/png", "image/webp"]);
+        content.Should().AllSatisfy(entry =>
+        {
+            entry.Value!["schema"]!["type"]!.GetValue<string>().Should().Be("string");
+            entry.Value["schema"]!["format"]!.GetValue<string>().Should().Be("binary");
+        });
+        upload["responses"]!.AsObject().Select(entry => entry.Key).Should().Contain(["413", "415", "422", "503"]);
+        cover["responses"]!["200"]!["content"]!.AsObject().Select(entry => entry.Key)
+            .Should().Equal("image/webp");
+    }
+
     [TestCase("GetAlbumCover")]
     [TestCase("GetTrackCover")]
+    [TestCase("GetMyPlaylistCover")]
     public async Task GetOpenApiDocument_Always_DescribesTheSizeAndHttpCachingOfCovers(string operationId)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
