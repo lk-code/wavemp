@@ -336,6 +336,146 @@ public class VideoStreamingApiTests
         await response.ShouldBeProblemAsync(HttpStatusCode.Forbidden, "auth.forbidden");
     }
 
+    [Test]
+    public async Task GetTrackVideoPlayback_WithoutOffset_ReturnsZero()
+    {
+        TrackVideoPlaybackDto playback = await VideoPlaybackAsync("Clip", BrowserCapabilities);
+
+        playback.OffsetMilliseconds.Should().Be(0);
+    }
+
+    [Test]
+    public async Task SetTrackVideoOffset_Admin_StoresItAndThePlaybackCarriesIt()
+    {
+        string path = OffsetPath("Webm Clip");
+        try
+        {
+            HttpResponseMessage response = await _admin.SendJsonAsync("PUT", path, """{ "offsetMilliseconds": 1500 }""");
+            TrackVideoOffsetDto read = await _admin.GetJsonAsync<TrackVideoOffsetDto>(path);
+            TrackVideoPlaybackDto playback = await VideoPlaybackAsync("Webm Clip", BrowserCapabilities);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+            (await response.Content.ReadFromJsonAsync<TrackVideoOffsetDto>(HttpClientExtensions.JsonOptions))
+                .Should().BeEquivalentTo(new { TrackId = Track("Webm Clip").Id, OffsetMilliseconds = 1500 });
+            read.OffsetMilliseconds.Should().Be(1500);
+            playback.OffsetMilliseconds.Should().Be(1500);
+        }
+        finally
+        {
+            await ResetOffsetAsync(path);
+        }
+    }
+
+    [Test]
+    public async Task SetTrackVideoOffset_Rescan_KeepsTheOffset()
+    {
+        string path = OffsetPath("Webm Clip");
+        try
+        {
+            (await _admin.SendJsonAsync("PUT", path, """{ "offsetMilliseconds": -2000 }""")).StatusCode
+                .Should().Be(HttpStatusCode.OK);
+
+            HttpResponseMessage response = await _admin.PostAsync("/api/v1/scans", null);
+            ScanDto queued = (await response.Content.ReadFromJsonAsync<ScanDto>(HttpClientExtensions.JsonOptions))!;
+            (await _admin.WaitForScanAsync(queued.Id)).Status.Should().Be(JobRunStatusDto.Succeeded);
+
+            (await _admin.GetJsonAsync<TrackVideoOffsetDto>(path)).OffsetMilliseconds.Should().Be(-2000);
+        }
+        finally
+        {
+            await ResetOffsetAsync(path);
+        }
+    }
+
+    [TestCase(700000, -600000, 600000)]
+    [TestCase(-600001, -600000, 600000)]
+    public async Task SetTrackVideoOffset_OutOfRange_ReturnsOutOfRangeWithLimits(int value, int min, int max)
+    {
+        HttpResponseMessage response = await _admin.SendJsonAsync(
+            "PUT",
+            OffsetPath("Clip"),
+            $$"""{ "offsetMilliseconds": {{value}} }""");
+
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+        {
+            Field = "offsetMilliseconds",
+            Code = ValidationErrorCodeDto.OutOfRange,
+            Min = (int?)min,
+            Max = (int?)max,
+        });
+        (await _admin.GetJsonAsync<TrackVideoOffsetDto>(OffsetPath("Clip"))).OffsetMilliseconds.Should().Be(0);
+    }
+
+    [TestCase("{}")]
+    [TestCase("""{ "offsetMilliseconds": null }""")]
+    public async Task SetTrackVideoOffset_Missing_ReturnsRequired(string body)
+    {
+        HttpResponseMessage response = await _admin.SendJsonAsync("PUT", OffsetPath("Clip"), body);
+
+        IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+        errors.Should().ContainSingle().Which.Should().BeEquivalentTo(new
+        {
+            Field = "offsetMilliseconds",
+            Code = ValidationErrorCodeDto.Required,
+        });
+    }
+
+    [TestCase("GET")]
+    [TestCase("PUT")]
+    public async Task TrackVideoOffset_User_ReturnsForbidden(string method)
+    {
+        HttpResponseMessage response = await _user.SendJsonAsync(
+            method,
+            OffsetPath("Clip"),
+            method == "PUT" ? """{ "offsetMilliseconds": 100 }""" : null);
+
+        await response.ShouldBeProblemAsync(HttpStatusCode.Forbidden, "auth.forbidden");
+    }
+
+    [TestCase("GET")]
+    [TestCase("PUT")]
+    public async Task TrackVideoOffset_AudioTrack_ReturnsNoVideo(string method)
+    {
+        HttpResponseMessage response = await _admin.SendJsonAsync(
+            method,
+            OffsetPath("Song"),
+            method == "PUT" ? """{ "offsetMilliseconds": 100 }""" : null);
+
+        await response.ShouldBeProblemAsync(HttpStatusCode.NotFound, "track.no_video");
+    }
+
+    [TestCase("GET")]
+    [TestCase("PUT")]
+    public async Task TrackVideoOffset_UnknownTrack_ReturnsNotFound(string method)
+    {
+        HttpResponseMessage response = await _admin.SendJsonAsync(
+            method,
+            $"/api/v1/tracks/{Guid.NewGuid()}/video/offset",
+            method == "PUT" ? """{ "offsetMilliseconds": 100 }""" : null);
+
+        await response.ShouldBeProblemAsync(HttpStatusCode.NotFound, "track.not_found");
+    }
+
+    [Test]
+    public async Task TrackVideoOffset_WithoutToken_ReturnsUnauthorized()
+    {
+        HttpResponseMessage response = await _anonymous.GetAsync(OffsetPath("Clip"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private string OffsetPath(string title)
+    {
+        return $"/api/v1/tracks/{Track(title).Id}/video/offset";
+    }
+
+    private async Task ResetOffsetAsync(string path)
+    {
+        HttpResponseMessage reset = await _admin.SendJsonAsync("PUT", path, """{ "offsetMilliseconds": 0 }""");
+        reset.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
     private TrackDto Track(string title)
     {
         return _tracks.Single(track => track.Title == title);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using WaveMP.Core.Streaming.Decisions;
 using WaveMP.Core.Streaming.Formats;
+using WaveMP.Core.Streaming.Offsets;
 using WaveMP.Core.Streaming.Signatures;
 using WaveMP.Core.Streaming.Sources;
 using WaveMP.Core.Transcoding.Services;
@@ -15,8 +16,8 @@ using WaveMP.Service.Tokens;
 namespace WaveMP.Service.Controllers;
 
 /// <summary>
-/// Playback of the video of tracks: the decision between direct play and transcoding, and the stream of the file. The
-/// transcoded HLS stream is delivered by the HLS endpoints of the track.
+/// Playback of the video of tracks: the decision between direct play and transcoding, the stream of the file and the
+/// offset of the video against the audio. The transcoded HLS stream is delivered by the HLS endpoints of the track.
 /// </summary>
 [ApiController]
 [Authorize]
@@ -25,6 +26,7 @@ namespace WaveMP.Service.Controllers;
 public sealed class TrackVideosController(
     IStreamService streams,
     ITranscodingService transcoding,
+    IVideoOffsetService offsets,
     MediaUrlFactory urls) : ControllerBase
 {
     /// <summary>
@@ -144,6 +146,80 @@ public sealed class TrackVideosController(
             source.LastModified,
             new EntityTagHeaderValue($"\"{source.ETag}\""),
             enableRangeProcessing: true);
+    }
+
+    /// <summary>
+    /// Returns the offset of the video against the audio of a track, for admins only. Position of the video = position
+    /// of the audio + offset; 0 without offset.
+    /// </summary>
+    /// <param name="id">Id of the track.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The offset.</response>
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>) or has no video (code
+    /// <c>track.no_video</c>).</response>
+    [HttpGet("offset", Name = "GetTrackVideoOffset")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [ProducesResponseType<TrackVideoOffsetDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<TrackVideoOffsetDto>> GetTrackVideoOffsetAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        VideoOffsetResult result = await offsets.GetAsync(id, cancellationToken);
+        return result.IsFound ? Ok(result.ToDto()) : OffsetProblem(result.Status);
+    }
+
+    /// <summary>
+    /// Sets the offset of the video against the audio of a track, for admins only, for videos whose music starts
+    /// earlier or later than in the audio file. Position of the video = position of the audio + offset; 0 removes the
+    /// offset. The offset is stored in the database (videos are never written) and stays across scans.
+    /// </summary>
+    /// <param name="id">Id of the track.</param>
+    /// <param name="request">The offset.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="200">The offset is set.</response>
+    /// <response code="400">The offset is missing or not between -600000 and 600000 (code <c>request.invalid</c>,
+    /// field <c>offsetMilliseconds</c> with <c>required</c> or <c>out_of_range</c> with min and max).</response>
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>) or has no video (code
+    /// <c>track.no_video</c>).</response>
+    [HttpPut("offset", Name = "SetTrackVideoOffset")]
+    [Authorize(Policy = AuthorizationPolicies.Admin)]
+    [Consumes("application/json")]
+    [ProducesResponseType<TrackVideoOffsetDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<TrackVideoOffsetDto>> SetTrackVideoOffsetAsync(
+        Guid id,
+        UpdateTrackVideoOffsetDto request,
+        CancellationToken cancellationToken)
+    {
+        VideoOffsetResult result = await offsets.SetAsync(id, request.OffsetMilliseconds!.Value, cancellationToken);
+        if (result.IsFound)
+        {
+            return Ok(result.ToDto());
+        }
+
+        if (result.Status == VideoOffsetStatus.Invalid)
+        {
+            // The data annotations reject such offsets first; the service checks them again.
+            ModelState.AddValidationError(
+                "offsetMilliseconds",
+                ValidationErrorCodeDto.OutOfRange,
+                VideoOffsets.MinMilliseconds,
+                VideoOffsets.MaxMilliseconds);
+            return ValidationProblem();
+        }
+
+        return OffsetProblem(result.Status);
+    }
+
+    private ObjectResult OffsetProblem(VideoOffsetStatus status)
+    {
+        return this.Problem(
+            status == VideoOffsetStatus.NoVideo ? ProblemCodeDto.TrackNoVideo : ProblemCodeDto.TrackNotFound,
+            StatusCodes.Status404NotFound);
     }
 
     private void Validate<TEnum>(TEnum[]? values, string field)

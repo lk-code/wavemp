@@ -98,7 +98,8 @@ internal sealed class StreamService(ITrackRepository tracks, IMediaFileLocator l
             TruncateToSeconds(modified),
             CreateETag(file.Id, info.Length, modified),
             file.Duration,
-            file.MetadataVersion >= VideoFormats.MetadataVersion));
+            file.MetadataVersion >= VideoFormats.MetadataVersion,
+            row.VideoOffsetMilliseconds));
     }
 
     public async Task<VideoPlaybackResult> DecideVideoAsync(

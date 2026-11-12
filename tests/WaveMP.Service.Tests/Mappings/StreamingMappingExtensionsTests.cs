@@ -2,6 +2,7 @@ using AwesomeAssertions;
 using WaveMP.Core.Scanning.Writers;
 using WaveMP.Core.Streaming.Decisions;
 using WaveMP.Core.Streaming.Formats;
+using WaveMP.Core.Streaming.Offsets;
 using WaveMP.Core.Streaming.Sources;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Mappings;
@@ -103,7 +104,19 @@ public class StreamingMappingExtensionsTests
             StreamUrl = stream.Url,
             ExpiresAt = stream.ExpiresAt,
             DurationMilliseconds = 61000,
+            OffsetMilliseconds = -1500,
         });
+    }
+
+    [Test]
+    public void ToDto_VideoOffset_CarriesTrackAndOffset()
+    {
+        var trackId = Guid.NewGuid();
+
+        TrackVideoOffsetDto dto = new VideoOffsetResult(VideoOffsetStatus.Found, trackId, 2500).ToDto();
+
+        dto.TrackId.Should().Be(trackId);
+        dto.OffsetMilliseconds.Should().Be(2500);
     }
 
     [Test]
@@ -206,7 +219,8 @@ public class StreamingMappingExtensionsTests
             DateTimeOffset.UnixEpoch,
             "tag",
             TimeSpan.FromSeconds(61),
-            true);
+            true,
+            -1500);
     }
 
     [Test]

@@ -5780,6 +5780,166 @@
         ]
       }
     },
+    "/api/v1/tracks/{id}/video/offset": {
+      "get": {
+        "tags": [
+          "TrackVideos"
+        ],
+        "summary": "Returns the offset of the video against the audio of a track, for admins only. Position of the video = position of the audio + offset; 0 without offset.",
+        "operationId": "GetTrackVideoOffset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The offset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackVideoOffset"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`) or has no video (code `track.no_video`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "TrackVideos"
+        ],
+        "summary": "Sets the offset of the video against the audio of a track, for admins only, for videos whose music starts earlier or later than in the audio file. Position of the video = position of the audio + offset; 0 removes the offset. The offset is stored in the database (videos are never written) and stays across scans.",
+        "operationId": "SetTrackVideoOffset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackVideoOffset"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackVideoOffset"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The offset is set.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackVideoOffset"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The offset is missing or not between -600000 and 600000 (code `request.invalid`, field `offsetMilliseconds` with `required` or `out_of_range` with min and max).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`) or has no video (code `track.no_video`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/transcoding/status": {
       "get": {
         "tags": [
@@ -9039,12 +9199,33 @@
         ],
         "type": "string"
       },
+      "TrackVideoOffset": {
+        "required": [
+          "trackId",
+          "offsetMilliseconds"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "description": "Id of the track.",
+            "format": "uuid"
+          },
+          "offsetMilliseconds": {
+            "type": "integer",
+            "description": "Offset in milliseconds: position of the video = position of the audio + offset. Positive if the music in the video starts later than in the audio file (for example after an intro), negative if it starts earlier; 0 without offset.",
+            "format": "int32"
+          }
+        },
+        "description": "The offset of the video against the audio of a track."
+      },
       "TrackVideoPlayback": {
         "required": [
           "trackId",
           "method",
           "protocol",
-          "hasAudio"
+          "hasAudio",
+          "offsetMilliseconds"
         ],
         "type": "object",
         "properties": {
@@ -9154,6 +9335,11 @@
             ],
             "description": "Duration of the video in milliseconds, if known.",
             "format": "int64"
+          },
+          "offsetMilliseconds": {
+            "type": "integer",
+            "description": "Offset of the video against the audio of the track in milliseconds: position of the video = position of the audio + offset; 0 without offset. Clients that play the audio and show the video muted synchronize the video with it.",
+            "format": "int32"
           }
         },
         "description": "How the client plays the video of a track, and the signed URL of its stream."
@@ -9569,6 +9755,25 @@
           }
         },
         "description": "Rates a track for the current profile."
+      },
+      "UpdateTrackVideoOffset": {
+        "required": [
+          "offsetMilliseconds"
+        ],
+        "type": "object",
+        "properties": {
+          "offsetMilliseconds": {
+            "maximum": 600000,
+            "minimum": -600000,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Offset in milliseconds from -600000 to 600000: position of the video = position of the audio + offset. Positive if the music in the video starts later than in the audio file (for example after an intro), negative if it starts earlier; 0 removes the offset.",
+            "format": "int32"
+          }
+        },
+        "description": "Sets the offset of the video against the audio of a track."
       },
       "UpdateTranscodingSettings": {
         "type": "object",

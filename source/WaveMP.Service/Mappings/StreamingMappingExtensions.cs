@@ -1,5 +1,6 @@
 using WaveMP.Core.Streaming.Decisions;
 using WaveMP.Core.Streaming.Formats;
+using WaveMP.Core.Streaming.Offsets;
 using WaveMP.Core.Streaming.Sources;
 using WaveMP.Service.Dtos;
 using WaveMP.Service.Signatures;
@@ -61,6 +62,16 @@ public static class StreamingMappingExtensions
             DurationMilliseconds = source.Duration is { } duration
                 ? (long)Math.Round(duration.TotalMilliseconds)
                 : null,
+            OffsetMilliseconds = source.OffsetMilliseconds,
+        };
+    }
+
+    public static TrackVideoOffsetDto ToDto(this VideoOffsetResult result)
+    {
+        return new TrackVideoOffsetDto
+        {
+            TrackId = result.TrackId,
+            OffsetMilliseconds = result.OffsetMilliseconds,
         };
     }
 

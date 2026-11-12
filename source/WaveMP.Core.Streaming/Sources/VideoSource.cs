@@ -23,6 +23,8 @@ namespace WaveMP.Core.Streaming.Sources;
 /// <param name="Duration">Duration of the file, if known.</param>
 /// <param name="MetadataComplete">Whether the scan stored everything the decision needs (sound and pixel format);
 /// videos read by an older scan are transcoded until the next scan reads them again.</param>
+/// <param name="OffsetMilliseconds">Offset of the video against the audio in milliseconds: position of the video =
+/// position of the audio + offset.</param>
 public sealed record VideoSource(
     Guid TrackId,
     Guid FileId,
@@ -40,4 +42,5 @@ public sealed record VideoSource(
     DateTimeOffset LastModified,
     string ETag,
     TimeSpan? Duration,
-    bool MetadataComplete);
+    bool MetadataComplete,
+    int OffsetMilliseconds = 0);

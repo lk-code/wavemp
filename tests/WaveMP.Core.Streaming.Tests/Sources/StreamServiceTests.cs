@@ -232,6 +232,19 @@ public class StreamServiceTests
     }
 
     [Test]
+    public async Task GetVideoSourceAsync_TrackWithOffset_CarriesIt()
+    {
+        var trackId = Guid.NewGuid();
+        MediaFile file = VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4");
+        WriteFile("Clip.mp4", 50);
+        Video(trackId, file, -2500);
+
+        VideoSource source = (await _service.GetVideoSourceAsync(trackId)).Source!;
+
+        source.OffsetMilliseconds.Should().Be(-2500);
+    }
+
+    [Test]
     public async Task GetVideoSourceAsync_VideoWithoutSoundReadByAnOlderScan_IsIncomplete()
     {
         var trackId = Guid.NewGuid();
@@ -378,10 +391,10 @@ public class StreamServiceTests
             .Returns(new TrackFileRow(trackId, file));
     }
 
-    private void Video(Guid trackId, MediaFile? file)
+    private void Video(Guid trackId, MediaFile? file, int offsetMilliseconds = 0)
     {
         _tracks.FindPrimaryFileAsync(trackId, MediaFileKind.Video, Arg.Any<CancellationToken>())
-            .Returns(new TrackFileRow(trackId, file));
+            .Returns(new TrackFileRow(trackId, file, offsetMilliseconds));
     }
 
     private static MediaFile VideoFile(

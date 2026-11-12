@@ -76,4 +76,11 @@ public sealed class TrackVideoPlaybackDto
     /// Duration of the video in milliseconds, if known.
     /// </summary>
     public long? DurationMilliseconds { get; init; }
+
+    /// <summary>
+    /// Offset of the video against the audio of the track in milliseconds: position of the video = position of the
+    /// audio + offset; 0 without offset. Clients that play the audio and show the video muted synchronize the video
+    /// with it.
+    /// </summary>
+    public required int OffsetMilliseconds { get; init; }
 }

@@ -231,6 +231,8 @@ public class ApiIntegrationTests
     [TestCase("AddMyFavoriteTrack", true)]
     [TestCase("SetMyTrackRating", true)]
     [TestCase("GetMyHome", true)]
+    [TestCase("GetTrackVideoOffset", true)]
+    [TestCase("SetTrackVideoOffset", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -419,6 +421,19 @@ public class ApiIntegrationTests
         library.Where(operation => operation["responses"]!["403"] is not null)
             .Select(operation => operation["operationId"]!.GetValue<string>())
             .Should().Equal("ListTrackFiles", "GetTrackMetadata", "UpdateTrackMetadata");
+    }
+
+    [Test]
+    public async Task GetOpenApiDocument_Always_DescribesForbiddenOnlyForTheVideoOffset()
+    {
+        JsonNode document = await GetOpenApiDocumentAsync();
+
+        List<JsonNode> videos = [.. FindOperations(document)
+            .Where(operation => operation["tags"]![0]!.GetValue<string>() == "TrackVideos")];
+        videos.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
+        videos.Where(operation => operation["responses"]!["403"] is not null)
+            .Select(operation => operation["operationId"]!.GetValue<string>())
+            .Should().BeEquivalentTo("GetTrackVideoOffset", "SetTrackVideoOffset");
     }
 
     [Test]

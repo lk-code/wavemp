@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using WaveMP.Core.Streaming.Histories;
+using WaveMP.Core.Streaming.Offsets;
 using WaveMP.Core.Streaming.Options;
 using WaveMP.Core.Streaming.Signatures;
 using WaveMP.Core.Streaming.Sources;
@@ -11,7 +12,7 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the streaming: the audio file of a track, the decision between direct play and transcoding, the
-    /// signed media URLs and the play history, with settings from the section <c>Streaming</c>. Needs
+    /// signed media URLs, the play history and the offset of videos, with settings from the section <c>Streaming</c>. Needs
     /// <c>AddWaveMpData</c> and <c>AddWaveMpMetadata</c>. The signing key is loaded on start by
     /// <see cref="ServiceProviderExtensions.InitializeWaveMpStreamingAsync"/>.
     /// </summary>
@@ -25,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMediaUrlIssuer, MediaUrlIssuer>();
         services.AddScoped<IStreamService, StreamService>();
         services.AddScoped<IPlayHistoryService, PlayHistoryService>();
+        services.AddScoped<IVideoOffsetService, VideoOffsetService>();
 
         return services;
     }
