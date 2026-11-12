@@ -198,9 +198,19 @@ Example of a desktop layout with the sidebar on the right:
 | `btn-next` | `button` | `transport-controls` | Next track |
 | `btn-mute` | `button` (`aria-pressed`) | `transport-controls` | Mute |
 | `volume` | `div` | `transport-controls` | Volume with a `slider` |
-| `mode-switch` | `div` (`role="group"`) | `transport` | Buttons for player modes |
+| `mode-switch` | `div` (`role="group"`) | `transport` | Buttons for player modes, the equalizer and the sleep timer |
 | `btn-compact` | `button` | `mode-switch` | Compact mode (disabled in this version) |
+| `btn-equalizer` | `button` | `mode-switch` | Opens the equalizer (`data-view="equalizer"`) |
+| `sleep-timer` | `div` | `mode-switch` | Sleep timer: `btn-sleep-timer`, `sleep-timer-remaining` and its menu (`context-menu`) |
+| `btn-sleep-timer` | `button` (`aria-pressed`, `aria-haspopup="menu"`, `aria-expanded`) | `sleep-timer` | Opens the menu of the sleep timer; pressed while a timer runs |
+| `sleep-timer-remaining` | `span` (`aria-hidden`) | `sleep-timer` | Remaining time of a timer with a duration, or the end the timer waits for; only while a timer runs |
 | `btn-collapse` | `button` | `transport` | Closes the full-screen player (mobile) |
+| `equalizer` | `section` | `view` | The equalizer of the profile: `equalizer-controls`, an `alert` if the browser cannot apply it, and `equalizer-bands` |
+| `equalizer-controls` | `div` (`role="group"`) | `equalizer` | `button` `power` (`aria-pressed`), the `field` `equalizer-preset` with a `select`, `button` `reset` |
+| `equalizer-bands` | `div` (`role="group"`) | `equalizer` | The preamp, `equalizer-scale` and one `equalizer-band` per frequency, side by side; the mobile base scrolls them horizontally |
+| `equalizer-band` | `div` | `equalizer-bands` | One band (`data-kind`): `equalizer-value`, a vertical `slider` and a `label` with the frequency or "Preamp" |
+| `equalizer-value` | `span` (`aria-hidden`) | `equalizer-band` | Gain of the band in dB |
+| `equalizer-scale` | `div` (`aria-hidden`) | `equalizer-bands` | Three `label`s with the highest gain, 0 dB and the lowest gain, from top to bottom |
 | `bottom-nav` | `nav` | `app` | Main navigation at the bottom (mobile) |
 | `bottom-nav-item` | `a` (`aria-current`) | `bottom-nav` | Entry with `icon` and `label` |
 | `profile-select` | `main` | `body` (without `app`) | Profile selection, shown before a profile is selected; with `logo`, title, `profile-list` and, on the first start, a hint |
@@ -301,6 +311,10 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `btn-shuffle` | `on` or `off` |
 | `btn-repeat` | `off`, `all` or `one` |
 | `btn-mute` | `muted` or `unmuted` |
+| `btn-equalizer` | `on` or `off`: whether the equalizer of the profile is on |
+| `sleep-timer` | `off`, `duration`, `end-of-track` or `end-of-queue`; additionally `fading` while the music fades out before the stop |
+| `btn-sleep-timer` | `on` while a timer runs, otherwise `off` |
+| `equalizer` | `on` or `off` |
 | `seek` | `disabled` while nothing plays |
 | `volume` | `muted` |
 | `slider` | `disabled`, `dragging` |
@@ -346,11 +360,11 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-current="page"` | `tab`, `bottom-nav-item`, `breadcrumb-link`, `tree-item`, `admin-nav-item` |
 | `aria-current="true"` | `profile-tile` of the current profile, `queue-item` of the current song |
 | `aria-busy="true"` | `profile-select` while a profile is being selected; `view` while its content loads; `load-more` while the next page loads |
-| `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `now-playing-mini` (mobile) |
+| `aria-expanded` | `tree-item`, `btn-menu`, `btn-profile`, `btn-sleep-timer`, `now-playing-mini` (mobile) |
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
 | `aria-checked` | `color-swatch`; `menu-item` with `role="menuitemradio"`, for example the chosen sort key and direction |
 | `aria-selected` | `list-row` |
-| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, `btn-view-cover`, `btn-view-video`, `btn-view-visualization`, the `button`s of `scope-switch` and other toggle buttons |
+| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, `btn-view-cover`, `btn-view-video`, `btn-view-visualization`, the `button`s of `scope-switch`, `btn-sleep-timer`, the `button` `power` of `equalizer-controls` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
 | `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate), `meter` (`aria-valuenow` from 0 to 100) |
 | `:disabled` | buttons and inputs |
@@ -368,18 +382,21 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
 | `data-orientation` | `slider` | `horizontal`, `vertical`; also as `aria-orientation` on `slider-thumb` |
-| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `home`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`, `not-found` |
+| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `home`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `equalizer`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`, `not-found` |
 | `data-kind` | `tile` | `album`, `artist`, `track`, `genre`, `year`, `playlist`, `recently-played` |
 | `data-kind` | `stage-view` | `cover`, `video`, `visualization` |
+| `data-kind` | `equalizer-band` | `preamp` or `band` |
+| `data-frequency` | `equalizer-band` with `data-kind="band"` | Center frequency of the band in Hz, `31`, `62`, `125`, `250`, `500`, `1000`, `2000`, `4000`, `8000`, `16000` |
 | `data-section` | `view` (library) | `recently-added`, `favorites`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-value` | `rating` | Stars of the rating, `0` (none) to `5` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist`, `rating`, `favorite`; in playlists also `handle` (first column, only where entries can be moved), `album` and `detail` (in "Recently played" the time of the last play, in the favorites the time the song was marked) |
 | `data-count` | `playlist-cover` | Number of song covers (1 to 4) |
 | `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media`, `rating` |
 | `data-field` | `field` (metadata editor) | `title`, `artist`, `album`, `album-artist`, `year`, `number`, `disc`, `genre` |
-| `data-field` | `field` (settings) | `language`, `replay-gain` |
+| `data-field` | `field` (settings) | `language`, `replay-gain`, `equalizer` (checkbox), `crossfade`, `crossfade-albums` (checkbox), `sleep-timer-fade` |
+| `data-field` | `field` (equalizer) | `equalizer-preset` |
 | `data-field` | `field` (video sync of a song) | `video-offset` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `shelf`, `button` in `view-actions`, `detail-actions`, `scope-switch`, `shelf-actions`, `queue`, `queue-item-actions` and `transcode-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `play`, `play-next` and `add-to-queue` for songs with audio, `add-to-playlist`, `favorite`, then `details`, `album`, `artist`, for admins `edit-metadata` and on the page of a playlist `move-up`, `move-down` and `remove-from-playlist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-rating`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`; of the transcoding `hardware`, `ffmpeg`, `cache`, `running-jobs`, `encoder`, `device`), the job (`library-scan`, `cover-cache`) or the section of the search, of an artist and of the favorites (`artists`, `albums`, `tracks`), the row of the home page (`playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated`), of a song (`files`; for songs with a video also `video-sync`), of the cache page (`usage`, `settings`) and of the transcoding page (`status`, `jobs`, `settings`), the action of a page (`play`, `shuffle`, `favorite`, `edit-metadata`; on the page of a song `save-video-offset`; of the library `all-music` and `my-music`; of a row of the home page `play`; of a playlist also `rename`, `cover`, `remove-cover`, `delete`; on the playlist overview `create-playlist`) of the queue (`clear-queue`; per entry `move-up`, `move-down`, `remove`) or of a running transcode (`cancel`) |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `shelf`, `button` in `view-actions`, `detail-actions`, `scope-switch`, `shelf-actions`, `queue`, `queue-item-actions`, `transcode-actions` and `equalizer-controls`, `link` on the settings page | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `play`, `play-next` and `add-to-queue` for songs with audio, `add-to-playlist`, `favorite`, then `details`, `album`, `artist`, for admins `edit-metadata` and on the page of a playlist `move-up`, `move-down` and `remove-from-playlist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-rating`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`; of the transcoding `hardware`, `ffmpeg`, `cache`, `running-jobs`, `encoder`, `device`), the job (`library-scan`, `cover-cache`) or the section of the search, of an artist and of the favorites (`artists`, `albums`, `tracks`), the row of the home page (`playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated`), of a song (`files`; for songs with a video also `video-sync`), of the cache page (`usage`, `settings`) and of the transcoding page (`status`, `jobs`, `settings`), the action of a page (`play`, `shuffle`, `favorite`, `edit-metadata`; on the page of a song `save-video-offset`; of the library `all-music` and `my-music`; of a row of the home page `play`; of a playlist also `rename`, `cover`, `remove-cover`, `delete`; on the playlist overview `create-playlist`) of the queue (`clear-queue`; per entry `move-up`, `move-down`, `remove`) or of a running transcode (`cancel`); in the menu of the sleep timer `sleep-off`, `sleep-15`, `sleep-30`, `sleep-45`, `sleep-60`, `sleep-90`, `sleep-120`, `sleep-end-of-track`, `sleep-end-of-queue`; the `button`s `power` and `reset` of `equalizer-controls`; the `link` `open-equalizer` on the settings page |
 
 ## Variables
 
@@ -654,6 +671,8 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `volume` | `--wmp-icon-volume` | `/icons/phosphor/fill/speaker-high-fill.svg` | Transport |
 | `muted` | `--wmp-icon-muted` | `/icons/phosphor/fill/speaker-x-fill.svg` | Transport |
 | `compact` | `--wmp-icon-compact` | `/icons/phosphor/fill/corners-in-fill.svg` | Transport |
+| `equalizer` | `--wmp-icon-equalizer` | `/icons/phosphor/fill/faders-fill.svg` | Transport |
+| `sleep-timer` | `--wmp-icon-sleep-timer` | `/icons/phosphor/fill/moon-fill.svg` | Transport |
 | `collapse-player` | `--wmp-icon-collapse-player` | `/icons/phosphor/fill/caret-down-fill.svg` | Transport |
 | `settings` | `--wmp-icon-settings` | `/icons/phosphor/regular/gear-six.svg` | Menus and dialogs |
 | `profile` | `--wmp-icon-profile` | `/icons/phosphor/regular/user-circle.svg` | Menus and dialogs |
@@ -684,6 +703,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `remove-from-queue` | `--wmp-icon-remove-from-queue` | `/icons/phosphor/regular/x.svg` | Menus and dialogs |
 | `clear-queue` | `--wmp-icon-clear-queue` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `close` | `--wmp-icon-close` | `/icons/phosphor/regular/x.svg` | Menus and dialogs |
+| `reset` | `--wmp-icon-reset` | `/icons/phosphor/regular/arrow-counter-clockwise.svg` | Menus and dialogs |
 
 ## Rules
 
@@ -725,6 +745,7 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 ### Changelog
 
 - **Version 3:** cover, video and visualization on the stage, with a fade. Changed: `btn-video` is replaced by `btn-view-video`, one of the three buttons `btn-view-cover`, `btn-view-video` and `btn-view-visualization`, of which the chosen view is pressed; `stage-actions` is shown for every current song, not only for songs with a video; the `cover` and the `video-stage` of the stage no longer lie directly in `stage` but each in a `stage-view` inside `stage-views`, so themes that address `stage > cover`, `stage cover` or `stage > video-stage` have to use `stage-view > cover` and `stage-view > video-stage`; the `video` is muted and follows the music. Added: the state `visualization` of `stage`, the parts `stage-views`, `stage-view` (with `data-kind` and the states `active`, `loading` and `failed`), `stage-notice`, `visualization` (state `placeholder`) and the `btn-view-*` buttons, the variables `--wmp-stage-transition-duration` and `--wmp-stage-view-background`, and for admins the `section` `video-sync` on the page of a song with a video (`field` `video-offset`, `button` `save-video-offset`). The icon slots `view-cover`, `view-video` and `view-visualization` now belong to the content.
+    - Additions without a version change: equalizer, crossfade and sleep timer. The page `data-view="equalizer"` below Now Playing with the parts `equalizer` (states `on` and `off`), `equalizer-controls`, `equalizer-bands`, `equalizer-band` (`data-kind` `preamp` or `band`, `data-frequency`), `equalizer-value` and `equalizer-scale`; the vertical `slider` (`data-orientation`, `aria-orientation`) with the variable `--wmp-equalizer-slider-height`; in `mode-switch` the button `btn-equalizer` (states `on` and `off`) and the sleep timer `sleep-timer` (states `off`, `duration`, `end-of-track`, `end-of-queue` and `fading`) with `btn-sleep-timer` and `sleep-timer-remaining`; on mobile the full-screen player shows `mode-switch` below the transport controls; new values of `data-field` (`equalizer`, `crossfade`, `crossfade-albums`, `sleep-timer-fade`, `equalizer-preset`) and `data-item` (`power`, `reset`, `open-equalizer` and the entries of the sleep timer menu), `section-title` on the settings page and the icon slots `equalizer`, `sleep-timer` and `reset`.
 - **Version 2:** favorites, ratings and the home page. Changed: the lists of songs have the new columns `rating` (stars) and `favorite` (heart) at their end, so the defaults of `--wmp-list-columns`, `--wmp-list-columns-playlist` and `--wmp-list-columns-recently-played` have two more columns; the new part `now-playing-actions` of `transport` takes the start of the grid area `mode-switch`, which now ends at the end of its cell (`justify-self: end`). Themes that set these variables have to add the new columns; themes that rearrange `transport` have to place `now-playing-actions`. Added: the parts `btn-favorite`, `rating`, `rating-star`, `scope-switch`, `now-playing-actions`, `shelf`, `shelf-header`, `shelf-title` and `shelf-actions`, their states, the attribute `data-value`, the home page (`data-view="home"`, tab and bottom navigation entry `home`), the library section `favorites`, the tile kind `track`, the `meta-item` `rating` on the page of a song, new values of `data-item` (menu entry `favorite`; detail action `favorite`; `all-music`, `my-music`; the rows `playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated` of `shelf`), the sort key `sort-rating`, the variables `--wmp-favorite-color`, `--wmp-rating-color` and `--wmp-shelf-tile-width` and the icon slots `home`, `track`, `favorite`, `favorite-off`, `rating-star`, `rating-star-off`, `add-favorite` and `remove-favorite`; `tree-favorites` is no longer reserved.
     - Additions without a version change: videos. The `stage` shows the video of songs with one (`stage-actions`, `btn-video`, `video-stage`, `video`, `btn-fullscreen`, the states `video` and `cover` of `stage` and `fullscreen` of `video-stage`) and the icon slot `exit-fullscreen`; `fullscreen` is no longer reserved and belongs to the content. The notice `unsupported` of `transport-message` now means that the server cannot transcode the song.
     - Additions without a version change: the transcoding page of the administration (`transcoding-status`, `transcode-list`, `transcode-item`, `transcode-info`, `transcode-title`, `transcode-meta`, `transcode-actions`, `data-view="admin-transcoding"`, the entry `admin-transcoding` of `admin-nav`, further values of `data-item` and the tokens of `badge` and `transcode-item`) with the icon slot `admin-transcoding`.

@@ -6,6 +6,7 @@ import BaseCover from '@/components/base/BaseCover.vue'
 import BaseSlider from '@/components/base/BaseSlider.vue'
 import FavoriteButton from '@/components/collection/FavoriteButton.vue'
 import RatingStars from '@/components/collection/RatingStars.vue'
+import SleepTimerControl from '@/components/player/SleepTimerControl.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import { useFormat } from '@/composables/useFormat'
 import { useMediaQuery } from '@/composables/useMediaQuery'
@@ -14,6 +15,7 @@ import {
     transportIcons,
     transportStateTokens,
     type PlayerMessage,
+    type SleepTimerChoice,
     type TransportState,
 } from './transport'
 
@@ -43,6 +45,8 @@ const emit = defineEmits<{
     toggleMute: []
     changeVolume: [volume: number]
     compact: []
+    openEqualizer: []
+    sleepTimer: [choice: SleepTimerChoice]
     showNowPlaying: []
     expand: []
     collapse: []
@@ -236,6 +240,15 @@ function onMiniPlayer(): void {
                 disabled
                 @click="emit('compact')"
             />
+            <BaseButton
+                part="btn-equalizer"
+                variant="icon"
+                icon="equalizer"
+                :label="t('player.equalizer')"
+                :state="state.equalizer ? 'on' : 'off'"
+                @click="emit('openEqualizer')"
+            />
+            <SleepTimerControl :timer="state.sleepTimer" @choose="emit('sleepTimer', $event)" />
         </div>
         <BaseButton
             part="btn-collapse"

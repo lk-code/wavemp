@@ -4,6 +4,7 @@ import { createPinia } from 'pinia'
 import AppTransport from '../AppTransport.vue'
 import {
     nextRepeatMode,
+    sleepTimerStateTokens,
     transportIcons,
     transportStateTokens,
     type TransportState,
@@ -54,6 +55,19 @@ describe('transport logic', () => {
         expect(transportStateTokens('idle', false)).toBe('idle')
         expect(transportStateTokens('playing', true)).toBe('playing expanded')
         expect(transportStateTokens('playing', false, true)).toBe('playing loading')
+    })
+
+    it('builds the state tokens of the sleep timer', () => {
+        expect(sleepTimerStateTokens(undefined)).toBe('off')
+        expect(sleepTimerStateTokens({ mode: 'duration', remaining: 60, fading: false })).toBe(
+            'duration',
+        )
+        expect(sleepTimerStateTokens({ mode: 'endOfTrack', remaining: 0, fading: true })).toBe(
+            'end-of-track fading',
+        )
+        expect(sleepTimerStateTokens({ mode: 'endOfQueue', remaining: 0, fading: false })).toBe(
+            'end-of-queue',
+        )
     })
 })
 
@@ -180,5 +194,80 @@ describe('AppTransport', () => {
         expect(wrapper.emitted('next')).toHaveLength(1)
         expect(wrapper.emitted('previous')).toHaveLength(1)
         expect(wrapper.emitted('stop')).toHaveLength(1)
+    })
+})
+
+describe('AppTransport equalizer and sleep timer', () => {
+    it('opens the equalizer and shows whether it is on', async () => {
+        const wrapper = mountTransport({ equalizer: true })
+
+        const button = wrapper.get('[data-part="btn-equalizer"]')
+        expect(button.attributes('data-state')).toBe('on')
+        expect(button.find('[data-part="icon"]').attributes('data-icon')).toBe('equalizer')
+        await button.trigger('click')
+
+        expect(wrapper.emitted('openEqualizer')).toHaveLength(1)
+        expect(mountTransport().get('[data-part="btn-equalizer"]').attributes('data-state')).toBe(
+            'off',
+        )
+    })
+
+    it('shows a stopped sleep timer without remaining time', () => {
+        const wrapper = mountTransport()
+
+        const timer = wrapper.get('[data-part="sleep-timer"]')
+        expect(timer.attributes('data-state')).toBe('off')
+        expect(timer.get('[data-part="btn-sleep-timer"]').attributes('aria-pressed')).toBe('false')
+        expect(timer.get('[data-part="btn-sleep-timer"]').attributes('aria-haspopup')).toBe('menu')
+        expect(timer.find('[data-part="sleep-timer-remaining"]').exists()).toBe(false)
+    })
+
+    it('shows the remaining time and the fade-out of a running timer', () => {
+        const wrapper = mountTransport({
+            sleepTimer: { mode: 'duration', remaining: 754, fading: true },
+        })
+
+        const timer = wrapper.get('[data-part="sleep-timer"]')
+        expect(timer.attributes('data-state')).toBe('duration fading')
+        expect(timer.get('[data-part="btn-sleep-timer"]').attributes('aria-pressed')).toBe('true')
+        expect(timer.get('[data-part="sleep-timer-remaining"]').text()).toBe('12:34')
+        expect(timer.get('[data-part="btn-sleep-timer"] [data-part="label"]').text()).toBe(
+            'Sleep timer: Stops in 12:34',
+        )
+    })
+
+    it('offers the choices of the sleep timer and emits the chosen one', async () => {
+        const wrapper = mountTransport({
+            sleepTimer: { mode: 'endOfTrack', remaining: 0, fading: false },
+        })
+
+        const items = wrapper.findAll('[data-part="sleep-timer"] [data-part="menu-item"]')
+        expect(items.map((item) => item.attributes('data-item'))).toEqual([
+            'sleep-off',
+            'sleep-15',
+            'sleep-30',
+            'sleep-45',
+            'sleep-60',
+            'sleep-90',
+            'sleep-120',
+            'sleep-end-of-track',
+            'sleep-end-of-queue',
+        ])
+        expect(
+            items
+                .filter((item) => item.attributes('aria-checked') === 'true')
+                .map((item) => item.text()),
+        ).toEqual(['At the end of the song'])
+        expect(wrapper.get('[data-part="sleep-timer-remaining"]').text()).toBe('End of song')
+
+        await wrapper.get('[data-item="sleep-30"]').trigger('click')
+        await wrapper.get('[data-item="sleep-end-of-queue"]').trigger('click')
+        await wrapper.get('[data-item="sleep-off"]').trigger('click')
+
+        expect(wrapper.emitted('sleepTimer')).toEqual([
+            [{ mode: 'duration', minutes: 30 }],
+            [{ mode: 'endOfQueue' }],
+            [{ mode: 'off' }],
+        ])
     })
 })

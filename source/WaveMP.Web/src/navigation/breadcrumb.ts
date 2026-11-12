@@ -55,6 +55,14 @@ export function buildBreadcrumb(route: RouteInfo, detailTitle?: string | null): 
         case 'now-playing':
             crumbs.push({ id: 'now-playing', labelKey: 'nav.nowPlaying' })
             break
+        case 'equalizer':
+            crumbs.push({
+                id: 'now-playing',
+                labelKey: 'nav.nowPlaying',
+                to: { name: 'now-playing' },
+            })
+            crumbs.push({ id: 'equalizer', labelKey: 'nav.equalizer' })
+            break
         case 'playlists':
         case 'playlists-new':
             crumbs.push({ id: 'playlists', labelKey: 'nav.playlists' })

@@ -52,6 +52,7 @@ import MetaItem from '@/components/library/MetaItem.vue'
 import TileList from '@/components/library/TileList.vue'
 import TrackFileList from '@/components/library/TrackFileList.vue'
 import TrackGroupList from '@/components/library/TrackGroupList.vue'
+import EqualizerPanel from '@/components/player/EqualizerPanel.vue'
 import NowPlayingStage from '@/components/player/NowPlayingStage.vue'
 import PlayQueue from '@/components/player/PlayQueue.vue'
 import PlaylistTrackList, {
@@ -72,6 +73,12 @@ import { supportedLocales, type SupportedLocale } from '@/i18n/locales'
 import { groupTracksByAlbum } from '@/library/grouping'
 import { sortItemId, sortLabelKey, sortOptions } from '@/library/sorting'
 import { libraryTree, mainNavigation, type NavigationTreeNode } from '@/navigation/libraryTree'
+import {
+    fallbackEqualizerBands,
+    fallbackMaxGainDb,
+    fallbackMinGainDb,
+    flatCurve,
+} from '@/player/equalizer'
 import { stageViewOf } from '@/player/videoSync'
 import { profileColorOptions } from '@/profiles/presentation'
 import { iconSlotNames, iconSlots } from '@/themes/iconSlots'
@@ -154,6 +161,11 @@ function openSortSample(event: MouseEvent): void {
 /** A picture of the theme stands in for a cover from the server. */
 const sampleCover = '/themes/midnight/images/cover-placeholder.svg'
 const sliders = ref([0, 0.5, 1])
+
+// Equalizer (fixture): on with the own curve, off without Web Audio
+const equalizerGains = ref([4, 3, 2, 0.5, -1, -1.5, 0, 2, 3.5, 5])
+const equalizerPreamp = ref(-2)
+const equalizerOn = ref(true)
 const disabledSlider = ref(0.3)
 const textEmpty = ref('')
 const textFilled = ref('')
@@ -264,6 +276,18 @@ const transports = computed(() => [
             ...track.value,
             playback: 'playing' as const,
             message: 'unsupported' as const,
+        },
+        expanded: false,
+    },
+    {
+        id: 'sleep-timer',
+        label: t('dev.transportStates.sleepTimer'),
+        state: {
+            ...idle,
+            ...track.value,
+            playback: 'playing' as const,
+            equalizer: true,
+            sleepTimer: { mode: 'duration' as const, remaining: 754, fading: false },
         },
         expanded: false,
     },
@@ -721,6 +745,36 @@ const sampleTranscodeJobs = computed<TranscodeJob[]>(() => {
                         disabled
                     />
                 </div>
+            </div>
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.equalizer') }}</h2>
+            <div data-part="dev-sample">
+                <EqualizerPanel
+                    :enabled="equalizerOn"
+                    preset="Custom"
+                    :preamp-db="equalizerPreamp"
+                    :gains-db="equalizerGains"
+                    :bands="fallbackEqualizerBands"
+                    :min-gain-db="fallbackMinGainDb"
+                    :max-gain-db="fallbackMaxGainDb"
+                    @enable="equalizerOn = $event"
+                    @band="(index, db) => (equalizerGains[index] = db)"
+                    @preamp="equalizerPreamp = $event"
+                />
+            </div>
+            <div data-part="dev-sample">
+                <EqualizerPanel
+                    :enabled="false"
+                    preset="Flat"
+                    :preamp-db="0"
+                    :gains-db="flatCurve()"
+                    :bands="fallbackEqualizerBands"
+                    :min-gain-db="fallbackMinGainDb"
+                    :max-gain-db="fallbackMaxGainDb"
+                    :available="false"
+                />
             </div>
         </section>
 

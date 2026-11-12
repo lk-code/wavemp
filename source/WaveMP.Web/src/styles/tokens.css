@@ -151,6 +151,8 @@
         --wmp-icon-volume: url('/icons/phosphor/fill/speaker-high-fill.svg');
         --wmp-icon-muted: url('/icons/phosphor/fill/speaker-x-fill.svg');
         --wmp-icon-compact: url('/icons/phosphor/fill/corners-in-fill.svg');
+        --wmp-icon-equalizer: url('/icons/phosphor/fill/faders-fill.svg');
+        --wmp-icon-sleep-timer: url('/icons/phosphor/fill/moon-fill.svg');
         --wmp-icon-fullscreen: url('/icons/phosphor/fill/corners-out-fill.svg');
         --wmp-icon-exit-fullscreen: url('/icons/phosphor/fill/corners-in-fill.svg');
         --wmp-icon-collapse-player: url('/icons/phosphor/fill/caret-down-fill.svg');
@@ -183,6 +185,7 @@
         --wmp-icon-remove-from-queue: url('/icons/phosphor/regular/x.svg');
         --wmp-icon-clear-queue: url('/icons/phosphor/regular/trash.svg');
         --wmp-icon-close: url('/icons/phosphor/regular/x.svg');
+        --wmp-icon-reset: url('/icons/phosphor/regular/arrow-counter-clockwise.svg');
 
         /* Spacing and radii */
         --wmp-space-xs: 0.25rem;

@@ -24,6 +24,7 @@ const icons: Record<IconStyle, string[]> = {
         'caret-right',
         'corners-in',
         'corners-out',
+        'faders',
         'guitar',
         'headphones',
         'heart',
@@ -31,6 +32,7 @@ const icons: Record<IconStyle, string[]> = {
         'list',
         'magnifying-glass',
         'microphone-stage',
+        'moon',
         'music-note',
         'music-notes',
         'pause',
@@ -66,6 +68,7 @@ const icons: Record<IconStyle, string[]> = {
         'vinyl-record',
     ],
     regular: [
+        'arrow-counter-clockwise',
         'arrows-clockwise',
         'caret-down',
         'caret-up',

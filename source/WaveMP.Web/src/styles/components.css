@@ -1622,6 +1622,80 @@
         gap: var(--wmp-space-xs);
     }
 
+    [data-part='sleep-timer'] {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--wmp-space-xs);
+    }
+
+    [data-part='sleep-timer-remaining'] {
+        font-size: var(--wmp-font-size-s);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    /* --- Equalizer ----------------------------------------------------------------------- */
+
+    [data-part='equalizer'] {
+        display: grid;
+        gap: var(--wmp-space-m);
+        min-inline-size: 0;
+    }
+
+    [data-part='equalizer-controls'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: var(--wmp-space-s) var(--wmp-space-m);
+    }
+
+    [data-part='equalizer-bands'] {
+        display: flex;
+        align-items: stretch;
+        gap: var(--wmp-space-s);
+        min-inline-size: 0;
+        padding-block: var(--wmp-space-s);
+        overflow-x: auto;
+    }
+
+    [data-part='equalizer-band'] {
+        display: grid;
+        grid-template-rows: auto auto auto;
+        justify-items: center;
+        gap: var(--wmp-space-xs);
+        flex: 1 0 2.75rem;
+        min-inline-size: 2.75rem;
+    }
+
+    [data-part='equalizer-band'][data-kind='preamp'] {
+        margin-inline-end: var(--wmp-space-xs);
+    }
+
+    [data-part='equalizer-value'],
+    [data-part='equalizer-band'] > [data-part='label'] {
+        font-size: var(--wmp-font-size-s);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    /* Aligned with the sliders: below the value, above the label. */
+    [data-part='equalizer-scale'] {
+        display: grid;
+        align-content: space-between;
+        flex: 0 0 auto;
+        block-size: var(--wmp-equalizer-slider-height);
+        margin-block-start: calc(var(--wmp-font-size-s) * 1.5 + var(--wmp-space-xs));
+        font-size: var(--wmp-font-size-s);
+        font-variant-numeric: tabular-nums;
+        opacity: 0.7;
+        text-align: end;
+        white-space: nowrap;
+    }
+
+    [data-part='equalizer'][data-state~='off'] > [data-part='equalizer-bands'] {
+        opacity: 0.6;
+    }
+
     /* --- Content views ------------------------------------------------------------------- */
 
     [data-part='content-title'] {

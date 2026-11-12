@@ -12,6 +12,15 @@ describe('buildBreadcrumb', () => {
         ])
     })
 
+    it('shows the equalizer below Now Playing', () => {
+        expect(buildBreadcrumb({ name: 'equalizer', params: {} })).toEqual([
+            { id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } },
+            { id: 'now-playing', labelKey: 'nav.nowPlaying', to: { name: 'now-playing' } },
+            { id: 'equalizer', labelKey: 'nav.equalizer' },
+        ])
+        expect(pageTitleKey({ name: 'equalizer', params: {} })).toBe('nav.equalizer')
+    })
+
     it('shows the main pages below music', () => {
         expect(buildBreadcrumb({ name: 'now-playing', params: {} }).map((c) => c.id)).toEqual([
             'music',

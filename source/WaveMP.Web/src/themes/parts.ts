@@ -123,6 +123,14 @@ export const parts = [
     'shelf-title',
     'shelf-actions',
 
+    // Equalizer
+    'equalizer',
+    'equalizer-controls',
+    'equalizer-bands',
+    'equalizer-band',
+    'equalizer-value',
+    'equalizer-scale',
+
     // Queue
     'queue',
     'queue-list',
@@ -153,6 +161,10 @@ export const parts = [
     'volume',
     'mode-switch',
     'btn-compact',
+    'btn-equalizer',
+    'sleep-timer',
+    'btn-sleep-timer',
+    'sleep-timer-remaining',
     'btn-collapse',
 
     // Mobile

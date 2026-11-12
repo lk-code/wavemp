@@ -11,7 +11,8 @@
     "home": "Home",
     "nowPlaying": "Now Playing",
     "library": "Library",
-    "playlists": "Playlists"
+    "playlists": "Playlists",
+    "equalizer": "Equalizer"
   },
   "breadcrumb": {
     "label": "Location",
@@ -124,7 +125,17 @@
       "unsupported": "This song cannot be played in this browser and the server cannot convert it right now; it was skipped.",
       "unavailable": "This song could not be loaded; it was skipped.",
       "failed": "Playback failed; the song was skipped."
-    }
+    },
+    "equalizer": "Equalizer",
+    "sleepTimer": "Sleep timer",
+    "sleepTimerMenu": "Stop playback",
+    "sleepTimerOff": "Off",
+    "sleepTimerMinutes": "{minutes} minutes",
+    "sleepTimerEndOfTrack": "At the end of the song",
+    "sleepTimerEndOfQueue": "At the end of the queue",
+    "sleepTimerRemaining": "Stops in {time}",
+    "sleepTimerEndOfTrackShort": "End of song",
+    "sleepTimerEndOfQueueShort": "End of queue"
   },
   "nowPlaying": {
     "emptyTitle": "Nothing is playing",
@@ -144,6 +155,33 @@
     "video": "Video of the current song",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen"
+  },
+  "equalizer": {
+    "title": "Equalizer",
+    "power": "Equalizer on",
+    "controls": "Equalizer settings",
+    "preset": "Preset",
+    "presets": {
+      "flat": "Flat",
+      "rock": "Rock",
+      "pop": "Pop",
+      "jazz": "Jazz",
+      "classical": "Classical",
+      "dance": "Dance",
+      "bass": "Bass",
+      "treble": "Treble",
+      "vocal": "Vocal",
+      "custom": "Custom"
+    },
+    "reset": "Reset",
+    "preamp": "Preamp",
+    "bands": "Frequency bands",
+    "hertz": "{value} Hz",
+    "kilohertz": "{value} kHz",
+    "gain": "{value} dB",
+    "unavailable": "The equalizer and crossfade need Web Audio, which this browser does not offer. The settings are kept for other devices.",
+    "loadError": "The equalizer could not be loaded. The default bands are shown.",
+    "saveError": "The equalizer could not be saved."
   },
   "playlists": {
     "emptyTitle": "No playlists yet",
@@ -259,7 +297,8 @@
       "alerts": "Messages",
       "forms": "Forms",
       "admin": "Profile administration",
-      "administration": "Administration"
+      "administration": "Administration",
+      "equalizer": "Equalizer"
     },
     "samples": {
       "button": "Button",
@@ -304,7 +343,8 @@
       "muted": "Muted",
       "loading": "Loading",
       "message": "Notice (format not supported)",
-      "expanded": "Expanded (full-screen player on mobile)"
+      "expanded": "Expanded (full-screen player on mobile)",
+      "sleepTimer": "Sleep timer running"
     },
     "table": {
       "part": "Part",
@@ -350,7 +390,19 @@
       "off": "Off",
       "track": "Per song",
       "album": "Per album"
-    }
+    },
+    "playback": "Playback",
+    "equalizerOn": "Use the equalizer",
+    "equalizerHint": "Shapes the sound with ten bands and presets. Applies to this profile on all devices.",
+    "openEqualizer": "Open the equalizer",
+    "crossfade": "Crossfade",
+    "crossfadeHint": "Fades one song into the next. Off plays the songs without gaps.",
+    "crossfadeOff": "Off (without gaps)",
+    "crossfadeSeconds": "{seconds} s",
+    "crossfadeAlbums": "Do not crossfade songs of the same album",
+    "sleepTimerFade": "Sleep timer fade-out",
+    "sleepTimerFadeHint": "How long the music fades out before the sleep timer stops it.",
+    "sleepTimerFadeSeconds": "{seconds} seconds"
   },
   "adminUsers": {
     "title": "Manage profiles",

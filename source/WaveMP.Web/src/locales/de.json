@@ -11,7 +11,8 @@
     "home": "Startseite",
     "nowPlaying": "Aktuelle Wiedergabe",
     "library": "Bibliothek",
-    "playlists": "Playlists"
+    "playlists": "Playlists",
+    "equalizer": "Equalizer"
   },
   "breadcrumb": {
     "label": "Position",
@@ -124,7 +125,17 @@
       "unsupported": "Dieser Titel kann in diesem Browser nicht abgespielt und vom Server gerade nicht umgewandelt werden; er wurde übersprungen.",
       "unavailable": "Dieser Titel konnte nicht geladen werden und wurde übersprungen.",
       "failed": "Die Wiedergabe ist fehlgeschlagen; der Titel wurde übersprungen."
-    }
+    },
+    "equalizer": "Equalizer",
+    "sleepTimer": "Sleep-Timer",
+    "sleepTimerMenu": "Wiedergabe beenden",
+    "sleepTimerOff": "Aus",
+    "sleepTimerMinutes": "{minutes} Minuten",
+    "sleepTimerEndOfTrack": "Am Ende des Titels",
+    "sleepTimerEndOfQueue": "Am Ende der Warteschlange",
+    "sleepTimerRemaining": "Stoppt in {time}",
+    "sleepTimerEndOfTrackShort": "Titelende",
+    "sleepTimerEndOfQueueShort": "Warteschlangenende"
   },
   "nowPlaying": {
     "emptyTitle": "Es wird nichts wiedergegeben",
@@ -144,6 +155,33 @@
     "video": "Video des aktuellen Titels",
     "fullscreen": "Vollbild",
     "exitFullscreen": "Vollbild beenden"
+  },
+  "equalizer": {
+    "title": "Equalizer",
+    "power": "Equalizer an",
+    "controls": "Equalizer-Einstellungen",
+    "preset": "Voreinstellung",
+    "presets": {
+      "flat": "Neutral",
+      "rock": "Rock",
+      "pop": "Pop",
+      "jazz": "Jazz",
+      "classical": "Klassik",
+      "dance": "Dance",
+      "bass": "Bass",
+      "treble": "Höhen",
+      "vocal": "Stimme",
+      "custom": "Eigene"
+    },
+    "reset": "Zurücksetzen",
+    "preamp": "Vorverstärkung",
+    "bands": "Frequenzbänder",
+    "hertz": "{value} Hz",
+    "kilohertz": "{value} kHz",
+    "gain": "{value} dB",
+    "unavailable": "Equalizer und Überblendung brauchen Web Audio, das dieser Browser nicht bietet. Die Einstellungen bleiben für andere Geräte erhalten.",
+    "loadError": "Der Equalizer konnte nicht geladen werden. Es werden die Standardbänder gezeigt.",
+    "saveError": "Der Equalizer konnte nicht gespeichert werden."
   },
   "playlists": {
     "emptyTitle": "Noch keine Playlists",
@@ -259,7 +297,8 @@
       "alerts": "Meldungen",
       "forms": "Formulare",
       "admin": "Profilverwaltung",
-      "administration": "Administration"
+      "administration": "Administration",
+      "equalizer": "Equalizer"
     },
     "samples": {
       "button": "Button",
@@ -304,7 +343,8 @@
       "muted": "Stumm",
       "loading": "Laden",
       "message": "Hinweis (Format nicht unterstützt)",
-      "expanded": "Erweitert (mobiler Vollbild-Player)"
+      "expanded": "Erweitert (mobiler Vollbild-Player)",
+      "sleepTimer": "Sleep-Timer läuft"
     },
     "table": {
       "part": "Part",
@@ -350,7 +390,19 @@
       "off": "Aus",
       "track": "Pro Titel",
       "album": "Pro Album"
-    }
+    },
+    "playback": "Wiedergabe",
+    "equalizerOn": "Equalizer verwenden",
+    "equalizerHint": "Formt den Klang mit zehn Bändern und Voreinstellungen. Gilt für dieses Profil auf allen Geräten.",
+    "openEqualizer": "Equalizer öffnen",
+    "crossfade": "Überblenden",
+    "crossfadeHint": "Blendet einen Titel in den nächsten über. Aus spielt die Titel ohne Lücken.",
+    "crossfadeOff": "Aus (ohne Lücken)",
+    "crossfadeSeconds": "{seconds} s",
+    "crossfadeAlbums": "Titel desselben Albums nicht überblenden",
+    "sleepTimerFade": "Ausblenden des Sleep-Timers",
+    "sleepTimerFadeHint": "Wie lange die Musik ausgeblendet wird, bevor der Sleep-Timer sie stoppt.",
+    "sleepTimerFadeSeconds": "{seconds} Sekunden"
   },
   "adminUsers": {
     "title": "Profile verwalten",

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
     formatDate,
+    formatDecibels,
     formatDuration,
     formatFileSize,
+    formatFrequency,
     formatNumber,
     formatPercent,
     formatYear,
@@ -80,5 +82,24 @@ describe('formatFileSize', () => {
     it('shows invalid and negative values as zero', () => {
         expect(formatFileSize(-1, 'en')).toBe('0 byte')
         expect(formatFileSize(Number.NaN, 'en')).toBe('0 byte')
+    })
+})
+
+describe('formatDecibels', () => {
+    it('shows one decimal and a sign except for zero', () => {
+        expect(formatDecibels(1.5, 'en')).toBe('+1.5')
+        expect(formatDecibels(-3, 'de')).toBe('-3,0')
+        expect(formatDecibels(0, 'en')).toBe('0.0')
+        expect(formatDecibels(-0, 'en')).toBe('0.0')
+        expect(formatDecibels(Number.NaN, 'en')).toBe('0.0')
+    })
+})
+
+describe('formatFrequency', () => {
+    it('uses Hz below 1000 Hz and kHz above', () => {
+        expect(formatFrequency(31, 'en')).toEqual({ value: '31', unit: 'hertz' })
+        expect(formatFrequency(1000, 'en')).toEqual({ value: '1', unit: 'kilohertz' })
+        expect(formatFrequency(16000, 'de')).toEqual({ value: '16', unit: 'kilohertz' })
+        expect(formatFrequency(2500, 'de')).toEqual({ value: '2,5', unit: 'kilohertz' })
     })
 })

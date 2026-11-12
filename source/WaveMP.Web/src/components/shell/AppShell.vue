@@ -7,6 +7,7 @@ import AppHeader from './AppHeader.vue'
 import AppSidebar from './AppSidebar.vue'
 import AppToolbar from './AppToolbar.vue'
 import AppTransport from './AppTransport.vue'
+import type { SleepTimerChoice } from './transport'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import { pageTitleKey } from '@/navigation/breadcrumb'
 import { useCollectionStore } from '@/stores/collection'
@@ -50,6 +51,21 @@ function closeSidebar(): void {
         sidebarOpen.value = false
         void focus('[data-part="btn-menu"]')
     }
+}
+
+function chooseSleepTimer(choice: SleepTimerChoice): void {
+    if (choice.mode === 'duration') {
+        player.startSleepTimer('duration', choice.minutes)
+    } else if (choice.mode === 'off') {
+        player.cancelSleepTimer()
+    } else {
+        player.startSleepTimer(choice.mode)
+    }
+}
+
+function openEqualizer(): void {
+    playerExpanded.value = false
+    void router.push({ name: 'equalizer' })
 }
 
 function expandPlayer(): void {
@@ -134,6 +150,8 @@ onUnmounted(() => {
             @toggle-mute="player.toggleMute"
             @change-volume="player.setVolume"
             @show-now-playing="router.push({ name: 'now-playing' })"
+            @open-equalizer="openEqualizer"
+            @sleep-timer="chooseSleepTimer"
             @expand="expandPlayer"
             @collapse="collapsePlayer"
         />

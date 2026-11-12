@@ -267,6 +267,14 @@
         --_icon: var(--wmp-icon-compact);
     }
 
+    [data-icon='equalizer'] {
+        --_icon: var(--wmp-icon-equalizer);
+    }
+
+    [data-icon='sleep-timer'] {
+        --_icon: var(--wmp-icon-sleep-timer);
+    }
+
     [data-icon='fullscreen'] {
         --_icon: var(--wmp-icon-fullscreen);
     }
@@ -393,5 +401,9 @@
 
     [data-icon='close'] {
         --_icon: var(--wmp-icon-close);
+    }
+
+    [data-icon='reset'] {
+        --_icon: var(--wmp-icon-reset);
     }
 }

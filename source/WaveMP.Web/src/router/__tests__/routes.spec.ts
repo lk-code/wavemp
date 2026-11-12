@@ -79,6 +79,14 @@ describe('createRoutes', () => {
         expect(route.meta.public).toBe(true)
     })
 
+    it('knows the equalizer below Now Playing', async () => {
+        const route = await resolve('/now-playing/equalizer')
+
+        expect(route.name).toBe('equalizer')
+        expect(route.meta.tab).toBe('now-playing')
+        expect(route.meta.public).toBeUndefined()
+    })
+
     it('knows the settings page', async () => {
         const route = await resolve('/settings')
 

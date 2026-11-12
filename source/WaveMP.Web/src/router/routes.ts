@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import EqualizerView from '@/views/EqualizerView.vue'
 import HomeView from '@/views/HomeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
@@ -72,6 +73,12 @@ export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecord
             path: '/now-playing',
             name: 'now-playing',
             component: NowPlayingView,
+            meta: { tab: 'now-playing' },
+        },
+        {
+            path: '/now-playing/equalizer',
+            name: 'equalizer',
+            component: EqualizerView,
             meta: { tab: 'now-playing' },
         },
         { path: '/library', name: 'library', redirect: librarySongs },

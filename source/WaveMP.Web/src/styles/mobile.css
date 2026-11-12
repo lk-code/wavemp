@@ -220,9 +220,10 @@
                 'now-playing-mini'
                 'now-playing-actions'
                 'seek'
-                'transport-controls' !important;
+                'transport-controls'
+                'mode-switch' !important;
             grid-template-columns: minmax(0, 1fr) !important;
-            grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
+            grid-template-rows: auto minmax(0, 1fr) auto auto auto auto !important;
             row-gap: var(--wmp-space-l);
             padding: max(var(--wmp-space-s), env(safe-area-inset-top)) var(--wmp-space-l)
                 max(var(--wmp-space-xl), env(safe-area-inset-bottom));
@@ -233,6 +234,19 @@
             grid-area: now-playing-actions !important;
             display: flex !important;
             justify-content: center;
+        }
+
+        /* The equalizer and the sleep timer; the compact mode does not exist on mobile. */
+        [data-part='transport'][data-state~='expanded'] > [data-part='mode-switch'] {
+            grid-area: mode-switch !important;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            gap: var(--wmp-space-l);
+        }
+
+        [data-part='transport'][data-state~='expanded'] [data-part='btn-compact'] {
+            display: none !important;
         }
 
         [data-part='transport'][data-state~='expanded'] > [data-part='btn-collapse'] {

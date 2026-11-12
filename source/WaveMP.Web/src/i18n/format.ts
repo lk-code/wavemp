@@ -73,3 +73,35 @@ export function formatFileSize(bytes: number, locale: string): string {
         maximumFractionDigits: index === 0 ? 0 : 1,
     }).format(value)
 }
+
+/**
+ * Formats a level in dB with one decimal and a sign except for zero (+1.5, 0.0, -3.0), without the
+ * unit; the messages add it.
+ */
+export function formatDecibels(value: number, locale: string): string {
+    const db = Number.isFinite(value) ? value : 0
+    return new Intl.NumberFormat(locale, {
+        signDisplay: 'exceptZero',
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+    }).format(db === 0 ? 0 : db)
+}
+
+export interface FormattedFrequency {
+    /** The number in Hz below 1000 Hz, otherwise in kHz. */
+    readonly value: string
+    readonly unit: 'hertz' | 'kilohertz'
+}
+
+/** Formats a frequency in Hz as Hz below 1000 Hz, otherwise as kHz (31 Hz, 1 kHz, 16 kHz). */
+export function formatFrequency(hertz: number, locale: string): FormattedFrequency {
+    const value = Number.isFinite(hertz) && hertz > 0 ? hertz : 0
+    if (value < 1000) {
+        return { value: formatNumber(value, locale, { maximumFractionDigits: 0 }), unit: 'hertz' }
+    }
+
+    return {
+        value: formatNumber(value / 1000, locale, { maximumFractionDigits: 1 }),
+        unit: 'kilohertz',
+    }
+}

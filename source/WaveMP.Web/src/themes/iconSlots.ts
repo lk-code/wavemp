@@ -88,6 +88,8 @@ export const iconSlots = {
     volume: { file: fill('speaker-high'), area: 'transport' },
     muted: { file: fill('speaker-x'), area: 'transport' },
     compact: { file: fill('corners-in'), area: 'transport' },
+    equalizer: { file: fill('faders'), area: 'transport' },
+    'sleep-timer': { file: fill('moon'), area: 'transport' },
     'collapse-player': { file: fill('caret-down'), area: 'transport' },
 
     // General (menus and dialogs)
@@ -120,6 +122,7 @@ export const iconSlots = {
     'remove-from-queue': { file: regular('x'), area: 'general' },
     'clear-queue': { file: regular('trash'), area: 'general' },
     close: { file: regular('x'), area: 'general' },
+    reset: { file: regular('arrow-counter-clockwise'), area: 'general' },
 } as const satisfies Record<string, IconSlot>
 
 export type IconSlotName = keyof typeof iconSlots

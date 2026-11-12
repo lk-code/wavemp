@@ -1,8 +1,10 @@
 import { useI18n } from 'vue-i18n'
 import {
     formatDate,
+    formatDecibels,
     formatDuration,
     formatFileSize,
+    formatFrequency,
     formatNumber,
     formatPercent,
     formatYear,
@@ -21,5 +23,7 @@ export function useFormat() {
         date: (date: Date | number, options?: Intl.DateTimeFormatOptions) =>
             formatDate(date, locale.value, options),
         fileSize: (bytes: number) => formatFileSize(bytes, locale.value),
+        decibels: (value: number) => formatDecibels(value, locale.value),
+        frequency: (hertz: number) => formatFrequency(hertz, locale.value),
     }
 }
