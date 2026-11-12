@@ -94,6 +94,43 @@ public class LibraryMappingExtensionsTests
         dto.Artist.Should().BeNull();
         dto.Album.Should().BeNull();
         dto.DurationMilliseconds.Should().BeNull();
+        dto.IsFavorite.Should().BeFalse();
+        dto.Rating.Should().Be(0);
+    }
+
+    [Test]
+    public void ToDto_RowsOfTheProfile_CarryTheFavoriteAndTheRating()
+    {
+        TrackRow track = new(
+            Guid.NewGuid(),
+            "Ballad",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            false,
+            false,
+            _time,
+            true,
+            3);
+        AlbumRow album = new(Guid.NewGuid(), "First Album", null, null, false, null, null, 1, 0, false, _time, true);
+        ArtistRow artist = new(Guid.NewGuid(), "Alpha Band", 1, 1, _time, true);
+
+        TrackDto trackDto = track.ToDto();
+
+        trackDto.IsFavorite.Should().BeTrue();
+        trackDto.Rating.Should().Be(3);
+        album.ToDto().IsFavorite.Should().BeTrue();
+        artist.ToDto().IsFavorite.Should().BeTrue();
     }
 
     [Test]

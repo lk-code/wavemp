@@ -54,4 +54,14 @@ public sealed class TrackDto
     /// When the track was found for the first time ("recently added").
     /// </summary>
     public required DateTimeOffset FirstSeenAt { get; init; }
+
+    /// <summary>
+    /// Whether the current profile marked the track as favorite.
+    /// </summary>
+    public required bool IsFavorite { get; init; }
+
+    /// <summary>
+    /// Rating of the current profile: 1 to 5 stars, 0 if not rated.
+    /// </summary>
+    public required int Rating { get; init; }
 }

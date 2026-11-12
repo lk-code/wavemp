@@ -93,6 +93,15 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "myMusic",
+            "in": "query",
+            "description": "Only albums with tracks of the \"my music\" of the current profile. Combines with all other filters.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -487,6 +496,15 @@
               "minLength": 0,
               "type": "string"
             }
+          },
+          {
+            "name": "myMusic",
+            "in": "query",
+            "description": "Only artists of the \"my music\" of the current profile, as track or album artist.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -808,6 +826,356 @@
         ]
       }
     },
+    "/api/v1/me/favorites": {
+      "get": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Lists the favorites of the current profile with their tracks, albums and artists, the newest first.",
+        "operationId": "ListMyFavorites",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of favorites to skip.",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of favorites of the page.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Only favorites of this type.",
+            "schema": {
+              "$ref": "#/components/schemas/FavoriteType"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "One page of favorites.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FavoritePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/favorites/tracks/{id}": {
+      "put": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Marks a track as favorite of the current profile. A track marked before keeps the time it was marked.",
+        "operationId": "AddMyFavoriteTrack",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The track is a favorite."
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Removes a track from the favorites of the current profile; also succeeds if it is no favorite.",
+        "operationId": "RemoveMyFavoriteTrack",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The track is no favorite."
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/favorites/albums/{id}": {
+      "put": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Marks an album as favorite of the current profile. An album marked before keeps the time it was marked.",
+        "operationId": "AddMyFavoriteAlbum",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the album.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The album is a favorite."
+          },
+          "404": {
+            "description": "The album does not exist (code `album.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Removes an album from the favorites of the current profile; also succeeds if it is no favorite.",
+        "operationId": "RemoveMyFavoriteAlbum",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the album.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The album is no favorite."
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/favorites/artists/{id}": {
+      "put": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Marks an artist as favorite of the current profile. An artist marked before keeps the time it was marked.",
+        "operationId": "AddMyFavoriteArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the artist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The artist is a favorite."
+          },
+          "404": {
+            "description": "The artist does not exist (code `artist.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Favorites"
+        ],
+        "summary": "Removes an artist from the favorites of the current profile; also succeeds if it is no favorite.",
+        "operationId": "RemoveMyFavoriteArtist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the artist.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The artist is no favorite."
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/genres": {
       "get": {
         "tags": [
@@ -864,6 +1232,15 @@
               "maxLength": 200,
               "minLength": 0,
               "type": "string"
+            }
+          },
+          {
+            "name": "myMusic",
+            "in": "query",
+            "description": "Only genres of the \"my music\" of the current profile, counted over these tracks.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1125,6 +1502,66 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/me/home": {
+      "get": {
+        "tags": [
+          "Home"
+        ],
+        "summary": "Returns all rows of the home page of the current profile in one call: own playlists, recently played tracks, recently added albums, favorites and top rated tracks. Every row is the first page of its list.",
+        "operationId": "GetMyHome",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of items per row.",
+            "schema": {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The rows of the home page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Home"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters (code `request.invalid`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -3525,7 +3962,7 @@
           {
             "name": "direction",
             "in": "query",
-            "description": "Sort direction of the key; descending by default for FirstSeenAt and Relevance, otherwise ascending. Disc and track number always ascend.",
+            "description": "Sort direction of the key; descending by default for FirstSeenAt, Relevance and Rating, otherwise ascending. Disc and track number always ascend.",
             "schema": {
               "$ref": "#/components/schemas/SortDirection"
             }
@@ -3593,6 +4030,15 @@
             "description": "Only tracks with (true) or without (false) a video file.",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "myMusic",
+            "in": "query",
+            "description": "Only tracks of the \"my music\" of the current profile: rated, marked as favorite (also through their album or artist) or in one of its playlists. Combines with all other filters.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -3671,6 +4117,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Track"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The track does not exist (code `track.not_found`).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/tracks/{id}/rating": {
+      "put": {
+        "tags": [
+          "Tracks"
+        ],
+        "summary": "Rates a track for the current profile with 1 to 5 stars; 0 removes the rating. Every profile has its own ratings.",
+        "operationId": "SetMyTrackRating",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the track.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Aborts the request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackRating"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrackRating"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The rating is set."
+          },
+          "400": {
+            "description": "The rating is missing or not between 0 and 5 (code `request.invalid`, field `rating` with `required` or `out_of_range` with min and max).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblem"
                 }
               }
             }
@@ -4893,6 +5416,15 @@
             "schema": {
               "$ref": "#/components/schemas/SortDirection"
             }
+          },
+          {
+            "name": "myMusic",
+            "in": "query",
+            "description": "Only years of the \"my music\" of the current profile, counted over these tracks.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -4994,7 +5526,8 @@
           "trackCount",
           "durationMilliseconds",
           "hasCover",
-          "firstSeenAt"
+          "firstSeenAt",
+          "isFavorite"
         ],
         "type": "object",
         "properties": {
@@ -5051,6 +5584,10 @@
             "type": "string",
             "description": "When the album was found for the first time.",
             "format": "date-time"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Whether the current profile marked the album as favorite."
           }
         },
         "description": "An album of the library."
@@ -5138,7 +5675,8 @@
           "name",
           "albumCount",
           "trackCount",
-          "firstSeenAt"
+          "firstSeenAt",
+          "isFavorite"
         ],
         "type": "object",
         "properties": {
@@ -5164,6 +5702,10 @@
             "type": "string",
             "description": "When the artist was found for the first time.",
             "format": "date-time"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Whether the current profile marked the artist as favorite."
           }
         },
         "description": "An artist of the library."
@@ -5442,6 +5984,106 @@
         },
         "description": "Creates a user (profile)."
       },
+      "Favorite": {
+        "required": [
+          "type",
+          "itemId",
+          "addedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/FavoriteType"
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Id of the track, album or artist.",
+            "format": "uuid"
+          },
+          "addedAt": {
+            "type": "string",
+            "description": "When the profile marked it.",
+            "format": "date-time"
+          },
+          "track": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The track of a track favorite; null otherwise.",
+                "$ref": "#/components/schemas/Track"
+              }
+            ]
+          },
+          "album": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The album of an album favorite; null otherwise.",
+                "$ref": "#/components/schemas/Album"
+              }
+            ]
+          },
+          "artist": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The artist of an artist favorite; null otherwise.",
+                "$ref": "#/components/schemas/Artist"
+              }
+            ]
+          }
+        },
+        "description": "A favorite of the current profile: a track, an album or an artist. Exactly the member of its type is set."
+      },
+      "FavoritePage": {
+        "required": [
+          "items",
+          "offset",
+          "limit",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Favorite"
+            },
+            "description": "Items of the page, at most limit."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Number of items skipped before this page.",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of items of the page, as requested.",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of items of the whole collection.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a collection."
+      },
+      "FavoriteType": {
+        "enum": [
+          "Track",
+          "Album",
+          "Artist"
+        ],
+        "type": "string",
+        "description": "What a favorite marks."
+      },
       "Genre": {
         "required": [
           "name",
@@ -5533,6 +6175,39 @@
         ],
         "type": "string",
         "description": "Aggregated health status."
+      },
+      "Home": {
+        "required": [
+          "playlists",
+          "recentlyPlayed",
+          "recentlyAdded",
+          "favorites",
+          "topRated"
+        ],
+        "type": "object",
+        "properties": {
+          "playlists": {
+            "description": "The own playlists, the last changed first (ListMyPlaylists).",
+            "$ref": "#/components/schemas/PlaylistPage"
+          },
+          "recentlyPlayed": {
+            "description": "The tracks played last (ListMyRecentlyPlayedTracks).",
+            "$ref": "#/components/schemas/RecentlyPlayedTrackPage"
+          },
+          "recentlyAdded": {
+            "description": "The albums found last (ListAlbums with sort FirstSeenAt).",
+            "$ref": "#/components/schemas/AlbumPage"
+          },
+          "favorites": {
+            "description": "The favorite tracks, albums and artists, the newest first (ListMyFavorites).",
+            "$ref": "#/components/schemas/FavoritePage"
+          },
+          "topRated": {
+            "description": "Only the rated tracks, the most stars first, then the latest rating (like ListTracks with sort Rating).",
+            "$ref": "#/components/schemas/TrackPage"
+          }
+        },
+        "description": "The home page of the current profile: every row is the first page of its list, total tells how many items the whole list has."
       },
       "Job": {
         "required": [
@@ -6890,7 +7565,9 @@
           "hasAudio",
           "hasVideo",
           "hasCover",
-          "firstSeenAt"
+          "firstSeenAt",
+          "isFavorite",
+          "rating"
         ],
         "type": "object",
         "properties": {
@@ -6975,6 +7652,15 @@
             "type": "string",
             "description": "When the track was found for the first time (\"recently added\").",
             "format": "date-time"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Whether the current profile marked the track as favorite."
+          },
+          "rating": {
+            "type": "integer",
+            "description": "Rating of the current profile: 1 to 5 stars, 0 if not rated.",
+            "format": "int32"
           }
         },
         "description": "A track of the library: all media files with the same base name in one folder."
@@ -7184,7 +7870,8 @@
           "Year",
           "Genre",
           "FirstSeenAt",
-          "Relevance"
+          "Relevance",
+          "Rating"
         ],
         "type": "string"
       },
@@ -7392,6 +8079,25 @@
           }
         },
         "description": "Changes the metadata of a track. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again."
+      },
+      "UpdateTrackRating": {
+        "required": [
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "rating": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "Number of stars from 1 to 5; 0 removes the rating.",
+            "format": "int32"
+          }
+        },
+        "description": "Rates a track for the current profile."
       },
       "UpdateUser": {
         "type": "object",
@@ -7751,6 +8457,9 @@
       "name": "Cache"
     },
     {
+      "name": "Favorites"
+    },
+    {
       "name": "Genres"
     },
     {
@@ -7758,6 +8467,9 @@
     },
     {
       "name": "History"
+    },
+    {
+      "name": "Home"
     },
     {
       "name": "Jobs"

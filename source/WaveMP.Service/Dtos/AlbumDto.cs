@@ -42,4 +42,9 @@ public sealed class AlbumDto
     /// When the album was found for the first time.
     /// </summary>
     public required DateTimeOffset FirstSeenAt { get; init; }
+
+    /// <summary>
+    /// Whether the current profile marked the album as favorite.
+    /// </summary>
+    public required bool IsFavorite { get; init; }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using WaveMP.Core.Caching.Extensions;
+using WaveMP.Core.Collection.Extensions;
 using WaveMP.Core.Jobs.Extensions;
 using WaveMP.Core.Library.Extensions;
 using WaveMP.Core.Metadata.Extensions;
@@ -51,6 +52,7 @@ public static class WaveMpApplication
         builder.Services.AddWaveMpLibrary();
         builder.Services.AddWaveMpCaching();
         builder.Services.AddWaveMpPlaylists();
+        builder.Services.AddWaveMpCollection();
         builder.Services.AddWaveMpStreaming();
         builder.Services.AddWaveMpAuthentication();
         builder.Services.AddHealthChecks()

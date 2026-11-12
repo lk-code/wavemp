@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaveMP.Core.Caching.Covers;
+using WaveMP.Core.Collection.Ratings;
 using WaveMP.Core.Library.Covers;
 using WaveMP.Core.Library.Tracks;
 using WaveMP.Core.Scanning.Edits;
@@ -23,8 +24,11 @@ namespace WaveMP.Service.Controllers;
 [Authorize]
 [Route("api/v1/tracks")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized, "application/problem+json")]
-public sealed class TracksController(ITrackService tracks, ICoverCacheService covers, ITrackMetadataEditor editor)
-    : ControllerBase
+public sealed class TracksController(
+    ITrackService tracks,
+    ICoverCacheService covers,
+    ITrackMetadataEditor editor,
+    IRatingService ratings) : ControllerBase
 {
     /// <summary>
     /// Lists the tracks, sorted and optionally searched and filtered.
@@ -33,7 +37,7 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
     /// <param name="limit">Maximum number of tracks of the page.</param>
     /// <param name="sort">Sort key; AlbumArtist by default, Relevance with q. Relevance without q falls back to the
     /// default.</param>
-    /// <param name="direction">Sort direction of the key; descending by default for FirstSeenAt and Relevance,
+    /// <param name="direction">Sort direction of the key; descending by default for FirstSeenAt, Relevance and Rating,
     /// otherwise ascending. Disc and track number always ascend.</param>
     /// <param name="q">Search text: only tracks whose title, artist or album contains it or is similar to it (small
     /// typos).</param>
@@ -43,6 +47,8 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
     /// <param name="year">Only tracks of this year.</param>
     /// <param name="hasAudio">Only tracks with (true) or without (false) an audio file.</param>
     /// <param name="hasVideo">Only tracks with (true) or without (false) a video file.</param>
+    /// <param name="myMusic">Only tracks of the "my music" of the current profile: rated, marked as favorite (also
+    /// through their album or artist) or in one of its playlists. Combines with all other filters.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">One page of tracks.</response>
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
@@ -61,6 +67,7 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
         [FromQuery, Range(LibraryLimits.MinYear, LibraryLimits.MaxYear)] int? year = null,
         [FromQuery] bool? hasAudio = null,
         [FromQuery] bool? hasVideo = null,
+        [FromQuery] bool myMusic = false,
         CancellationToken cancellationToken = default)
     {
         this.ValidateEnum(sort, nameof(sort));
@@ -81,7 +88,9 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
             genre,
             year,
             hasAudio,
-            hasVideo);
+            hasVideo,
+            User.GetUserId(),
+            myMusic);
         Page<TrackRow> page = await tracks.ListAsync(request, cancellationToken);
         return Ok(page.ToDto(track => track.ToDto()));
     }
@@ -102,6 +111,36 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
         return track is null
             ? this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound)
             : Ok(track.ToDto());
+    }
+
+    /// <summary>
+    /// Rates a track for the current profile with 1 to 5 stars; 0 removes the rating. Every profile has its own
+    /// ratings.
+    /// </summary>
+    /// <param name="id">Id of the track.</param>
+    /// <param name="request">The rating.</param>
+    /// <param name="cancellationToken">Aborts the request.</param>
+    /// <response code="204">The rating is set.</response>
+    /// <response code="400">The rating is missing or not between 0 and 5 (code <c>request.invalid</c>, field
+    /// <c>rating</c> with <c>required</c> or <c>out_of_range</c> with min and max).</response>
+    /// <response code="404">The track does not exist (code <c>track.not_found</c>).</response>
+    [HttpPut("{id:guid}/rating", Name = "SetMyTrackRating")]
+    [Consumes("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDto>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> SetMyTrackRatingAsync(
+        Guid id,
+        UpdateTrackRatingDto request,
+        CancellationToken cancellationToken)
+    {
+        RatingStatus status = await ratings.SetAsync(User.GetUserId(), id, request.Rating!.Value, cancellationToken);
+        return status switch
+        {
+            RatingStatus.Done => NoContent(),
+            RatingStatus.Invalid => InvalidRating(),
+            _ => this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound),
+        };
     }
 
     /// <summary>
@@ -249,5 +288,18 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
                 this.Problem(ProblemCodeDto.TrackNotWritable, StatusCodes.Status409Conflict),
             _ => this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound),
         };
+    }
+
+    /// <summary>
+    /// The data annotations reject such ratings first; the service checks them again.
+    /// </summary>
+    private ActionResult InvalidRating()
+    {
+        ModelState.AddValidationError(
+            "rating",
+            ValidationErrorCodeDto.OutOfRange,
+            TrackRatings.Min,
+            TrackRatings.Max);
+        return ValidationProblem();
     }
 }

@@ -29,6 +29,7 @@ public sealed class GenresController(ITrackService tracks) : ControllerBase
     /// <param name="sort">Sort key; Name by default.</param>
     /// <param name="direction">Sort direction; descending by default for TrackCount, otherwise ascending.</param>
     /// <param name="q">Search text: only genres that contain it or are similar to it.</param>
+    /// <param name="myMusic">Only genres of the "my music" of the current profile, counted over these tracks.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">One page of genres.</response>
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
@@ -41,6 +42,7 @@ public sealed class GenresController(ITrackService tracks) : ControllerBase
         [FromQuery] GenreSortDto? sort = null,
         [FromQuery] SortDirectionDto? direction = null,
         [FromQuery, StringLength(LibraryLimits.TextMaxLength)] string? q = null,
+        [FromQuery] bool myMusic = false,
         CancellationToken cancellationToken = default)
     {
         this.ValidateEnum(sort, nameof(sort));
@@ -51,7 +53,14 @@ public sealed class GenresController(ITrackService tracks) : ControllerBase
         }
 
         Page<GenreRow> page = await tracks.ListGenresAsync(
-            new GenreListRequest(offset, limit, sort?.ToEntity(), direction?.ToEntity(), q),
+            new GenreListRequest(
+                offset,
+                limit,
+                sort?.ToEntity(),
+                direction?.ToEntity(),
+                q,
+                User.GetUserId(),
+                myMusic),
             cancellationToken);
         return Ok(page.ToDto(genre => genre.ToDto()));
     }

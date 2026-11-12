@@ -26,6 +26,7 @@ public sealed class YearsController(ITrackService tracks) : ControllerBase
     /// <param name="offset">Number of years to skip.</param>
     /// <param name="limit">Maximum number of years of the page.</param>
     /// <param name="direction">Sort direction; the newest year first by default.</param>
+    /// <param name="myMusic">Only years of the "my music" of the current profile, counted over these tracks.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">One page of years.</response>
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
@@ -36,6 +37,7 @@ public sealed class YearsController(ITrackService tracks) : ControllerBase
         [FromQuery, Range(0, int.MaxValue)] int offset = 0,
         [FromQuery, Range(1, PageLimits.MaxLimit)] int limit = PageLimits.DefaultLimit,
         [FromQuery] SortDirectionDto? direction = null,
+        [FromQuery] bool myMusic = false,
         CancellationToken cancellationToken = default)
     {
         this.ValidateEnum(direction, nameof(direction));
@@ -45,7 +47,7 @@ public sealed class YearsController(ITrackService tracks) : ControllerBase
         }
 
         Page<YearRow> page = await tracks.ListYearsAsync(
-            new YearListRequest(offset, limit, direction?.ToEntity()),
+            new YearListRequest(offset, limit, direction?.ToEntity(), User.GetUserId(), myMusic),
             cancellationToken);
         return Ok(page.ToDto(year => year.ToDto()));
     }

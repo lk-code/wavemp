@@ -26,4 +26,9 @@ public sealed class ArtistDto
     /// When the artist was found for the first time.
     /// </summary>
     public required DateTimeOffset FirstSeenAt { get; init; }
+
+    /// <summary>
+    /// Whether the current profile marked the artist as favorite.
+    /// </summary>
+    public required bool IsFavorite { get; init; }
 }

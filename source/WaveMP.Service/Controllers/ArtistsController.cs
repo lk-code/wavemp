@@ -31,6 +31,7 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
     /// <param name="direction">Sort direction; descending by default for FirstSeenAt and Relevance, otherwise
     /// ascending.</param>
     /// <param name="q">Search text: only artists whose name contains it or is similar to it (small typos).</param>
+    /// <param name="myMusic">Only artists of the "my music" of the current profile, as track or album artist.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">One page of artists.</response>
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
@@ -43,6 +44,7 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
         [FromQuery] ArtistSortDto? sort = null,
         [FromQuery] SortDirectionDto? direction = null,
         [FromQuery, StringLength(LibraryLimits.TextMaxLength)] string? q = null,
+        [FromQuery] bool myMusic = false,
         CancellationToken cancellationToken = default)
     {
         this.ValidateEnum(sort, nameof(sort));
@@ -53,7 +55,14 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
         }
 
         Page<ArtistRow> page = await artists.ListAsync(
-            new ArtistListRequest(offset, limit, sort?.ToEntity(), direction?.ToEntity(), q),
+            new ArtistListRequest(
+                offset,
+                limit,
+                sort?.ToEntity(),
+                direction?.ToEntity(),
+                q,
+                User.GetUserId(),
+                myMusic),
             cancellationToken);
         return Ok(page.ToDto(artist => artist.ToDto()));
     }
@@ -117,7 +126,15 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
 
         Page<AlbumRow>? page = await artists.ListAlbumsAsync(
             id,
-            new AlbumListRequest(offset, limit, sort?.ToEntity(), direction?.ToEntity(), q, Genre: genre, Year: year),
+            new AlbumListRequest(
+                offset,
+                limit,
+                sort?.ToEntity(),
+                direction?.ToEntity(),
+                q,
+                Genre: genre,
+                Year: year,
+                UserId: User.GetUserId()),
             cancellationToken);
         return page is null
             ? this.Problem(ProblemCodeDto.ArtistNotFound, StatusCodes.Status404NotFound)

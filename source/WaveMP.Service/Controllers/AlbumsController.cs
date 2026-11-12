@@ -37,6 +37,8 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
     /// <param name="artistId">Only albums with this album artist or with tracks of this artist.</param>
     /// <param name="genre">Only albums with tracks of this genre, without regard to case.</param>
     /// <param name="year">Only albums of this year.</param>
+    /// <param name="myMusic">Only albums with tracks of the "my music" of the current profile. Combines with all other
+    /// filters.</param>
     /// <param name="cancellationToken">Aborts the request.</param>
     /// <response code="200">One page of albums.</response>
     /// <response code="400">Invalid query parameters (code <c>request.invalid</c>).</response>
@@ -52,6 +54,7 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
         [FromQuery] Guid? artistId = null,
         [FromQuery, StringLength(LibraryLimits.GenreMaxLength)] string? genre = null,
         [FromQuery, Range(LibraryLimits.MinYear, LibraryLimits.MaxYear)] int? year = null,
+        [FromQuery] bool myMusic = false,
         CancellationToken cancellationToken = default)
     {
         this.ValidateEnum(sort, nameof(sort));
@@ -62,7 +65,17 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
         }
 
         Page<AlbumRow> page = await albums.ListAsync(
-            new AlbumListRequest(offset, limit, sort?.ToEntity(), direction?.ToEntity(), q, artistId, genre, year),
+            new AlbumListRequest(
+                offset,
+                limit,
+                sort?.ToEntity(),
+                direction?.ToEntity(),
+                q,
+                artistId,
+                genre,
+                year,
+                User.GetUserId(),
+                myMusic),
             cancellationToken);
         return Ok(page.ToDto(album => album.ToDto()));
     }
@@ -131,7 +144,8 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
             direction?.ToEntity(),
             q,
             HasAudio: hasAudio,
-            HasVideo: hasVideo);
+            HasVideo: hasVideo,
+            UserId: User.GetUserId());
         Page<TrackRow>? page = await albums.ListTracksAsync(id, request, cancellationToken);
         return page is null
             ? this.Problem(ProblemCodeDto.AlbumNotFound, StatusCodes.Status404NotFound)

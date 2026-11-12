@@ -227,6 +227,10 @@ public class ApiIntegrationTests
     [TestCase("CreateMyHistoryEntry", true)]
     [TestCase("ListMyHistory", true)]
     [TestCase("SetMyPlaylistCover", true)]
+    [TestCase("ListMyFavorites", true)]
+    [TestCase("AddMyFavoriteTrack", true)]
+    [TestCase("SetMyTrackRating", true)]
+    [TestCase("GetMyHome", true)]
     [TestCase("ListProfiles", false)]
     [TestCase("CreateSession", false)]
     [TestCase("GetHealth", false)]
@@ -279,6 +283,7 @@ public class ApiIntegrationTests
     [TestCase("YearPage", "Year")]
     [TestCase("MediaFilePage", "MediaFile")]
     [TestCase("PlayHistoryEntryPage", "PlayHistoryEntry")]
+    [TestCase("FavoritePage", "Favorite")]
     public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
@@ -407,7 +412,7 @@ public class ApiIntegrationTests
 
         List<JsonNode> library = [.. FindOperations(document)
             .Where(operation => libraryTags.Contains(operation["tags"]![0]!.GetValue<string>()))];
-        library.Should().HaveCount(16);
+        library.Should().HaveCount(17);
         library.Should().AllSatisfy(operation => operation["responses"]!["401"].Should().NotBeNull());
         library.Where(operation => operation["responses"]!["403"] is not null)
             .Select(operation => operation["operationId"]!.GetValue<string>())

@@ -17,6 +17,7 @@ public static class LibraryMappingExtensions
             AlbumCount = artist.AlbumCount,
             TrackCount = artist.TrackCount,
             FirstSeenAt = artist.FirstSeenAt,
+            IsFavorite = artist.IsFavorite,
         };
     }
 
@@ -34,6 +35,7 @@ public static class LibraryMappingExtensions
             DurationMilliseconds = (long)Math.Round(album.DurationMilliseconds),
             HasCover = album.HasCover,
             FirstSeenAt = album.FirstSeenAt,
+            IsFavorite = album.IsFavorite,
         };
     }
 
@@ -62,6 +64,8 @@ public static class LibraryMappingExtensions
             HasVideo = track.HasVideo,
             HasCover = track.HasCover,
             FirstSeenAt = track.FirstSeenAt,
+            IsFavorite = track.IsFavorite,
+            Rating = track.Rating,
         };
     }
 
@@ -188,6 +192,7 @@ public static class LibraryMappingExtensions
             TrackSortDto.Genre => TrackSortField.Genre,
             TrackSortDto.FirstSeenAt => TrackSortField.FirstSeenAt,
             TrackSortDto.Relevance => TrackSortField.Relevance,
+            TrackSortDto.Rating => TrackSortField.Rating,
             _ => throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort key."),
         };
     }
