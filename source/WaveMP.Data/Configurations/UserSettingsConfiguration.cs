@@ -9,6 +9,7 @@ internal sealed class UserSettingsConfiguration : IEntityTypeConfiguration<UserS
     public const int LanguageMaxLength = 16;
     public const int ReplayGainMaxLength = 16;
     public const int PlayerViewModeMaxLength = 16;
+    public const int EqualizerPresetMaxLength = 16;
 
     public void Configure(EntityTypeBuilder<UserSettings> builder)
     {
@@ -33,6 +34,41 @@ internal sealed class UserSettingsConfiguration : IEntityTypeConfiguration<UserS
             .HasConversion<string>()
             .HasMaxLength(PlayerViewModeMaxLength)
             .HasDefaultValue(PlayerViewMode.Video)
+            .ValueGeneratedNever();
+
+        // The columns below give existing rows the defaults of a new profile. The entity always writes its values
+        // (ValueGeneratedNever), so the default of a column never replaces a value set in the code. For
+        // CrossfadeAlbumsGapless and SleepTimerFadeSeconds the defaults of the CLR types (false, 0) differ from the
+        // column defaults; EF would otherwise leave them out on insert.
+        builder.Property(settings => settings.EqualizerEnabled)
+            .HasDefaultValue(false)
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.EqualizerPreset)
+            .HasConversion<string>()
+            .HasMaxLength(EqualizerPresetMaxLength)
+            .HasDefaultValue(EqualizerPreset.Flat)
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.EqualizerPreampDb)
+            .HasDefaultValue(0d)
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.EqualizerCustomGainsDb)
+            .HasColumnType("double precision[]")
+            .HasDefaultValueSql("'{0,0,0,0,0,0,0,0,0,0}'::double precision[]")
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.CrossfadeSeconds)
+            .HasDefaultValue(0)
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.CrossfadeAlbumsGapless)
+            .HasDefaultValue(true)
+            .ValueGeneratedNever();
+
+        builder.Property(settings => settings.SleepTimerFadeSeconds)
+            .HasDefaultValue(10)
             .ValueGeneratedNever();
     }
 }

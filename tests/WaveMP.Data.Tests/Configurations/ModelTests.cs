@@ -124,6 +124,54 @@ public class ModelTests
     }
 
     [Test]
+    public void UserSettings_EqualizerPreset_IsStoredAsNameWithFlatAsDefault()
+    {
+        IProperty preset = GetEntity(typeof(UserSettings)).FindProperty(nameof(UserSettings.EqualizerPreset))!;
+
+        preset.GetProviderClrType().Should().Be<string>();
+        preset.GetDefaultValue().Should().Be(EqualizerPreset.Flat);
+        preset.ValueGenerated.Should().Be(ValueGenerated.Never);
+    }
+
+    [Test]
+    public void UserSettings_EqualizerCustomGainsDb_IsStoredAsArrayWithZerosAsDefault()
+    {
+        IProperty gains = GetEntity(typeof(UserSettings)).FindProperty(nameof(UserSettings.EqualizerCustomGainsDb))!;
+
+        gains.GetColumnType().Should().Be("double precision[]");
+        gains.GetColumnName().Should().Be("equalizer_custom_gains_db");
+        gains.GetDefaultValueSql().Should().Be("'{0,0,0,0,0,0,0,0,0,0}'::double precision[]");
+        gains.ValueGenerated.Should().Be(ValueGenerated.Never);
+    }
+
+    [TestCase(nameof(UserSettings.EqualizerEnabled), false)]
+    [TestCase(nameof(UserSettings.EqualizerPreampDb), 0d)]
+    [TestCase(nameof(UserSettings.CrossfadeSeconds), 0)]
+    [TestCase(nameof(UserSettings.CrossfadeAlbumsGapless), true)]
+    [TestCase(nameof(UserSettings.SleepTimerFadeSeconds), 10)]
+    public void UserSettings_PlaybackSettings_HaveTheDefaultsOfANewProfile(string property, object expected)
+    {
+        IProperty column = GetEntity(typeof(UserSettings)).FindProperty(property)!;
+
+        column.GetDefaultValue().Should().Be(expected);
+        column.ValueGenerated.Should().Be(ValueGenerated.Never);
+    }
+
+    [Test]
+    public void UserSettings_NewInstance_HasTheDefaultsOfTheColumns()
+    {
+        UserSettings settings = new();
+
+        settings.EqualizerEnabled.Should().BeFalse();
+        settings.EqualizerPreset.Should().Be(EqualizerPreset.Flat);
+        settings.EqualizerCustomGainsDb.Should().HaveCount(UserSettings.EqualizerBandCount)
+            .And.OnlyContain(gain => gain == 0);
+        settings.CrossfadeSeconds.Should().Be(0);
+        settings.CrossfadeAlbumsGapless.Should().BeTrue();
+        settings.SleepTimerFadeSeconds.Should().Be(10);
+    }
+
+    [Test]
     public void ServerSetting_Value_IsStoredAsJsonb()
     {
         IProperty value = GetEntity(typeof(ServerSetting)).FindProperty(nameof(ServerSetting.Value))!;
