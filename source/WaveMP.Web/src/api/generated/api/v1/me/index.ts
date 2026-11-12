@@ -4,6 +4,10 @@
 // @ts-ignore
 import { HistoryRequestBuilderNavigationMetadata, HistoryRequestBuilderRequestsMetadata, type HistoryRequestBuilder } from './history/index.js';
 // @ts-ignore
+import { PlaylistsRequestBuilderNavigationMetadata, PlaylistsRequestBuilderRequestsMetadata, type PlaylistsRequestBuilder } from './playlists/index.js';
+// @ts-ignore
+import { RecentlyPlayedRequestBuilderRequestsMetadata, type RecentlyPlayedRequestBuilder } from './recentlyPlayed/index.js';
+// @ts-ignore
 import { SettingsRequestBuilderRequestsMetadata, type SettingsRequestBuilder } from './settings/index.js';
 // @ts-ignore
 import { type BaseRequestBuilder, type KeysToExcludeForNavigationMetadata, type NavigationMetadata } from '@microsoft/kiota-abstractions';
@@ -16,6 +20,14 @@ export interface MeRequestBuilder extends BaseRequestBuilder<MeRequestBuilder> {
      * The history property
      */
     get history(): HistoryRequestBuilder;
+    /**
+     * The playlists property
+     */
+    get playlists(): PlaylistsRequestBuilder;
+    /**
+     * The recentlyPlayed property
+     */
+    get recentlyPlayed(): RecentlyPlayedRequestBuilder;
     /**
      * The settings property
      */
@@ -32,6 +44,13 @@ export const MeRequestBuilderNavigationMetadata: Record<Exclude<keyof MeRequestB
     history: {
         requestsMetadata: HistoryRequestBuilderRequestsMetadata,
         navigationMetadata: HistoryRequestBuilderNavigationMetadata,
+    },
+    playlists: {
+        requestsMetadata: PlaylistsRequestBuilderRequestsMetadata,
+        navigationMetadata: PlaylistsRequestBuilderNavigationMetadata,
+    },
+    recentlyPlayed: {
+        requestsMetadata: RecentlyPlayedRequestBuilderRequestsMetadata,
     },
     settings: {
         requestsMetadata: SettingsRequestBuilderRequestsMetadata,

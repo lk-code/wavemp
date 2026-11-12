@@ -5,6 +5,32 @@
 import { type AdditionalDataHolder, type ApiError, type Guid, type Parsable, type ParseNode, type SerializationWriter } from '@microsoft/kiota-abstractions';
 
 /**
+ * The entries added to a playlist and the playlist afterwards.
+ */
+export interface AddedPlaylistEntries extends AdditionalDataHolder, Parsable {
+    /**
+     * The new entries, in the order of the request.
+     */
+    entries?: PlaylistEntry[] | null;
+    /**
+     * A playlist of the current profile.
+     */
+    playlist?: Playlist | null;
+}
+/**
+ * Adds tracks to a playlist.
+ */
+export interface AddPlaylistEntries extends AdditionalDataHolder, Parsable {
+    /**
+     * Position of the first added entry, from 0 to the number of entries; the entries from there move back. At the end if missing.
+     */
+    position?: number | null;
+    /**
+     * The tracks to add, in this order; duplicates are allowed.
+     */
+    trackIds?: Guid[] | null;
+}
+/**
  * An album of the library.
  */
 export interface Album extends AdditionalDataHolder, Parsable {
@@ -207,6 +233,24 @@ export interface CacheUsage extends AdditionalDataHolder, Parsable {
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {AddedPlaylistEntries}
+ */
+// @ts-ignore
+export function createAddedPlaylistEntriesFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoAddedPlaylistEntries;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {AddPlaylistEntries}
+ */
+// @ts-ignore
+export function createAddPlaylistEntriesFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoAddPlaylistEntries;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {Album}
  */
 // @ts-ignore
@@ -302,6 +346,15 @@ export function createCreatedSessionFromDiscriminatorValue(parseNode: ParseNode 
 // @ts-ignore
 export function createCreatePlayHistoryEntryFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoCreatePlayHistoryEntry;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CreatePlaylist}
+ */
+// @ts-ignore
+export function createCreatePlaylistFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCreatePlaylist;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -456,6 +509,64 @@ export function createPlayHistoryEntryPageFromDiscriminatorValue(parseNode: Pars
     return deserializeIntoPlayHistoryEntryPage;
 }
 /**
+ * Creates a playlist of the current profile.
+ */
+export interface CreatePlaylist extends AdditionalDataHolder, Parsable {
+    /**
+     * Name of the playlist, 1 to 100 characters; spaces at the ends are removed. Names do not need to be unique.
+     */
+    name?: string | null;
+    /**
+     * Tracks the playlist starts with, in this order; duplicates are allowed. Empty if missing.
+     */
+    trackIds?: Guid[] | null;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlaylistCover}
+ */
+// @ts-ignore
+export function createPlaylistCoverFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlaylistCover;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlaylistEntry}
+ */
+// @ts-ignore
+export function createPlaylistEntryFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlaylistEntry;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlaylistEntryPage}
+ */
+// @ts-ignore
+export function createPlaylistEntryPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlaylistEntryPage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Playlist}
+ */
+// @ts-ignore
+export function createPlaylistFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlaylist;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {PlaylistPage}
+ */
+// @ts-ignore
+export function createPlaylistPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoPlaylistPage;
+}
+/**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {ProblemDetails}
@@ -481,6 +592,24 @@ export function createProfileFromDiscriminatorValue(parseNode: ParseNode | undef
 // @ts-ignore
 export function createProfilePageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoProfilePage;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {RecentlyPlayedTrack}
+ */
+// @ts-ignore
+export function createRecentlyPlayedTrackFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoRecentlyPlayedTrack;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {RecentlyPlayedTrackPage}
+ */
+// @ts-ignore
+export function createRecentlyPlayedTrackPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoRecentlyPlayedTrackPage;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -620,6 +749,24 @@ export function createUpdateLibrarySettingsFromDiscriminatorValue(parseNode: Par
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdatePlaylistEntry}
+ */
+// @ts-ignore
+export function createUpdatePlaylistEntryFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdatePlaylistEntry;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdatePlaylist}
+ */
+// @ts-ignore
+export function createUpdatePlaylistFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdatePlaylist;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {UpdateTrackMetadata}
  */
 // @ts-ignore
@@ -727,6 +874,30 @@ export function createYearFromDiscriminatorValue(parseNode: ParseNode | undefine
 // @ts-ignore
 export function createYearPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoYearPage;
+}
+/**
+ * The deserialization information for the current model
+ * @param AddedPlaylistEntries The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoAddedPlaylistEntries(addedPlaylistEntries: Partial<AddedPlaylistEntries> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "entries": n => { addedPlaylistEntries.entries = n.getCollectionOfObjectValues<PlaylistEntry>(createPlaylistEntryFromDiscriminatorValue); },
+        "playlist": n => { addedPlaylistEntries.playlist = n.getObjectValue<Playlist>(createPlaylistFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param AddPlaylistEntries The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoAddPlaylistEntries(addPlaylistEntries: Partial<AddPlaylistEntries> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "position": n => { addPlaylistEntries.position = n.getNumberValue(); },
+        "trackIds": n => { addPlaylistEntries.trackIds = n.getCollectionOfPrimitiveValues<Guid>("string"); },
+    }
 }
 /**
  * The deserialization information for the current model
@@ -878,6 +1049,18 @@ export function deserializeIntoCreatePlayHistoryEntry(createPlayHistoryEntry: Pa
     return {
         "playedAt": n => { createPlayHistoryEntry.playedAt = n.getDateValue(); },
         "trackId": n => { createPlayHistoryEntry.trackId = n.getGuidValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param CreatePlaylist The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCreatePlaylist(createPlaylist: Partial<CreatePlaylist> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "name": n => { createPlaylist.name = n.getStringValue(); },
+        "trackIds": n => { createPlaylist.trackIds = n.getCollectionOfPrimitiveValues<Guid>("string"); },
     }
 }
 /**
@@ -1098,6 +1281,78 @@ export function deserializeIntoPlayHistoryEntryPage(playHistoryEntryPage: Partia
 }
 /**
  * The deserialization information for the current model
+ * @param Playlist The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlaylist(playlist: Partial<Playlist> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "cover": n => { playlist.cover = n.getObjectValue<PlaylistCover>(createPlaylistCoverFromDiscriminatorValue); },
+        "createdAt": n => { playlist.createdAt = n.getDateValue(); },
+        "durationMilliseconds": n => { playlist.durationMilliseconds = n.getNumberValue(); },
+        "id": n => { playlist.id = n.getGuidValue(); },
+        "name": n => { playlist.name = n.getStringValue(); },
+        "trackCount": n => { playlist.trackCount = n.getNumberValue(); },
+        "updatedAt": n => { playlist.updatedAt = n.getDateValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param PlaylistCover The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlaylistCover(playlistCover: Partial<PlaylistCover> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "kind": n => { playlistCover.kind = n.getEnumValue<PlaylistCoverKind>(PlaylistCoverKindObject); },
+        "trackIds": n => { playlistCover.trackIds = n.getCollectionOfPrimitiveValues<Guid>("string"); },
+        "version": n => { playlistCover.version = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param PlaylistEntry The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlaylistEntry(playlistEntry: Partial<PlaylistEntry> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "addedAt": n => { playlistEntry.addedAt = n.getDateValue(); },
+        "id": n => { playlistEntry.id = n.getGuidValue(); },
+        "position": n => { playlistEntry.position = n.getNumberValue(); },
+        "track": n => { playlistEntry.track = n.getObjectValue<Track>(createTrackFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param PlaylistEntryPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlaylistEntryPage(playlistEntryPage: Partial<PlaylistEntryPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { playlistEntryPage.items = n.getCollectionOfObjectValues<PlaylistEntry>(createPlaylistEntryFromDiscriminatorValue); },
+        "limit": n => { playlistEntryPage.limit = n.getNumberValue(); },
+        "offset": n => { playlistEntryPage.offset = n.getNumberValue(); },
+        "total": n => { playlistEntryPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param PlaylistPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoPlaylistPage(playlistPage: Partial<PlaylistPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { playlistPage.items = n.getCollectionOfObjectValues<Playlist>(createPlaylistFromDiscriminatorValue); },
+        "limit": n => { playlistPage.limit = n.getNumberValue(); },
+        "offset": n => { playlistPage.offset = n.getNumberValue(); },
+        "total": n => { playlistPage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param ProblemDetails The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1140,6 +1395,32 @@ export function deserializeIntoProfilePage(profilePage: Partial<ProfilePage> | u
         "limit": n => { profilePage.limit = n.getNumberValue(); },
         "offset": n => { profilePage.offset = n.getNumberValue(); },
         "total": n => { profilePage.total = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param RecentlyPlayedTrack The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoRecentlyPlayedTrack(recentlyPlayedTrack: Partial<RecentlyPlayedTrack> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "lastPlayedAt": n => { recentlyPlayedTrack.lastPlayedAt = n.getDateValue(); },
+        "track": n => { recentlyPlayedTrack.track = n.getObjectValue<Track>(createTrackFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param RecentlyPlayedTrackPage The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoRecentlyPlayedTrackPage(recentlyPlayedTrackPage: Partial<RecentlyPlayedTrackPage> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "items": n => { recentlyPlayedTrackPage.items = n.getCollectionOfObjectValues<RecentlyPlayedTrack>(createRecentlyPlayedTrackFromDiscriminatorValue); },
+        "limit": n => { recentlyPlayedTrackPage.limit = n.getNumberValue(); },
+        "offset": n => { recentlyPlayedTrackPage.offset = n.getNumberValue(); },
+        "total": n => { recentlyPlayedTrackPage.total = n.getNumberValue(); },
     }
 }
 /**
@@ -1374,6 +1655,28 @@ export function deserializeIntoUpdateLibrarySettings(updateLibrarySettings: Part
         "imageExtensions": n => { updateLibrarySettings.imageExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
         "scanIntervalMinutes": n => { updateLibrarySettings.scanIntervalMinutes = n.getNumberValue(); },
         "videoExtensions": n => { updateLibrarySettings.videoExtensions = n.getCollectionOfPrimitiveValues<string>("string"); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdatePlaylist The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdatePlaylist(updatePlaylist: Partial<UpdatePlaylist> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "name": n => { updatePlaylist.name = n.getStringValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdatePlaylistEntry The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdatePlaylistEntry(updatePlaylistEntry: Partial<UpdatePlaylistEntry> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "position": n => { updatePlaylistEntry.position = n.getNumberValue(); },
     }
 }
 /**
@@ -1876,6 +2179,121 @@ export interface PlayHistoryEntryPage extends AdditionalDataHolder, Parsable {
      */
     total?: number | null;
 }
+/**
+ * A playlist of the current profile.
+ */
+export interface Playlist extends AdditionalDataHolder, Parsable {
+    /**
+     * What the client shows as cover of the playlist.
+     */
+    cover?: PlaylistCover | null;
+    /**
+     * The createdAt property
+     */
+    createdAt?: Date | null;
+    /**
+     * Total duration of all entries in milliseconds.
+     */
+    durationMilliseconds?: number | null;
+    /**
+     * The id property
+     */
+    id?: Guid | null;
+    /**
+     * The name property
+     */
+    name?: string | null;
+    /**
+     * Number of entries; a track can be in the playlist more than once.
+     */
+    trackCount?: number | null;
+    /**
+     * When the name, the entries or the cover changed last.
+     */
+    updatedAt?: Date | null;
+}
+/**
+ * The cover of a playlist: an uploaded picture (Custom), else the covers of up to four tracks of different albums from the start of the playlist (Tracks), else none.
+ */
+export interface PlaylistCover extends AdditionalDataHolder, Parsable {
+    /**
+     * Where the cover of a playlist comes from.
+     */
+    kind?: PlaylistCoverKind | null;
+    /**
+     * Ids of the tracks whose covers make up the cover, in the order of the playlist; only with Tracks, otherwise empty. Their pictures come from the cover endpoint of the tracks.
+     */
+    trackIds?: Guid[] | null;
+    /**
+     * Version of the uploaded picture, only with Custom; it changes with every upload, so clients can use it as part of their cache key.
+     */
+    version?: string | null;
+}
+export type PlaylistCoverKind = (typeof PlaylistCoverKindObject)[keyof typeof PlaylistCoverKindObject];
+/**
+ * An entry of a playlist: a track at a position. The same track can have several entries.
+ */
+export interface PlaylistEntry extends AdditionalDataHolder, Parsable {
+    /**
+     * The addedAt property
+     */
+    addedAt?: Date | null;
+    /**
+     * Id of the entry; it stays the same when the entry moves.
+     */
+    id?: Guid | null;
+    /**
+     * Position of the entry in the playlist, starting at 0.
+     */
+    position?: number | null;
+    /**
+     * A track of the library: all media files with the same base name in one folder.
+     */
+    track?: Track | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface PlaylistEntryPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: PlaylistEntry[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface PlaylistPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: Playlist[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+export type PlaylistSort = (typeof PlaylistSortObject)[keyof typeof PlaylistSortObject];
 export type ProblemCode = (typeof ProblemCodeObject)[keyof typeof ProblemCodeObject];
 export interface ProblemDetails extends AdditionalDataHolder, ApiError, Parsable {
     /**
@@ -1940,6 +2358,40 @@ export interface ProfilePage extends AdditionalDataHolder, Parsable {
      * Items of the page, at most limit.
      */
     items?: Profile[] | null;
+    /**
+     * Maximum number of items of the page, as requested.
+     */
+    limit?: number | null;
+    /**
+     * Number of items skipped before this page.
+     */
+    offset?: number | null;
+    /**
+     * Number of items of the whole collection.
+     */
+    total?: number | null;
+}
+/**
+ * A track of the automatic list "Recently played": every track once, at its last play.
+ */
+export interface RecentlyPlayedTrack extends AdditionalDataHolder, Parsable {
+    /**
+     * When the last play of the track started.
+     */
+    lastPlayedAt?: Date | null;
+    /**
+     * A track of the library: all media files with the same base name in one folder.
+     */
+    track?: Track | null;
+}
+/**
+ * One page of a collection.
+ */
+export interface RecentlyPlayedTrackPage extends AdditionalDataHolder, Parsable {
+    /**
+     * Items of the page, at most limit.
+     */
+    items?: RecentlyPlayedTrack[] | null;
     /**
      * Maximum number of items of the page, as requested.
      */
@@ -2178,6 +2630,32 @@ export interface SearchResult extends AdditionalDataHolder, Parsable {
 }
 /**
  * Serializes information the current object
+ * @param AddedPlaylistEntries The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeAddedPlaylistEntries(writer: SerializationWriter, addedPlaylistEntries: Partial<AddedPlaylistEntries> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!addedPlaylistEntries || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<PlaylistEntry>("entries", addedPlaylistEntries.entries, serializePlaylistEntry);
+    writer.writeObjectValue<Playlist>("playlist", addedPlaylistEntries.playlist, serializePlaylist);
+    writer.writeAdditionalData(addedPlaylistEntries.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param AddPlaylistEntries The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeAddPlaylistEntries(writer: SerializationWriter, addPlaylistEntries: Partial<AddPlaylistEntries> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!addPlaylistEntries || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("position", addPlaylistEntries.position);
+    writer.writeCollectionOfPrimitiveValues<Guid>("trackIds", addPlaylistEntries.trackIds);
+    writer.writeAdditionalData(addPlaylistEntries.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param Album The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -2338,6 +2816,19 @@ export function serializeCreatePlayHistoryEntry(writer: SerializationWriter, cre
     writer.writeDateValue("playedAt", createPlayHistoryEntry.playedAt);
     writer.writeGuidValue("trackId", createPlayHistoryEntry.trackId);
     writer.writeAdditionalData(createPlayHistoryEntry.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param CreatePlaylist The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCreatePlaylist(writer: SerializationWriter, createPlaylist: Partial<CreatePlaylist> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!createPlaylist || isSerializingDerivedType) { return; }
+    writer.writeStringValue("name", createPlaylist.name);
+    writer.writeCollectionOfPrimitiveValues<Guid>("trackIds", createPlaylist.trackIds);
+    writer.writeAdditionalData(createPlaylist.additionalData);
 }
 /**
  * Serializes information the current object
@@ -2572,6 +3063,83 @@ export function serializePlayHistoryEntryPage(writer: SerializationWriter, playH
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param Playlist The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlaylist(writer: SerializationWriter, playlist: Partial<Playlist> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playlist || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<PlaylistCover>("cover", playlist.cover, serializePlaylistCover);
+    writer.writeDateValue("createdAt", playlist.createdAt);
+    writer.writeNumberValue("durationMilliseconds", playlist.durationMilliseconds);
+    writer.writeGuidValue("id", playlist.id);
+    writer.writeStringValue("name", playlist.name);
+    writer.writeNumberValue("trackCount", playlist.trackCount);
+    writer.writeDateValue("updatedAt", playlist.updatedAt);
+    writer.writeAdditionalData(playlist.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlaylistCover The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlaylistCover(writer: SerializationWriter, playlistCover: Partial<PlaylistCover> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playlistCover || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<PlaylistCoverKind>("kind", playlistCover.kind);
+    writer.writeCollectionOfPrimitiveValues<Guid>("trackIds", playlistCover.trackIds);
+    writer.writeStringValue("version", playlistCover.version);
+    writer.writeAdditionalData(playlistCover.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlaylistEntry The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlaylistEntry(writer: SerializationWriter, playlistEntry: Partial<PlaylistEntry> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playlistEntry || isSerializingDerivedType) { return; }
+    writer.writeDateValue("addedAt", playlistEntry.addedAt);
+    writer.writeGuidValue("id", playlistEntry.id);
+    writer.writeNumberValue("position", playlistEntry.position);
+    writer.writeObjectValue<Track>("track", playlistEntry.track, serializeTrack);
+    writer.writeAdditionalData(playlistEntry.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlaylistEntryPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlaylistEntryPage(writer: SerializationWriter, playlistEntryPage: Partial<PlaylistEntryPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playlistEntryPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<PlaylistEntry>("items", playlistEntryPage.items, serializePlaylistEntry);
+    writer.writeNumberValue("limit", playlistEntryPage.limit);
+    writer.writeNumberValue("offset", playlistEntryPage.offset);
+    writer.writeNumberValue("total", playlistEntryPage.total);
+    writer.writeAdditionalData(playlistEntryPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param PlaylistPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializePlaylistPage(writer: SerializationWriter, playlistPage: Partial<PlaylistPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!playlistPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<Playlist>("items", playlistPage.items, serializePlaylist);
+    writer.writeNumberValue("limit", playlistPage.limit);
+    writer.writeNumberValue("offset", playlistPage.offset);
+    writer.writeNumberValue("total", playlistPage.total);
+    writer.writeAdditionalData(playlistPage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param ProblemDetails The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -2617,6 +3185,34 @@ export function serializeProfilePage(writer: SerializationWriter, profilePage: P
     writer.writeNumberValue("offset", profilePage.offset);
     writer.writeNumberValue("total", profilePage.total);
     writer.writeAdditionalData(profilePage.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param RecentlyPlayedTrack The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeRecentlyPlayedTrack(writer: SerializationWriter, recentlyPlayedTrack: Partial<RecentlyPlayedTrack> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!recentlyPlayedTrack || isSerializingDerivedType) { return; }
+    writer.writeDateValue("lastPlayedAt", recentlyPlayedTrack.lastPlayedAt);
+    writer.writeObjectValue<Track>("track", recentlyPlayedTrack.track, serializeTrack);
+    writer.writeAdditionalData(recentlyPlayedTrack.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param RecentlyPlayedTrackPage The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeRecentlyPlayedTrackPage(writer: SerializationWriter, recentlyPlayedTrackPage: Partial<RecentlyPlayedTrackPage> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!recentlyPlayedTrackPage || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<RecentlyPlayedTrack>("items", recentlyPlayedTrackPage.items, serializeRecentlyPlayedTrack);
+    writer.writeNumberValue("limit", recentlyPlayedTrackPage.limit);
+    writer.writeNumberValue("offset", recentlyPlayedTrackPage.offset);
+    writer.writeNumberValue("total", recentlyPlayedTrackPage.total);
+    writer.writeAdditionalData(recentlyPlayedTrackPage.additionalData);
 }
 /**
  * Serializes information the current object
@@ -2865,6 +3461,30 @@ export function serializeUpdateLibrarySettings(writer: SerializationWriter, upda
     writer.writeNumberValue("scanIntervalMinutes", updateLibrarySettings.scanIntervalMinutes);
     writer.writeCollectionOfPrimitiveValues<string>("videoExtensions", updateLibrarySettings.videoExtensions);
     writer.writeAdditionalData(updateLibrarySettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdatePlaylist The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdatePlaylist(writer: SerializationWriter, updatePlaylist: Partial<UpdatePlaylist> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updatePlaylist || isSerializingDerivedType) { return; }
+    writer.writeStringValue("name", updatePlaylist.name);
+    writer.writeAdditionalData(updatePlaylist.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdatePlaylistEntry The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdatePlaylistEntry(writer: SerializationWriter, updatePlaylistEntry: Partial<UpdatePlaylistEntry> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updatePlaylistEntry || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("position", updatePlaylistEntry.position);
+    writer.writeAdditionalData(updatePlaylistEntry.additionalData);
 }
 /**
  * Serializes information the current object
@@ -3253,6 +3873,24 @@ export interface UpdateLibrarySettings extends AdditionalDataHolder, Parsable {
     videoExtensions?: string[] | null;
 }
 /**
+ * Changes a playlist. Missing or null values stay unchanged.
+ */
+export interface UpdatePlaylist extends AdditionalDataHolder, Parsable {
+    /**
+     * New name, 1 to 100 characters; spaces at the ends are removed.
+     */
+    name?: string | null;
+}
+/**
+ * Moves an entry of a playlist.
+ */
+export interface UpdatePlaylistEntry extends AdditionalDataHolder, Parsable {
+    /**
+     * New position of the entry, from 0 to the number of entries minus one; the entries in between move by one.
+     */
+    position?: number | null;
+}
+/**
  * Changes the metadata of a track. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again.
  */
 export interface UpdateTrackMetadata extends AdditionalDataHolder, Parsable {
@@ -3598,6 +4236,22 @@ export const PlaybackMethodObject = {
     Transcode: "Transcode",
 } as const;
 /**
+ * Where the cover of a playlist comes from.
+ */
+export const PlaylistCoverKindObject = {
+    Custom: "Custom",
+    Tracks: "Tracks",
+    None: "None",
+} as const;
+/**
+ * Sort key of the playlist list; ties are sorted by id.
+ */
+export const PlaylistSortObject = {
+    Name: "Name",
+    CreatedAt: "CreatedAt",
+    UpdatedAt: "UpdatedAt",
+} as const;
+/**
  * Machine-readable code of a problem, part of every Problem Details response. Clients translate it.
  */
 export const ProblemCodeObject = {
@@ -3628,6 +4282,12 @@ export const ProblemCodeObject = {
     StreamTranscoding_required: "stream.transcoding_required",
     StreamFile_missing: "stream.file_missing",
     HistoryNot_found: "history.not_found",
+    PlaylistNot_found: "playlist.not_found",
+    PlaylistEntry_not_found: "playlist.entry_not_found",
+    PlaylistFull: "playlist.full",
+    CoverUnsupported_format: "cover.unsupported_format",
+    CoverToo_large: "cover.too_large",
+    CoverUnreadable: "cover.unreadable",
 } as const;
 /**
  * Whether the players even out the volume with the ReplayGain tags; Off by default.
