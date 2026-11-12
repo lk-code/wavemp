@@ -656,6 +656,16 @@
     "filesTitle": "Dateien",
     "filesError": "Die Dateien konnten nicht geladen werden."
   },
+  "trackVideo": {
+    "title": "Video-Synchronisation",
+    "offset": "Video-Versatz (Millisekunden)",
+    "offsetHint": "Positiver Wert, wenn die Musik im Video später einsetzt als im Titel, zum Beispiel nach einem Intro; negativer Wert, wenn sie früher einsetzt.",
+    "offsetRange": "Gib ganze Millisekunden von {min} bis {max} ein.",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "loadError": "Die Video-Synchronisation konnte nicht geladen werden.",
+    "saveError": "Der Video-Versatz konnte nicht gespeichert werden."
+  },
   "trackMetadata": {
     "edit": "Metadaten bearbeiten",
     "title": "Metadaten bearbeiten",

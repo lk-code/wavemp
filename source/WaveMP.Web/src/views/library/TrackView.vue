@@ -14,6 +14,7 @@ import LibraryCover from '@/components/library/LibraryCover.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
 import TrackFileList from '@/components/library/TrackFileList.vue'
 import TrackMetadataDialog from '@/components/library/TrackMetadataDialog.vue'
+import TrackVideoOffsetForm from '@/components/library/TrackVideoOffsetForm.vue'
 import { useFormat } from '@/composables/useFormat'
 import { getTrack, listTrackFiles } from '@/library/api'
 import { artistLabelKey, durationSeconds, mediaKey } from '@/library/presentation'
@@ -23,8 +24,9 @@ import { useSessionStore } from '@/stores/session'
 
 /**
  * The details of a track: its cover, artist, album, numbers, year, genre, length and media, its
- * rating and the heart that marks it as favorite. Admins also see all its files and edit its
- * metadata; the query edit=metadata opens the editor at once (context menu of a track).
+ * rating and the heart that marks it as favorite. Admins also see all its files, edit its
+ * metadata and set the offset of its video; the query edit=metadata opens the editor at once
+ * (context menu of a track).
  */
 const props = defineProps<{
     id: string
@@ -38,6 +40,7 @@ const pageTitle = usePageTitleStore()
 const session = useSessionStore()
 const player = usePlayerStore()
 const filesTitleId = useId()
+const videoSyncTitleId = useId()
 
 const track = ref<Track | null>(null)
 const status = ref<'loading' | 'ready' | 'notFound' | 'error'>('loading')
@@ -240,6 +243,20 @@ onBeforeUnmount(() => pageTitle.clear())
                     v-else-if="files.length > 0"
                     :files="files"
                     :label="t('files.label')"
+                />
+            </section>
+            <section
+                v-if="session.isAdmin && track.hasVideo"
+                data-part="section"
+                data-item="video-sync"
+                :aria-labelledby="videoSyncTitleId"
+            >
+                <h2 :id="videoSyncTitleId" data-part="section-title">
+                    {{ t('trackVideo.title') }}
+                </h2>
+                <TrackVideoOffsetForm
+                    :track-id="track.id ?? id"
+                    @saved="(offset) => player.applyVideoOffset(track?.id ?? id, offset)"
                 />
             </section>
             <TrackMetadataDialog

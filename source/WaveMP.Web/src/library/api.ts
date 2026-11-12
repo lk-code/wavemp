@@ -21,6 +21,7 @@ import type {
     Track,
     TrackMetadata,
     TrackPage,
+    TrackVideoOffset,
     UpdateTrackMetadata,
     YearPage,
 } from '@/api/generated/models'
@@ -62,6 +63,19 @@ export function updateTrackMetadata(
     changes: UpdateTrackMetadata,
 ): Promise<TrackMetadata | undefined> {
     return apiClient.api.v1.tracks.byId(id).metadata.patch(changes)
+}
+
+/** The offset of the video against the audio of a track (admins only). */
+export function getTrackVideoOffset(id: string): Promise<TrackVideoOffset | undefined> {
+    return apiClient.api.v1.tracks.byId(id).video.offset.get()
+}
+
+/** Sets the offset of the video of a track in milliseconds; 0 removes it (admins only). */
+export function setTrackVideoOffset(
+    id: string,
+    offsetMilliseconds: number,
+): Promise<TrackVideoOffset | undefined> {
+    return apiClient.api.v1.tracks.byId(id).video.offset.put({ offsetMilliseconds })
 }
 
 export function listAlbums(query: AlbumQuery): Promise<AlbumPage | undefined> {

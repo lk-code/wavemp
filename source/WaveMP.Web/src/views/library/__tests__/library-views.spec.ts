@@ -23,6 +23,8 @@ const api = vi.hoisted(() => ({
     listTrackFiles: vi.fn(),
     getTrackMetadata: vi.fn(),
     updateTrackMetadata: vi.fn(),
+    getTrackVideoOffset: vi.fn(),
+    setTrackVideoOffset: vi.fn(),
     searchLibrary: vi.fn(),
     fetchAlbumCover: vi.fn(),
     fetchTrackCover: vi.fn(),
@@ -386,6 +388,52 @@ describe('TrackView', () => {
         expect(wrapper.find('[data-item="files"]').exists()).toBe(false)
         expect(api.listTrackFiles).not.toHaveBeenCalled()
         wrapper.unmount()
+    })
+
+    describe('video sync', () => {
+        beforeEach(() => {
+            api.getTrackVideoOffset.mockResolvedValue({ trackId: 'Closing', offsetMilliseconds: 0 })
+            api.setTrackVideoOffset.mockImplementation((id: string, offsetMilliseconds: number) =>
+                Promise.resolve({ trackId: id, offsetMilliseconds }),
+            )
+        })
+
+        it('is offered to admins for songs with a video only', async () => {
+            signIn('User')
+            const user = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+            expect(user.wrapper.find('[data-item="video-sync"]').exists()).toBe(false)
+            expect(api.getTrackVideoOffset).not.toHaveBeenCalled()
+            user.wrapper.unmount()
+
+            signIn('Admin')
+            api.getTrack.mockResolvedValueOnce(track('Opening', { hasVideo: false }))
+            const audio = await mountView(TrackView, '/library/tracks/Opening', { id: 'Opening' })
+            expect(audio.wrapper.find('[data-item="video-sync"]').exists()).toBe(false)
+            audio.wrapper.unmount()
+
+            const admin = await mountView(TrackView, '/library/tracks/Closing', { id: 'Closing' })
+            const title = admin.wrapper.get('[data-item="video-sync"] [data-part="section-title"]')
+            expect(title.text()).toBe('Video sync')
+            expect(api.getTrackVideoOffset).toHaveBeenCalledWith('Closing')
+            admin.wrapper.unmount()
+        })
+
+        it('applies a saved offset to the playing video at once', async () => {
+            signIn('Admin')
+            const player = usePlayerStore()
+            const apply = vi.spyOn(player, 'applyVideoOffset')
+            const { wrapper } = await mountView(TrackView, '/library/tracks/Closing', {
+                id: 'Closing',
+            })
+
+            await wrapper.get('[data-field="video-offset"] input').setValue('1500')
+            await wrapper.get('[data-item="video-sync"] form').trigger('submit')
+            await flushPromises()
+
+            expect(api.setTrackVideoOffset).toHaveBeenCalledWith('Closing', 1500)
+            expect(apply).toHaveBeenCalledWith('Closing', 1500)
+            wrapper.unmount()
+        })
     })
 
     describe('metadata editor', () => {

@@ -656,6 +656,16 @@
     "filesTitle": "Files",
     "filesError": "The files could not be loaded."
   },
+  "trackVideo": {
+    "title": "Video sync",
+    "offset": "Video offset (milliseconds)",
+    "offsetHint": "Use a positive value if the music in the video starts later than in the song, for example after an intro, and a negative value if it starts earlier.",
+    "offsetRange": "Enter whole milliseconds from {min} to {max}.",
+    "save": "Save",
+    "saved": "Saved.",
+    "loadError": "The video sync could not be loaded.",
+    "saveError": "The video offset could not be saved."
+  },
   "trackMetadata": {
     "edit": "Edit metadata",
     "title": "Edit metadata",
