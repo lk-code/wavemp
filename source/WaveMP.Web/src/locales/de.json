@@ -8,6 +8,7 @@
     "back": "Zurück",
     "forward": "Vor",
     "menu": "Menü",
+    "home": "Startseite",
     "nowPlaying": "Aktuelle Wiedergabe",
     "library": "Bibliothek",
     "playlists": "Playlists"
@@ -32,6 +33,7 @@
   },
   "library": {
     "recentlyAdded": "Zuletzt hinzugefügt",
+    "favorites": "Favoriten",
     "artists": "Interpret",
     "albums": "Album",
     "songs": "Titel",
@@ -71,7 +73,9 @@
       "duration": "Länge",
       "artist": "Interpret",
       "handle": "Verschieben",
-      "album": "Album"
+      "album": "Album",
+      "rating": "Bewertung",
+      "favorite": "Favorit"
     },
     "hasVideo": "Video vorhanden",
     "album": "Album",
@@ -96,6 +100,7 @@
   "player": {
     "label": "Player",
     "controls": "Wiedergabesteuerung",
+    "trackActions": "Favorit und Bewertung",
     "nothingPlaying": "Keine Wiedergabe",
     "play": "Wiedergabe",
     "pause": "Pause",
@@ -227,6 +232,7 @@
       "tree": "Baum",
       "list": "Liste mit Gruppen",
       "library": "Bibliothek",
+      "home": "Startseite und Sammlung",
       "sliders": "Schieberegler",
       "fields": "Eingabefelder",
       "dialog": "Dialog",
@@ -644,7 +650,8 @@
       "genre": "Genre",
       "firstSeenAt": "Hinzugefügt am",
       "trackCount": "Anzahl der Titel",
-      "relevance": "Relevanz"
+      "relevance": "Relevanz",
+      "rating": "Bewertung"
     }
   },
   "trackMenu": {
@@ -656,7 +663,37 @@
     "play": "Abspielen",
     "playNext": "Als Nächstes abspielen",
     "addToQueue": "Zur Warteschlange hinzufügen",
-    "addToPlaylist": "Zur Playlist hinzufügen"
+    "addToPlaylist": "Zur Playlist hinzufügen",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "removeFavorite": "Aus Favoriten entfernen"
+  },
+  "collection": {
+    "favorite": "Favorit",
+    "rating": "Bewertung",
+    "stars": "{count} von 5 Sternen",
+    "rated": "Mit {count} von 5 Sternen bewertet",
+    "unrated": "Nicht bewertet",
+    "addedAt": "Hinzugefügt",
+    "artistsTitle": "Interpreten",
+    "favoritesEmptyTitle": "Noch keine Favoriten",
+    "favoritesEmptyText": "Markiere Titel, Alben und Interpreten mit dem Herz, um sie hier wiederzufinden.",
+    "scope": {
+      "label": "Anzeigen",
+      "all": "Alle Musik",
+      "myMusic": "Meine Musik"
+    },
+    "errors": {
+      "favorite": "Der Favorit konnte nicht gespeichert werden.",
+      "rating": "Die Bewertung konnte nicht gespeichert werden."
+    }
+  },
+  "home": {
+    "playlists": "Deine Playlists",
+    "topRated": "Am besten bewertet",
+    "showAll": "Alle anzeigen",
+    "loadError": "Die Startseite konnte nicht geladen werden.",
+    "emptyTitle": "Willkommen bei WaveMP",
+    "emptyText": "Hier erscheinen deine Playlists, Favoriten und die zuletzt gespielten Titel."
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",

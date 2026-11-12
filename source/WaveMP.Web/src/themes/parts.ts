@@ -3,7 +3,7 @@
 // sync. Changing or removing an existing part increases the version, adding a new part does not.
 
 /** Version of the theme API (data-theme-api on <html>). */
-export const themeApiVersion = 1
+export const themeApiVersion = 2
 
 export const parts = [
     // App
@@ -100,6 +100,18 @@ export const parts = [
     'playlist-choice-count',
     'drag-handle',
 
+    // Collection
+    'btn-favorite',
+    'rating',
+    'rating-star',
+    'scope-switch',
+
+    // Home page
+    'shelf',
+    'shelf-header',
+    'shelf-title',
+    'shelf-actions',
+
     // Queue
     'queue',
     'queue-list',
@@ -117,6 +129,7 @@ export const parts = [
     'now-playing-meta',
     'now-playing-title',
     'now-playing-artist',
+    'now-playing-actions',
     'transport-message',
     'transport-controls',
     'btn-shuffle',

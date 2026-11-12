@@ -7,6 +7,8 @@ import { fetchAllPages } from '@/api/paging'
 import { statusOf } from '@/api/problems'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
+import RatingStars from '@/components/collection/RatingStars.vue'
 import DetailHeader from '@/components/library/DetailHeader.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
@@ -20,9 +22,9 @@ import { usePlayerStore } from '@/stores/player'
 import { useSessionStore } from '@/stores/session'
 
 /**
- * The details of a track: its cover, artist, album, numbers, year, genre, length and media. Admins
- * also see all its files and edit its metadata; the query edit=metadata opens the editor at once
- * (context menu of a track).
+ * The details of a track: its cover, artist, album, numbers, year, genre, length and media, its
+ * rating and the heart that marks it as favorite. Admins also see all its files and edit its
+ * metadata; the query edit=metadata opens the editor at once (context menu of a track).
  */
 const props = defineProps<{
     id: string
@@ -196,7 +198,10 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem field="media" :label="t('list.media')">
                     {{ t(mediaKey({ hasAudio: track.hasAudio, hasVideo: track.hasVideo })) }}
                 </MetaItem>
-                <template v-if="track.hasAudio || session.isAdmin" #actions>
+                <MetaItem field="rating" :label="t('collection.rating')">
+                    <RatingStars :track-id="track.id ?? id" :rating="track.rating" />
+                </MetaItem>
+                <template #actions>
                     <BaseButton
                         v-if="track.hasAudio"
                         data-item="play"
@@ -204,6 +209,12 @@ onBeforeUnmount(() => pageTitle.clear())
                         icon="play-now"
                         :label="t('library.play')"
                         @click="player.playTracks([track], 0)"
+                    />
+                    <FavoriteButton
+                        data-item="favorite"
+                        type="Track"
+                        :id="track.id ?? id"
+                        :favorite="track.isFavorite"
                     />
                     <BaseButton
                         v-if="session.isAdmin"

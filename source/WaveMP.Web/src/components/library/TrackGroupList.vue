@@ -6,6 +6,8 @@ import BaseCover from '@/components/base/BaseCover.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
 import BaseList, { type ListGroup, type ListRowBase } from '@/components/base/BaseList.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
+import RatingStars from '@/components/collection/RatingStars.vue'
 import LibraryCover from './LibraryCover.vue'
 import MetaItem from './MetaItem.vue'
 import TrackMenu from './TrackMenu.vue'
@@ -17,7 +19,8 @@ import { usePlayerStore } from '@/stores/player'
 /**
  * Tracks grouped by album (or by disc on the album page), with cover and details of each group.
  * Details link to the pages of album, artist, genre and year; the context menu of a row plays or
- * queues the track and leads to the track, its album and its artist. A double click, Enter or a tap
+ * queues the track and leads to the track, its album and its artist. The columns rating and favorite
+ * show the stars and the heart of the profile; a click changes them. A double click, Enter or a tap
  * on a touch screen plays the tracks of the list from the row on; the playing track is marked.
  */
 interface TrackRow extends ListRowBase {
@@ -51,6 +54,8 @@ const columns = computed(() => [
     { id: 'title', label: t('list.columns.title') },
     { id: 'duration', label: t('list.columns.duration') },
     { id: 'artist', label: t('list.columns.artist') },
+    { id: 'rating', label: t('list.columns.rating') },
+    { id: 'favorite', label: t('list.columns.favorite') },
 ])
 
 function groupTitle(group: TrackGroup): string {
@@ -204,7 +209,20 @@ function activate(rowId: string): void {
                         : format.duration(durationSeconds(row.track.durationMilliseconds)!)
                 }}
             </template>
-            <template v-else>{{ trackArtist(row.track) }}</template>
+            <template v-else-if="column.id === 'artist'">{{ trackArtist(row.track) }}</template>
+            <RatingStars
+                v-else-if="column.id === 'rating'"
+                :track-id="row.track.id ?? ''"
+                :rating="row.track.rating"
+                :focusable="false"
+            />
+            <FavoriteButton
+                v-else-if="column.id === 'favorite'"
+                type="Track"
+                :id="row.track.id ?? ''"
+                :favorite="row.track.isFavorite"
+                :focusable="false"
+            />
         </template>
     </BaseList>
     <TrackMenu ref="menu" @play="playFrom" />

@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseCover from '@/components/base/BaseCover.vue'
 import BaseSlider from '@/components/base/BaseSlider.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
+import RatingStars from '@/components/collection/RatingStars.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import { useFormat } from '@/composables/useFormat'
 import { useMediaQuery } from '@/composables/useMediaQuery'
@@ -17,7 +19,8 @@ import {
 
 /**
  * Transport bar: seek bar, mini player and playback controls. It is controlled through props and
- * events only; on mobile, the same DOM becomes the mini player and the full-screen player.
+ * events only; on mobile, the same DOM becomes the mini player and the full-screen player. The heart
+ * and the stars of the current track save the favorite and the rating of the profile themselves.
  */
 const props = withDefaults(
     defineProps<{
@@ -133,6 +136,17 @@ function onMiniPlayer(): void {
                 isDesktop ? t('player.showNowPlaying') : t('player.open')
             }}</span>
         </button>
+        <div
+            data-part="now-playing-actions"
+            role="group"
+            :aria-label="t('player.trackActions')"
+            :data-state="state.trackId ? undefined : 'empty'"
+        >
+            <template v-if="state.trackId">
+                <FavoriteButton type="Track" :id="state.trackId" :favorite="state.isFavorite" />
+                <RatingStars :track-id="state.trackId" :rating="state.rating" />
+            </template>
+        </div>
         <p
             data-part="transport-message"
             role="status"

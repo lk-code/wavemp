@@ -6,6 +6,7 @@ import { fetchAllPages } from '@/api/paging'
 import { statusOf } from '@/api/problems'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
 import DetailHeader from '@/components/library/DetailHeader.vue'
 import LibraryCover from '@/components/library/LibraryCover.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
@@ -17,7 +18,10 @@ import { artistLabelKey, durationSeconds } from '@/library/presentation'
 import { usePageTitleStore } from '@/stores/pageTitle'
 import { usePlayerStore } from '@/stores/player'
 
-/** An album with its cover, details and all its tracks in the order of disc and track number. */
+/**
+ * An album with its cover, details and all its tracks in the order of disc and track number, and the
+ * heart that marks it as favorite.
+ */
 const props = defineProps<{
     id: string
 }>()
@@ -128,8 +132,9 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem v-if="duration !== null" field="duration" :label="t('list.duration')">
                     {{ format.duration(duration) }}
                 </MetaItem>
-                <template v-if="hasAudio" #actions>
+                <template #actions>
                     <BaseButton
+                        v-if="hasAudio"
                         data-item="play"
                         variant="primary"
                         icon="play-now"
@@ -137,10 +142,17 @@ onBeforeUnmount(() => pageTitle.clear())
                         @click="play(false)"
                     />
                     <BaseButton
+                        v-if="hasAudio"
                         data-item="shuffle"
                         icon="shuffle-play"
                         :label="t('library.shufflePlay')"
                         @click="play(true)"
+                    />
+                    <FavoriteButton
+                        data-item="favorite"
+                        type="Album"
+                        :id="album.id ?? id"
+                        :favorite="album.isFavorite"
                     />
                 </template>
             </DetailHeader>

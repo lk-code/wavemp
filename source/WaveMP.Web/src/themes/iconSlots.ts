@@ -22,6 +22,7 @@ export const iconSlots = {
     forward: { file: fill('arrow-right'), area: 'header' },
     'tab-indicator': { file: fill('caret-down'), area: 'header' },
     menu: { file: fill('list'), area: 'header' },
+    home: { file: fill('house'), area: 'header' },
     'now-playing': { file: fill('music-notes'), area: 'header' },
     library: { file: fill('books'), area: 'header' },
     playlists: { file: fill('playlist'), area: 'header' },
@@ -48,7 +49,7 @@ export const iconSlots = {
     'tree-years': { file: duotone('calendar-blank'), area: 'sidebar' },
     'tree-recently-played': { file: duotone('headphones'), area: 'sidebar' },
     'tree-playlist': { file: duotone('music-notes-simple'), area: 'sidebar' },
-    'tree-favorites': { file: duotone('heart'), area: 'sidebar', reserved: true },
+    'tree-favorites': { file: duotone('heart'), area: 'sidebar' },
     'tree-expand': { file: regular('plus-square'), area: 'sidebar' },
     'tree-collapse': { file: regular('minus-square'), area: 'sidebar' },
 
@@ -66,6 +67,11 @@ export const iconSlots = {
     playlist: { file: fill('playlist'), area: 'content' },
     'recently-played': { file: fill('headphones'), area: 'content' },
     'drag-handle': { file: regular('dots-six-vertical'), area: 'content' },
+    track: { file: fill('music-note'), area: 'content' },
+    favorite: { file: fill('heart'), area: 'content' },
+    'favorite-off': { file: regular('heart'), area: 'content' },
+    'rating-star': { file: fill('star'), area: 'content' },
+    'rating-star-off': { file: regular('star'), area: 'content' },
 
     // Transport
     shuffle: { file: fill('shuffle'), area: 'transport' },
@@ -104,6 +110,8 @@ export const iconSlots = {
     'add-to-playlist': { file: regular('playlist'), area: 'general' },
     'remove-from-playlist': { file: regular('minus-circle'), area: 'general' },
     'change-cover': { file: regular('image-square'), area: 'general' },
+    'add-favorite': { file: regular('heart'), area: 'general' },
+    'remove-favorite': { file: regular('heart-break'), area: 'general' },
     'shuffle-play': { file: regular('shuffle'), area: 'general' },
     'move-up': { file: regular('caret-up'), area: 'general' },
     'move-down': { file: regular('caret-down'), area: 'general' },

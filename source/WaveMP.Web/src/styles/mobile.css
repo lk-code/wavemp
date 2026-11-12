@@ -200,7 +200,12 @@
             display: none !important;
         }
 
-        [data-part='transport'] > :is([data-part='mode-switch'], [data-part='btn-collapse']) {
+        [data-part='transport']
+            > :is(
+                [data-part='mode-switch'],
+                [data-part='btn-collapse'],
+                [data-part='now-playing-actions']
+            ) {
             display: none !important;
         }
 
@@ -213,14 +218,21 @@
             grid-template-areas:
                 'btn-collapse'
                 'now-playing-mini'
+                'now-playing-actions'
                 'seek'
                 'transport-controls' !important;
             grid-template-columns: minmax(0, 1fr) !important;
-            grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+            grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
             row-gap: var(--wmp-space-l);
             padding: max(var(--wmp-space-s), env(safe-area-inset-top)) var(--wmp-space-l)
                 max(var(--wmp-space-xl), env(safe-area-inset-bottom));
             overflow: auto !important;
+        }
+
+        [data-part='transport'][data-state~='expanded'] > [data-part='now-playing-actions'] {
+            grid-area: now-playing-actions !important;
+            display: flex !important;
+            justify-content: center;
         }
 
         [data-part='transport'][data-state~='expanded'] > [data-part='btn-collapse'] {
@@ -340,7 +352,7 @@
         /* --- Content details (not protected, themes may adjust them) ---------------------- */
 
         [data-part='list'] {
-            --wmp-list-columns: 2rem minmax(0, 1fr) auto;
+            --wmp-list-columns: 2rem minmax(0, 1fr) auto auto;
         }
 
         [data-part='list-header'] {
@@ -352,15 +364,19 @@
             display: none;
         }
 
-        /* Playlists keep the handle (large enough for a finger) and leave album and detail out. */
+        /*
+         * Lists keep number, title, length and the heart; playlists also the handle (large enough
+         * for a finger). Artist, album, detail and the stars are left out.
+         */
         [data-view='playlist'] [data-part='list'] {
-            --wmp-list-columns: 2.75rem 2rem minmax(0, 1fr) auto;
+            --wmp-list-columns: 2.75rem 2rem minmax(0, 1fr) auto auto;
         }
 
         [data-part='list']
             :is([data-part='list-column'], [data-part='list-cell']):is(
                 [data-column='album'],
-                [data-column='detail']
+                [data-column='detail'],
+                [data-column='rating']
             ) {
             display: none;
         }

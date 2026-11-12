@@ -16,6 +16,8 @@ import { useI18n } from 'vue-i18n'
 import type { MenuItem } from '@/components/base/BaseContextMenu.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
 import BaseList, { type ListGroup, type ListRowBase } from '@/components/base/BaseList.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
+import RatingStars from '@/components/collection/RatingStars.vue'
 import TrackMenu from '@/components/library/TrackMenu.vue'
 import { useFormat } from '@/composables/useFormat'
 import { useSortableList } from '@/composables/useSortableList'
@@ -26,7 +28,8 @@ import { usePlayerStore } from '@/stores/player'
  * The tracks of a playlist (or of the list "Recently played") in their order, without grouping.
  * A double click, Enter or a tap plays the list from the row on. With sortable, each row has a
  * handle to drag it to another place (event move); the context menu adds the entries of the page
- * (extraItems, event extra), e.g. to move a row with the keyboard or to remove it.
+ * (extraItems, event extra), e.g. to move a row with the keyboard or to remove it. The columns
+ * rating and favorite show the stars and the heart of the profile; a click changes them.
  */
 interface Row extends ListRowBase {
     readonly entry: PlaylistTrackRow
@@ -71,6 +74,8 @@ const columns = computed(() => [
     { id: 'artist', label: t('list.columns.artist') },
     { id: 'album', label: t('list.columns.album') },
     ...(props.detailLabel ? [{ id: 'detail', label: props.detailLabel }] : []),
+    { id: 'rating', label: t('list.columns.rating') },
+    { id: 'favorite', label: t('list.columns.favorite') },
 ])
 
 const playingId = computed(() => player.state.trackId)
@@ -208,7 +213,20 @@ function onExtra(id: string): void {
             <template v-else-if="column.id === 'album'">
                 {{ row.entry.track.album?.title ?? '' }}
             </template>
-            <template v-else>{{ row.entry.detail ?? '' }}</template>
+            <template v-else-if="column.id === 'detail'">{{ row.entry.detail ?? '' }}</template>
+            <RatingStars
+                v-else-if="column.id === 'rating'"
+                :track-id="row.entry.track.id ?? ''"
+                :rating="row.entry.track.rating"
+                :focusable="false"
+            />
+            <FavoriteButton
+                v-else-if="column.id === 'favorite'"
+                type="Track"
+                :id="row.entry.track.id ?? ''"
+                :favorite="row.entry.track.isFavorite"
+                :focusable="false"
+            />
         </template>
     </BaseList>
     <TrackMenu ref="menu" :extra-items="menuItems" @play="onPlay" @extra="onExtra" />

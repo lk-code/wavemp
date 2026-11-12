@@ -1,6 +1,6 @@
 # WaveMP Theme API
 
-Version 1
+Version 2
 
 This document describes how themes change the look of the WaveMP web app: the parts of the DOM a theme can address, their states, the CSS variables and the icons. It is meant for theme authors.
 
@@ -13,7 +13,7 @@ The DOM is the same for every theme. Every element a theme can address has a sta
 The root element carries the active theme and the version of this API:
 
 ```html
-<html lang="en" data-theme="midnight" data-theme-api="1">
+<html lang="en" data-theme="midnight" data-theme-api="2">
 ```
 
 A theme can change everything: colors, graphics, fonts, sizes and the desktop layout. Only the mobile layout is fixed (see [Responsive layout](#responsive-layout)).
@@ -53,7 +53,7 @@ These parts are grids with named areas:
 | `app` | `header`, `toolbar`, `sidebar`, `content`, `transport`, `bottom-nav` | `'header header' 'toolbar toolbar' 'sidebar content' 'transport transport'` |
 | `header` | `btn-menu`, `logo`, `nav-history`, `tabs`, `server-status`, `btn-profile` | `'logo nav-history tabs server-status btn-profile'` |
 | `toolbar` | `breadcrumb`, `view-switch`, `sort`, `search` | `'breadcrumb view-switch sort search'` |
-| `transport` | `seek`, `now-playing-mini`, `transport-controls`, `mode-switch`, `btn-collapse` | `'seek seek seek' 'now-playing-mini transport-controls mode-switch'` |
+| `transport` | `seek`, `now-playing-mini`, `now-playing-actions`, `transport-controls`, `mode-switch`, `btn-collapse` | `'seek seek seek seek' 'now-playing-mini now-playing-actions transport-controls mode-switch'` |
 | `list-group` | `list-group-header`, `list-group-info`, `list-group-rows` | `'list-group-header list-group-header' 'list-group-info list-group-rows'` |
 
 Example of a desktop layout with the sidebar on the right:
@@ -154,6 +154,14 @@ Example of a desktop layout with the sidebar on the right:
 | `playlist-choice` | `button` | `playlist-choices` (in a `li`) | One playlist with its cover, its name as `label` and `playlist-choice-count`; adds the songs at its end |
 | `playlist-choice-count` | `span` | `playlist-choice` | Number of songs of the playlist |
 | `drag-handle` | `span` | `list-cell` with `data-column="handle"` | Handle that drags an entry of a playlist to another place (mouse, pen and touch), with `icon` and a `label` for screen readers; the menu of the entry moves it with the keyboard |
+| `btn-favorite` | `button` (`aria-pressed`) | `detail-actions`, `list-cell` with `data-column="favorite"`, `now-playing-actions` | Heart that marks a song, album or artist as favorite of the profile, with `icon` and `label`; in lists it is no tab stop (the menu of the song offers the same) |
+| `rating` | `span` (`role="group"`) | `meta-value` of the `meta-item` `rating`, `list-cell` with `data-column="rating"`, `now-playing-actions` | Rating of a song with five `rating-star`s; `data-value` holds the stars (0 to 5) |
+| `rating-star` | `button` (`aria-pressed` for the star of the rating) | `rating` | One star with `icon` and `label`; a click rates the song with it, a click on the star of the rating removes it; in lists no tab stop |
+| `scope-switch` | `div` (`role="group"`) | `view` (library) | Switch between the whole library and the "my music" of the profile: two `button`s (`data-item` `all-music` and `my-music`, `aria-pressed`) |
+| `shelf` | `section` | `view` (home) | One row of the home page with `shelf-header` and a `tile-list` of its first entries |
+| `shelf-header` | `div` | `shelf` | `shelf-title` and `shelf-actions` |
+| `shelf-title` | `h2` | `shelf-header` | Name of the row |
+| `shelf-actions` | `div` | `shelf-header` | Actions of the row (`button` `play`) and a `link` to the whole list |
 | `queue` | `section` (`aria-labelledby`) | `view` | Queue on the Now Playing page: a `section-title`, the `button` `clear-queue` and the `queue-list`; missing while the queue is empty. On the desktop the base shows it beside the stage |
 | `queue-list` | `ol` | `queue` | Entries of the queue in playing order |
 | `queue-item` | `li` (`aria-current`) | `queue-list` | One entry with `queue-item-info`, `queue-item-duration` and `queue-item-actions` |
@@ -168,6 +176,7 @@ Example of a desktop layout with the sidebar on the right:
 | `now-playing-meta` | `span` | `now-playing-mini` | Title and artist |
 | `now-playing-title` | `span` | `now-playing-meta` | Title of the current track |
 | `now-playing-artist` | `span` | `now-playing-meta` | Artist of the current track |
+| `now-playing-actions` | `div` (`role="group"`) | `transport` | `btn-favorite` and `rating` of the current song; empty (state `empty`) while nothing plays; on mobile only in the full-screen player |
 | `transport-message` | `p` (`role="status"`) | `transport` | Notice of the player, for example that a song was skipped; empty while there is none. The base shows it above the transport bar, outside the grid |
 | `transport-controls` | `div` (`role="group"`) | `transport` | Playback controls |
 | `btn-shuffle` | `button` (`aria-pressed`) | `transport-controls` | Shuffle |
@@ -282,6 +291,10 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `tree-item` | additionally `expanded` or `collapsed` for nodes with children |
 | `list` | `placeholder` while the list shows placeholder content (component overview); `busy` while a change of a playlist is being saved |
 | `list-row` | `selected`; `has-video` for songs with a video, additionally `video-only` for songs with a video only (no audio); `playing` for the current song of the player |
+| `btn-favorite` | `on` for a favorite, otherwise `off` |
+| `rating` | `rated` or `unrated` |
+| `rating-star` | `on` up to the rating, otherwise `off` |
+| `now-playing-actions` | `empty` while nothing plays |
 | `queue-item` | `current` for the current song, `played` for the songs before it |
 | `placeholder-notice`, `cover` | `placeholder` |
 | `now-playing-mini` | `empty` while nothing plays |
@@ -314,7 +327,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
 | `aria-checked` | `color-swatch`; `menu-item` with `role="menuitemradio"`, for example the chosen sort key and direction |
 | `aria-selected` | `list-row` |
-| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute` and other toggle buttons |
+| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, the `button`s of `scope-switch` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
 | `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate), `meter` (`aria-valuenow` from 0 to 100) |
 | `:disabled` | buttons and inputs |
@@ -331,15 +344,16 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-variant` | `button` and all `btn-*` parts | `default`, `primary`, `icon`, `round` |
 | `data-variant` | `field` | `checkbox` |
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
-| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-users`, `not-found` |
-| `data-kind` | `tile` | `album`, `artist`, `genre`, `year`, `playlist`, `recently-played` |
-| `data-section` | `view` (library) | `recently-added`, `artists`, `albums`, `songs`, `genres`, `years` |
-| `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist`; in playlists also `handle` (first column, only where entries can be moved), `album` and `detail` (in "Recently played" the time of the last play) |
+| `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `home`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-users`, `not-found` |
+| `data-kind` | `tile` | `album`, `artist`, `track`, `genre`, `year`, `playlist`, `recently-played` |
+| `data-section` | `view` (library) | `recently-added`, `favorites`, `artists`, `albums`, `songs`, `genres`, `years` |
+| `data-value` | `rating` | Stars of the rating, `0` (none) to `5` |
+| `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist`, `rating`, `favorite`; in playlists also `handle` (first column, only where entries can be moved), `album` and `detail` (in "Recently played" the time of the last play, in the favorites the time the song was marked) |
 | `data-count` | `playlist-cover` | Number of song covers (1 to 4) |
-| `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media` |
+| `data-field` | `meta-item` | `album`, `artist`, `genre`, `year`, `tracks`, `albums`, `duration`, `number`, `disc`, `media`, `rating` |
 | `data-field` | `field` (metadata editor) | `title`, `artist`, `album`, `album-artist`, `year`, `number`, `disc`, `genre` |
 | `data-field` | `field` (settings) | `language`, `replay-gain` |
-| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `button` in `view-actions`, `detail-actions`, `queue` and `queue-item-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `play`, `play-next` and `add-to-queue` for songs with audio, `add-to-playlist`, then `details`, `album`, `artist`, for admins `edit-metadata` and on the page of a playlist `move-up`, `move-down` and `remove-from-playlist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`), the job (`library-scan`, `cover-cache`) or the section of the search and of an artist (`artists`, `albums`, `tracks`), of a song (`files`) and of the cache page (`usage`, `settings`), the action of a page (`play`, `shuffle`, `edit-metadata`; of a playlist also `rename`, `cover`, `remove-cover`, `delete`; on the playlist overview `create-playlist`) or of the queue (`clear-queue`; per entry `move-up`, `move-down`, `remove`) |
+| `data-item` | `menu-item`, `admin-nav-item`, `stat-item`, `job-item`, `section`, `shelf`, `button` in `view-actions`, `detail-actions`, `scope-switch`, `shelf-actions`, `queue` and `queue-item-actions` | Id of the entry: the menu entry (in the profile menu `settings`, `administration`, `switch-profile`; in the menu of a song `play`, `play-next` and `add-to-queue` for songs with audio, `add-to-playlist`, `favorite`, then `details`, `album`, `artist`, for admins `edit-metadata` and on the page of a playlist `move-up`, `move-down` and `remove-from-playlist`; in the sort options `sort-album-artist`, `sort-album`, `sort-title`, `sort-artist`, `sort-name`, `sort-duration`, `sort-year`, `sort-genre`, `sort-first-seen-at`, `sort-track-count`, `sort-rating`, `sort-relevance`, `direction-asc`, `direction-desc`), the page (`admin-library`, `admin-jobs`, `admin-cache`, `admin-users`), the statistic (for example `filesFound`, `tracksTotal`, `duration`; of the cache `covers`, `transcodes`, `entries`), the job (`library-scan`, `cover-cache`) or the section of the search, of an artist and of the favorites (`artists`, `albums`, `tracks`), the row of the home page (`playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated`), of a song (`files`) and of the cache page (`usage`, `settings`), the action of a page (`play`, `shuffle`, `favorite`, `edit-metadata`; of the library `all-music` and `my-music`; of a row of the home page `play`; of a playlist also `rename`, `cover`, `remove-cover`, `delete`; on the playlist overview `create-playlist`) or of the queue (`clear-queue`; per entry `move-up`, `move-down`, `remove`) |
 
 ## Variables
 
@@ -366,6 +380,8 @@ Graphics and backgrounds take any value of the CSS `background` shorthand: a col
 | `--wmp-color-success` | `#2e9d4f` |
 | `--wmp-color-warning` | `#c98a12` |
 | `--wmp-color-danger` | `#c83737` |
+| `--wmp-favorite-color` | `#d6336c` |
+| `--wmp-rating-color` | `#e0a100` |
 | `--wmp-backdrop-color` | `rgb(0 0 0 / 45%)` |
 
 ### Areas
@@ -497,16 +513,17 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-cover-size-l` | `12rem` | Size of the cover in `detail-header` |
 | `--wmp-tile-width` | `9rem` | Smallest width of a column of tiles |
 | `--wmp-list-row-height` | `2rem` | Minimum height of `list-row` |
-| `--wmp-list-columns` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)` | `grid-template-columns` of `list-header` and `list-row` |
-| `--wmp-list-columns-playlist` | `2rem 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) minmax(0, 1.5fr)` | `--wmp-list-columns` of the list in `data-view="playlist"` (handle, number, title, duration, artist, album) |
-| `--wmp-list-columns-recently-played` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) minmax(0, 1.5fr) 10rem` | `--wmp-list-columns` of the list in `data-view="recently-played"` (number, title, duration, artist, album, detail) |
+| `--wmp-list-columns` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) 6.5rem 2rem` | `grid-template-columns` of `list-header` and `list-row` (number, title, duration, artist, rating, favorite) |
+| `--wmp-list-columns-playlist` | `2rem 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) minmax(0, 1.5fr) 6.5rem 2rem` | `--wmp-list-columns` of the list in `data-view="playlist"` (handle, number, title, duration, artist, album, rating, favorite) |
+| `--wmp-list-columns-recently-played` | `3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) minmax(0, 1.5fr) 10rem 6.5rem 2rem` | `--wmp-list-columns` of the list in `data-view="recently-played"` and of the songs in `data-section="favorites"` (number, title, duration, artist, album, detail, rating, favorite) |
+| `--wmp-shelf-tile-width` | `var(--wmp-tile-width)` | Width of a tile in a `shelf` of the home page |
 | `--wmp-list-group-info-width` | `11rem` | Width of `list-group-info` (desktop) |
 | `--wmp-avatar-size` | `2rem` | Size of `avatar` |
 | `--wmp-avatar-size-l` | `6rem` | Size of `avatar` in `profile-tile` |
 | `--wmp-swatch-size` | `2rem` | Size of `color-swatch` |
 | `--wmp-progress-height` | `0.5rem` | Height of `progress-track` and `meter-track` |
 
-On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list` (in playlists with the handle); the columns `album` and `detail` are left out there.
+On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list` (in playlists with the handle); the columns `artist`, `album`, `detail` and `rating` are left out there.
 
 ### Runtime variables
 
@@ -545,6 +562,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `forward` | `--wmp-icon-forward` | `/icons/phosphor/fill/arrow-right-fill.svg` | Header |
 | `tab-indicator` | `--wmp-icon-tab-indicator` | `/icons/phosphor/fill/caret-down-fill.svg` | Header |
 | `menu` | `--wmp-icon-menu` | `/icons/phosphor/fill/list-fill.svg` | Header |
+| `home` | `--wmp-icon-home` | `/icons/phosphor/fill/house-fill.svg` | Tabs, bottom navigation |
 | `now-playing` | `--wmp-icon-now-playing` | `/icons/phosphor/fill/music-notes-fill.svg` | Tabs, bottom navigation |
 | `library` | `--wmp-icon-library` | `/icons/phosphor/fill/books-fill.svg` | Tabs, bottom navigation |
 | `playlists` | `--wmp-icon-playlists` | `/icons/phosphor/fill/playlist-fill.svg` | Tabs, bottom navigation |
@@ -567,7 +585,7 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `tree-years` | `--wmp-icon-tree-years` | `/icons/phosphor/duotone/calendar-blank-duotone.svg` | Sidebar |
 | `tree-recently-played` | `--wmp-icon-tree-recently-played` | `/icons/phosphor/duotone/headphones-duotone.svg` | Sidebar |
 | `tree-playlist` | `--wmp-icon-tree-playlist` | `/icons/phosphor/duotone/music-notes-simple-duotone.svg` | Sidebar (each playlist of the profile) |
-| `tree-favorites` | `--wmp-icon-tree-favorites` | `/icons/phosphor/duotone/heart-duotone.svg` | Sidebar (reserved) |
+| `tree-favorites` | `--wmp-icon-tree-favorites` | `/icons/phosphor/duotone/heart-duotone.svg` | Sidebar |
 | `tree-expand` | `--wmp-icon-tree-expand` | `/icons/phosphor/regular/plus-square.svg` | Sidebar |
 | `tree-collapse` | `--wmp-icon-tree-collapse` | `/icons/phosphor/regular/minus-square.svg` | Sidebar |
 | `has-video` | `--wmp-icon-has-video` | `/icons/phosphor/regular/video-camera.svg` | Content |
@@ -583,6 +601,11 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `playlist` | `--wmp-icon-playlist` | `/icons/phosphor/fill/playlist-fill.svg` | Content (playlists without any cover) |
 | `recently-played` | `--wmp-icon-recently-played` | `/icons/phosphor/fill/headphones-fill.svg` | Content (tile and page of "Recently played") |
 | `drag-handle` | `--wmp-icon-drag-handle` | `/icons/phosphor/regular/dots-six-vertical.svg` | Content (`drag-handle` of playlist entries) |
+| `track` | `--wmp-icon-track` | `/icons/phosphor/fill/music-note-fill.svg` | Content (tiles of songs without cover) |
+| `favorite` | `--wmp-icon-favorite` | `/icons/phosphor/fill/heart-fill.svg` | Content (`btn-favorite` of a favorite) |
+| `favorite-off` | `--wmp-icon-favorite-off` | `/icons/phosphor/regular/heart.svg` | Content (`btn-favorite` of anything else) |
+| `rating-star` | `--wmp-icon-rating-star` | `/icons/phosphor/fill/star-fill.svg` | Content (`rating-star` up to the rating) |
+| `rating-star-off` | `--wmp-icon-rating-star-off` | `/icons/phosphor/regular/star.svg` | Content (the other `rating-star`s) |
 | `shuffle` | `--wmp-icon-shuffle` | `/icons/phosphor/fill/shuffle-fill.svg` | Transport |
 | `repeat` | `--wmp-icon-repeat` | `/icons/phosphor/fill/repeat-fill.svg` | Transport |
 | `repeat-one` | `--wmp-icon-repeat-one` | `/icons/phosphor/fill/repeat-once-fill.svg` | Transport |
@@ -617,6 +640,8 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `add-to-playlist` | `--wmp-icon-add-to-playlist` | `/icons/phosphor/regular/playlist.svg` | Menus and dialogs |
 | `remove-from-playlist` | `--wmp-icon-remove-from-playlist` | `/icons/phosphor/regular/minus-circle.svg` | Menus and dialogs |
 | `change-cover` | `--wmp-icon-change-cover` | `/icons/phosphor/regular/image-square.svg` | Menus and dialogs |
+| `add-favorite` | `--wmp-icon-add-favorite` | `/icons/phosphor/regular/heart.svg` | Menus and dialogs |
+| `remove-favorite` | `--wmp-icon-remove-favorite` | `/icons/phosphor/regular/heart-break.svg` | Menus and dialogs |
 | `shuffle-play` | `--wmp-icon-shuffle-play` | `/icons/phosphor/regular/shuffle.svg` | Menus and dialogs |
 | `move-up` | `--wmp-icon-move-up` | `/icons/phosphor/regular/caret-up.svg` | Menus and dialogs |
 | `move-down` | `--wmp-icon-move-down` | `/icons/phosphor/regular/caret-down.svg` | Menus and dialogs |
@@ -663,6 +688,7 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 
 ### Changelog
 
+- **Version 2:** favorites, ratings and the home page. Changed: the lists of songs have the new columns `rating` (stars) and `favorite` (heart) at their end, so the defaults of `--wmp-list-columns`, `--wmp-list-columns-playlist` and `--wmp-list-columns-recently-played` have two more columns; the grid `transport` has the new area `now-playing-actions` between `now-playing-mini` and `transport-controls`. Themes that set these variables or the grid of `transport` have to add the new columns and the area. Added: the parts `btn-favorite`, `rating`, `rating-star`, `scope-switch`, `now-playing-actions`, `shelf`, `shelf-header`, `shelf-title` and `shelf-actions`, their states, the attribute `data-value`, the home page (`data-view="home"`, tab and bottom navigation entry `home`), the library section `favorites`, the tile kind `track`, the `meta-item` `rating` on the page of a song, new values of `data-item` (menu entry `favorite`; detail action `favorite`; `all-music`, `my-music`; the rows `playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated` of `shelf`), the sort key `sort-rating`, the variables `--wmp-favorite-color`, `--wmp-rating-color` and `--wmp-shelf-tile-width` and the icon slots `home`, `track`, `favorite`, `favorite-off`, `rating-star`, `rating-star-off`, `add-favorite` and `remove-favorite`; `tree-favorites` is no longer reserved.
 - **Version 1:** first version with the app shell, the base components and the theme Midnight.
     - Additions without a version change: the profile selection (`profile-select`, `profile-select-title`, `profile-select-hint`, `profile-list`, `profile-item`, `profile-tile`, `avatar`, `avatar-initials`), the profile menu `btn-profile` with the new header area `btn-profile`, the settings page (`profile-summary`, `data-view="settings"`), the profile administration (`view-actions`, `user-list`, `user-item`, `user-info`, `user-name`, `user-meta`, `user-actions`, `data-view="admin-users"`), the base components `alert`, `form`, `select`, `field-hint`, `field-error`, `color-picker` and `color-swatch`, the icon slots `switch-profile` and `manage-profiles`, the variables `--wmp-profile-select-color`, `--wmp-profile-select-background`, `--wmp-avatar-color`, `--wmp-profile-secondary-opacity`, `--wmp-avatar-size`, `--wmp-avatar-size-l` and `--wmp-swatch-size` and the runtime variables `--wmp-profile-color` and `--wmp-swatch-color`.
     - Additions without a version change: the administration (`admin-nav`, `admin-nav-item`, `section`, `section-title`, `scan-status`, `progress`, `progress-track`, `progress-fill`, `stat-list`, `stat-item`, `stat-value`, `run-list`, `run-item`, `run-meta`, `issue-list`, `issue-item`, `issue-path`, `disclosure`, `disclosure-summary`, `job-list`, `job-item`, `job-info`, `job-name`, `job-meta`, `job-actions`, `data-view="admin-library"` and `data-view="admin-jobs"`), the base component `checkbox` with `data-variant="checkbox"` on `field`, the attribute `data-item` (`menu-item` already carried it, now it is documented), the states of `admin-nav-item`, `scan-status`, `job-item`, `run-item`, `progress` and the new tokens of `badge`, the icon slots `administration`, `admin-library`, `admin-jobs`, `scan` and `run-job`, the variables `--wmp-progress-height`, `--wmp-progress-track-background` and `--wmp-progress-fill-background` and the runtime variable `--wmp-progress-value`. The profile menu entry `manage-profiles` became `administration`.

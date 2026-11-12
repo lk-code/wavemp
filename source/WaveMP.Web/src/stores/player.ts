@@ -559,6 +559,8 @@ export const usePlayerStore = defineStore('player', () => {
             hasCover: track?.hasCover ?? false,
             title: track?.title ?? undefined,
             artist: artistOf(track),
+            isFavorite: track?.isFavorite ?? false,
+            rating: track?.rating ?? 0,
             position: position.value,
             duration: duration.value,
             shuffle: shuffle.value,

@@ -1825,4 +1825,156 @@
         border: 0;
         border-block-start: 1px solid var(--wmp-color-border);
     }
+
+    /* --- Collection: favorites, ratings and "my music" ------------------------------------- */
+
+    [data-part='btn-favorite'] {
+        --wmp-icon-size: var(--wmp-icon-size-s);
+        --wmp-icon-fill: currentColor;
+
+        color: var(--wmp-color-text-muted);
+    }
+
+    [data-part='btn-favorite'][data-state~='on'] {
+        color: var(--wmp-favorite-color);
+    }
+
+    [data-part='rating'] {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+    }
+
+    [data-part='rating-star'] {
+        --wmp-icon-size: var(--wmp-icon-size-s);
+        --wmp-icon-fill: currentColor;
+
+        display: inline-grid;
+        place-items: center;
+        padding: 0.125rem;
+        border: 0;
+        border-radius: var(--wmp-radius-s);
+        background: none;
+        color: var(--wmp-color-text-muted);
+        cursor: pointer;
+    }
+
+    [data-part='rating-star'][data-state~='on'] {
+        color: var(--wmp-rating-color);
+    }
+
+    /* Hovering a star previews the rating up to it. */
+    [data-part='rating']:hover [data-part='rating-star'] {
+        color: var(--wmp-color-text-muted);
+    }
+
+    [data-part='rating']
+        [data-part='rating-star']:is(:hover, :has(~ [data-part='rating-star']:hover)) {
+        color: var(--wmp-rating-color);
+    }
+
+    [data-part='rating-star'] > [data-part='label'] {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    /*
+     * In lists, songs without rating or heart show the empty stars and heart only on hover, selection
+     * and focus, where a pointer can hover; on touch screens they stay visible.
+     */
+    @media (hover: hover) {
+        [data-part='list-row']:not(:hover, [aria-selected='true'], :focus-within)
+            [data-part='rating'][data-state~='unrated'],
+        [data-part='list-row']:not(:hover, [aria-selected='true'], :focus-within)
+            [data-part='btn-favorite'][data-state~='off'] {
+            opacity: 0;
+        }
+    }
+
+    :is([data-part='list-column'], [data-part='list-cell']):is(
+        [data-column='rating'],
+        [data-column='favorite']
+    ) {
+        overflow: visible;
+    }
+
+    [data-part='list-cell'][data-column='favorite'] [data-part='btn-favorite'] {
+        min-block-size: 0;
+        padding: 0;
+    }
+
+    [data-part='scope-switch'] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--wmp-space-xs);
+        padding-block-end: var(--wmp-space-s);
+    }
+
+    [data-part='now-playing-actions'] {
+        display: flex;
+        align-items: center;
+        gap: var(--wmp-space-xs);
+    }
+
+    [data-part='now-playing-actions'][data-state~='empty'] {
+        visibility: hidden;
+    }
+
+    /* --- Home page ------------------------------------------------------------------------ */
+
+    [data-view='home'] {
+        display: grid;
+        align-content: start;
+        gap: var(--wmp-space-xl);
+    }
+
+    [data-part='shelf'] {
+        display: grid;
+        gap: var(--wmp-space-s);
+        min-inline-size: 0;
+    }
+
+    [data-part='shelf-header'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--wmp-space-s);
+    }
+
+    [data-part='shelf-title'] {
+        margin: 0;
+        font-size: var(--wmp-font-size-l);
+        font-weight: var(--wmp-font-weight-bold);
+    }
+
+    [data-part='shelf-actions'] {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--wmp-space-s);
+    }
+
+    /* One row that scrolls sideways, also by swiping on touch screens. */
+    [data-part='shelf'] > [data-part='tile-list'] {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: var(--wmp-shelf-tile-width);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x proximity;
+        padding-block-end: var(--wmp-space-xs);
+    }
+
+    [data-part='shelf'] [data-part='tile-item'] {
+        scroll-snap-align: start;
+    }
+
+    [data-section='favorites'] [data-part='list'] {
+        --wmp-list-columns: var(--wmp-list-columns-recently-played);
+    }
 }

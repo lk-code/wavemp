@@ -7,7 +7,9 @@ import AppHeader from './AppHeader.vue'
 import AppSidebar from './AppSidebar.vue'
 import AppToolbar from './AppToolbar.vue'
 import AppTransport from './AppTransport.vue'
+import BaseAlert from '@/components/base/BaseAlert.vue'
 import { pageTitleKey } from '@/navigation/breadcrumb'
+import { useCollectionStore } from '@/stores/collection'
 import { useHealthStore } from '@/stores/health'
 import { usePageTitleStore } from '@/stores/pageTitle'
 import { usePlayerStore } from '@/stores/player'
@@ -21,6 +23,7 @@ const route = useRoute()
 const router = useRouter()
 const health = useHealthStore()
 const pageTitle = usePageTitleStore()
+const collection = useCollectionStore()
 
 const player = usePlayerStore()
 
@@ -68,12 +71,14 @@ function onKeydown(event: KeyboardEvent): void {
     }
 }
 
-// Navigating closes the drawer and the full-screen player.
+// Navigating closes the drawer and the full-screen player and dismisses the error of a favorite or a
+// rating.
 watch(
     () => route.fullPath,
     () => {
         sidebarOpen.value = false
         playerExpanded.value = false
+        collection.clearError()
     },
 )
 
@@ -102,6 +107,17 @@ onUnmounted(() => {
         <AppSidebar :open="sidebarOpen" @close="closeSidebar" />
         <main id="wavemp-content" data-part="content">
             <h1 data-part="content-title">{{ title }}</h1>
+            <BaseAlert
+                v-if="collection.error"
+                tone="error"
+                :message="
+                    t(
+                        collection.error === 'rating'
+                            ? 'collection.errors.rating'
+                            : 'collection.errors.favorite',
+                    )
+                "
+            />
             <slot />
         </main>
         <AppTransport

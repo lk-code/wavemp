@@ -6,7 +6,7 @@ import type { Playlist } from '@/api/generated/models'
 import BaseButton from '@/components/base/BaseButton.vue'
 import TileList, { type Tile } from '@/components/library/TileList.vue'
 import PlaylistEditDialog from '@/components/playlists/PlaylistEditDialog.vue'
-import { useFormat } from '@/composables/useFormat'
+import { useLibraryTiles } from '@/composables/useLibraryTiles'
 import { usePlaylistsStore } from '@/stores/playlists'
 
 /**
@@ -21,7 +21,7 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
-const format = useFormat()
+const libraryTiles = useLibraryTiles()
 const router = useRouter()
 const playlists = usePlaylistsStore()
 
@@ -37,14 +37,7 @@ const tiles = computed<Tile[]>(() => [
         subtitle: t('playlists.automatic'),
         to: { name: 'playlists-recently-played' },
     },
-    ...playlists.playlists.map((playlist): Tile => ({
-        id: playlist.id ?? '',
-        kind: 'playlist',
-        title: playlist.name ?? '',
-        subtitle: t('library.songCount', { count: format.number(playlist.trackCount ?? 0) }),
-        to: { name: 'playlist', params: { id: playlist.id ?? '' } },
-        playlistCover: { id: playlist.id ?? '', cover: playlist.cover },
-    })),
+    ...playlists.playlists.map((playlist) => libraryTiles.playlist(playlist)),
 ])
 
 const empty = computed(() => playlists.status === 'ready' && playlists.playlists.length === 0)

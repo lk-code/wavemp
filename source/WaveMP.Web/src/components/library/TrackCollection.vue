@@ -15,6 +15,8 @@ export interface TrackFilter {
     readonly albumId?: string
     readonly genre?: string
     readonly year?: number
+    /** Only the "my music" of the profile. */
+    readonly myMusic?: boolean
 }
 
 /**
@@ -50,6 +52,7 @@ const list = usePagedList<Track>((offset, limit) =>
         albumId: props.filter.albumId,
         genre: props.filter.genre,
         year: props.filter.year,
+        myMusic: props.filter.myMusic,
     }),
 )
 

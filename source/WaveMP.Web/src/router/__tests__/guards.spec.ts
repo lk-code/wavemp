@@ -41,7 +41,7 @@ describe('resolveAccess', () => {
 
     it('lets profiles open the app', async () => {
         expect((await navigate('/now-playing', user)).name).toBe('now-playing')
-        expect((await navigate('/', user)).fullPath).toBe('/library/songs')
+        expect((await navigate('/', user)).name).toBe('home')
     })
 
     it('keeps admin pages for admins', () => {
@@ -51,7 +51,7 @@ describe('resolveAccess', () => {
             redirectedFrom: undefined,
         }
 
-        expect(resolveAccess(adminPage, user)).toEqual({ name: 'library' })
+        expect(resolveAccess(adminPage, user)).toEqual({ name: 'home' })
         expect(resolveAccess(adminPage, admin)).toBe(true)
         expect(resolveAccess(adminPage, guest)).toEqual({
             name: 'profiles',

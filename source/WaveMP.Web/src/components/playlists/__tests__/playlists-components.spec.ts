@@ -282,9 +282,20 @@ describe('PlaylistTrackList', () => {
             'duration',
             'artist',
             'album',
+            'rating',
+            'favorite',
         ])
         expect(fixed.findAll('[data-part="drag-handle"]')).toHaveLength(0)
-        expect(columns(fixed)).toEqual(['number', 'title', 'duration', 'artist', 'album', 'detail'])
+        expect(columns(fixed)).toEqual([
+            'number',
+            'title',
+            'duration',
+            'artist',
+            'album',
+            'detail',
+            'rating',
+            'favorite',
+        ])
         sortable.unmount()
         fixed.unmount()
     })

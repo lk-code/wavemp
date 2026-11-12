@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
+import HomeView from '@/views/HomeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import PlaylistsView from '@/views/PlaylistsView.vue'
@@ -59,8 +60,7 @@ const librarySongs = { name: 'library-section', params: { section: defaultLibrar
  */
 export function createRoutes(extra: readonly RouteRecordRaw[] = []): RouteRecordRaw[] {
     return [
-        // The start page follows in step 11; until then the library opens.
-        { path: '/', redirect: librarySongs },
+        { path: '/', name: 'home', component: HomeView, meta: { tab: 'home' } },
         {
             path: '/profiles',
             name: 'profiles',

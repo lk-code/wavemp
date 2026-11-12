@@ -92,3 +92,17 @@ describe('sortItemId and sortLabelKey', () => {
         expect(sortLabelKey('Name')).toBe('sort.keys.name')
     })
 })
+
+describe('rating', () => {
+    it('sorts the songs with the most stars first by default', () => {
+        expect(sortOptions('tracks', false)).toContain('Rating')
+        expect(sortOptions('albums', false)).not.toContain('Rating')
+        expect(defaultDirection('tracks', 'Rating')).toBe('Desc')
+        expect(parseSort('tracks', { sort: 'Rating' }, false)).toEqual({
+            sort: 'Rating',
+            direction: undefined,
+        })
+        expect(sortItemId('Rating')).toBe('sort-rating')
+        expect(sortLabelKey('Rating')).toBe('sort.keys.rating')
+    })
+})

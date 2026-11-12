@@ -16,12 +16,12 @@ describe('createRoutes', () => {
         expect(routes.at(-2)?.name).toBe('extra')
     })
 
-    it('opens the songs of the library on the start page', async () => {
+    it('opens the home page on the start page', async () => {
         const route = await resolve('/')
 
-        expect(route.name).toBe('library-section')
-        expect(route.fullPath).toBe('/library/songs')
-        expect(route.meta.tab).toBe('library')
+        expect(route.name).toBe('home')
+        expect(route.fullPath).toBe('/')
+        expect(route.meta.tab).toBe('home')
     })
 
     it('redirects the library to its songs', async () => {
@@ -29,7 +29,15 @@ describe('createRoutes', () => {
     })
 
     it('knows the sections of the library', async () => {
-        for (const section of ['recently-added', 'artists', 'albums', 'songs', 'genres', 'years']) {
+        for (const section of [
+            'recently-added',
+            'favorites',
+            'artists',
+            'albums',
+            'songs',
+            'genres',
+            'years',
+        ]) {
             const route = await resolve(`/library/${section}`)
             expect(route.name).toBe('library-section')
             expect(route.params.section).toBe(section)

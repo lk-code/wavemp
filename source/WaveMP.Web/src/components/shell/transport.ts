@@ -23,6 +23,9 @@ export interface TransportState {
     hasCover?: boolean
     title?: string
     artist?: string
+    /** Favorite and rating (0 to 5) of the current track, as the API returned them. */
+    isFavorite?: boolean
+    rating?: number
     message?: PlayerMessage | null
     /** Position and duration in seconds. */
     position: number

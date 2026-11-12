@@ -33,6 +33,8 @@ import type { TreeNode } from '@/components/base/BaseTreeItem.vue'
 import UserList, { type UserListItem } from '@/components/admin/UserList.vue'
 import BaseCover from '@/components/base/BaseCover.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
+import HomeShelf from '@/components/collection/HomeShelf.vue'
+import LibraryScopeSwitch from '@/components/collection/LibraryScopeSwitch.vue'
 import DetailHeader from '@/components/library/DetailHeader.vue'
 import LibraryEmpty from '@/components/library/LibraryEmpty.vue'
 import LoadMore from '@/components/library/LoadMore.vue'
@@ -637,6 +639,25 @@ const sampleCacheUsage: CacheUsage = {
                 :items="sortSampleItems"
                 :label="t('sort.menu')"
             />
+        </section>
+
+        <section data-part="dev-section">
+            <h2 data-part="dev-section-title">{{ t('dev.sections.home') }}</h2>
+            <div data-part="view" data-view="library" data-section="songs">
+                <LibraryScopeSwitch />
+            </div>
+            <div data-part="view" data-view="home">
+                <HomeShelf
+                    item="recently-added"
+                    :title="t('library.recentlyAdded')"
+                    :tiles="tiles"
+                    :to="{ name: 'library' }"
+                >
+                    <template #actions>
+                        <BaseButton data-item="play" icon="play-now" :label="t('library.play')" />
+                    </template>
+                </HomeShelf>
+            </div>
         </section>
 
         <section data-part="dev-section">

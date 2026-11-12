@@ -7,6 +7,7 @@ import BaseButton from '@/components/base/BaseButton.vue'
 import BaseCover from '@/components/base/BaseCover.vue'
 import BaseIcon from '@/components/base/BaseIcon.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
+import FavoriteButton from '@/components/collection/FavoriteButton.vue'
 import DetailHeader from '@/components/library/DetailHeader.vue'
 import MetaItem from '@/components/library/MetaItem.vue'
 import TileCollection from '@/components/library/TileCollection.vue'
@@ -17,7 +18,10 @@ import type { PagedListStatus } from '@/composables/usePagedList'
 import { getArtist, listArtistAlbums } from '@/library/api'
 import { usePageTitleStore } from '@/stores/pageTitle'
 
-/** An artist with its albums (also those it only contributes to) and its songs. */
+/**
+ * An artist with its albums (also those it only contributes to), its songs and the heart that marks
+ * it as favorite.
+ */
 const props = defineProps<{
     id: string
 }>()
@@ -97,6 +101,14 @@ onBeforeUnmount(() => pageTitle.clear())
                 <MetaItem field="tracks" :label="t('list.songs')">
                     {{ format.number(artist.trackCount ?? 0) }}
                 </MetaItem>
+                <template #actions>
+                    <FavoriteButton
+                        data-item="favorite"
+                        type="Artist"
+                        :id="artist.id ?? id"
+                        :favorite="artist.isFavorite"
+                    />
+                </template>
             </DetailHeader>
             <section
                 v-if="(artist.albumCount ?? 0) > 0"

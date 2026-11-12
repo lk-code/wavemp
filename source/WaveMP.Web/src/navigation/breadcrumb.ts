@@ -48,6 +48,9 @@ export function buildBreadcrumb(route: RouteInfo, detailTitle?: string | null): 
     }
 
     switch (route.name) {
+        case 'home':
+            crumbs.push({ id: 'home', labelKey: 'nav.home' })
+            break
         case 'now-playing':
             crumbs.push({ id: 'now-playing', labelKey: 'nav.nowPlaying' })
             break

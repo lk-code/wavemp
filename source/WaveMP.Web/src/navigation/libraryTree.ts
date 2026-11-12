@@ -3,7 +3,7 @@
 import type { RouteLocationRaw } from 'vue-router'
 import type { IconSlotName } from '@/themes/iconSlots'
 
-export type MainTab = 'now-playing' | 'library' | 'playlists'
+export type MainTab = 'home' | 'now-playing' | 'library' | 'playlists'
 
 export interface MainNavigationItem {
     readonly id: MainTab
@@ -13,6 +13,7 @@ export interface MainNavigationItem {
 }
 
 export const mainNavigation: readonly MainNavigationItem[] = [
+    { id: 'home', labelKey: 'nav.home', icon: 'home', to: { name: 'home' } },
     {
         id: 'now-playing',
         labelKey: 'nav.nowPlaying',
@@ -25,6 +26,7 @@ export const mainNavigation: readonly MainNavigationItem[] = [
 
 export const librarySections = [
     { id: 'recently-added', labelKey: 'library.recentlyAdded', icon: 'tree-recently-added' },
+    { id: 'favorites', labelKey: 'library.favorites', icon: 'tree-favorites' },
     { id: 'artists', labelKey: 'library.artists', icon: 'tree-artists' },
     { id: 'albums', labelKey: 'library.albums', icon: 'tree-albums' },
     { id: 'songs', labelKey: 'library.songs', icon: 'tree-songs' },

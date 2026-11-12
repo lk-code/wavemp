@@ -5,15 +5,16 @@ import { useRouter } from 'vue-router'
 import type { Track } from '@/api/generated/models'
 import BaseContextMenu, { type MenuItem } from '@/components/base/BaseContextMenu.vue'
 import AddToPlaylistDialog from '@/components/playlists/AddToPlaylistDialog.vue'
+import { useCollectionStore } from '@/stores/collection'
 import { usePlayerStore } from '@/stores/player'
 import { useSessionStore } from '@/stores/session'
 
 /**
  * Context menu of a track: play it, play it next or add it to the queue (tracks with audio), add it
- * to a playlist, its details, its album and its artist; for admins also the metadata editor, which
- * opens on the page of the track. Play is passed to the list (event play), which plays its tracks
- * from this one. Lists can add entries of their own (extraItems, event extra), e.g. the playlist
- * page to move and remove entries.
+ * to a playlist, mark it as favorite or remove it from the favorites, its details, its album and
+ * its artist; for admins also the metadata editor, which opens on the page of the track. Play is
+ * passed to the list (event play), which plays its tracks from this one. Lists can add entries of
+ * their own (extraItems, event extra), e.g. the playlist page to move and remove entries.
  */
 const props = withDefaults(
     defineProps<{
@@ -31,10 +32,16 @@ const { t } = useI18n()
 const router = useRouter()
 const session = useSessionStore()
 const player = usePlayerStore()
+const collection = useCollectionStore()
 const menu = ref<InstanceType<typeof BaseContextMenu> | null>(null)
 const track = ref<Track | null>(null)
 const addingToPlaylist = ref(false)
 const playlistTrackIds = computed(() => (track.value?.id ? [track.value.id] : []))
+const favorite = computed(() =>
+    track.value?.id
+        ? collection.isFavorite('Track', track.value.id, track.value.isFavorite)
+        : false,
+)
 
 const items = computed<MenuItem[]>(() => {
     const current = track.value
@@ -55,6 +62,17 @@ const items = computed<MenuItem[]>(() => {
             label: t('trackMenu.addToPlaylist'),
             icon: 'add-to-playlist',
         },
+        favorite.value
+            ? ({
+                  id: 'favorite',
+                  label: t('trackMenu.removeFavorite'),
+                  icon: 'remove-favorite',
+              } as const)
+            : ({
+                  id: 'favorite',
+                  label: t('trackMenu.addFavorite'),
+                  icon: 'add-favorite',
+              } as const),
         { id: 'separator-play', separator: true },
         { id: 'details', label: t('trackMenu.details'), icon: 'info' },
         ...(current?.album?.id
@@ -94,6 +112,8 @@ function choose(id: string): void {
         player.addToQueue([current])
     } else if (id === 'add-to-playlist') {
         addingToPlaylist.value = true
+    } else if (id === 'favorite') {
+        void collection.toggleFavorite('Track', current.id, current.isFavorite)
     } else if (id === 'album' && current.album?.id) {
         void router.push({ name: 'library-album', params: { id: current.album.id } })
     } else if (id === 'artist' && current.artist?.id) {

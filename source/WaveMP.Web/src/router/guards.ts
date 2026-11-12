@@ -23,7 +23,7 @@ export function resolveAccess(to: AccessTarget, state: AccessState): true | Rout
     }
 
     if (to.meta.admin && !state.isAdmin) {
-        return { name: 'library' }
+        return { name: 'home' }
     }
 
     return true

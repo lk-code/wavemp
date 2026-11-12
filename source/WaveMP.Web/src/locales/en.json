@@ -8,6 +8,7 @@
     "back": "Back",
     "forward": "Forward",
     "menu": "Menu",
+    "home": "Home",
     "nowPlaying": "Now Playing",
     "library": "Library",
     "playlists": "Playlists"
@@ -32,6 +33,7 @@
   },
   "library": {
     "recentlyAdded": "Recently Added",
+    "favorites": "Favorites",
     "artists": "Artist",
     "albums": "Album",
     "songs": "Songs",
@@ -71,7 +73,9 @@
       "duration": "Length",
       "artist": "Artist",
       "handle": "Move",
-      "album": "Album"
+      "album": "Album",
+      "rating": "Rating",
+      "favorite": "Favorite"
     },
     "hasVideo": "Video available",
     "album": "Album",
@@ -96,6 +100,7 @@
   "player": {
     "label": "Player",
     "controls": "Playback controls",
+    "trackActions": "Favorite and rating",
     "nothingPlaying": "Nothing playing",
     "play": "Play",
     "pause": "Pause",
@@ -227,6 +232,7 @@
       "tree": "Tree",
       "list": "List with groups",
       "library": "Library",
+      "home": "Home page and collection",
       "sliders": "Sliders",
       "fields": "Input fields",
       "dialog": "Dialog",
@@ -644,7 +650,8 @@
       "genre": "Genre",
       "firstSeenAt": "Date added",
       "trackCount": "Number of songs",
-      "relevance": "Relevance"
+      "relevance": "Relevance",
+      "rating": "Rating"
     }
   },
   "trackMenu": {
@@ -656,7 +663,37 @@
     "play": "Play",
     "playNext": "Play next",
     "addToQueue": "Add to queue",
-    "addToPlaylist": "Add to playlist"
+    "addToPlaylist": "Add to playlist",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites"
+  },
+  "collection": {
+    "favorite": "Favorite",
+    "rating": "Rating",
+    "stars": "{count} of 5 stars",
+    "rated": "Rated with {count} of 5 stars",
+    "unrated": "Not rated",
+    "addedAt": "Added",
+    "artistsTitle": "Artists",
+    "favoritesEmptyTitle": "No favorites yet",
+    "favoritesEmptyText": "Mark songs, albums and artists with the heart to find them here.",
+    "scope": {
+      "label": "Show",
+      "all": "All music",
+      "myMusic": "My music"
+    },
+    "errors": {
+      "favorite": "The favorite could not be saved.",
+      "rating": "The rating could not be saved."
+    }
+  },
+  "home": {
+    "playlists": "Your playlists",
+    "topRated": "Top rated",
+    "showAll": "Show all",
+    "loadError": "The home page could not be loaded.",
+    "emptyTitle": "Welcome to WaveMP",
+    "emptyText": "Your playlists, favorites and the songs you played recently will appear here."
   },
   "validation": {
     "required": "This field is required.",

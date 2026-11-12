@@ -58,6 +58,7 @@ describe('AppToolbar', () => {
             'sort-year',
             'sort-genre',
             'sort-first-seen-at',
+            'sort-rating',
             'direction-asc',
             'direction-desc',
         ])

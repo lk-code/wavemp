@@ -159,3 +159,19 @@ describe('detail pages', () => {
         ])
     })
 })
+
+describe('home page', () => {
+    it('shows music and the home page and is no node of the sidebar', () => {
+        const route = { name: 'home', params: {} }
+
+        expect(buildBreadcrumb(route)).toEqual([
+            { id: 'music', labelKey: 'breadcrumb.music', to: { name: 'library' } },
+            { id: 'home', labelKey: 'nav.home' },
+        ])
+        expect(pageTitleKey(route)).toBe('nav.home')
+        expect(activeTreeId(route)).toBeUndefined()
+        expect(activeTreeId({ name: 'library-section', params: { section: 'favorites' } })).toBe(
+            'favorites',
+        )
+    })
+})

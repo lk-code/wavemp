@@ -2,7 +2,8 @@
 import type { RouteLocationRaw } from 'vue-router'
 import type { PlaylistCover as PlaylistCoverModel } from '@/api/generated/models'
 
-export type TileKind = 'album' | 'artist' | 'genre' | 'year' | 'playlist' | 'recently-played'
+export type TileKind =
+    'album' | 'artist' | 'track' | 'genre' | 'year' | 'playlist' | 'recently-played'
 
 export interface Tile {
     readonly id: string
@@ -10,8 +11,12 @@ export interface Tile {
     readonly title: string
     readonly subtitle?: string
     readonly to: RouteLocationRaw
-    /** Cover of an album; tiles without cover show the icon of their kind. */
-    readonly cover?: { readonly id: string; readonly available: boolean }
+    /** Cover of an album or a track; tiles without cover show the icon of their kind. */
+    readonly cover?: {
+        readonly kind?: 'album' | 'track'
+        readonly id: string
+        readonly available: boolean
+    }
     /** Cover of a playlist: its own picture or the covers of some of its tracks. */
     readonly playlistCover?: {
         readonly id: string
@@ -27,7 +32,7 @@ import BaseLink from '@/components/base/BaseLink.vue'
 import LibraryCover from './LibraryCover.vue'
 import PlaylistCover from '@/components/playlists/PlaylistCover.vue'
 
-/** Tiles of albums, artists, genres, years or playlists that lead to their pages. */
+/** Tiles of albums, artists, songs, genres, years or playlists that lead to their pages. */
 defineProps<{
     tiles: readonly Tile[]
     /** Accessible name of the list. */
@@ -41,7 +46,7 @@ defineProps<{
             <BaseLink part="tile" :to="tile.to" :data-kind="tile.kind">
                 <LibraryCover
                     v-if="tile.cover"
-                    kind="album"
+                    :kind="tile.cover.kind ?? 'album'"
                     :id="tile.cover.id"
                     :available="tile.cover.available"
                 />

@@ -13,8 +13,11 @@ import type {
 } from '@/api/generated/models'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseLink from '@/components/base/BaseLink.vue'
+import FavoritesCollection from '@/components/collection/FavoritesCollection.vue'
+import LibraryScopeSwitch from '@/components/collection/LibraryScopeSwitch.vue'
 import TileCollection from '@/components/library/TileCollection.vue'
-import TrackCollection from '@/components/library/TrackCollection.vue'
+import TrackCollection, { type TrackFilter } from '@/components/library/TrackCollection.vue'
+import { isMyMusic } from '@/collection/presentation'
 import { useLibraryTiles } from '@/composables/useLibraryTiles'
 import type { PagedListStatus } from '@/composables/usePagedList'
 import { listAlbums, listArtists, listGenres, listYears } from '@/library/api'
@@ -23,8 +26,9 @@ import { parseSort, sortContext } from '@/library/sorting'
 
 /**
  * A section of the library: the songs grouped by album, the recently added songs (newest first),
- * or albums, artists, genres and years as tiles. Search text (?q=, not for years) and sort order
- * (?sort=, ?direction=) come from the query of the route.
+ * the favorites of the profile, or albums, artists, genres and years as tiles. Search text (?q=,
+ * not for years and favorites), sort order (?sort=, ?direction=) and the "my music" filter
+ * (?myMusic=true, not for favorites) come from the query of the route.
  */
 const props = defineProps<{
     /** Section of the library (route parameter), e.g. "songs". */
@@ -36,15 +40,19 @@ const route = useRoute()
 const tiles = useLibraryTiles()
 const status = ref<PagedListStatus>('idle')
 
-// The years cannot be filtered, so their section ignores a search text and does not offer one.
-const filterable = computed(() => props.section !== 'years')
+// Years and favorites cannot be searched, so their sections ignore a search text and offer none.
+const filterable = computed(() => props.section !== 'years' && props.section !== 'favorites')
+// The favorites belong to the "my music" anyway, so their section offers no switch.
+const scoped = computed(() => props.section !== 'favorites')
+const myMusic = computed(() => scoped.value && isMyMusic(route.query))
+const trackFilter = computed<TrackFilter>(() => (myMusic.value ? { myMusic: true } : {}))
 const search = computed(() => (filterable.value ? queryText(route.query) : ''))
 const sortState = computed(() => {
     const list = sortContext({ name: 'library-section', params: { section: props.section } })
     return list ? parseSort(list, route.query, search.value !== '') : {}
 })
 const reloadKey = computed(() =>
-    JSON.stringify([search.value, sortState.value.sort, sortState.value.direction]),
+    JSON.stringify([search.value, sortState.value.sort, sortState.value.direction, myMusic.value]),
 )
 const showAll = computed(() => {
     const query = { ...route.query }
@@ -54,6 +62,7 @@ const showAll = computed(() => {
 
 const labels: Record<string, string> = {
     'recently-added': 'library.recentlyAdded',
+    favorites: 'library.favorites',
     artists: 'library.artists',
     albums: 'library.albums',
     songs: 'library.songs',
@@ -68,6 +77,7 @@ function query(offset: number, limit: number) {
         limit,
         q: search.value || undefined,
         direction: sortState.value.direction,
+        myMusic: myMusic.value || undefined,
     }
 }
 
@@ -84,7 +94,12 @@ function fetchGenres(offset: number, limit: number) {
 }
 
 function fetchYears(offset: number, limit: number) {
-    return listYears({ offset, limit, direction: sortState.value.direction })
+    return listYears({
+        offset,
+        limit,
+        direction: sortState.value.direction,
+        myMusic: myMusic.value || undefined,
+    })
 }
 </script>
 
@@ -95,6 +110,7 @@ function fetchYears(offset: number, limit: number) {
         :data-section="section"
         :aria-busy="status === 'loading' ? 'true' : undefined"
     >
+        <LibraryScopeSwitch v-if="scoped" />
         <template v-if="search">
             <BaseAlert tone="info" :message="t('library.filteredBy', { query: search })" />
             <BaseLink :to="showAll">{{ t('library.showAll') }}</BaseLink>
@@ -102,6 +118,7 @@ function fetchYears(offset: number, limit: number) {
         <TrackCollection
             v-if="section === 'songs'"
             :label="label"
+            :filter="trackFilter"
             :search="search"
             :sort="sortState.sort"
             :direction="sortState.direction"
@@ -110,9 +127,15 @@ function fetchYears(offset: number, limit: number) {
         <TrackCollection
             v-else-if="section === 'recently-added'"
             :label="label"
+            :filter="trackFilter"
             :search="search"
             sort="FirstSeenAt"
             direction="Desc"
+            @status="status = $event"
+        />
+        <FavoritesCollection
+            v-else-if="section === 'favorites'"
+            :label="label"
             @status="status = $event"
         />
         <TileCollection
@@ -122,6 +145,7 @@ function fetchYears(offset: number, limit: number) {
             :to-tile="(item: Album) => tiles.album(item)"
             :reload-key="reloadKey"
             :search="search"
+            :filtered="myMusic"
             @status="status = $event"
         />
         <TileCollection
@@ -131,6 +155,7 @@ function fetchYears(offset: number, limit: number) {
             :to-tile="(item: Artist) => tiles.artist(item)"
             :reload-key="reloadKey"
             :search="search"
+            :filtered="myMusic"
             @status="status = $event"
         />
         <TileCollection
@@ -140,6 +165,7 @@ function fetchYears(offset: number, limit: number) {
             :to-tile="(item: Genre) => tiles.genre(item)"
             :reload-key="reloadKey"
             :search="search"
+            :filtered="myMusic"
             @status="status = $event"
         />
         <TileCollection
@@ -148,6 +174,7 @@ function fetchYears(offset: number, limit: number) {
             :fetch-page="fetchYears"
             :to-tile="(item: Year) => tiles.year(item)"
             :reload-key="reloadKey"
+            :filtered="myMusic"
             @status="status = $event"
         />
     </div>

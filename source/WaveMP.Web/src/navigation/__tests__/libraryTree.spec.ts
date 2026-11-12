@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildLibraryTree, libraryTree, playlistNodeId } from '../libraryTree'
+import {
+    buildLibraryTree,
+    librarySections,
+    libraryTree,
+    mainNavigation,
+    playlistNodeId,
+} from '../libraryTree'
 
 describe('buildLibraryTree', () => {
     it('leads to creating a playlist and to the recently played tracks', () => {
@@ -43,5 +49,26 @@ describe('buildLibraryTree', () => {
     it('keeps the fixed tree without playlists', () => {
         expect(buildLibraryTree([])).toEqual(libraryTree)
         expect(playlistNodeId('x')).toBe('playlist:x')
+    })
+})
+
+describe('main navigation', () => {
+    it('starts with the home page', () => {
+        expect(mainNavigation.map((item) => item.id)).toEqual([
+            'home',
+            'now-playing',
+            'library',
+            'playlists',
+        ])
+        expect(mainNavigation[0]).toMatchObject({ icon: 'home', to: { name: 'home' } })
+    })
+
+    it('offers the favorites as a section of the library', () => {
+        expect(librarySections.map((section) => section.id)).toContain('favorites')
+        const library = libraryTree.find((node) => node.id === 'library')!
+        expect(library.children?.find((node) => node.id === 'favorites')).toMatchObject({
+            icon: 'tree-favorites',
+            to: { name: 'library-section', params: { section: 'favorites' } },
+        })
     })
 })

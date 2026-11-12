@@ -184,12 +184,23 @@ describe('TrackGroupList', () => {
         })
 
         const rows = wrapper.findAll('[data-part="list-row"]')
-        expect(rows[0]!.findAll('[data-part="list-cell"]').map((cell) => cell.text())).toEqual([
+        const cells = rows[0]!.findAll('[data-part="list-cell"]')
+        expect(cells.map((cell) => cell.attributes('data-column'))).toEqual([
+            'number',
+            'title',
+            'duration',
+            'artist',
+            'rating',
+            'favorite',
+        ])
+        expect(cells.slice(0, 4).map((cell) => cell.text())).toEqual([
             '1',
             'Opening',
             '3:05',
             'Alpha Band',
         ])
+        expect(cells[4]!.findAll('[data-part="rating-star"]')).toHaveLength(5)
+        expect(cells[5]!.get('[data-part="btn-favorite"]').attributes('aria-pressed')).toBe('false')
         expect(rows[1]!.attributes('data-state')).toBe('has-video')
         expect(rows[1]!.get('[data-part="badge"]').attributes('data-state')).toBe('has-video')
         expect(rows[2]!.attributes('data-state')).toBe('has-video video-only')
@@ -222,6 +233,7 @@ describe('TrackGroupList', () => {
             'play-next',
             'add-to-queue',
             'add-to-playlist',
+            'favorite',
             'details',
             'album',
             'artist',
@@ -261,7 +273,7 @@ describe('TrackGroupList', () => {
             [...menu.querySelectorAll('[data-part="menu-item"]')].map((item) =>
                 item.getAttribute('data-item'),
             ),
-        ).toEqual(['add-to-playlist', 'details', 'edit-metadata'])
+        ).toEqual(['add-to-playlist', 'favorite', 'details', 'edit-metadata'])
         ;(menu.querySelector('[data-item="edit-metadata"]') as HTMLElement).click()
         await flushPromises()
         expect(router.currentRoute.value.fullPath).toBe('/library/tracks/clip?edit=metadata')
@@ -283,7 +295,7 @@ describe('TrackGroupList', () => {
         const items = [...document.querySelectorAll('[data-part="menu-item"]')].map((item) =>
             item.getAttribute('data-item'),
         )
-        expect(items).toEqual(['add-to-playlist', 'details'])
+        expect(items).toEqual(['add-to-playlist', 'favorite', 'details'])
         wrapper.unmount()
     })
 

@@ -11,7 +11,17 @@ export const relevanceKey = 'Relevance'
 
 /** Sort keys of each list, without the relevance (it needs a search text). */
 export const sortKeys: Readonly<Record<SortList, readonly string[]>> = {
-    tracks: ['AlbumArtist', 'Album', 'Title', 'Artist', 'Duration', 'Year', 'Genre', 'FirstSeenAt'],
+    tracks: [
+        'AlbumArtist',
+        'Album',
+        'Title',
+        'Artist',
+        'Duration',
+        'Year',
+        'Genre',
+        'FirstSeenAt',
+        'Rating',
+    ],
     albums: ['Artist', 'Title', 'Year', 'FirstSeenAt'],
     artists: ['Name', 'FirstSeenAt'],
     genres: ['Name', 'TrackCount'],
@@ -26,7 +36,7 @@ const defaultKeys: Readonly<Record<SortList, string | undefined>> = {
     years: undefined,
 }
 
-const descendingKeys = new Set(['FirstSeenAt', relevanceKey, 'TrackCount'])
+const descendingKeys = new Set(['FirstSeenAt', relevanceKey, 'TrackCount', 'Rating'])
 
 function supportsRelevance(list: SortList): boolean {
     return list === 'tracks' || list === 'albums' || list === 'artists'
@@ -42,7 +52,10 @@ export function defaultSort(list: SortList, hasSearch: boolean): string | undefi
     return hasSearch && supportsRelevance(list) ? relevanceKey : defaultKeys[list]
 }
 
-/** The direction the server uses without one: descending for years, recent, relevant, counts. */
+/**
+ * The direction the server uses without one: descending for years, recent, relevant, counts and
+ * ratings.
+ */
 export function defaultDirection(list: SortList, sort: string | undefined): SortDirection {
     return list === 'years' || (sort !== undefined && descendingKeys.has(sort)) ? 'Desc' : 'Asc'
 }

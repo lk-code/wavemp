@@ -24,6 +24,8 @@
         --wmp-color-success: #2e9d4f;
         --wmp-color-warning: #c98a12;
         --wmp-color-danger: #c83737;
+        --wmp-favorite-color: #d6336c;
+        --wmp-rating-color: #e0a100;
         --wmp-backdrop-color: rgb(0 0 0 / 45%);
 
         /* Areas: text color and background */
@@ -93,6 +95,7 @@
         --wmp-icon-forward: url('/icons/phosphor/fill/arrow-right-fill.svg');
         --wmp-icon-tab-indicator: url('/icons/phosphor/fill/caret-down-fill.svg');
         --wmp-icon-menu: url('/icons/phosphor/fill/list-fill.svg');
+        --wmp-icon-home: url('/icons/phosphor/fill/house-fill.svg');
         --wmp-icon-now-playing: url('/icons/phosphor/fill/music-notes-fill.svg');
         --wmp-icon-library: url('/icons/phosphor/fill/books-fill.svg');
         --wmp-icon-playlists: url('/icons/phosphor/fill/playlist-fill.svg');
@@ -131,6 +134,11 @@
         --wmp-icon-playlist: url('/icons/phosphor/fill/playlist-fill.svg');
         --wmp-icon-recently-played: url('/icons/phosphor/fill/headphones-fill.svg');
         --wmp-icon-drag-handle: url('/icons/phosphor/regular/dots-six-vertical.svg');
+        --wmp-icon-track: url('/icons/phosphor/fill/music-note-fill.svg');
+        --wmp-icon-favorite: url('/icons/phosphor/fill/heart-fill.svg');
+        --wmp-icon-favorite-off: url('/icons/phosphor/regular/heart.svg');
+        --wmp-icon-rating-star: url('/icons/phosphor/fill/star-fill.svg');
+        --wmp-icon-rating-star-off: url('/icons/phosphor/regular/star.svg');
         --wmp-icon-shuffle: url('/icons/phosphor/fill/shuffle-fill.svg');
         --wmp-icon-repeat: url('/icons/phosphor/fill/repeat-fill.svg');
         --wmp-icon-repeat-one: url('/icons/phosphor/fill/repeat-once-fill.svg');
@@ -165,6 +173,8 @@
         --wmp-icon-add-to-playlist: url('/icons/phosphor/regular/playlist.svg');
         --wmp-icon-remove-from-playlist: url('/icons/phosphor/regular/minus-circle.svg');
         --wmp-icon-change-cover: url('/icons/phosphor/regular/image-square.svg');
+        --wmp-icon-add-favorite: url('/icons/phosphor/regular/heart.svg');
+        --wmp-icon-remove-favorite: url('/icons/phosphor/regular/heart-break.svg');
         --wmp-icon-shuffle-play: url('/icons/phosphor/regular/shuffle.svg');
         --wmp-icon-move-up: url('/icons/phosphor/regular/caret-up.svg');
         --wmp-icon-move-down: url('/icons/phosphor/regular/caret-down.svg');
@@ -212,11 +222,12 @@
         --wmp-cover-size-l: 12rem;
         --wmp-tile-width: 9rem;
         --wmp-list-row-height: 2rem;
-        --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr);
+        --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) 6.5rem 2rem;
         --wmp-list-columns-playlist: 2rem 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)
-            minmax(0, 1.5fr);
+            minmax(0, 1.5fr) 6.5rem 2rem;
         --wmp-list-columns-recently-played: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr)
-            minmax(0, 1.5fr) 10rem;
+            minmax(0, 1.5fr) 10rem 6.5rem 2rem;
+        --wmp-shelf-tile-width: var(--wmp-tile-width);
         --wmp-list-group-info-width: 11rem;
         --wmp-avatar-size: 2rem;
         --wmp-avatar-size-l: 6rem;

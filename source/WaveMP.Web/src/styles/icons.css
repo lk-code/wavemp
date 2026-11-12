@@ -43,6 +43,10 @@
         --_icon: var(--wmp-icon-menu);
     }
 
+    [data-icon='home'] {
+        --_icon: var(--wmp-icon-home);
+    }
+
     [data-icon='now-playing'] {
         --_icon: var(--wmp-icon-now-playing);
     }
@@ -195,6 +199,26 @@
         --_icon: var(--wmp-icon-drag-handle);
     }
 
+    [data-icon='track'] {
+        --_icon: var(--wmp-icon-track);
+    }
+
+    [data-icon='favorite'] {
+        --_icon: var(--wmp-icon-favorite);
+    }
+
+    [data-icon='favorite-off'] {
+        --_icon: var(--wmp-icon-favorite-off);
+    }
+
+    [data-icon='rating-star'] {
+        --_icon: var(--wmp-icon-rating-star);
+    }
+
+    [data-icon='rating-star-off'] {
+        --_icon: var(--wmp-icon-rating-star-off);
+    }
+
     [data-icon='shuffle'] {
         --_icon: var(--wmp-icon-shuffle);
     }
@@ -329,6 +353,14 @@
 
     [data-icon='change-cover'] {
         --_icon: var(--wmp-icon-change-cover);
+    }
+
+    [data-icon='add-favorite'] {
+        --_icon: var(--wmp-icon-add-favorite);
+    }
+
+    [data-icon='remove-favorite'] {
+        --_icon: var(--wmp-icon-remove-favorite);
     }
 
     [data-icon='shuffle-play'] {

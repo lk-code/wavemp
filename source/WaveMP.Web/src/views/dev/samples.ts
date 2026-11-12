@@ -70,6 +70,9 @@ export function sampleTracks(t: Translate): Track[] {
                 hasAudio: track.video !== 'only',
                 hasVideo: track.video !== undefined,
                 hasCover: false,
+                // Some songs are rated or favorites, so the overview shows every state.
+                isFavorite: track.title % 2 === 1,
+                rating: track.title % 6,
             }
         }),
     )

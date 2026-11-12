@@ -89,6 +89,10 @@
         grid-area: now-playing-mini;
     }
 
+    [data-part='transport'] > [data-part='now-playing-actions'] {
+        grid-area: now-playing-actions;
+    }
+
     [data-part='transport'] > [data-part='transport-controls'] {
         grid-area: transport-controls;
     }
@@ -183,9 +187,9 @@
         [data-part='transport'] {
             display: grid;
             grid-template-areas:
-                'seek seek seek'
-                'now-playing-mini transport-controls mode-switch';
-            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+                'seek seek seek seek'
+                'now-playing-mini now-playing-actions transport-controls mode-switch';
+            grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
             align-items: center;
             column-gap: var(--wmp-space-l);
             min-block-size: var(--wmp-transport-height);
