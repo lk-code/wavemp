@@ -83,6 +83,8 @@ public static class LibraryMappingExtensions
             IsPrimary = file.IsPrimary,
             Format = file.Format,
             Codec = file.Codec,
+            AudioCodec = file.AudioCodec,
+            PixelFormat = file.PixelFormat,
             Bitrate = file.Bitrate,
             SampleRate = file.SampleRate,
             BitDepth = file.BitDepth,

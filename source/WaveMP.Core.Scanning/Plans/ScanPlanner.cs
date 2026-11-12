@@ -1,4 +1,5 @@
 using WaveMP.Core.Scanning.Discoveries;
+using WaveMP.Data.Entities;
 using WaveMP.Data.Repositories;
 
 namespace WaveMP.Core.Scanning.Plans;
@@ -12,7 +13,7 @@ public static class ScanPlanner
 {
     /// <param name="discovered">The folders found on disk.</param>
     /// <param name="stored">The stored files of these folders (and of folders that may be gone).</param>
-    /// <param name="metadataVersion">The current version of the metadata reader.</param>
+    /// <param name="metadataVersion">The current version of the metadata reader, the same for every kind of file.</param>
     /// <param name="changedFiles">Relative paths of stored files that are read again even with the same size and
     /// change time, e.g. after WaveMP wrote their tags in place (file systems with a coarse change time, padding of
     /// the tags).</param>
@@ -22,6 +23,22 @@ public static class ScanPlanner
         int metadataVersion,
         IReadOnlySet<string>? changedFiles = null)
     {
+        return Plan(discovered, stored, _ => metadataVersion, changedFiles);
+    }
+
+    /// <param name="discovered">The folders found on disk.</param>
+    /// <param name="stored">The stored files of these folders (and of folders that may be gone).</param>
+    /// <param name="metadataVersionOf">The current version of the metadata reader per kind of file; a stored file
+    /// read by an older version of its kind is read again.</param>
+    /// <param name="changedFiles">Relative paths of stored files that are read again even with the same size and
+    /// change time.</param>
+    public static ScanPlan Plan(
+        IReadOnlyList<DiscoveredDirectory> discovered,
+        IReadOnlyList<MediaFileSnapshot> stored,
+        Func<MediaFileKind, int> metadataVersionOf,
+        IReadOnlySet<string>? changedFiles = null)
+    {
+        ArgumentNullException.ThrowIfNull(metadataVersionOf);
         var storedByDirectory = stored
             .GroupBy(file => file.DirectoryPath, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.Ordinal);
@@ -47,7 +64,7 @@ public static class ScanPlanner
                 else if (snapshot.Size != file.Size
                     || snapshot.ModifiedAt != file.ModifiedAt
                     || snapshot.Kind != file.Kind
-                    || snapshot.MetadataVersion < metadataVersion
+                    || snapshot.MetadataVersion < metadataVersionOf(file.Kind)
                     || changedFiles?.Contains(file.RelativePath) == true)
                 {
                     updated++;

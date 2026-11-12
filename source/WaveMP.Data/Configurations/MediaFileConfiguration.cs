@@ -17,6 +17,8 @@ internal sealed class MediaFileConfiguration : IEntityTypeConfiguration<MediaFil
         builder.Property(file => file.Issue).HasConversion<string>().HasMaxLength(LibraryColumns.EnumMaxLength);
         builder.Property(file => file.Format).HasMaxLength(LibraryColumns.TechnicalMaxLength);
         builder.Property(file => file.Codec).HasMaxLength(LibraryColumns.TechnicalMaxLength);
+        builder.Property(file => file.AudioCodec).HasMaxLength(LibraryColumns.TechnicalMaxLength);
+        builder.Property(file => file.PixelFormat).HasMaxLength(LibraryColumns.TechnicalMaxLength);
         builder.Property(file => file.EmbeddedPictureMimeType).HasMaxLength(LibraryColumns.TechnicalMaxLength);
 
         builder.ComplexProperty(file => file.Tags, tags =>

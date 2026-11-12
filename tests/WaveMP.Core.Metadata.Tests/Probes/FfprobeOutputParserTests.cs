@@ -96,7 +96,7 @@ public class FfprobeOutputParserTests
         const string Json = """
             {
                 "streams": [
-                    { "codec_name": "h264", "codec_type": "video", "width": 1920, "height": 1080, "bit_rate": "4000000" },
+                    { "codec_name": "h264", "codec_type": "video", "width": 1920, "height": 1080, "bit_rate": "4000000", "pix_fmt": "yuv420p10le" },
                     { "codec_name": "aac", "codec_type": "audio", "sample_rate": "48000", "channels": 6, "bit_rate": "256000" }
                 ],
                 "format": { "format_name": "matroska,webm", "duration": "N/A" }
@@ -105,7 +105,7 @@ public class FfprobeOutputParserTests
 
         MediaProbeResult result = FfprobeOutputParser.Parse(Json)!;
 
-        result.Video.Should().Be(new VideoStreamInfo("h264", 1920, 1080, 4000000));
+        result.Video.Should().Be(new VideoStreamInfo("h264", 1920, 1080, 4000000, "yuv420p10le"));
         result.Audio.Should().Be(new AudioStreamInfo("aac", 256000, 48000, 6, null));
         result.Duration.Should().BeNull();
         result.Bitrate.Should().BeNull();

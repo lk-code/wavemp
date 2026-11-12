@@ -6559,6 +6559,20 @@
             ],
             "description": "Codec of the main stream, e.g. mp3, flac or h264."
           },
+          "audioCodec": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Codec of the first audio stream of a video, e.g. aac; null for videos without sound and for other files."
+          },
+          "pixelFormat": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Pixel format of the video stream of a video, e.g. yuv420p; null for other files."
+          },
           "bitrate": {
             "type": [
               "null",

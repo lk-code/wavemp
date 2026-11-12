@@ -47,6 +47,16 @@ public sealed class MediaFileDto
     public string? Codec { get; init; }
 
     /// <summary>
+    /// Codec of the first audio stream of a video, e.g. aac; null for videos without sound and for other files.
+    /// </summary>
+    public string? AudioCodec { get; init; }
+
+    /// <summary>
+    /// Pixel format of the video stream of a video, e.g. yuv420p; null for other files.
+    /// </summary>
+    public string? PixelFormat { get; init; }
+
+    /// <summary>
     /// Bitrate in bit/s.
     /// </summary>
     public int? Bitrate { get; init; }

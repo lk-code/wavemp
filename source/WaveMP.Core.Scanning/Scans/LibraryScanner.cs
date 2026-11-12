@@ -88,7 +88,7 @@ internal sealed class LibraryScanner(
         ScanPlan plan = ScanPlanner.Plan(
             [discovered],
             stored,
-            ScannerVersions.Metadata,
+            ScannerVersions.MetadataOf,
             changedFiles.ToHashSet(StringComparer.Ordinal));
         if (plan.ChangedDirectories is not [DirectoryPlan changed])
         {
@@ -162,7 +162,7 @@ internal sealed class LibraryScanner(
         IReadOnlyList<MediaFileSnapshot> stored = await library.GetFileSnapshotsAsync(
             scope.IsFull ? null : scope.Directories,
             cancellationToken);
-        ScanPlan plan = ScanPlanner.Plan(discovered, stored, ScannerVersions.Metadata);
+        ScanPlan plan = ScanPlanner.Plan(discovered, stored, ScannerVersions.MetadataOf);
         if (scope.IsFull && plan.FilesFound == 0 && stored.Count > 0)
         {
             throw new JobFailedException(

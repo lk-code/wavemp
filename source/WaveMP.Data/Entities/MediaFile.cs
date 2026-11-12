@@ -67,6 +67,17 @@ public class MediaFile
     public string? Codec { get; set; }
 
     /// <summary>
+    /// Codec of the first audio stream of a video, e.g. <c>aac</c>; <c>null</c> for videos without sound and for
+    /// audio files and pictures (their codec is <see cref="Codec"/>).
+    /// </summary>
+    public string? AudioCodec { get; set; }
+
+    /// <summary>
+    /// Pixel format of the video stream of a video, e.g. <c>yuv420p</c>; <c>null</c> for other files.
+    /// </summary>
+    public string? PixelFormat { get; set; }
+
+    /// <summary>
     /// Bitrate in bit/s.
     /// </summary>
     public int? Bitrate { get; set; }

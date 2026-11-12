@@ -80,6 +80,12 @@ public class LibraryScannerTests
         song.HasVideo.Should().BeTrue();
         song.Files.Should().HaveCount(3);
         song.Files.Where(file => file.IsPrimary).Select(file => file.Extension).Should().BeEquivalentTo("mp3", "mkv");
+        MediaFile video = song.Files.Single(file => file.Kind == MediaFileKind.Video);
+        (video.Codec, video.AudioCodec, video.PixelFormat).Should().Be(("mpeg4", "aac", "yuv420p"));
+        video.MetadataVersion.Should().Be(ScannerVersions.VideoMetadata);
+        MediaFile audio = song.Files.Single(file => file.Kind == MediaFileKind.Audio);
+        (audio.AudioCodec, audio.PixelFormat).Should().Be(((string?)null, (string?)null));
+        audio.MetadataVersion.Should().Be(ScannerVersions.AudioMetadata);
         song.Covers.Should().ContainSingle(cover => cover.IsPrimary && cover.Source == CoverSource.File);
         (await LoadTrackAsync(db, "OTHER")).Files.Select(file => file.FileName)
             .Should().BeEquivalentTo("Other.MP3", "other.jpg");

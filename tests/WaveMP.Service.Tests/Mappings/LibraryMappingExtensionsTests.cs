@@ -204,6 +204,38 @@ public class LibraryMappingExtensionsTests
     }
 
     [Test]
+    public void ToDto_Video_MapsAudioCodecAndPixelFormat()
+    {
+        MediaFile file = new()
+        {
+            Id = Guid.NewGuid(),
+            RelativePath = "Band/Clip.mp4",
+            DirectoryPath = "Band",
+            FileName = "Clip.mp4",
+            BaseName = "Clip",
+            NormalizedBaseName = "CLIP",
+            Extension = "mp4",
+            Kind = MediaFileKind.Video,
+            Size = 1234,
+            ModifiedAt = _time,
+            IsPrimary = true,
+            Codec = "h264",
+            AudioCodec = "aac",
+            PixelFormat = "yuv420p",
+            IsLossless = false,
+            HasEmbeddedPicture = false,
+            IsWritable = false,
+            MetadataVersion = 2,
+            FirstSeenAt = _time,
+            ScannedAt = _time,
+        };
+
+        MediaFileDto dto = file.ToDto();
+
+        (dto.Codec, dto.AudioCodec, dto.PixelFormat).Should().Be(("h264", "aac", "yuv420p"));
+    }
+
+    [Test]
     public void ToDto_SearchResult_MapsEveryGroup()
     {
         ArtistRow artist = new(Guid.NewGuid(), "Alpha Band", 1, 2, _time);

@@ -16,6 +16,16 @@ public sealed record MediaFileMetadata
     public string? Codec { get; init; }
 
     /// <summary>
+    /// Codec of the first audio stream of a video; <c>null</c> for videos without sound and for other files.
+    /// </summary>
+    public string? AudioCodec { get; init; }
+
+    /// <summary>
+    /// Pixel format of the video stream of a video, e.g. <c>yuv420p</c>; <c>null</c> for other files.
+    /// </summary>
+    public string? PixelFormat { get; init; }
+
+    /// <summary>
     /// Bitrate in bit/s: of the audio stream for audio files, of the video stream (or the file) for videos.
     /// </summary>
     public int? Bitrate { get; init; }

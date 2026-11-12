@@ -379,7 +379,7 @@ public sealed class LibraryWriter(ILibraryScanRepository library)
             IsLossless = false,
             HasEmbeddedPicture = false,
             IsWritable = false,
-            MetadataVersion = ScannerVersions.Metadata,
+            MetadataVersion = ScannerVersions.MetadataOf(discovered.Kind),
             FirstSeenAt = now,
             ScannedAt = now,
         };
@@ -392,6 +392,8 @@ public sealed class LibraryWriter(ILibraryScanRepository library)
         file.ModifiedAt = discovered.ModifiedAt;
         file.Format = metadata.Format;
         file.Codec = metadata.Codec;
+        file.AudioCodec = metadata.AudioCodec;
+        file.PixelFormat = metadata.PixelFormat;
         file.Bitrate = metadata.Bitrate;
         file.SampleRate = metadata.SampleRate;
         file.BitDepth = metadata.BitDepth;
@@ -407,7 +409,7 @@ public sealed class LibraryWriter(ILibraryScanRepository library)
         file.IsWritable = metadata.IsWritable;
         file.Issue = metadata.Issue;
         file.Tags = ToEntity(metadata.Tags);
-        file.MetadataVersion = ScannerVersions.Metadata;
+        file.MetadataVersion = ScannerVersions.MetadataOf(discovered.Kind);
         file.ScannedAt = now;
     }
 

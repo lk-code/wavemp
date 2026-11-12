@@ -321,6 +321,11 @@ namespace WaveMP.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AudioCodec")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("audio_codec");
+
                     b.Property<string>("BaseName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -428,6 +433,11 @@ namespace WaveMP.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("normalized_base_name");
+
+                    b.Property<string>("PixelFormat")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("pixel_format");
 
                     b.Property<string>("RelativePath")
                         .IsRequired()

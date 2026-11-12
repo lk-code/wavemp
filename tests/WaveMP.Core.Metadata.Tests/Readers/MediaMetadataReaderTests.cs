@@ -116,7 +116,7 @@ public class MediaMetadataReaderTests
             5000000,
             new Dictionary<string, string>(),
             new AudioStreamInfo("aac", 128000, 48000, 2, null),
-            new VideoStreamInfo("h264", 1280, 720, null),
+            new VideoStreamInfo("h264", 1280, 720, null, "yuv420p"),
             null));
 
         MediaFileMetadata metadata = await _reader.ReadAsync(Path, MediaFileKind.Video);
@@ -124,6 +124,8 @@ public class MediaMetadataReaderTests
         metadata.IsWritable.Should().BeFalse();
         _writeAccess.DidNotReceive().IsWritable(Arg.Any<string>());
         metadata.Codec.Should().Be("h264");
+        metadata.AudioCodec.Should().Be("aac");
+        metadata.PixelFormat.Should().Be("yuv420p");
         metadata.Width.Should().Be(1280);
         metadata.Bitrate.Should().Be(5000000);
         metadata.IsLossless.Should().BeFalse();

@@ -66,7 +66,8 @@ internal static class FfprobeOutputParser
                         ReadString(v, "codec_name"),
                         ReadInt(v, "width"),
                         ReadInt(v, "height"),
-                        ReadLong(v, "bit_rate"))
+                        ReadLong(v, "bit_rate"),
+                        ReadString(v, "pix_fmt"))
                     : null,
                 picture is { } p
                     ? new PictureStreamInfo(ReadString(p, "codec_name"), ReadInt(p, "width"), ReadInt(p, "height"))

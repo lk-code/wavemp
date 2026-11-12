@@ -72,6 +72,8 @@ internal sealed class MediaMetadataReader(ITagReader tagReader, IMediaProber pro
             MediaFileKind.Video => metadata with
             {
                 Codec = Truncate(probe.Video?.Codec),
+                AudioCodec = Truncate(probe.Audio?.Codec),
+                PixelFormat = Truncate(probe.Video?.PixelFormat),
                 Bitrate = ToInt(probe.Video?.Bitrate ?? probe.Bitrate),
                 SampleRate = probe.Audio?.SampleRate,
                 Channels = probe.Audio?.Channels,

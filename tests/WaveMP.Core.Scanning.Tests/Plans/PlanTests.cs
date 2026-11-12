@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using WaveMP.Core.Scanning.Discoveries;
 using WaveMP.Core.Scanning.Plans;
+using WaveMP.Core.Scanning.Writers;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Repositories;
 
@@ -73,6 +74,34 @@ public class PlanTests
 
         plan.ChangedDirectories.Single().FilesToRead.Select(file => file.RelativePath)
             .Should().Equal("A/old.mp3", "A/kind.mp4");
+    }
+
+    [Test]
+    public void Plan_VersionPerKind_ReadsOnlyTheKindsWithANewerVersionAgain()
+    {
+        ScanPlan plan = ScanPlanner.Plan(
+            [Directory(
+                "A",
+                File("A/song.mp3"),
+                File("A/song.mkv", kind: MediaFileKind.Video),
+                File("A/song.jpg", kind: MediaFileKind.Image))],
+            [
+                Stored("A/song.mp3"),
+                Stored("A/song.mkv", kind: MediaFileKind.Video),
+                Stored("A/song.jpg", kind: MediaFileKind.Image),
+            ],
+            ScannerVersions.MetadataOf);
+
+        plan.ChangedDirectories.Single().FilesToRead.Select(file => file.RelativePath).Should().Equal("A/song.mkv");
+        plan.FilesUnchanged.Should().Be(2);
+    }
+
+    [TestCase(MediaFileKind.Audio, 1)]
+    [TestCase(MediaFileKind.Video, 2)]
+    [TestCase(MediaFileKind.Image, 1)]
+    public void MetadataOf_Kind_ReturnsTheVersionOfTheKind(MediaFileKind kind, int expected)
+    {
+        ScannerVersions.MetadataOf(kind).Should().Be(expected);
     }
 
     [Test]

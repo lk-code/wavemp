@@ -4,7 +4,7 @@ using System.Globalization;
 namespace WaveMP.Testing.Media;
 
 /// <summary>
-/// Creates synthetic test media with ffmpeg at test runtime: one second of a sine tone, a test picture and tags
+/// Creates synthetic test media with ffmpeg at test runtime: a sine tone (one second by default), a test picture and tags
 /// written with <c>-metadata</c>, as CLAUDE.md asks. Encoded files are cached per process and only remuxed
 /// (<c>-c copy</c>) for other tags, which keeps the tests fast.
 /// </summary>
@@ -23,6 +23,7 @@ public static class TestMediaGenerator
     /// <param name="sampleRate">Sample rate; 44100 (Opus: 48000) if not set.</param>
     /// <param name="bitDepth">16 or 24 for FLAC and WAV; 16 if not set.</param>
     /// <param name="embeddedCoverPath">Picture embedded as front cover (MP3, FLAC and M4A).</param>
+    /// <param name="durationSeconds">Length of the tone in seconds; 1 if not set.</param>
     public static async Task CreateAudioAsync(
         string path,
         AudioFormat format,
@@ -30,17 +31,22 @@ public static class TestMediaGenerator
         int? bitrateKbps = null,
         int? sampleRate = null,
         int? bitDepth = null,
-        string? embeddedCoverPath = null)
+        string? embeddedCoverPath = null,
+        int durationSeconds = 1)
     {
         int rate = sampleRate ?? (format == AudioFormat.Opus ? 48000 : 44100);
         int bitrate = bitrateKbps ?? 128;
         int depth = bitDepth ?? 16;
         string extension = format.ToString().ToLowerInvariant();
-        string key = $"audio-{extension}-{bitrate}-{rate}-{depth}";
+        string key = string.Create(
+            CultureInfo.InvariantCulture,
+            $"audio-{extension}-{bitrate}-{rate}-{depth}-{durationSeconds}");
 
         string encoded = await EncodeOnceAsync(key, extension, output =>
         [
-            "-f", "lavfi", "-i", $"sine=frequency=440:duration=1:sample_rate={rate}",
+            "-f", "lavfi", "-i", string.Create(
+                CultureInfo.InvariantCulture,
+                $"sine=frequency=440:duration={durationSeconds}:sample_rate={rate}"),
             "-ac", "2",
             .. AudioCodecArguments(format, bitrate, depth),
             output,
@@ -68,24 +74,39 @@ public static class TestMediaGenerator
     }
 
     /// <summary>
-    /// Creates a music video (MPEG-4 part 2 video with AAC audio) with the given resolution.
+    /// Creates a music video with the given resolution: by default MPEG-4 part 2 video with AAC audio, which browsers
+    /// cannot play directly.
     /// </summary>
+    /// <param name="path">Target file; missing folders are created.</param>
+    /// <param name="format">Container.</param>
+    /// <param name="width">Width of the picture.</param>
+    /// <param name="height">Height of the picture.</param>
+    /// <param name="tags">Tags to write; <c>null</c> for a file without tags.</param>
+    /// <param name="codec">Codecs of the video and its sound.</param>
+    /// <param name="withAudio">Whether the video has sound.</param>
+    /// <param name="durationSeconds">Length in seconds; 1 if not set.</param>
     public static async Task CreateVideoAsync(
         string path,
         VideoFormat format,
         int width,
         int height,
-        TestTags? tags = null)
+        TestTags? tags = null,
+        TestVideoCodec codec = TestVideoCodec.Mpeg4,
+        bool withAudio = true,
+        int durationSeconds = 1)
     {
         string extension = format.ToString().ToLowerInvariant();
         string size = string.Create(CultureInfo.InvariantCulture, $"{width}x{height}");
-        string encoded = await EncodeOnceAsync($"video-{extension}-{size}", extension, output =>
+        string duration = durationSeconds.ToString(CultureInfo.InvariantCulture);
+        string key = $"video-{extension}-{size}-{codec}-{(withAudio ? "a" : "na")}-{duration}".ToLowerInvariant();
+        string encoded = await EncodeOnceAsync(key, extension, output =>
         [
-            "-f", "lavfi", "-i", $"testsrc=size={size}:rate=10:duration=1",
-            "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
-            "-c:v", "mpeg4", "-q:v", "5", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "64k",
-            "-shortest",
+            "-f", "lavfi", "-i", $"testsrc=size={size}:rate=10:duration={duration}",
+            .. withAudio ? (string[])["-f", "lavfi", "-i", $"sine=frequency=440:duration={duration}"] : [],
+            .. VideoCodecArguments(codec),
+            .. withAudio ? AudioOfVideoArguments(codec) : ["-an"],
+            .. withAudio ? (string[])["-shortest"] : [],
+            "-f", MuxerOf(format),
             output,
         ]);
 
@@ -93,7 +114,7 @@ public static class TestMediaGenerator
         [
             "-i", encoded, "-map", "0", "-c", "copy",
             .. tags?.ToArguments() ?? [],
-            "-f", format == VideoFormat.Mkv ? "matroska" : "mp4",
+            "-f", MuxerOf(format),
             Prepare(path),
         ]);
     }
@@ -136,6 +157,35 @@ public static class TestMediaGenerator
             AudioFormat.Flac => ["-c:a", "flac", "-sample_fmt", depth > 16 ? "s32" : "s16"],
             AudioFormat.Wav => ["-c:a", depth > 16 ? "pcm_s24le" : "pcm_s16le"],
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unknown audio format."),
+        };
+    }
+
+    private static string[] VideoCodecArguments(TestVideoCodec codec)
+    {
+        return codec switch
+        {
+            TestVideoCodec.Mpeg4 => ["-c:v", "mpeg4", "-q:v", "5", "-pix_fmt", "yuv420p"],
+            TestVideoCodec.H264 => ["-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p"],
+            TestVideoCodec.Vp9 => ["-c:v", "libvpx-vp9", "-deadline", "realtime", "-b:v", "200k", "-pix_fmt", "yuv420p"],
+            _ => throw new ArgumentOutOfRangeException(nameof(codec), codec, "Unknown video codec."),
+        };
+    }
+
+    private static string[] AudioOfVideoArguments(TestVideoCodec codec)
+    {
+        return codec == TestVideoCodec.Vp9
+            ? ["-c:a", "libopus", "-b:a", "64k"]
+            : ["-c:a", "aac", "-b:a", "64k"];
+    }
+
+    private static string MuxerOf(VideoFormat format)
+    {
+        return format switch
+        {
+            VideoFormat.Mp4 => "mp4",
+            VideoFormat.Mkv => "matroska",
+            VideoFormat.Webm => "webm",
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unknown video format."),
         };
     }
 

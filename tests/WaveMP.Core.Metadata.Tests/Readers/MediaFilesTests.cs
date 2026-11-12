@@ -83,9 +83,44 @@ public class MediaFilesTests
         metadata.Tags.Title.Should().Be("Test Title");
         metadata.Tags.Artist.Should().Be("Test Artist");
         metadata.Codec.Should().Be("mpeg4");
+        metadata.AudioCodec.Should().Be("aac");
+        metadata.PixelFormat.Should().Be("yuv420p");
         metadata.Width.Should().Be(640);
         metadata.Height.Should().Be(480);
         metadata.IsWritable.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task ReadAsync_VideoWithoutSound_HasNoAudioCodec()
+    {
+        string path = _directory.Combine("silent.mp4");
+        await TestMediaGenerator.CreateVideoAsync(
+            path,
+            VideoFormat.Mp4,
+            320,
+            240,
+            codec: TestVideoCodec.H264,
+            withAudio: false);
+
+        MediaFileMetadata metadata = await _reader.ReadAsync(path, MediaFileKind.Video);
+
+        metadata.Codec.Should().Be("h264");
+        metadata.AudioCodec.Should().BeNull();
+        metadata.PixelFormat.Should().Be("yuv420p");
+        metadata.SampleRate.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ReadAsync_WebmVideo_ReadsVp9AndOpus()
+    {
+        string path = _directory.Combine("clip.webm");
+        await TestMediaGenerator.CreateVideoAsync(path, VideoFormat.Webm, 320, 240, codec: TestVideoCodec.Vp9);
+
+        MediaFileMetadata metadata = await _reader.ReadAsync(path, MediaFileKind.Video);
+
+        metadata.Format.Should().Be("matroska,webm");
+        metadata.Codec.Should().Be("vp9");
+        metadata.AudioCodec.Should().Be("opus");
     }
 
     [Test]
