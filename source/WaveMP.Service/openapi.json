@@ -7840,6 +7840,15 @@
         "type": "string",
         "description": "How a client plays a track."
       },
+      "PlayerViewMode": {
+        "enum": [
+          "Cover",
+          "Video",
+          "Visualization"
+        ],
+        "type": "string",
+        "description": "What the Now Playing view of a player shows."
+      },
       "PlayHistoryEntry": {
         "required": [
           "id",
@@ -9671,6 +9680,17 @@
                 "$ref": "#/components/schemas/ReplayGainMode"
               }
             ]
+          },
+          "playerViewMode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "What the Now Playing view shows.",
+                "$ref": "#/components/schemas/PlayerViewMode"
+              }
+            ]
           }
         },
         "description": "Changes the settings of the current profile. Missing or null values stay unchanged."
@@ -9755,7 +9775,8 @@
       "UserSettings": {
         "required": [
           "language",
-          "replayGain"
+          "replayGain",
+          "playerViewMode"
         ],
         "type": "object",
         "properties": {
@@ -9766,6 +9787,10 @@
           "replayGain": {
             "description": "Whether the players even out the volume with the ReplayGain tags; Off by default.",
             "$ref": "#/components/schemas/ReplayGainMode"
+          },
+          "playerViewMode": {
+            "description": "What the Now Playing view shows; Video by default. Clients keep the choice of the profile with it.",
+            "$ref": "#/components/schemas/PlayerViewMode"
           }
         },
         "description": "Settings of the current profile."

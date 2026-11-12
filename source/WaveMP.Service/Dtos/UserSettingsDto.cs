@@ -14,4 +14,9 @@ public sealed class UserSettingsDto
     /// Whether the players even out the volume with the ReplayGain tags; Off by default.
     /// </summary>
     public required ReplayGainModeDto ReplayGain { get; init; }
+
+    /// <summary>
+    /// What the Now Playing view shows; Video by default. Clients keep the choice of the profile with it.
+    /// </summary>
+    public required PlayerViewModeDto PlayerViewMode { get; init; }
 }

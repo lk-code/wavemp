@@ -23,13 +23,33 @@ public class SettingsMappingExtensionsTests
     }
 
     [Test]
-    public void ToDto_Settings_CarriesLanguageAndReplayGain()
+    public void PlayerViewModes_MapBothWays()
     {
-        UserSettings settings = new() { Language = Language.De, ReplayGain = ReplayGainMode.Album };
+        foreach (PlayerViewMode mode in Enum.GetValues<PlayerViewMode>())
+        {
+            PlayerViewModeDto dto = mode.ToDto();
+
+            dto.ToString().Should().Be(mode.ToString());
+            dto.ToEntity().Should().Be(mode);
+        }
+
+        Enum.GetValues<PlayerViewModeDto>().Should().HaveSameCount(Enum.GetValues<PlayerViewMode>());
+    }
+
+    [Test]
+    public void ToDto_Settings_CarriesAllSettings()
+    {
+        UserSettings settings = new()
+        {
+            Language = Language.De,
+            ReplayGain = ReplayGainMode.Album,
+            PlayerViewMode = PlayerViewMode.Visualization,
+        };
 
         UserSettingsDto dto = settings.ToDto();
 
         dto.Language.Should().Be(LanguageDto.De);
         dto.ReplayGain.Should().Be(ReplayGainModeDto.Album);
+        dto.PlayerViewMode.Should().Be(PlayerViewModeDto.Visualization);
     }
 }

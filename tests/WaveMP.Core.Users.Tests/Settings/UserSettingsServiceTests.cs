@@ -84,6 +84,33 @@ public class UserSettingsServiceTests
     }
 
     [Test]
+    public async Task UpdateAsync_WithPlayerViewMode_SavesItAndKeepsTheOtherSettings()
+    {
+        User user = Given(Language.De);
+        user.Settings!.ReplayGain = ReplayGainMode.Track;
+
+        UserSettings? result = await _service.UpdateAsync(
+            user.Id,
+            new UpdateUserSettingsCommand(PlayerViewMode: PlayerViewMode.Visualization));
+
+        result!.PlayerViewMode.Should().Be(PlayerViewMode.Visualization);
+        result.Language.Should().Be(Language.De);
+        result.ReplayGain.Should().Be(ReplayGainMode.Track);
+        await _users.Received(1).UpdateAsync(user, Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task UpdateAsync_WithoutPlayerViewMode_KeepsIt()
+    {
+        User user = Given(Language.En);
+        user.Settings!.PlayerViewMode = PlayerViewMode.Cover;
+
+        UserSettings? result = await _service.UpdateAsync(user.Id, new UpdateUserSettingsCommand(Language.De));
+
+        result!.PlayerViewMode.Should().Be(PlayerViewMode.Cover);
+    }
+
+    [Test]
     public async Task GetAsync_UserWithoutSettings_ReturnsTheDefaults()
     {
         User user = Given(Language.En);
@@ -93,6 +120,7 @@ public class UserSettingsServiceTests
 
         result!.Language.Should().Be(Language.En);
         result.ReplayGain.Should().Be(ReplayGainMode.Off);
+        result.PlayerViewMode.Should().Be(PlayerViewMode.Video);
     }
 
     [Test]

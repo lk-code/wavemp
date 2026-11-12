@@ -33,6 +33,11 @@ internal sealed class UserSettingsService(IUserRepository users) : IUserSettings
             settings.ReplayGain = replayGain;
         }
 
+        if (command.PlayerViewMode is { } playerViewMode)
+        {
+            settings.PlayerViewMode = playerViewMode;
+        }
+
         await users.UpdateAsync(user, cancellationToken);
         return settings;
     }

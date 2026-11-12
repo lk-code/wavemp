@@ -14,4 +14,9 @@ public sealed class UpdateUserSettingsDto
     /// Whether the players even out the volume with the ReplayGain tags.
     /// </summary>
     public ReplayGainModeDto? ReplayGain { get; init; }
+
+    /// <summary>
+    /// What the Now Playing view shows.
+    /// </summary>
+    public PlayerViewModeDto? PlayerViewMode { get; init; }
 }

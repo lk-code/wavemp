@@ -11,6 +11,29 @@ public static class SettingsMappingExtensions
         {
             Language = settings.Language.ToDto(),
             ReplayGain = settings.ReplayGain.ToDto(),
+            PlayerViewMode = settings.PlayerViewMode.ToDto(),
+        };
+    }
+
+    public static PlayerViewModeDto ToDto(this PlayerViewMode mode)
+    {
+        return mode switch
+        {
+            PlayerViewMode.Cover => PlayerViewModeDto.Cover,
+            PlayerViewMode.Video => PlayerViewModeDto.Video,
+            PlayerViewMode.Visualization => PlayerViewModeDto.Visualization,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown player view mode."),
+        };
+    }
+
+    public static PlayerViewMode ToEntity(this PlayerViewModeDto mode)
+    {
+        return mode switch
+        {
+            PlayerViewModeDto.Cover => PlayerViewMode.Cover,
+            PlayerViewModeDto.Video => PlayerViewMode.Video,
+            PlayerViewModeDto.Visualization => PlayerViewMode.Visualization,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown player view mode."),
         };
     }
 

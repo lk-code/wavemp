@@ -7,4 +7,8 @@ namespace WaveMP.Core.Users.Settings;
 /// </summary>
 /// <param name="Language">Language of the user interface.</param>
 /// <param name="ReplayGain">Volume normalization of the player.</param>
-public sealed record UpdateUserSettingsCommand(Language? Language = null, ReplayGainMode? ReplayGain = null);
+/// <param name="PlayerViewMode">What the Now Playing stage shows.</param>
+public sealed record UpdateUserSettingsCommand(
+    Language? Language = null,
+    ReplayGainMode? ReplayGain = null,
+    PlayerViewMode? PlayerViewMode = null);

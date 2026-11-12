@@ -44,6 +44,59 @@ public class MeSettingsApiTests
 
             settings.Language.Should().Be(LanguageDto.En);
             settings.ReplayGain.Should().Be(ReplayGainModeDto.Off);
+            settings.PlayerViewMode.Should().Be(PlayerViewModeDto.Video);
+        }
+    }
+
+    [TestCase("Cover", PlayerViewModeDto.Cover)]
+    [TestCase("Visualization", PlayerViewModeDto.Visualization)]
+    [TestCase("Video", PlayerViewModeDto.Video)]
+    public async Task UpdateMySettings_WithPlayerViewMode_KeepsItAndTheOtherSettings(
+        string value,
+        PlayerViewModeDto expected)
+    {
+        (Guid profileId, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { language = "de", replayGain = "Album" },
+                HttpClientExtensions.JsonOptions);
+
+            HttpResponseMessage response = await client.PatchAsJsonAsync(
+                "/api/v1/me/settings",
+                new { playerViewMode = value },
+                HttpClientExtensions.JsonOptions);
+            UserSettingsDto read = await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+            using HttpClient otherSession = _factory.CreateAuthorizedClient(
+                (await _anonymous.CreateSessionAsync(profileId)).Token);
+            UserSettingsDto otherRead = await otherSession.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            (await response.Content.ReadAsStringAsync()).Should().Contain($"\"playerViewMode\":\"{value}\"");
+            read.PlayerViewMode.Should().Be(expected);
+            read.Language.Should().Be(LanguageDto.De);
+            read.ReplayGain.Should().Be(ReplayGainModeDto.Album);
+            otherRead.PlayerViewMode.Should().Be(expected);
+        }
+    }
+
+    [TestCase("\"Lyrics\"")]
+    [TestCase("1")]
+    public async Task UpdateMySettings_WithInvalidPlayerViewMode_ReturnsBadRequest(string value)
+    {
+        (Guid _, HttpClient client) = await CreateProfileAsync();
+        using (client)
+        {
+            using StringContent body = new($"{{\"playerViewMode\":{value}}}", Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PatchAsync("/api/v1/me/settings", body);
+
+            IReadOnlyList<ValidationErrorDto> errors = await response.ShouldBeValidationProblemAsync();
+            errors.Should().ContainSingle(error => error.Field == "playerViewMode")
+                .Which.Code.Should().Be(ValidationErrorCodeDto.InvalidFormat);
+            (await client.GetJsonAsync<UserSettingsDto>("/api/v1/me/settings")).PlayerViewMode
+                .Should().Be(PlayerViewModeDto.Video);
         }
     }
 
