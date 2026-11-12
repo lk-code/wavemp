@@ -2,10 +2,12 @@
 # Creates the synthetic test media of the E2E tests with ffmpeg: sine tones, test pictures and
 # tags written with -metadata, no files from other sources. The result are 4 tracks:
 #   E2E Artist/E2E Album/01 - First Song.mp3          tagged audio (genre E2E Genre, 2026)
-#   E2E Artist/E2E Album/02 - Second Song.flac + .mp4  audio with music video
+#   E2E Artist/E2E Album/02 - Second Song.flac + .mp4  audio with music video (MPEG-4 Part 2,
+#                                                      which browsers cannot play: transcoded to HLS)
 #   E2E Artist/E2E Album/cover.jpg                     album cover
 #   E2E Artist/Video Only.mp4                          music video without audio file
-#   Loose Artist - Loose Song.mp3                      audio without tags in the root
+#   Loose Artist - Loose Song.mp3 + .webm              audio without tags in the root, with a
+#                                                      music video browsers play as it is (VP9, Opus)
 # The files are made writable for everyone: the metadata editor test writes tags, and the container
 # runs as another user (1654) than the one who creates the media.
 #
@@ -47,6 +49,9 @@ video 320x240 "$album/02 - Second Song.mp4"
 ff -f lavfi -i "testsrc=size=300x300:rate=1" -frames:v 1 -update 1 "$album/cover.jpg"
 video 320x240 "$artist/Video Only.mp4"
 audio 660 "$target/Loose Artist - Loose Song.mp3" -c:a libmp3lame -b:a 128k
+ff -f lavfi -i "testsrc=size=320x240:rate=10:duration=2" -f lavfi -i "sine=frequency=660:duration=2" \
+    -c:v libvpx-vp9 -b:v 200k -deadline realtime -cpu-used 8 -pix_fmt yuv420p \
+    -c:a libopus -b:a 64k -shortest "$target/Loose Artist - Loose Song.webm"
 
-chmod -R a+rwX "$artist" "$target/Loose Artist - Loose Song.mp3"
+chmod -R a+rwX "$artist" "$target/Loose Artist - Loose Song.mp3" "$target/Loose Artist - Loose Song.webm"
 echo "Test media created in $target"
