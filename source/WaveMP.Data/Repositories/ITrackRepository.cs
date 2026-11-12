@@ -5,7 +5,8 @@ using WaveMP.Data.Queries;
 namespace WaveMP.Data.Repositories;
 
 /// <summary>
-/// Reads the tracks of the library, their files and the genres and years of the tracks. Nothing is tracked.
+/// Reads the tracks of the library, their files and the genres and years of the tracks, and sets the video offset of
+/// tracks. Nothing is tracked.
 /// </summary>
 public interface ITrackRepository
 {
@@ -38,6 +39,12 @@ public interface ITrackRepository
         Guid trackId,
         MediaFileKind kind,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the offset of the video against the audio of the track in milliseconds. Returns <c>false</c> if the track
+    /// does not exist.
+    /// </summary>
+    Task<bool> SetVideoOffsetAsync(Guid trackId, int milliseconds, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists the files of a track: audio, video and its own pictures, also duplicates of lower quality.

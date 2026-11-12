@@ -918,6 +918,10 @@ namespace WaveMP.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("VideoOffsetMilliseconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("video_offset_milliseconds");
+
                     b.Property<int?>("Year")
                         .HasColumnType("integer")
                         .HasColumnName("year");
@@ -1057,6 +1061,13 @@ namespace WaveMP.Data.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("language");
+
+                    b.Property<string>("PlayerViewMode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("Video")
+                        .HasColumnName("player_view_mode");
 
                     b.Property<string>("ReplayGain")
                         .IsRequired()

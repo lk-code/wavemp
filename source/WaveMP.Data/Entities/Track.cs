@@ -62,6 +62,12 @@ public class Track
 
     public required DateTimeOffset UpdatedAt { get; set; }
 
+    /// <summary>
+    /// Offset of the video against the audio in milliseconds: position of the video = position of the audio + offset.
+    /// Set by the admin for videos whose music starts earlier or later than in the audio file; a scan never changes it.
+    /// </summary>
+    public int VideoOffsetMilliseconds { get; set; }
+
     public ICollection<MediaFile> Files { get; set; } = [];
 
     public ICollection<Cover> Covers { get; set; } = [];

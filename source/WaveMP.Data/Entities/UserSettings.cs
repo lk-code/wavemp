@@ -15,4 +15,9 @@ public class UserSettings
     /// Volume normalization of the player; off by default.
     /// </summary>
     public ReplayGainMode ReplayGain { get; set; } = ReplayGainMode.Off;
+
+    /// <summary>
+    /// What the Now Playing stage shows; the video by default.
+    /// </summary>
+    public PlayerViewMode PlayerViewMode { get; set; } = PlayerViewMode.Video;
 }

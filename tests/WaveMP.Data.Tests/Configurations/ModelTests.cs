@@ -114,6 +114,16 @@ public class ModelTests
     }
 
     [Test]
+    public void UserSettings_PlayerViewMode_IsStoredAsNameWithVideoAsDefault()
+    {
+        IProperty mode = GetEntity(typeof(UserSettings)).FindProperty(nameof(UserSettings.PlayerViewMode))!;
+
+        mode.GetProviderClrType().Should().Be<string>();
+        mode.GetDefaultValue().Should().Be(PlayerViewMode.Video);
+        mode.ValueGenerated.Should().Be(ValueGenerated.Never);
+    }
+
+    [Test]
     public void ServerSetting_Value_IsStoredAsJsonb()
     {
         IProperty value = GetEntity(typeof(ServerSetting)).FindProperty(nameof(ServerSetting.Value))!;

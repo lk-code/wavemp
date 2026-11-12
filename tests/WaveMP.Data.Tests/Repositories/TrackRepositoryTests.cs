@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using Microsoft.EntityFrameworkCore;
 using WaveMP.Data.Entities;
 using WaveMP.Data.Projections;
 using WaveMP.Data.Queries;
@@ -329,6 +330,68 @@ public class TrackRepositoryTests : LibraryDatabaseTests
             .FindPrimaryFileAsync(Guid.NewGuid(), MediaFileKind.Audio);
 
         row.Should().BeNull();
+    }
+
+    [Test]
+    public async Task FindPrimaryFileAsync_Always_ReturnsTheVideoOffset()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+        await new TrackRepository(CreateDbContext()).SetVideoOffsetAsync(library.Closing.Id, -1250);
+
+        TrackFileRow? row = await new TrackRepository(CreateDbContext())
+            .FindPrimaryFileAsync(library.Closing.Id, MediaFileKind.Video);
+
+        row!.VideoOffsetMilliseconds.Should().Be(-1250);
+    }
+
+    [Test]
+    public async Task FindPrimaryFileAsync_WithoutOffset_ReturnsZero()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+
+        TrackFileRow? row = await new TrackRepository(CreateDbContext())
+            .FindPrimaryFileAsync(library.Closing.Id, MediaFileKind.Video);
+
+        row!.VideoOffsetMilliseconds.Should().Be(0);
+    }
+
+    [Test]
+    public async Task SetVideoOffsetAsync_KnownTrack_StoresItAndKeepsTheTimeOfTheLastChange()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+
+        bool set = await new TrackRepository(CreateDbContext()).SetVideoOffsetAsync(library.Closing.Id, 1500);
+
+        set.Should().BeTrue();
+        Track track = await CreateDbContext().Tracks.SingleAsync(track => track.Id == library.Closing.Id);
+        track.VideoOffsetMilliseconds.Should().Be(1500);
+        track.UpdatedAt.Should().Be(library.Closing.UpdatedAt);
+    }
+
+    [Test]
+    public async Task SetVideoOffsetAsync_UnknownTrack_ReturnsFalse()
+    {
+        await SeedStandardLibraryAsync();
+
+        bool set = await new TrackRepository(CreateDbContext()).SetVideoOffsetAsync(Guid.NewGuid(), 1500);
+
+        set.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task SetVideoOffsetAsync_ChangedTrackSavedLater_KeepsTheOffset()
+    {
+        StandardLibrary library = await SeedStandardLibraryAsync();
+        await using WaveMpDbContext scan = CreateDbContext();
+        Track tracked = await scan.Tracks.SingleAsync(track => track.Id == library.Closing.Id);
+
+        await new TrackRepository(CreateDbContext()).SetVideoOffsetAsync(library.Closing.Id, 800);
+        tracked.Title = "Closing (Remastered)";
+        await scan.SaveChangesAsync();
+
+        Track track = await CreateDbContext().Tracks.SingleAsync(track => track.Id == library.Closing.Id);
+        track.Title.Should().Be("Closing (Remastered)");
+        track.VideoOffsetMilliseconds.Should().Be(800);
     }
 
     [Test]

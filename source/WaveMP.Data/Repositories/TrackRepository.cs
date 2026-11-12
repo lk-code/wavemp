@@ -53,7 +53,12 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
         MediaFileKind kind,
         CancellationToken cancellationToken = default)
     {
-        if (!await ExistsAsync(trackId, cancellationToken))
+        // Checks that the track exists and reads its offset in one query.
+        int? offset = await dbContext.Tracks.AsNoTracking()
+            .Where(track => track.Id == trackId)
+            .Select(track => (int?)track.VideoOffsetMilliseconds)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (offset is not { } videoOffset)
         {
             return null;
         }
@@ -62,7 +67,21 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
             .Where(file => file.TrackId == trackId && file.Kind == kind && file.IsPrimary)
             .OrderBy(file => file.Id)
             .FirstOrDefaultAsync(cancellationToken);
-        return new TrackFileRow(trackId, file);
+        return new TrackFileRow(trackId, file, videoOffset);
+    }
+
+    public async Task<bool> SetVideoOffsetAsync(
+        Guid trackId,
+        int milliseconds,
+        CancellationToken cancellationToken = default)
+    {
+        // Not a change of the content of the library, so the time of the last change stays.
+        int changed = await dbContext.Tracks
+            .Where(track => track.Id == trackId)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(track => track.VideoOffsetMilliseconds, milliseconds),
+                cancellationToken);
+        return changed > 0;
     }
 
     public Task<Page<MediaFile>> ListFilesAsync(
