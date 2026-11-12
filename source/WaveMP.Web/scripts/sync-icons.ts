@@ -71,6 +71,7 @@ const icons: Record<IconStyle, string[]> = {
         'caret-up',
         'clock-clockwise',
         'dots-six-vertical',
+        'film-reel',
         'film-strip',
         'folder-open',
         'gear-six',

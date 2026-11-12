@@ -30,11 +30,18 @@ describe('AdminNav', () => {
         const nav = wrapper.get('nav[data-part="admin-nav"]')
         expect(nav.attributes('aria-label')).toBe('Administration')
         const items = wrapper.findAll('[data-part="admin-nav-item"]')
-        expect(items.map((item) => item.text())).toEqual(['Library', 'Jobs', 'Cache', 'Profiles'])
+        expect(items.map((item) => item.text())).toEqual([
+            'Library',
+            'Jobs',
+            'Cache',
+            'Transcoding',
+            'Profiles',
+        ])
         expect(items.map((item) => item.attributes('href'))).toEqual([
             '/admin/library',
             '/admin/jobs',
             '/admin/cache',
+            '/admin/transcoding',
             '/admin/users',
         ])
         expect(items.map((item) => item.attributes('data-item'))).toContain('admin-cache')

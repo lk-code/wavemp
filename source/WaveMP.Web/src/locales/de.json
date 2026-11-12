@@ -405,6 +405,7 @@
       "library": "Bibliothek",
       "jobs": "Jobs",
       "cache": "Cache",
+      "transcoding": "Transcodierung",
       "profiles": "Profile"
     }
   },
@@ -518,7 +519,7 @@
     "usageTitle": "Belegung",
     "usageLabel": "Belegter Platz des Caches",
     "usage": "{size} von {limit} belegt",
-    "hint": "Enthält verkleinerte Cover. Alles darin wird bei Bedarf neu erstellt.",
+    "hint": "Enthält verkleinerte Cover und transcodierte Medien. Alles darin wird bei Bedarf neu erstellt.",
     "stats": {
       "label": "Inhalt des Caches",
       "covers": "Cover",
@@ -545,6 +546,76 @@
     "errors": {
       "maxSize": "Wähle eine Größe zwischen {min} und {max}."
     }
+  },
+  "adminTranscoding": {
+    "title": "Transcodierung",
+    "statusTitle": "Status",
+    "unavailable": "Es kann nichts transcodiert werden: ffmpeg lässt sich nicht starten oder der Cache-Ordner ist nicht beschreibbar. Titel und Videos, die der Browser nicht abspielen kann, werden übersprungen.",
+    "hint": "Titel und Videos, die der Browser nicht abspielen kann, werden während der Wiedergabe in HLS umgewandelt; die Teile bleiben im Cache.",
+    "loadError": "Der Status der Transcodierung konnte nicht geladen werden.",
+    "yes": "Ja",
+    "no": "Nein",
+    "jobCount": "{running} von {max}",
+    "stats": {
+      "label": "Status der Transcodierung",
+      "hardware": "Hardwarebeschleunigung",
+      "ffmpeg": "ffmpeg verfügbar",
+      "cache": "Cache beschreibbar",
+      "jobs": "Laufende Transcodierungen",
+      "encoder": "Video-Encoder",
+      "device": "Render-Gerät"
+    },
+    "hardware": {
+      "states": {
+        "detecting": "Wird erkannt",
+        "active": "Aktiv",
+        "unavailable": "Nicht verfügbar",
+        "disabled": "Ausgeschaltet",
+        "failed": "Fehlgeschlagen"
+      },
+      "reasons": {
+        "ffmpegMissing": "ffmpeg lässt sich nicht starten.",
+        "noDevice": "Es wurde kein Render-Gerät gefunden. Gib /dev/dri in den Container, um Intel Quick Sync zu nutzen.",
+        "testFailed": "Die Testcodierung auf der Grafikhardware ist fehlgeschlagen; Videos werden per Software transcodiert.",
+        "encodeFailed": "Eine Transcodierung auf der Grafikhardware ist fehlgeschlagen; Videos werden per Software transcodiert."
+      }
+    },
+    "accelerators": {
+      "none": "Software",
+      "vaapi": "VA-API",
+      "qsv": "Quick Sync"
+    },
+    "jobs": "Laufende Transcodierungen",
+    "noJobs": "Es laufen keine Transcodierungen.",
+    "jobTitle": "{title} – {artist}",
+    "media": {
+      "audio": "Audio",
+      "video": "Video"
+    },
+    "segments": "Teil {done} von {total}",
+    "startedAt": "Gestartet um {time}",
+    "progress": "Fortschritt der Transcodierung",
+    "cancel": "Stoppen",
+    "cancelError": "Die Transcodierung konnte nicht gestoppt werden.",
+    "settingsTitle": "Einstellungen",
+    "hardwareMode": "Hardwarebeschleunigung",
+    "hardwareModeHint": "Automatisch nutzt Intel Quick Sync, wenn ein Render-Gerät verfügbar ist, sonst Software.",
+    "hardwareModes": {
+      "auto": "Automatisch",
+      "off": "Aus (nur Software)"
+    },
+    "maxParallelJobs": "Gleichzeitige Transcodierungen",
+    "maxParallelJobsHint": "Mehr gleichzeitige Transcodierungen brauchen mehr Rechenleistung.",
+    "maxVideoHeight": "Größte Videohöhe",
+    "maxVideoHeightHint": "Größere Videos werden verkleinert, kleinere nie vergrößert.",
+    "height": "{height} Pixel",
+    "audioBitrate": "Audio-Bitrate",
+    "audioBitrateHint": "Bitrate des transcodierten Tons (AAC).",
+    "bitrate": "{bitrate} kbit/s",
+    "save": "Speichern",
+    "saved": "Die Einstellungen sind gespeichert.",
+    "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
+    "settingsLoadError": "Die Einstellungen konnten nicht geladen werden."
   },
   "jobRuns": {
     "statuses": {

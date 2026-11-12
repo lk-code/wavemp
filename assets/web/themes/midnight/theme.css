@@ -1080,10 +1080,12 @@ a[data-part="breadcrumb-link"]:hover {
 
 /* Panels and list entries in the style of the profile administration. */
 [data-part="cache-usage"],
+[data-part="transcoding-status"],
 [data-part="scan-status"],
 [data-part="stat-item"],
 [data-part="run-item"],
 [data-part="job-item"],
+[data-part="transcode-item"],
 [data-part="disclosure"] {
     border: 1px solid #d9e0e8;
     border-radius: 0.25rem;
@@ -1092,7 +1094,8 @@ a[data-part="breadcrumb-link"]:hover {
 }
 
 [data-part="run-item"]:hover,
-[data-part="job-item"]:hover {
+[data-part="job-item"]:hover,
+[data-part="transcode-item"]:hover {
     border-color: #c5e1fb;
     background: linear-gradient(#f4faff, #e9f4fe);
 }
@@ -1104,19 +1107,21 @@ a[data-part="breadcrumb-link"]:hover {
 [data-part="scan-status"] > [data-part="badge"],
 [data-part="run-item"] > [data-part="badge"],
 [data-part="run-meta"] > [data-part="badge"],
-[data-part="job-meta"] > [data-part="badge"] {
+[data-part="job-meta"] > [data-part="badge"],
+[data-part="transcode-meta"] > [data-part="badge"],
+[data-part="stat-value"] > [data-part="badge"] {
     border-color: #c9d1da;
     background: linear-gradient(#ffffff, #eef1f4);
     color: #4f5862;
 }
 
-[data-part="badge"]:is([data-state~="running"], [data-state~="queued"]) {
+[data-part="badge"]:is([data-state~="running"], [data-state~="queued"], [data-state~="detecting"]) {
     border-color: #84b9ea;
     background: linear-gradient(#e6f3fe, #c9e2fa);
     color: #10253f;
 }
 
-[data-part="badge"][data-state~="succeeded"] {
+[data-part="badge"]:is([data-state~="succeeded"], [data-state~="active"]) {
     border-color: #a4d8b0;
     background: linear-gradient(#f2fbf4, #d8f0de);
     color: #1d4a27;

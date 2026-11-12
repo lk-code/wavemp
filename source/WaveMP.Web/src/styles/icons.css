@@ -171,6 +171,10 @@
         --_icon: var(--wmp-icon-admin-cache);
     }
 
+    [data-icon='admin-transcoding'] {
+        --_icon: var(--wmp-icon-admin-transcoding);
+    }
+
     [data-icon='album'] {
         --_icon: var(--wmp-icon-album);
     }

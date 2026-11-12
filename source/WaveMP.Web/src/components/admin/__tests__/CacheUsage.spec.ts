@@ -42,7 +42,7 @@ describe('CacheUsage', () => {
             '0 byte',
             '1,234',
         ])
-        expect(wrapper.text()).toContain('Holds scaled covers.')
+        expect(wrapper.text()).toContain('Holds scaled covers and transcoded media.')
     })
 
     it('asks to clear the cache unless it is empty or being cleared', async () => {

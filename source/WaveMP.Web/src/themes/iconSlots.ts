@@ -60,6 +60,7 @@ export const iconSlots = {
     'admin-library': { file: regular('folder-open'), area: 'content' },
     'admin-jobs': { file: regular('clock-clockwise'), area: 'content' },
     'admin-cache': { file: regular('hard-drives'), area: 'content' },
+    'admin-transcoding': { file: regular('film-reel'), area: 'content' },
     album: { file: fill('vinyl-record'), area: 'content' },
     artist: { file: fill('microphone-stage'), area: 'content' },
     genre: { file: fill('guitar'), area: 'content' },

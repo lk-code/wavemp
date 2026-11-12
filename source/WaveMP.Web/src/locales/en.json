@@ -405,6 +405,7 @@
       "library": "Library",
       "jobs": "Jobs",
       "cache": "Cache",
+      "transcoding": "Transcoding",
       "profiles": "Profiles"
     }
   },
@@ -518,7 +519,7 @@
     "usageTitle": "Usage",
     "usageLabel": "Used space of the cache",
     "usage": "{size} of {limit} used",
-    "hint": "Holds scaled covers. Everything in it is created again when it is needed.",
+    "hint": "Holds scaled covers and transcoded media. Everything in it is created again when it is needed.",
     "stats": {
       "label": "Contents of the cache",
       "covers": "Covers",
@@ -545,6 +546,76 @@
     "errors": {
       "maxSize": "Choose a size between {min} and {max}."
     }
+  },
+  "adminTranscoding": {
+    "title": "Transcoding",
+    "statusTitle": "Status",
+    "unavailable": "Nothing can be transcoded: ffmpeg cannot be started or the cache folder cannot be written. Songs and videos the browser cannot play are skipped.",
+    "hint": "Songs and videos the browser cannot play are converted to HLS on the fly; the parts are kept in the cache.",
+    "loadError": "The transcoding status could not be loaded.",
+    "yes": "Yes",
+    "no": "No",
+    "jobCount": "{running} of {max}",
+    "stats": {
+      "label": "Status of the transcoding",
+      "hardware": "Hardware acceleration",
+      "ffmpeg": "ffmpeg available",
+      "cache": "Cache writable",
+      "jobs": "Running transcodes",
+      "encoder": "Video encoder",
+      "device": "Render device"
+    },
+    "hardware": {
+      "states": {
+        "detecting": "Detecting",
+        "active": "Active",
+        "unavailable": "Not available",
+        "disabled": "Turned off",
+        "failed": "Failed"
+      },
+      "reasons": {
+        "ffmpegMissing": "ffmpeg cannot be started.",
+        "noDevice": "No render device was found. Pass /dev/dri into the container to use Intel Quick Sync.",
+        "testFailed": "The test encode on the graphics hardware failed; videos are transcoded in software.",
+        "encodeFailed": "A transcode on the graphics hardware failed; videos are transcoded in software."
+      }
+    },
+    "accelerators": {
+      "none": "Software",
+      "vaapi": "VA-API",
+      "qsv": "Quick Sync"
+    },
+    "jobs": "Running transcodes",
+    "noJobs": "No transcodes are running.",
+    "jobTitle": "{title} – {artist}",
+    "media": {
+      "audio": "Audio",
+      "video": "Video"
+    },
+    "segments": "Part {done} of {total}",
+    "startedAt": "Started at {time}",
+    "progress": "Progress of the transcode",
+    "cancel": "Stop",
+    "cancelError": "The transcode could not be stopped.",
+    "settingsTitle": "Settings",
+    "hardwareMode": "Hardware acceleration",
+    "hardwareModeHint": "Automatic uses Intel Quick Sync when a render device is available, otherwise software.",
+    "hardwareModes": {
+      "auto": "Automatic",
+      "off": "Off (software only)"
+    },
+    "maxParallelJobs": "Parallel transcodes",
+    "maxParallelJobsHint": "More transcodes at the same time need more processor power.",
+    "maxVideoHeight": "Largest video height",
+    "maxVideoHeightHint": "Larger videos are scaled down; smaller ones are never scaled up.",
+    "height": "{height} pixels",
+    "audioBitrate": "Audio bitrate",
+    "audioBitrateHint": "Bitrate of transcoded sound (AAC).",
+    "bitrate": "{bitrate} kbit/s",
+    "save": "Save",
+    "saved": "The settings are saved.",
+    "saveError": "The settings could not be saved.",
+    "settingsLoadError": "The settings could not be loaded."
   },
   "jobRuns": {
     "statuses": {

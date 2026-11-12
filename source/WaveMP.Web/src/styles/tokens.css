@@ -127,6 +127,7 @@
         --wmp-icon-admin-library: url('/icons/phosphor/regular/folder-open.svg');
         --wmp-icon-admin-jobs: url('/icons/phosphor/regular/clock-clockwise.svg');
         --wmp-icon-admin-cache: url('/icons/phosphor/regular/hard-drives.svg');
+        --wmp-icon-admin-transcoding: url('/icons/phosphor/regular/film-reel.svg');
         --wmp-icon-album: url('/icons/phosphor/fill/vinyl-record-fill.svg');
         --wmp-icon-artist: url('/icons/phosphor/fill/microphone-stage-fill.svg');
         --wmp-icon-genre: url('/icons/phosphor/fill/guitar-fill.svg');

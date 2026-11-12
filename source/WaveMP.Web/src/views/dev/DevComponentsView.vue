@@ -5,7 +5,14 @@
 import '@/styles/dev.css'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { CacheUsage, Job, Scan, ScanIssue } from '@/api/generated/models'
+import type {
+    CacheUsage,
+    Job,
+    Scan,
+    ScanIssue,
+    TranscodeJob,
+    TranscodingStatus,
+} from '@/api/generated/models'
 import AdminNav from '@/components/admin/AdminNav.vue'
 import CacheUsagePanel from '@/components/admin/CacheUsage.vue'
 import JobList from '@/components/admin/JobList.vue'
@@ -13,6 +20,8 @@ import ScanHistory from '@/components/admin/ScanHistory.vue'
 import ScanIssues from '@/components/admin/ScanIssues.vue'
 import ScanPanel from '@/components/admin/ScanPanel.vue'
 import ScanSummary from '@/components/admin/ScanSummary.vue'
+import TranscodeJobList from '@/components/admin/TranscodeJobList.vue'
+import TranscodingStatusPanel from '@/components/admin/TranscodingStatus.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseCheckbox from '@/components/base/BaseCheckbox.vue'
@@ -431,6 +440,36 @@ const sampleCacheUsage: CacheUsage = {
     covers: { sizeBytes: 1_240_000_000, entryCount: 5_321 },
     transcodes: { sizeBytes: 0, entryCount: 0 },
 }
+const sampleTranscodingStatus: TranscodingStatus = {
+    available: true,
+    ffmpegAvailable: true,
+    cacheAvailable: true,
+    runningJobs: 1,
+    maxParallelJobs: 2,
+    hardware: {
+        state: 'Unavailable',
+        accelerator: 'None',
+        reason: 'no_device',
+        detectedAt: sampleTime,
+    },
+}
+const sampleTranscodeJobs = computed<TranscodeJob[]>(() => {
+    const track = sampleTracks(t).find((item) => item.hasVideo)
+    return [
+        {
+            id: 'sample-transcode',
+            trackId: track?.id,
+            track,
+            media: 'Video',
+            accelerator: 'None',
+            startSegment: 0,
+            completedSegments: 12,
+            segmentCount: 40,
+            startedAt: sampleTime,
+            lastAccessAt: sampleTime,
+        },
+    ]
+})
 </script>
 
 <template>
@@ -822,6 +861,17 @@ const sampleCacheUsage: CacheUsage = {
                     <h2 data-part="section-title">{{ t('adminCache.usageTitle') }}</h2>
                     <CacheUsagePanel :usage="sampleCacheUsage" />
                     <BaseMeter :label="t('adminCache.usageLabel')" :value="0.95" />
+                </section>
+            </div>
+            <div data-part="view" data-view="admin-transcoding">
+                <section data-part="section" data-item="status">
+                    <h2 data-part="section-title">{{ t('adminTranscoding.statusTitle') }}</h2>
+                    <TranscodingStatusPanel :status="sampleTranscodingStatus" />
+                </section>
+                <section data-part="section" data-item="jobs">
+                    <h2 data-part="section-title">{{ t('adminTranscoding.jobs') }}</h2>
+                    <TranscodeJobList :jobs="sampleTranscodeJobs" />
+                    <TranscodeJobList :jobs="[]" />
                 </section>
             </div>
         </section>
