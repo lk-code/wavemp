@@ -20,7 +20,7 @@ export interface SettingsRequestBuilder extends BaseRequestBuilder<SettingsReque
      get(requestConfiguration?: RequestConfiguration<object> | undefined) : Promise<UserSettings | undefined>;
     /**
      * Changes the settings of the current profile. Missing or null values stay unchanged.
-     * @param body Changes the settings of the current profile. Missing or null values stay unchanged.
+     * @param body Changes the settings of the current profile. Missing or null values stay unchanged, also within the groups.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {Promise<UserSettings>}
      * @throws {ValidationProblem} error when the service returns a 400 status code
@@ -36,7 +36,7 @@ export interface SettingsRequestBuilder extends BaseRequestBuilder<SettingsReque
      toGetRequestInformation(requestConfiguration?: RequestConfiguration<object> | undefined) : RequestInformation;
     /**
      * Changes the settings of the current profile. Missing or null values stay unchanged.
-     * @param body Changes the settings of the current profile. Missing or null values stay unchanged.
+     * @param body Changes the settings of the current profile. Missing or null values stay unchanged, also within the groups.
      * @param requestConfiguration Configuration for the request such as headers, query parameters, and middleware options.
      * @returns {RequestInformation}
      */

@@ -384,6 +384,15 @@ export function createCreateUserFromDiscriminatorValue(parseNode: ParseNode | un
     return deserializeIntoCreateUser;
 }
 /**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {CrossfadeSettings}
+ */
+// @ts-ignore
+export function createCrossfadeSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoCrossfadeSettings;
+}
+/**
  * A new session with its token.
  */
 export interface CreatedSession extends AdditionalDataHolder, Parsable {
@@ -395,6 +404,42 @@ export interface CreatedSession extends AdditionalDataHolder, Parsable {
      * Bearer token of the session for the Authorization header.
      */
     token?: string | null;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {EqualizerBand}
+ */
+// @ts-ignore
+export function createEqualizerBandFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoEqualizerBand;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {Equalizer}
+ */
+// @ts-ignore
+export function createEqualizerFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoEqualizer;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {EqualizerPresetCurve}
+ */
+// @ts-ignore
+export function createEqualizerPresetCurveFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoEqualizerPresetCurve;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {EqualizerSettings}
+ */
+// @ts-ignore
+export function createEqualizerSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoEqualizerSettings;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -740,6 +785,15 @@ export function createSessionFromDiscriminatorValue(parseNode: ParseNode | undef
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {SleepTimerSettings}
+ */
+// @ts-ignore
+export function createSleepTimerSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoSleepTimerSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {Track}
  */
 // @ts-ignore
@@ -839,6 +893,24 @@ export function createUpdateCacheSettingsFromDiscriminatorValue(parseNode: Parse
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateCrossfadeSettings}
+ */
+// @ts-ignore
+export function createUpdateCrossfadeSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateCrossfadeSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateEqualizerSettings}
+ */
+// @ts-ignore
+export function createUpdateEqualizerSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateEqualizerSettings;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {UpdateLibrarySettings}
  */
 // @ts-ignore
@@ -862,6 +934,15 @@ export function createUpdatePlaylistEntryFromDiscriminatorValue(parseNode: Parse
 // @ts-ignore
 export function createUpdatePlaylistFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoUpdatePlaylist;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateSleepTimerSettings}
+ */
+// @ts-ignore
+export function createUpdateSleepTimerSettingsFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateSleepTimerSettings;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -1000,6 +1081,19 @@ export function createYearFromDiscriminatorValue(parseNode: ParseNode | undefine
 // @ts-ignore
 export function createYearPageFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoYearPage;
+}
+/**
+ * Crossfade between tracks of the current profile.
+ */
+export interface CrossfadeSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Whether consecutive tracks of the same album play gapless even with a crossfade; true by default.
+     */
+    albumsGapless?: boolean | null;
+    /**
+     * Seconds the players fade from one track into the next, from 0 to 12; 0 (the default) plays the tracks gapless.
+     */
+    seconds?: number | null;
 }
 /**
  * The deserialization information for the current model
@@ -1214,6 +1308,72 @@ export function deserializeIntoCreateUser(createUser: Partial<CreateUser> | unde
         "initials": n => { createUser.initials = n.getStringValue(); },
         "name": n => { createUser.name = n.getStringValue(); },
         "role": n => { createUser.role = n.getEnumValue<Role>(RoleObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param CrossfadeSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoCrossfadeSettings(crossfadeSettings: Partial<CrossfadeSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumsGapless": n => { crossfadeSettings.albumsGapless = n.getBooleanValue(); },
+        "seconds": n => { crossfadeSettings.seconds = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param Equalizer The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoEqualizer(equalizer: Partial<Equalizer> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "bands": n => { equalizer.bands = n.getCollectionOfObjectValues<EqualizerBand>(createEqualizerBandFromDiscriminatorValue); },
+        "maxGainDb": n => { equalizer.maxGainDb = n.getNumberValue(); },
+        "minGainDb": n => { equalizer.minGainDb = n.getNumberValue(); },
+        "presets": n => { equalizer.presets = n.getCollectionOfObjectValues<EqualizerPresetCurve>(createEqualizerPresetCurveFromDiscriminatorValue); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param EqualizerBand The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoEqualizerBand(equalizerBand: Partial<EqualizerBand> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "filterType": n => { equalizerBand.filterType = n.getEnumValue<EqualizerFilterType>(EqualizerFilterTypeObject); },
+        "frequencyHz": n => { equalizerBand.frequencyHz = n.getNumberValue(); },
+        "q": n => { equalizerBand.q = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param EqualizerPresetCurve The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoEqualizerPresetCurve(equalizerPresetCurve: Partial<EqualizerPresetCurve> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "gainsDb": n => { equalizerPresetCurve.gainsDb = n.getCollectionOfPrimitiveValues<number>("number"); },
+        "preset": n => { equalizerPresetCurve.preset = n.getEnumValue<EqualizerPreset>(EqualizerPresetObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param EqualizerSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoEqualizerSettings(equalizerSettings: Partial<EqualizerSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "customGainsDb": n => { equalizerSettings.customGainsDb = n.getCollectionOfPrimitiveValues<number>("number"); },
+        "enabled": n => { equalizerSettings.enabled = n.getBooleanValue(); },
+        "gainsDb": n => { equalizerSettings.gainsDb = n.getCollectionOfPrimitiveValues<number>("number"); },
+        "preampDb": n => { equalizerSettings.preampDb = n.getNumberValue(); },
+        "preset": n => { equalizerSettings.preset = n.getEnumValue<EqualizerPreset>(EqualizerPresetObject); },
     }
 }
 /**
@@ -1745,6 +1905,17 @@ export function deserializeIntoSession(session: Partial<Session> | undefined = {
 }
 /**
  * The deserialization information for the current model
+ * @param SleepTimerSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoSleepTimerSettings(sleepTimerSettings: Partial<SleepTimerSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "fadeSeconds": n => { sleepTimerSettings.fadeSeconds = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param Track The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1938,6 +2109,32 @@ export function deserializeIntoUpdateCacheSettings(updateCacheSettings: Partial<
 }
 /**
  * The deserialization information for the current model
+ * @param UpdateCrossfadeSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateCrossfadeSettings(updateCrossfadeSettings: Partial<UpdateCrossfadeSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "albumsGapless": n => { updateCrossfadeSettings.albumsGapless = n.getBooleanValue(); },
+        "seconds": n => { updateCrossfadeSettings.seconds = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateEqualizerSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateEqualizerSettings(updateEqualizerSettings: Partial<UpdateEqualizerSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "customGainsDb": n => { updateEqualizerSettings.customGainsDb = n.getCollectionOfPrimitiveValues<number>("number"); },
+        "enabled": n => { updateEqualizerSettings.enabled = n.getBooleanValue(); },
+        "preampDb": n => { updateEqualizerSettings.preampDb = n.getNumberValue(); },
+        "preset": n => { updateEqualizerSettings.preset = n.getEnumValue<EqualizerPreset>(EqualizerPresetObject); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param UpdateLibrarySettings The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1972,6 +2169,17 @@ export function deserializeIntoUpdatePlaylist(updatePlaylist: Partial<UpdatePlay
 export function deserializeIntoUpdatePlaylistEntry(updatePlaylistEntry: Partial<UpdatePlaylistEntry> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "position": n => { updatePlaylistEntry.position = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
+ * @param UpdateSleepTimerSettings The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateSleepTimerSettings(updateSleepTimerSettings: Partial<UpdateSleepTimerSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "fadeSeconds": n => { updateSleepTimerSettings.fadeSeconds = n.getNumberValue(); },
     }
 }
 /**
@@ -2050,9 +2258,12 @@ export function deserializeIntoUpdateUser(updateUser: Partial<UpdateUser> | unde
 // @ts-ignore
 export function deserializeIntoUpdateUserSettings(updateUserSettings: Partial<UpdateUserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
+        "crossfade": n => { updateUserSettings.crossfade = n.getObjectValue<UpdateCrossfadeSettings>(createUpdateCrossfadeSettingsFromDiscriminatorValue); },
+        "equalizer": n => { updateUserSettings.equalizer = n.getObjectValue<UpdateEqualizerSettings>(createUpdateEqualizerSettingsFromDiscriminatorValue); },
         "language": n => { updateUserSettings.language = n.getEnumValue<Language>(LanguageObject); },
         "playerViewMode": n => { updateUserSettings.playerViewMode = n.getEnumValue<PlayerViewMode>(PlayerViewModeObject); },
         "replayGain": n => { updateUserSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
+        "sleepTimer": n => { updateUserSettings.sleepTimer = n.getObjectValue<UpdateSleepTimerSettings>(createUpdateSleepTimerSettingsFromDiscriminatorValue); },
     }
 }
 /**
@@ -2094,9 +2305,12 @@ export function deserializeIntoUserPage(userPage: Partial<UserPage> | undefined 
 // @ts-ignore
 export function deserializeIntoUserSettings(userSettings: Partial<UserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
+        "crossfade": n => { userSettings.crossfade = n.getObjectValue<CrossfadeSettings>(createCrossfadeSettingsFromDiscriminatorValue); },
+        "equalizer": n => { userSettings.equalizer = n.getObjectValue<EqualizerSettings>(createEqualizerSettingsFromDiscriminatorValue); },
         "language": n => { userSettings.language = n.getEnumValue<Language>(LanguageObject); },
         "playerViewMode": n => { userSettings.playerViewMode = n.getEnumValue<PlayerViewMode>(PlayerViewModeObject); },
         "replayGain": n => { userSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
+        "sleepTimer": n => { userSettings.sleepTimer = n.getObjectValue<SleepTimerSettings>(createSleepTimerSettingsFromDiscriminatorValue); },
     }
 }
 /**
@@ -2156,6 +2370,84 @@ export function deserializeIntoYearPage(yearPage: Partial<YearPage> | undefined 
         "offset": n => { yearPage.offset = n.getNumberValue(); },
         "total": n => { yearPage.total = n.getNumberValue(); },
     }
+}
+/**
+ * The equalizer of the players: its bands, the limits of the gains and the curves of the presets. The same for every profile; clients apply the curves with it instead of keeping own tables.
+ */
+export interface Equalizer extends AdditionalDataHolder, Parsable {
+    /**
+     * The bands from the lowest to the highest frequency; the gains of a curve follow this order.
+     */
+    bands?: EqualizerBand[] | null;
+    /**
+     * Highest gain of a band and of the preamp in dB.
+     */
+    maxGainDb?: number | null;
+    /**
+     * Lowest gain of a band and of the preamp in dB.
+     */
+    minGainDb?: number | null;
+    /**
+     * The curves of all presets except Custom.
+     */
+    presets?: EqualizerPresetCurve[] | null;
+}
+/**
+ * A band of the equalizer.
+ */
+export interface EqualizerBand extends AdditionalDataHolder, Parsable {
+    /**
+     * Filter of the band.
+     */
+    filterType?: EqualizerFilterType | null;
+    /**
+     * Center frequency of a peaking filter, corner frequency of a shelf filter, in Hz.
+     */
+    frequencyHz?: number | null;
+    /**
+     * Quality factor of the filter: the higher, the narrower the band.
+     */
+    q?: number | null;
+}
+export type EqualizerFilterType = (typeof EqualizerFilterTypeObject)[keyof typeof EqualizerFilterTypeObject];
+export type EqualizerPreset = (typeof EqualizerPresetObject)[keyof typeof EqualizerPresetObject];
+/**
+ * The curve of a preset of the equalizer.
+ */
+export interface EqualizerPresetCurve extends AdditionalDataHolder, Parsable {
+    /**
+     * Gain of every band in dB, from the lowest to the highest frequency.
+     */
+    gainsDb?: number[] | null;
+    /**
+     * The preset.
+     */
+    preset?: EqualizerPreset | null;
+}
+/**
+ * Equalizer of the current profile.
+ */
+export interface EqualizerSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * The own curve of the profile, one gain in dB per band from -12 to 12. It stays when the profile selects a preset.
+     */
+    customGainsDb?: number[] | null;
+    /**
+     * Whether the players shape the sound with the equalizer; false by default.
+     */
+    enabled?: boolean | null;
+    /**
+     * The curve that applies, one gain in dB per band from the lowest to the highest frequency: the curve of the preset, or `customGainsDb` for Custom. Read only.
+     */
+    gainsDb?: number[] | null;
+    /**
+     * Gain in dB before the bands, from -12 to 12; 0 by default.
+     */
+    preampDb?: number | null;
+    /**
+     * The selected curve; Flat by default.
+     */
+    preset?: EqualizerPreset | null;
 }
 /**
  * A favorite of the current profile: a track, an album or an artist. Exactly the member of its type is set.
@@ -3309,6 +3601,77 @@ export function serializeCreateUser(writer: SerializationWriter, createUser: Par
 }
 /**
  * Serializes information the current object
+ * @param CrossfadeSettings The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeCrossfadeSettings(writer: SerializationWriter, crossfadeSettings: Partial<CrossfadeSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!crossfadeSettings || isSerializingDerivedType) { return; }
+    writer.writeBooleanValue("albumsGapless", crossfadeSettings.albumsGapless);
+    writer.writeNumberValue("seconds", crossfadeSettings.seconds);
+    writer.writeAdditionalData(crossfadeSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param Equalizer The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeEqualizer(writer: SerializationWriter, equalizer: Partial<Equalizer> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!equalizer || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfObjectValues<EqualizerBand>("bands", equalizer.bands, serializeEqualizerBand);
+    writer.writeNumberValue("maxGainDb", equalizer.maxGainDb);
+    writer.writeNumberValue("minGainDb", equalizer.minGainDb);
+    writer.writeCollectionOfObjectValues<EqualizerPresetCurve>("presets", equalizer.presets, serializeEqualizerPresetCurve);
+    writer.writeAdditionalData(equalizer.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param EqualizerBand The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeEqualizerBand(writer: SerializationWriter, equalizerBand: Partial<EqualizerBand> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!equalizerBand || isSerializingDerivedType) { return; }
+    writer.writeEnumValue<EqualizerFilterType>("filterType", equalizerBand.filterType);
+    writer.writeNumberValue("frequencyHz", equalizerBand.frequencyHz);
+    writer.writeNumberValue("q", equalizerBand.q);
+    writer.writeAdditionalData(equalizerBand.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param EqualizerPresetCurve The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeEqualizerPresetCurve(writer: SerializationWriter, equalizerPresetCurve: Partial<EqualizerPresetCurve> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!equalizerPresetCurve || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfPrimitiveValues<number>("gainsDb", equalizerPresetCurve.gainsDb);
+    writer.writeEnumValue<EqualizerPreset>("preset", equalizerPresetCurve.preset);
+    writer.writeAdditionalData(equalizerPresetCurve.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param EqualizerSettings The instance to serialize from.
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeEqualizerSettings(writer: SerializationWriter, equalizerSettings: Partial<EqualizerSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!equalizerSettings || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfPrimitiveValues<number>("customGainsDb", equalizerSettings.customGainsDb);
+    writer.writeBooleanValue("enabled", equalizerSettings.enabled);
+    writer.writeCollectionOfPrimitiveValues<number>("gainsDb", equalizerSettings.gainsDb);
+    writer.writeNumberValue("preampDb", equalizerSettings.preampDb);
+    writer.writeEnumValue<EqualizerPreset>("preset", equalizerSettings.preset);
+    writer.writeAdditionalData(equalizerSettings.additionalData);
+}
+/**
+ * Serializes information the current object
  * @param Favorite The instance to serialize from.
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param writer Serialization writer to use to serialize this model
@@ -3871,6 +4234,18 @@ export function serializeSession(writer: SerializationWriter, session: Partial<S
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param SleepTimerSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeSleepTimerSettings(writer: SerializationWriter, sleepTimerSettings: Partial<SleepTimerSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!sleepTimerSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("fadeSeconds", sleepTimerSettings.fadeSeconds);
+    writer.writeAdditionalData(sleepTimerSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param Track The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -4075,6 +4450,34 @@ export function serializeUpdateCacheSettings(writer: SerializationWriter, update
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateCrossfadeSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateCrossfadeSettings(writer: SerializationWriter, updateCrossfadeSettings: Partial<UpdateCrossfadeSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateCrossfadeSettings || isSerializingDerivedType) { return; }
+    writer.writeBooleanValue("albumsGapless", updateCrossfadeSettings.albumsGapless);
+    writer.writeNumberValue("seconds", updateCrossfadeSettings.seconds);
+    writer.writeAdditionalData(updateCrossfadeSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateEqualizerSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateEqualizerSettings(writer: SerializationWriter, updateEqualizerSettings: Partial<UpdateEqualizerSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateEqualizerSettings || isSerializingDerivedType) { return; }
+    writer.writeCollectionOfPrimitiveValues<number>("customGainsDb", updateEqualizerSettings.customGainsDb);
+    writer.writeBooleanValue("enabled", updateEqualizerSettings.enabled);
+    writer.writeNumberValue("preampDb", updateEqualizerSettings.preampDb);
+    writer.writeEnumValue<EqualizerPreset>("preset", updateEqualizerSettings.preset);
+    writer.writeAdditionalData(updateEqualizerSettings.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param UpdateLibrarySettings The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -4112,6 +4515,18 @@ export function serializeUpdatePlaylistEntry(writer: SerializationWriter, update
     if (!updatePlaylistEntry || isSerializingDerivedType) { return; }
     writer.writeNumberValue("position", updatePlaylistEntry.position);
     writer.writeAdditionalData(updatePlaylistEntry.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateSleepTimerSettings The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateSleepTimerSettings(writer: SerializationWriter, updateSleepTimerSettings: Partial<UpdateSleepTimerSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateSleepTimerSettings || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("fadeSeconds", updateSleepTimerSettings.fadeSeconds);
+    writer.writeAdditionalData(updateSleepTimerSettings.additionalData);
 }
 /**
  * Serializes information the current object
@@ -4195,9 +4610,12 @@ export function serializeUpdateUser(writer: SerializationWriter, updateUser: Par
 // @ts-ignore
 export function serializeUpdateUserSettings(writer: SerializationWriter, updateUserSettings: Partial<UpdateUserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!updateUserSettings || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<UpdateCrossfadeSettings>("crossfade", updateUserSettings.crossfade, serializeUpdateCrossfadeSettings);
+    writer.writeObjectValue<UpdateEqualizerSettings>("equalizer", updateUserSettings.equalizer, serializeUpdateEqualizerSettings);
     writer.writeEnumValue<Language>("language", updateUserSettings.language);
     writer.writeEnumValue<PlayerViewMode>("playerViewMode", updateUserSettings.playerViewMode);
     writer.writeEnumValue<ReplayGainMode>("replayGain", updateUserSettings.replayGain);
+    writer.writeObjectValue<UpdateSleepTimerSettings>("sleepTimer", updateUserSettings.sleepTimer, serializeUpdateSleepTimerSettings);
     writer.writeAdditionalData(updateUserSettings.additionalData);
 }
 /**
@@ -4242,9 +4660,12 @@ export function serializeUserPage(writer: SerializationWriter, userPage: Partial
 // @ts-ignore
 export function serializeUserSettings(writer: SerializationWriter, userSettings: Partial<UserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!userSettings || isSerializingDerivedType) { return; }
+    writer.writeObjectValue<CrossfadeSettings>("crossfade", userSettings.crossfade, serializeCrossfadeSettings);
+    writer.writeObjectValue<EqualizerSettings>("equalizer", userSettings.equalizer, serializeEqualizerSettings);
     writer.writeEnumValue<Language>("language", userSettings.language);
     writer.writeEnumValue<PlayerViewMode>("playerViewMode", userSettings.playerViewMode);
     writer.writeEnumValue<ReplayGainMode>("replayGain", userSettings.replayGain);
+    writer.writeObjectValue<SleepTimerSettings>("sleepTimer", userSettings.sleepTimer, serializeSleepTimerSettings);
     writer.writeAdditionalData(userSettings.additionalData);
 }
 /**
@@ -4329,6 +4750,15 @@ export interface Session extends AdditionalDataHolder, Parsable {
      * The selected profile.
      */
     profile?: Profile | null;
+}
+/**
+ * Sleep timer of the current profile. The running timer itself belongs to the player that plays and is not stored.
+ */
+export interface SleepTimerSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Seconds the sleep timer fades out the music before it stops, from 1 to 60; 10 by default.
+     */
+    fadeSeconds?: number | null;
 }
 export type SortDirection = (typeof SortDirectionObject)[keyof typeof SortDirectionObject];
 export type StreamProtocol = (typeof StreamProtocolObject)[keyof typeof StreamProtocolObject];
@@ -4723,6 +5153,40 @@ export interface UpdateCacheSettings extends AdditionalDataHolder, Parsable {
     maxSizeMegabytes?: number | null;
 }
 /**
+ * Changes the crossfade of the current profile. Missing or null values stay unchanged.
+ */
+export interface UpdateCrossfadeSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Whether consecutive tracks of the same album play gapless even with a crossfade.
+     */
+    albumsGapless?: boolean | null;
+    /**
+     * Seconds the players fade from one track into the next, from 0 to 12; 0 plays the tracks gapless.
+     */
+    seconds?: number | null;
+}
+/**
+ * Changes the equalizer of the current profile. Missing or null values stay unchanged.
+ */
+export interface UpdateEqualizerSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * The own curve of the profile: exactly one gain per band (10), each from -12 to 12 dB, rounded to 0.1 dB. It does not select the preset Custom by itself; clients send the preset Custom with it to apply the curve.
+     */
+    customGainsDb?: number[] | null;
+    /**
+     * Whether the players shape the sound with the equalizer.
+     */
+    enabled?: boolean | null;
+    /**
+     * Gain in dB before the bands, from -12 to 12; rounded to 0.1 dB.
+     */
+    preampDb?: number | null;
+    /**
+     * The preset property
+     */
+    preset?: EqualizerPreset | null;
+}
+/**
  * Changes the settings of the media library. Missing or null values stay unchanged.
  */
 export interface UpdateLibrarySettings extends AdditionalDataHolder, Parsable {
@@ -4768,6 +5232,15 @@ export interface UpdatePlaylistEntry extends AdditionalDataHolder, Parsable {
      * New position of the entry, from 0 to the number of entries minus one; the entries in between move by one.
      */
     position?: number | null;
+}
+/**
+ * Changes the sleep timer of the current profile. Missing or null values stay unchanged.
+ */
+export interface UpdateSleepTimerSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * Seconds the sleep timer fades out the music before it stops, from 1 to 60.
+     */
+    fadeSeconds?: number | null;
 }
 /**
  * Changes the metadata of a track. Missing members stay unchanged; null or an empty text removes the value from the tags, and the library derives it from the folder and file name again.
@@ -4867,9 +5340,17 @@ export interface UpdateUser extends AdditionalDataHolder, Parsable {
     role?: Role | null;
 }
 /**
- * Changes the settings of the current profile. Missing or null values stay unchanged.
+ * Changes the settings of the current profile. Missing or null values stay unchanged, also within the groups.
  */
 export interface UpdateUserSettings extends AdditionalDataHolder, Parsable {
+    /**
+     * The crossfade property
+     */
+    crossfade?: UpdateCrossfadeSettings | null;
+    /**
+     * The equalizer property
+     */
+    equalizer?: UpdateEqualizerSettings | null;
     /**
      * The language property
      */
@@ -4882,6 +5363,10 @@ export interface UpdateUserSettings extends AdditionalDataHolder, Parsable {
      * The replayGain property
      */
     replayGain?: ReplayGainMode | null;
+    /**
+     * The sleepTimer property
+     */
+    sleepTimer?: UpdateSleepTimerSettings | null;
 }
 /**
  * A user (profile) as managed by admins.
@@ -4942,6 +5427,14 @@ export interface UserPage extends AdditionalDataHolder, Parsable {
  */
 export interface UserSettings extends AdditionalDataHolder, Parsable {
     /**
+     * Crossfade between tracks.
+     */
+    crossfade?: CrossfadeSettings | null;
+    /**
+     * Equalizer of the players.
+     */
+    equalizer?: EqualizerSettings | null;
+    /**
      * Language of the user interface.
      */
     language?: Language | null;
@@ -4953,6 +5446,10 @@ export interface UserSettings extends AdditionalDataHolder, Parsable {
      * Whether the players even out the volume with the ReplayGain tags; Off by default.
      */
     replayGain?: ReplayGainMode | null;
+    /**
+     * Sleep timer of the players.
+     */
+    sleepTimer?: SleepTimerSettings | null;
 }
 export type UserSort = (typeof UserSortObject)[keyof typeof UserSortObject];
 /**
@@ -5084,6 +5581,29 @@ export const AudioFormatObject = {
     WebmVorbis: "WebmVorbis",
     WavPcm: "WavPcm",
     AiffPcm: "AiffPcm",
+} as const;
+/**
+ * Filter of the band.
+ */
+export const EqualizerFilterTypeObject = {
+    LowShelf: "LowShelf",
+    Peaking: "Peaking",
+    HighShelf: "HighShelf",
+} as const;
+/**
+ * The selected curve; Flat by default.
+ */
+export const EqualizerPresetObject = {
+    Flat: "Flat",
+    Rock: "Rock",
+    Pop: "Pop",
+    Jazz: "Jazz",
+    Classical: "Classical",
+    Dance: "Dance",
+    Bass: "Bass",
+    Treble: "Treble",
+    Vocal: "Vocal",
+    Custom: "Custom",
 } as const;
 /**
  * What a favorite marks.

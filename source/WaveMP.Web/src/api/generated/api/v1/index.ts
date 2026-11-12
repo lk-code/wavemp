@@ -8,6 +8,8 @@ import { ArtistsRequestBuilderNavigationMetadata, ArtistsRequestBuilderRequestsM
 // @ts-ignore
 import { CacheRequestBuilderRequestsMetadata, type CacheRequestBuilder } from './cache/index.js';
 // @ts-ignore
+import { EqualizerRequestBuilderRequestsMetadata, type EqualizerRequestBuilder } from './equalizer/index.js';
+// @ts-ignore
 import { GenresRequestBuilderRequestsMetadata, type GenresRequestBuilder } from './genres/index.js';
 // @ts-ignore
 import { HealthRequestBuilderRequestsMetadata, type HealthRequestBuilder } from './health/index.js';
@@ -52,6 +54,10 @@ export interface V1RequestBuilder extends BaseRequestBuilder<V1RequestBuilder> {
      * The cache property
      */
     get cache(): CacheRequestBuilder;
+    /**
+     * The equalizer property
+     */
+    get equalizer(): EqualizerRequestBuilder;
     /**
      * The genres property
      */
@@ -123,6 +129,9 @@ export const V1RequestBuilderNavigationMetadata: Record<Exclude<keyof V1RequestB
     },
     cache: {
         requestsMetadata: CacheRequestBuilderRequestsMetadata,
+    },
+    equalizer: {
+        requestsMetadata: EqualizerRequestBuilderRequestsMetadata,
     },
     genres: {
         requestsMetadata: GenresRequestBuilderRequestsMetadata,
