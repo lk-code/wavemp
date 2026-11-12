@@ -3,9 +3,11 @@ import { computed, ref } from 'vue'
 import { sessionTokens } from '@/api/auth'
 import { apiClient } from '@/api/client'
 import {
+    PlayerViewModeObject,
     ReplayGainModeObject,
     RoleObject,
     type Language,
+    type PlayerViewMode,
     type ReplayGainMode,
     type Session,
     type UserSettings,
@@ -28,6 +30,13 @@ function toReplayGain(settings: UserSettings | null | undefined): ReplayGainMode
     return mode && replayGainModes.has(mode) ? mode : null
 }
 
+const playerViewModes = new Set<string>(Object.values(PlayerViewModeObject))
+
+function toPlayerViewMode(settings: UserSettings | null | undefined): PlayerViewMode | null {
+    const mode = settings?.playerViewMode
+    return mode && playerViewModes.has(mode) ? mode : null
+}
+
 function toLocale(language: Language | null | undefined): SupportedLocale | null {
     return language && isSupportedLocale(language) ? language : null
 }
@@ -46,6 +55,8 @@ export const useSessionStore = defineStore('session', () => {
     const language = ref<SupportedLocale | null>(null)
     /** ReplayGain mode of the profile; Off until the settings are loaded. */
     const replayGain = ref<ReplayGainMode>(ReplayGainModeObject.Off)
+    /** What Now Playing shows for the profile; the video until the settings are loaded. */
+    const playerViewMode = ref<PlayerViewMode>(PlayerViewModeObject.Video)
 
     const isAuthenticated = computed(
         () =>
@@ -66,6 +77,7 @@ export const useSessionStore = defineStore('session', () => {
         profile.value = session?.profile ?? null
         language.value = session?.language ?? null
         replayGain.value = ReplayGainModeObject.Off
+        playerViewMode.value = PlayerViewModeObject.Video
         sessionTokens.current = token.value
     }
 
@@ -127,6 +139,7 @@ export const useSessionStore = defineStore('session', () => {
         sessionTokens.current = created.token
         language.value = null
         replayGain.value = ReplayGainModeObject.Off
+        playerViewMode.value = PlayerViewModeObject.Video
         if (!applySession(created.session)) {
             clear()
             throw new Error('The server returned an incomplete session.')
@@ -136,6 +149,7 @@ export const useSessionStore = defineStore('session', () => {
             const settings = await apiClient.api.v1.me.settings.get()
             language.value = toLocale(settings?.language)
             replayGain.value = toReplayGain(settings) ?? ReplayGainModeObject.Off
+            playerViewMode.value = toPlayerViewMode(settings) ?? PlayerViewModeObject.Video
         } catch {
             // The language follows with the next refresh; until then the browser language applies.
         }
@@ -162,6 +176,7 @@ export const useSessionStore = defineStore('session', () => {
             applySession(session)
             language.value = toLocale(settings?.language) ?? language.value
             replayGain.value = toReplayGain(settings) ?? replayGain.value
+            playerViewMode.value = toPlayerViewMode(settings) ?? playerViewMode.value
             persist()
         } catch (error) {
             if (isUnauthorized(error) && token.value === requestToken) {
@@ -181,6 +196,23 @@ export const useSessionStore = defineStore('session', () => {
     async function updateReplayGain(mode: ReplayGainMode): Promise<void> {
         const settings = await apiClient.api.v1.me.settings.patch({ replayGain: mode })
         replayGain.value = toReplayGain(settings) ?? mode
+    }
+
+    /**
+     * Shows the view mode at once and saves it for the profile on the server. If saving fails (e.g.
+     * offline), the choice stays for this device until the next refresh.
+     */
+    async function updatePlayerViewMode(mode: PlayerViewMode): Promise<void> {
+        const requestToken = token.value
+        playerViewMode.value = mode
+        try {
+            const settings = await apiClient.api.v1.me.settings.patch({ playerViewMode: mode })
+            if (token.value === requestToken && playerViewMode.value === mode) {
+                playerViewMode.value = toPlayerViewMode(settings) ?? mode
+            }
+        } catch {
+            // The local choice applies; the server keeps the previous one.
+        }
     }
 
     /** Ends the session on the server (if reachable) and forgets it. */
@@ -203,6 +235,7 @@ export const useSessionStore = defineStore('session', () => {
         profile,
         language,
         replayGain,
+        playerViewMode,
         isAuthenticated,
         isAdmin,
         isBuiltInAdmin,
@@ -211,6 +244,7 @@ export const useSessionStore = defineStore('session', () => {
         refresh,
         updateLanguage,
         updateReplayGain,
+        updatePlayerViewMode,
         signOut,
         clear,
     }

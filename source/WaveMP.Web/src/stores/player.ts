@@ -2,8 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, ref, shallowRef, watch } from 'vue'
 import {
     PlaybackMethodObject,
+    PlayerViewModeObject,
     StreamProtocolObject,
     type AudioFormat,
+    type PlayerViewMode,
     type Track,
     type TrackPlayback,
     type TrackVideoPlayback,
@@ -40,8 +42,14 @@ import {
 } from '@/player/queue'
 import { replayGainFactor } from '@/player/replayGain'
 import { shouldPreload, shouldRestart } from '@/player/scheduling'
-import { VideoEngine } from '@/player/videoEngine'
+import {
+    VideoFollower,
+    type FollowerClock,
+    type VideoFollowerEvents,
+    type VideoFollowerSource,
+} from '@/player/videoFollower'
 import { browserVideoFormats, type VideoFormats } from '@/player/videoFormats'
+import { stageViewOf, type StageView, type VideoState } from '@/player/videoSync'
 import { clampVolume, loadVolume, saveVolume, volumeToGain } from '@/player/volume'
 import { useCoversStore } from './covers'
 import { useSessionStore } from './session'
@@ -61,14 +69,20 @@ export type PlayerEngine = Pick<
     | 'position'
 >
 
-/** What the store needs from the video engine, which also lets go of its element. */
-export type PlayerVideoEngine = PlayerEngine & Pick<VideoEngine, 'dispose'>
+/** What the store needs from the video follower; tests replace it. */
+export type PlayerVideoFollower = Pick<
+    VideoFollower,
+    'load' | 'unload' | 'setActive' | 'setOffset' | 'sync' | 'dispose'
+>
 
 /** Parts of the browser the player uses; tests replace them. */
 export const playerDependencies = {
     createEngine: (events: EngineEvents): PlayerEngine => new AudioEngine(events),
-    createVideoEngine: (element: HTMLVideoElement, events: EngineEvents): PlayerVideoEngine =>
-        new VideoEngine(element, events),
+    createVideoFollower: (
+        element: HTMLVideoElement,
+        clock: () => FollowerClock,
+        events: VideoFollowerEvents,
+    ): PlayerVideoFollower => new VideoFollower(element, clock, events),
     audioFormats: (): readonly AudioFormat[] => browserAudioFormats(),
     videoFormats: (): VideoFormats => browserVideoFormats(),
     random: (): number => Math.random(),
@@ -78,14 +92,16 @@ export const playerDependencies = {
 /** Size of the cover shown by the media session (lock screen, notifications). */
 const artworkSize = 300
 
-/** Where the current track plays: the audio engine, or the video of the Now Playing stage. */
-type Output = 'audio' | 'video'
-
-type Playback = TrackPlayback | TrackVideoPlayback
-
 interface Loaded {
     readonly key: string
-    readonly playback: Playback
+    readonly playback: TrackPlayback
+}
+
+function isHls(value: TrackPlayback | TrackVideoPlayback): boolean {
+    return (
+        value.method === PlaybackMethodObject.Transcode ||
+        value.protocol === StreamProtocolObject.Hls
+    )
 }
 
 function seconds(milliseconds: number | null | undefined): number {
@@ -102,9 +118,10 @@ function artistOf(track: Track | undefined): string | undefined {
  * HLS stream; tracks that cannot be played or fail are skipped with a notice. Plays count for the
  * history once they were listened to long enough.
  *
- * While the Now Playing stage shows a video element and the video mode is on, tracks with a video
- * play their video there instead of the audio; switching continues at the same position. Videos are
- * not prepared ahead, so they start after a short gap.
+ * The audio always leads, also for tracks with a video: the Now Playing stage shows the cover, the
+ * video or the visualization of the current track, and switching between them never touches the
+ * audio. The video plays muted and follows the position of the audio plus the offset of the track;
+ * it is only loaded while the stage shows it.
  */
 export const usePlayerStore = defineStore('player', () => {
     const session = useSessionStore()
@@ -121,20 +138,41 @@ export const usePlayerStore = defineStore('player', () => {
     const volume = ref(storedVolume.volume)
     const muted = ref(storedVolume.muted)
     const artwork = ref<string | null>(null)
-    /** Whether tracks with a video show it while the stage is open. */
-    const videoMode = ref(true)
-    /** The video element of the Now Playing stage, while it is shown. */
+    /** The video element of the Now Playing stage, while the stage is open. */
     const videoElement = shallowRef<HTMLVideoElement | null>(null)
+    /** State of the video of the current track. */
+    const videoState = ref<VideoState>('idle')
+    /** Whether the page is visible; a hidden page shows no video. */
+    const pageVisible = ref(
+        typeof document === 'undefined' || document.visibilityState !== 'hidden',
+    )
 
     const current = computed<QueueItem | undefined>(() => currentItem(queue.value))
     const shuffle = computed(() => queue.value.shuffle)
     const hasVideo = computed(() => current.value?.track.hasVideo === true)
-    const showsVideo = computed(() => current.value !== undefined && playsVideo(current.value))
+    /** The view mode chosen by the profile. */
+    const viewMode = computed<PlayerViewMode>(() => session.playerViewMode)
+    /** What the stage shows: the video only once it is ready at the right position. */
+    const stageView = computed<StageView>(() =>
+        stageViewOf(viewMode.value, hasVideo.value, videoState.value),
+    )
+    /** Whether the video of the current track is to be shown. */
+    const videoWanted = computed(
+        () =>
+            videoElement.value !== null &&
+            hasVideo.value &&
+            viewMode.value === PlayerViewModeObject.Video &&
+            pageVisible.value,
+    )
 
     let engine: PlayerEngine | null = null
-    let videoEngine: PlayerVideoEngine | null = null
-    /** The engine of the current track; the events of the other one are ignored. */
-    let output: Output = 'audio'
+    let follower: PlayerVideoFollower | null = null
+    /** The queue entry whose video is loaded or requested. */
+    let videoKey: string | null = null
+    /** Increases with every request of a video, so late answers are ignored. */
+    let videoGeneration = 0
+    /** The entry whose failed video was already requested once more. */
+    let videoRetried: string | null = null
     /** The loaded track and its playback; null while loading or idle. */
     let loaded: Loaded | null = null
     /** The track prepared on the other deck. */
@@ -149,42 +187,28 @@ export const usePlayerStore = defineStore('player', () => {
 
     const history = new PlayHistoryTracker((trackId, playedAt) => recordPlay(trackId, playedAt))
 
-    function playsVideo(item: QueueItem): boolean {
-        return videoMode.value && videoElement.value !== null && item.track.hasVideo === true
-    }
-
-    /** The events of the engine of one output; they only count while it plays the current track. */
-    function eventsOf(kind: Output): EngineEvents {
-        const when =
-            <A extends unknown[]>(handler: (...args: A) => void) =>
-            (...args: A): void => {
-                if (output === kind) {
-                    handler(...args)
-                }
+    const engineEvents: EngineEvents = {
+        timeupdate: onTimeUpdate,
+        playing: () => {
+            playback.value = 'playing'
+            loading.value = false
+            skipped = 0
+        },
+        paused: () => {
+            // Loading a new source pauses the element as well; that is no pause of the user.
+            if (playback.value === 'playing' && !loading.value) {
+                playback.value = 'paused'
             }
-        return {
-            timeupdate: when(onTimeUpdate),
-            playing: when(() => {
-                playback.value = 'playing'
-                loading.value = false
-                skipped = 0
-            }),
-            paused: when(() => {
-                // Loading a new source pauses the element as well; that is no pause of the user.
-                if (playback.value === 'playing' && !loading.value) {
-                    playback.value = 'paused'
-                }
-            }),
-            waiting: when(() => {
-                // Only a playing track waits for data; a paused one does not load.
-                if (playback.value === 'playing') {
-                    loading.value = true
-                }
-            }),
-            ended: when(onEnded),
-            advanced: when(onAdvanced),
-            error: when(onError),
-        }
+        },
+        waiting: () => {
+            // Only a playing track waits for data; a paused one does not load.
+            if (playback.value === 'playing') {
+                loading.value = true
+            }
+        },
+        ended: onEnded,
+        advanced: onAdvanced,
+        error: onError,
     }
 
     function outputGain(): number {
@@ -192,56 +216,35 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     function getEngine(): PlayerEngine {
-        engine ??= playerDependencies.createEngine(eventsOf('audio'))
+        engine ??= playerDependencies.createEngine(engineEvents)
         engine.setVolume(outputGain())
         return engine
     }
 
-    /** The engine of the current track. */
-    function activeEngine(): PlayerEngine {
-        return output === 'video' && videoEngine ? videoEngine : getEngine()
+    function gainOf(value: TrackPlayback | null | undefined): number {
+        return replayGainFactor(session.replayGain, value?.replayGain)
     }
 
-    /** The engine of an output, if it exists. */
-    function engineOf(kind: Output): PlayerEngine | null {
-        return kind === 'video' ? videoEngine : engine
-    }
-
-    /** Moves the playback to the other engine; the previous one stops. */
-    function setOutput(kind: Output): void {
-        if (kind !== output) {
-            engineOf(output)?.stop()
-            output = kind
-        }
-    }
-
-    function gainOf(value: Playback | null | undefined): number {
-        const replayGain = value && 'replayGain' in value ? value.replayGain : undefined
-        return replayGainFactor(session.replayGain, replayGain)
-    }
-
-    function sourceOf(value: Playback): DeckSource | null {
+    function sourceOf(value: TrackPlayback): DeckSource | null {
         if (!value.streamUrl) {
             return null
         }
 
         const source = { url: value.streamUrl, gain: gainOf(value) }
-        const hls =
-            value.method === PlaybackMethodObject.Transcode ||
-            value.protocol === StreamProtocolObject.Hls
-        return hls ? { ...source, hls } : source
+        return isHls(value) ? { ...source, hls: true } : source
     }
 
-    async function fetchPlayback(
-        item: QueueItem,
-        kind: Output = 'audio',
-    ): Promise<Playback | PlayerMessage> {
+    function videoSourceOf(value: TrackVideoPlayback | undefined): VideoFollowerSource | null {
+        if (!value?.streamUrl) {
+            return null
+        }
+
+        return isHls(value) ? { url: value.streamUrl, hls: true } : { url: value.streamUrl }
+    }
+
+    async function fetchPlayback(item: QueueItem): Promise<TrackPlayback | PlayerMessage> {
         try {
-            const id = item.track.id ?? ''
-            const result =
-                kind === 'video'
-                    ? await getVideoPlayback(id, playerDependencies.videoFormats())
-                    : await getPlayback(id, playerDependencies.audioFormats())
+            const result = await getPlayback(item.track.id ?? '', playerDependencies.audioFormats())
             return result && sourceOf(result) ? result : 'unsupported'
         } catch (error) {
             const status = statusOf(error)
@@ -255,37 +258,24 @@ export const usePlayerStore = defineStore('player', () => {
         engine?.prepare(null)
     }
 
-    /**
-     * Loads the current entry and plays it (autoplay) or waits paused at the position. A switch
-     * between audio and video of the same track keeps counting it for the history.
-     */
-    async function startCurrent(
-        autoplay = true,
-        startPosition = 0,
-        keepHistory = false,
-    ): Promise<void> {
+    /** Loads the current entry and plays it (autoplay) or waits paused at the position. */
+    async function startCurrent(autoplay = true, startPosition = 0): Promise<void> {
         const item = current.value
         const token = ++generation
         forgetPrepared()
         loaded = null
-        if (!keepHistory) {
-            history.stop()
-        }
-
+        history.stop()
         if (!item) {
             reset()
             return
         }
-
-        const kind: Output = playsVideo(item) ? 'video' : 'audio'
-        setOutput(kind)
 
         loading.value = true
         position.value = startPosition
         duration.value = seconds(item.track.durationMilliseconds)
         playback.value = autoplay ? 'playing' : 'paused'
 
-        const result = await fetchPlayback(item, kind)
+        const result = await fetchPlayback(item)
         if (token !== generation) {
             return
         }
@@ -300,11 +290,9 @@ export const usePlayerStore = defineStore('player', () => {
         const source = sourceOf(result)!
         loaded = { key: item.key, playback: result }
         duration.value = seconds(result.durationMilliseconds) || duration.value
-        const player = activeEngine()
+        const player = getEngine()
         player.load(source, startPosition)
-        if (!keepHistory) {
-            history.start(item.track.id ?? '', startPosition)
-        }
+        history.start(item.track.id ?? '', startPosition)
         if (shouldPlay) {
             playback.value = 'playing'
             await player.play()
@@ -347,11 +335,6 @@ export const usePlayerStore = defineStore('player', () => {
         const index = nextIndex(queue.value, repeat.value, true)
         const item = index === null ? undefined : queue.value.items[index]
         if (!item || !loaded || prepared?.key === item.key || preparing === item.key) {
-            return
-        }
-
-        // Only the audio engine prepares; a video, or a track after one, loads when it is due.
-        if (output === 'video' || playsVideo(item)) {
             return
         }
 
@@ -438,8 +421,6 @@ export const usePlayerStore = defineStore('player', () => {
         loaded = null
         history.stop()
         engine?.stop()
-        videoEngine?.stop()
-        output = 'audio'
         reset()
     }
 
@@ -505,11 +486,11 @@ export const usePlayerStore = defineStore('player', () => {
         }
 
         playback.value = 'playing'
-        void activeEngine().play()
+        void getEngine().play()
     }
 
     function pause(): void {
-        engineOf(output)?.pause()
+        engine?.pause()
         if (playback.value === 'playing') {
             playback.value = 'paused'
         }
@@ -569,8 +550,10 @@ export const usePlayerStore = defineStore('player', () => {
         position.value = target
         history.seek(target)
         if (loaded) {
-            activeEngine().seek(target)
+            getEngine().seek(target)
         }
+
+        follower?.sync()
     }
 
     function toggleShuffle(): void {
@@ -586,43 +569,117 @@ export const usePlayerStore = defineStore('player', () => {
     function applyVolume(): void {
         saveVolume({ volume: volume.value, muted: muted.value })
         engine?.setVolume(outputGain())
-        videoEngine?.setVolume(outputGain())
     }
 
-    /** Shows videos of tracks while the stage is open, or only their cover. */
-    function toggleVideo(): void {
-        videoMode.value = !videoMode.value
+    /** The audio the video follows. */
+    function clock(): FollowerClock {
+        return {
+            position: loaded && engine ? engine.position : position.value,
+            playing: playback.value === 'playing' && !loading.value && loaded !== null,
+        }
     }
 
-    /** The stage shows its video element; tracks with a video play there from now on. */
+    /** Chooses what the stage shows; the audio is never touched. */
+    function selectViewMode(mode: PlayerViewMode): void {
+        void session.updatePlayerViewMode(mode)
+    }
+
+    /** The stage shows its video element; it shows the video of tracks with one from now on. */
     function attachVideo(element: HTMLVideoElement): void {
         if (videoElement.value === element) {
             return
         }
 
         detachVideo()
-        videoEngine = playerDependencies.createVideoEngine(element, eventsOf('video'))
-        videoEngine.setVolume(outputGain())
+        follower = playerDependencies.createVideoFollower(element, clock, {
+            stateChange: onVideoState,
+            // The own controls of the video (e.g. full screen on the iPhone) control the audio.
+            userPlay: play,
+            userPause: pause,
+        })
         videoElement.value = element
     }
 
-    /** The stage closes: a playing video continues as audio at its position. */
+    /** The stage closes; the audio simply goes on. */
     function detachVideo(element?: HTMLVideoElement): void {
         if (!videoElement.value || (element && element !== videoElement.value)) {
             return
         }
 
+        videoGeneration++
+        videoKey = null
         videoElement.value = null
-        if (output === 'video') {
-            if (current.value && playback.value !== 'idle') {
-                void startCurrent(playback.value === 'playing', position.value, true)
-            } else {
-                setOutput('audio')
-            }
+        follower?.dispose()
+        follower = null
+        videoState.value = 'idle'
+    }
+
+    /** Applies a new offset to the video of a track at once, if it is the current one. */
+    function applyVideoOffset(trackId: string, offsetMilliseconds: number): void {
+        if (current.value?.track.id === trackId) {
+            follower?.setOffset(offsetMilliseconds)
+            follower?.sync()
+        }
+    }
+
+    function onVideoState(state: VideoState): void {
+        videoState.value = state
+        const item = current.value
+        // A signed URL may have expired while the video waited: request it once more.
+        if (state === 'failed' && item && videoKey === item.key && videoRetried !== item.key) {
+            videoRetried = item.key
+            void loadVideo(item)
+        }
+    }
+
+    /** Requests the video of the entry and loads it into the follower. */
+    async function loadVideo(item: QueueItem): Promise<void> {
+        const token = ++videoGeneration
+        videoKey = item.key
+        videoState.value = 'loading'
+        let result: TrackVideoPlayback | undefined
+        try {
+            result = await getVideoPlayback(item.track.id ?? '', playerDependencies.videoFormats())
+        } catch {
+            result = undefined
         }
 
-        videoEngine?.dispose()
-        videoEngine = null
+        if (token !== videoGeneration || !follower) {
+            return
+        }
+
+        const source = videoSourceOf(result)
+        if (!source) {
+            onVideoState('failed')
+            return
+        }
+
+        follower.load(source, result?.offsetMilliseconds ?? 0)
+        follower.setActive(videoWanted.value)
+    }
+
+    /** Loads, shows or hides the video of the current entry; a new entry unloads the previous one. */
+    function updateVideo(entryChanged: boolean): void {
+        const item = current.value
+        if (entryChanged) {
+            videoGeneration++
+            videoKey = null
+            videoRetried = null
+            follower?.unload()
+            videoState.value = 'idle'
+        }
+
+        if (!follower) {
+            return
+        }
+
+        if (!videoWanted.value || !item) {
+            follower.setActive(false)
+        } else if (videoKey === item.key) {
+            follower.setActive(true)
+        } else {
+            void loadVideo(item)
+        }
     }
 
     function toggleMute(): void {
@@ -656,21 +713,26 @@ export const usePlayerStore = defineStore('player', () => {
         () => session.replayGain,
         () => {
             if (loaded) {
-                activeEngine().setTrackGain(gainOf(loaded.playback))
+                engine?.setTrackGain(gainOf(loaded.playback))
             }
 
             forgetPrepared()
         },
     )
 
-    // The video mode changed or the stage opened or closed: continue at the position. A track that
-    // is still loading for the other output starts again for this one.
-    watch(showsVideo, (show) => {
-        const kind: Output = show ? 'video' : 'audio'
-        if (kind !== output && current.value && playback.value !== 'idle') {
-            void startCurrent(playback.value === 'playing', position.value, true)
-        }
-    })
+    // A new entry, view mode, stage or visibility: the video follows; the audio is not touched.
+    watch([() => current.value?.key ?? null, videoWanted], ([key], [previousKey]) =>
+        updateVideo(key !== previousKey),
+    )
+
+    // The audio starts, pauses or waits for data: the video does the same at once.
+    watch([playback, loading], () => follower?.sync())
+
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+            pageVisible.value = document.visibilityState !== 'hidden'
+        })
+    }
 
     // Another profile (or none) gets an empty player: stream URLs and history belong to the session.
     watch(
@@ -760,9 +822,10 @@ export const usePlayerStore = defineStore('player', () => {
         volume,
         muted,
         message,
-        videoMode,
+        viewMode,
+        stageView,
+        videoState,
         hasVideo,
-        showsVideo,
         playTracks: playTrackList,
         playNext,
         addToQueue,
@@ -783,8 +846,9 @@ export const usePlayerStore = defineStore('player', () => {
         setVolume,
         clear,
         dismissMessage,
-        toggleVideo,
+        selectViewMode,
         attachVideo,
         detachVideo,
+        applyVideoOffset,
     }
 })

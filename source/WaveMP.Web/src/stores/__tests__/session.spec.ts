@@ -238,6 +238,56 @@ describe('session store', () => {
         expect(session.replayGain).toBe('Off')
     })
 
+    it('loads the view mode with the settings and refreshes it', async () => {
+        api.createSession.mockResolvedValue(created('a'))
+        api.getSettings.mockResolvedValue({ language: 'en', playerViewMode: 'Cover' })
+        const session = useSessionStore()
+        session.restore()
+        expect(session.playerViewMode).toBe('Video')
+
+        await session.select('a')
+        expect(session.playerViewMode).toBe('Cover')
+
+        api.getCurrentSession.mockResolvedValue(created('a').session)
+        api.getSettings.mockResolvedValue({ language: 'en', playerViewMode: 'Visualization' })
+        await session.refresh()
+        expect(session.playerViewMode).toBe('Visualization')
+
+        api.getSettings.mockResolvedValue({ language: 'en', playerViewMode: 'Lyrics' })
+        await session.refresh()
+        expect(session.playerViewMode).toBe('Visualization')
+
+        session.clear()
+        expect(session.playerViewMode).toBe('Video')
+    })
+
+    it('shows a new view mode at once and saves it on the server', async () => {
+        saveStoredSession(stored('a'))
+        let answer: (value: unknown) => void = () => {}
+        api.updateSettings.mockReturnValue(new Promise((resolve) => (answer = resolve)))
+        const session = useSessionStore()
+        session.restore()
+
+        const saving = session.updatePlayerViewMode('Visualization')
+        expect(session.playerViewMode).toBe('Visualization')
+        answer({ language: 'en', playerViewMode: 'Visualization' })
+        await saving
+
+        expect(api.updateSettings).toHaveBeenCalledWith({ playerViewMode: 'Visualization' })
+        expect(session.playerViewMode).toBe('Visualization')
+    })
+
+    it('keeps the chosen view mode when it cannot be saved', async () => {
+        saveStoredSession(stored('a'))
+        api.updateSettings.mockRejectedValue(new TypeError('Failed to fetch'))
+        const session = useSessionStore()
+        session.restore()
+
+        await session.updatePlayerViewMode('Cover')
+
+        expect(session.playerViewMode).toBe('Cover')
+    })
+
     it('passes errors of saving the language on', async () => {
         saveStoredSession(stored('a', 'en'))
         api.updateSettings.mockRejectedValue(new TypeError('Failed to fetch'))

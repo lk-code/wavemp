@@ -4,7 +4,13 @@ import { flushPromises } from '@vue/test-utils'
 import type { Track, TrackPlayback, TrackVideoPlayback } from '@/api/generated/models'
 import type { EngineEvents } from '@/player/engine'
 import { getPlayback, getVideoPlayback, recordPlay } from '@/player/api'
-import { playerDependencies, usePlayerStore, type PlayerEngine } from '../player'
+import type { FollowerClock, VideoFollowerEvents } from '@/player/videoFollower'
+import {
+    playerDependencies,
+    usePlayerStore,
+    type PlayerEngine,
+    type PlayerVideoFollower,
+} from '../player'
 import { useSessionStore } from '../session'
 
 vi.mock('@/player/api', () => ({
@@ -42,8 +48,18 @@ class FakeEngine implements PlayerEngine {
     }
 }
 
-class FakeVideoEngine extends FakeEngine {
+class FakeFollower implements PlayerVideoFollower {
+    readonly load = vi.fn()
+    readonly unload = vi.fn()
+    readonly setActive = vi.fn()
+    readonly setOffset = vi.fn()
+    readonly sync = vi.fn()
     readonly dispose = vi.fn()
+
+    constructor(
+        readonly clock: () => FollowerClock,
+        readonly events: VideoFollowerEvents,
+    ) {}
 }
 
 function track(id: string, extra: Partial<Track> = {}): Track {
@@ -307,7 +323,8 @@ describe('player store', () => {
     })
 
     describe('video', () => {
-        let videoEngine: FakeVideoEngine
+        let follower: FakeFollower
+        let created: number
         const element = {} as HTMLVideoElement
         const withVideo = [
             track('a', { hasVideo: true }),
@@ -318,10 +335,13 @@ describe('player store', () => {
         beforeEach(() => {
             // Replaced as soon as the store creates its audio engine.
             engine = new FakeEngine({})
+            created = 0
             vi.mocked(getVideoPlayback).mockReset()
             vi.mocked(getVideoPlayback).mockImplementation((id) => Promise.resolve(video(id)))
-            playerDependencies.createVideoEngine = (_element, events) =>
-                (videoEngine = new FakeVideoEngine(events))
+            playerDependencies.createVideoFollower = (_element, clock, events) => {
+                created++
+                return (follower = new FakeFollower(clock, events))
+            }
             playerDependencies.videoFormats = () => ({
                 containers: ['Mp4'],
                 videoCodecs: ['H264'],
@@ -329,125 +349,254 @@ describe('player store', () => {
             })
         })
 
-        it('plays tracks with a video in the video element of the stage', async () => {
+        afterEach(() => {
+            Object.defineProperty(document, 'visibilityState', {
+                value: 'visible',
+                configurable: true,
+            })
+        })
+
+        it('plays the audio once and shows the muted video with its offset', async () => {
+            vi.mocked(getVideoPlayback).mockResolvedValue({
+                ...video('a'),
+                offsetMilliseconds: 1500,
+            })
             const player = usePlayerStore()
             player.attachVideo(element)
 
             player.playTracks(withVideo, 0)
             await flushPromises()
 
-            expect(player.showsVideo).toBe(true)
+            expect(engine.load).toHaveBeenCalledOnce()
+            expect(engine.lastUrl).toBe('/stream/a')
             expect(getVideoPlayback).toHaveBeenCalledWith('a', {
                 containers: ['Mp4'],
                 videoCodecs: ['H264'],
                 audioCodecs: ['Aac'],
             })
-            expect(videoEngine.lastUrl).toBe('/video/a')
-            expect(videoEngine.play).toHaveBeenCalledOnce()
-            expect(getPlayback).not.toHaveBeenCalled()
-            expect(player.state.playback).toBe('playing')
+            expect(follower.load).toHaveBeenCalledWith({ url: '/video/a' }, 1500)
+            expect(follower.setActive).toHaveBeenLastCalledWith(true)
+            expect(player.stageView).toBe('cover')
+
+            follower.events.stateChange?.('ready')
+            expect(player.videoState).toBe('ready')
+            expect(player.stageView).toBe('video')
         })
 
-        it('plays tracks with a video as audio while the stage is closed', async () => {
+        it('lets the video follow the position of the audio engine', async () => {
             const player = usePlayerStore()
-
+            player.attachVideo(element)
             player.playTracks(withVideo, 0)
             await flushPromises()
 
-            expect(player.showsVideo).toBe(false)
+            engine.position = 42
+            expect(follower.clock()).toEqual({ position: 42, playing: true })
+
+            player.pause()
+            expect(follower.clock().playing).toBe(false)
+            expect(follower.sync).toHaveBeenCalled()
+        })
+
+        it('switches between video, cover and visualization without touching the audio', async () => {
+            const session = useSessionStore()
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+            follower.events.stateChange?.('ready')
+            engine.events.timeupdate?.(30, 200)
+
+            session.playerViewMode = 'Cover'
+            await flushPromises()
+            expect(player.stageView).toBe('cover')
+            expect(follower.setActive).toHaveBeenLastCalledWith(false)
+
+            session.playerViewMode = 'Visualization'
+            await flushPromises()
+            expect(player.stageView).toBe('visualization')
+
+            session.playerViewMode = 'Video'
+            await flushPromises()
+            expect(player.stageView).toBe('video')
+            expect(follower.setActive).toHaveBeenLastCalledWith(true)
+
+            expect(engine.load).toHaveBeenCalledOnce()
+            expect(engine.stop).not.toHaveBeenCalled()
+            expect(engine.seek).not.toHaveBeenCalled()
+            expect(engine.pause).not.toHaveBeenCalled()
+            expect(follower.load).toHaveBeenCalledOnce()
+            expect(getVideoPlayback).toHaveBeenCalledOnce()
+            expect(player.state).toMatchObject({ playback: 'playing', position: 30 })
+        })
+
+        it('loads no video for a track without one', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+
+            player.playTracks([track('b')], 0)
+            await flushPromises()
+
+            expect(getVideoPlayback).not.toHaveBeenCalled()
+            expect(player.stageView).toBe('cover')
+            expect(player.hasVideo).toBe(false)
+        })
+
+        it('loads no video while the stage is closed or the cover is chosen', async () => {
+            const session = useSessionStore()
+            session.playerViewMode = 'Cover'
+            const player = usePlayerStore()
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            player.attachVideo(element)
+            await flushPromises()
+
             expect(getVideoPlayback).not.toHaveBeenCalled()
             expect(engine.lastUrl).toBe('/stream/a')
         })
 
-        it('switches between audio and video at the same position', async () => {
+        it('prepares the next track also while a video is shown', async () => {
             const player = usePlayerStore()
+            player.attachVideo(element)
             player.playTracks(withVideo, 0)
             await flushPromises()
-            engine.events.timeupdate?.(30, 200)
 
-            player.attachVideo(element)
+            engine.events.timeupdate?.(185, 200)
             await flushPromises()
 
-            expect(engine.stop).toHaveBeenCalled()
-            expect(videoEngine.loaded.at(-1)).toEqual({ url: '/video/a', gain: 1, position: 30 })
-            expect(videoEngine.play).toHaveBeenCalledOnce()
-
-            videoEngine.events.timeupdate?.(45, 200)
-            player.toggleVideo()
-            await flushPromises()
-
-            expect(videoEngine.stop).toHaveBeenCalled()
-            expect(engine.loaded.at(-1)).toMatchObject({ url: '/stream/a', position: 45 })
-            expect(player.state.playback).toBe('playing')
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/b', gain: 1 })
         })
 
-        it('loads the video when the stage opens while the audio is still loading', async () => {
+        it('changes the video when the audio moves on to the next track', async () => {
             const player = usePlayerStore()
-
-            player.playTracks(withVideo, 0)
             player.attachVideo(element)
+            player.playTracks([withVideo[0]!, withVideo[2]!], 0)
+            await flushPromises()
+            engine.events.timeupdate?.(185, 200)
             await flushPromises()
 
-            expect(engine.loaded).toEqual([])
-            expect(videoEngine.lastUrl).toBe('/video/a')
-            expect(videoEngine.play).toHaveBeenCalledOnce()
+            engine.events.advanced?.()
+            await flushPromises()
+
+            expect(player.state.trackId).toBe('c')
+            expect(follower.unload).toHaveBeenCalled()
+            expect(follower.load).toHaveBeenLastCalledWith({ url: '/video/c' }, 0)
+            expect(engine.load).toHaveBeenCalledOnce()
         })
 
-        it('continues as audio when the stage closes', async () => {
+        it('keeps the audio playing when the stage closes', async () => {
             const player = usePlayerStore()
             player.attachVideo(element)
             player.playTracks(withVideo, 0)
             await flushPromises()
-            videoEngine.events.timeupdate?.(12, 200)
-            const closed = videoEngine
+            const closed = follower
 
             player.detachVideo(element)
             await flushPromises()
 
-            expect(closed.stop).toHaveBeenCalled()
             expect(closed.dispose).toHaveBeenCalledOnce()
-            expect(engine.loaded.at(-1)).toMatchObject({ url: '/stream/a', position: 12 })
-        })
-
-        it('ignores the events of the engine that does not play', async () => {
-            const player = usePlayerStore()
-            player.playTracks(withVideo, 0)
-            await flushPromises()
-            const audio = engine
-            player.attachVideo(element)
-            await flushPromises()
-
-            audio.events.paused?.()
-            audio.events.ended?.()
-
+            expect(engine.load).toHaveBeenCalledOnce()
+            expect(engine.stop).not.toHaveBeenCalled()
             expect(player.state.playback).toBe('playing')
-            expect(player.state.trackId).toBe('a')
+            expect(player.videoState).toBe('idle')
+
+            player.attachVideo(element)
+            await flushPromises()
+            expect(created).toBe(2)
+            expect(follower.load).toHaveBeenCalledOnce()
         })
 
-        it('does not prepare the next track while a video plays', async () => {
+        it('requests a failed video once more and shows the cover after that', async () => {
             const player = usePlayerStore()
             player.attachVideo(element)
             player.playTracks(withVideo, 0)
             await flushPromises()
 
-            videoEngine.events.timeupdate?.(185, 200)
+            follower.events.stateChange?.('failed')
             await flushPromises()
+            expect(getVideoPlayback).toHaveBeenCalledTimes(2)
+            expect(follower.load).toHaveBeenCalledTimes(2)
 
-            expect(getPlayback).not.toHaveBeenCalled()
+            follower.events.stateChange?.('failed')
+            await flushPromises()
+            expect(getVideoPlayback).toHaveBeenCalledTimes(2)
+            expect(player.videoState).toBe('failed')
+            expect(player.stageView).toBe('cover')
+            expect(player.state.playback).toBe('playing')
         })
 
-        it('plays the next track as audio when a video ended', async () => {
+        it('shows the cover when the video cannot be requested', async () => {
+            vi.mocked(getVideoPlayback).mockRejectedValue({ responseStatusCode: 404 })
+            const player = usePlayerStore()
+            player.attachVideo(element)
+
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            expect(player.videoState).toBe('failed')
+            expect(follower.load).not.toHaveBeenCalled()
+            expect(player.state.playback).toBe('playing')
+        })
+
+        it('saves the chosen view mode for the profile', () => {
+            const session = useSessionStore()
+            const update = vi.spyOn(session, 'updatePlayerViewMode').mockResolvedValue()
+            const player = usePlayerStore()
+
+            player.selectViewMode('Visualization')
+
+            expect(update).toHaveBeenCalledWith('Visualization')
+        })
+
+        it('applies a new offset only to the video of the current track', async () => {
             const player = usePlayerStore()
             player.attachVideo(element)
             player.playTracks(withVideo, 0)
             await flushPromises()
 
-            videoEngine.events.ended?.()
+            player.applyVideoOffset('c', 500)
+            expect(follower.setOffset).not.toHaveBeenCalled()
+
+            player.applyVideoOffset('a', 500)
+            expect(follower.setOffset).toHaveBeenCalledWith(500)
+        })
+
+        it('lets the own controls of the video pause and play the audio', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
             await flushPromises()
 
-            expect(player.state.trackId).toBe('b')
-            expect(engine.lastUrl).toBe('/stream/b')
-            expect(videoEngine.stop).toHaveBeenCalled()
+            follower.events.userPause?.()
+            expect(engine.pause).toHaveBeenCalledOnce()
+            expect(player.state.playback).toBe('paused')
+
+            follower.events.userPlay?.()
+            expect(player.state.playback).toBe('playing')
+        })
+
+        it('hides the video while the page is hidden', async () => {
+            const player = usePlayerStore()
+            player.attachVideo(element)
+            player.playTracks(withVideo, 0)
+            await flushPromises()
+
+            Object.defineProperty(document, 'visibilityState', {
+                value: 'hidden',
+                configurable: true,
+            })
+            document.dispatchEvent(new Event('visibilitychange'))
+            await flushPromises()
+            expect(follower.setActive).toHaveBeenLastCalledWith(false)
+
+            Object.defineProperty(document, 'visibilityState', {
+                value: 'visible',
+                configurable: true,
+            })
+            document.dispatchEvent(new Event('visibilitychange'))
+            await flushPromises()
+            expect(follower.setActive).toHaveBeenLastCalledWith(true)
+            expect(follower.load).toHaveBeenCalledOnce()
         })
     })
 

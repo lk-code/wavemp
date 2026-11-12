@@ -11,8 +11,8 @@ const player = usePlayerStore()
     <div data-part="view" data-view="now-playing">
         <NowPlayingStage
             :track="player.current?.track"
-            :video-mode="player.videoMode"
-            @toggle-video="player.toggleVideo"
+            :video-mode="player.viewMode === 'Video'"
+            @toggle-video="player.selectViewMode(player.viewMode === 'Video' ? 'Cover' : 'Video')"
             @attach-video="player.attachVideo"
             @detach-video="player.detachVideo"
         />
