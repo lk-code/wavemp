@@ -4,6 +4,8 @@
 // @ts-ignore
 import { createProblemDetailsFromDiscriminatorValue, type ProblemDetails } from '../../../../../models/index.js';
 // @ts-ignore
+import { OffsetRequestBuilderRequestsMetadata, type OffsetRequestBuilder } from './offset/index.js';
+// @ts-ignore
 import { PlaybackRequestBuilderRequestsMetadata, type PlaybackRequestBuilder } from './playback/index.js';
 // @ts-ignore
 import { type BaseRequestBuilder, type Guid, type KeysToExcludeForNavigationMetadata, type NavigationMetadata, type Parsable, type ParsableFactory, type RequestConfiguration, type RequestInformation, type RequestsMetadata } from '@microsoft/kiota-abstractions';
@@ -12,6 +14,10 @@ import { type BaseRequestBuilder, type Guid, type KeysToExcludeForNavigationMeta
  * Builds and executes requests for operations under /api/v1/tracks/{id}/video
  */
 export interface VideoRequestBuilder extends BaseRequestBuilder<VideoRequestBuilder> {
+    /**
+     * The offset property
+     */
+    get offset(): OffsetRequestBuilder;
     /**
      * The playback property
      */
@@ -61,6 +67,9 @@ export const VideoRequestBuilderUriTemplate = "{+baseurl}/api/v1/tracks/{id}/vid
  * Metadata for all the navigation properties in the request builder.
  */
 export const VideoRequestBuilderNavigationMetadata: Record<Exclude<keyof VideoRequestBuilder, KeysToExcludeForNavigationMetadata>, NavigationMetadata> = {
+    offset: {
+        requestsMetadata: OffsetRequestBuilderRequestsMetadata,
+    },
     playback: {
         requestsMetadata: PlaybackRequestBuilderRequestsMetadata,
     },

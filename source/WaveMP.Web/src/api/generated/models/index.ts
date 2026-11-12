@@ -776,6 +776,15 @@ export function createTrackPlaybackFromDiscriminatorValue(parseNode: ParseNode |
 /**
  * Creates a new instance of the appropriate class based on discriminator value
  * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {TrackVideoOffset}
+ */
+// @ts-ignore
+export function createTrackVideoOffsetFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoTrackVideoOffset;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
  * @returns {TrackVideoPlayback}
  */
 // @ts-ignore
@@ -871,6 +880,15 @@ export function createUpdateTrackMetadataFromDiscriminatorValue(parseNode: Parse
 // @ts-ignore
 export function createUpdateTrackRatingFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
     return deserializeIntoUpdateTrackRating;
+}
+/**
+ * Creates a new instance of the appropriate class based on discriminator value
+ * @param parseNode The parse node to use to read the discriminator value and create the object
+ * @returns {UpdateTrackVideoOffset}
+ */
+// @ts-ignore
+export function createUpdateTrackVideoOffsetFromDiscriminatorValue(parseNode: ParseNode | undefined) : ((instance?: Parsable) => Record<string, (node: ParseNode) => void>) {
+    return deserializeIntoUpdateTrackVideoOffset;
 }
 /**
  * Creates a new instance of the appropriate class based on discriminator value
@@ -1807,6 +1825,18 @@ export function deserializeIntoTrackPlayback(trackPlayback: Partial<TrackPlaybac
 }
 /**
  * The deserialization information for the current model
+ * @param TrackVideoOffset The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoTrackVideoOffset(trackVideoOffset: Partial<TrackVideoOffset> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "offsetMilliseconds": n => { trackVideoOffset.offsetMilliseconds = n.getNumberValue(); },
+        "trackId": n => { trackVideoOffset.trackId = n.getGuidValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param TrackVideoPlayback The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -1821,6 +1851,7 @@ export function deserializeIntoTrackVideoPlayback(trackVideoPlayback: Partial<Tr
         "hasAudio": n => { trackVideoPlayback.hasAudio = n.getBooleanValue(); },
         "height": n => { trackVideoPlayback.height = n.getNumberValue(); },
         "method": n => { trackVideoPlayback.method = n.getEnumValue<PlaybackMethod>(PlaybackMethodObject); },
+        "offsetMilliseconds": n => { trackVideoPlayback.offsetMilliseconds = n.getNumberValue(); },
         "protocol": n => { trackVideoPlayback.protocol = n.getEnumValue<StreamProtocol>(StreamProtocolObject); },
         "streamUrl": n => { trackVideoPlayback.streamUrl = n.getStringValue(); },
         "trackId": n => { trackVideoPlayback.trackId = n.getGuidValue(); },
@@ -1974,6 +2005,17 @@ export function deserializeIntoUpdateTrackRating(updateTrackRating: Partial<Upda
 }
 /**
  * The deserialization information for the current model
+ * @param UpdateTrackVideoOffset The instance to deserialize into.
+ * @returns {Record<string, (node: ParseNode) => void>}
+ */
+// @ts-ignore
+export function deserializeIntoUpdateTrackVideoOffset(updateTrackVideoOffset: Partial<UpdateTrackVideoOffset> | undefined = {}) : Record<string, (node: ParseNode) => void> {
+    return {
+        "offsetMilliseconds": n => { updateTrackVideoOffset.offsetMilliseconds = n.getNumberValue(); },
+    }
+}
+/**
+ * The deserialization information for the current model
  * @param UpdateTranscodingSettings The instance to deserialize into.
  * @returns {Record<string, (node: ParseNode) => void>}
  */
@@ -2009,6 +2051,7 @@ export function deserializeIntoUpdateUser(updateUser: Partial<UpdateUser> | unde
 export function deserializeIntoUpdateUserSettings(updateUserSettings: Partial<UpdateUserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "language": n => { updateUserSettings.language = n.getEnumValue<Language>(LanguageObject); },
+        "playerViewMode": n => { updateUserSettings.playerViewMode = n.getEnumValue<PlayerViewMode>(PlayerViewModeObject); },
         "replayGain": n => { updateUserSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
     }
 }
@@ -2052,6 +2095,7 @@ export function deserializeIntoUserPage(userPage: Partial<UserPage> | undefined 
 export function deserializeIntoUserSettings(userSettings: Partial<UserSettings> | undefined = {}) : Record<string, (node: ParseNode) => void> {
     return {
         "language": n => { userSettings.language = n.getEnumValue<Language>(LanguageObject); },
+        "playerViewMode": n => { userSettings.playerViewMode = n.getEnumValue<PlayerViewMode>(PlayerViewModeObject); },
         "replayGain": n => { userSettings.replayGain = n.getEnumValue<ReplayGainMode>(ReplayGainModeObject); },
     }
 }
@@ -2544,6 +2588,7 @@ export interface MediaFilePage extends AdditionalDataHolder, Parsable {
 }
 export type MediaFileSort = (typeof MediaFileSortObject)[keyof typeof MediaFileSortObject];
 export type PlaybackMethod = (typeof PlaybackMethodObject)[keyof typeof PlaybackMethodObject];
+export type PlayerViewMode = (typeof PlayerViewModeObject)[keyof typeof PlayerViewModeObject];
 /**
  * A play of a track in the play history of the current profile.
  */
@@ -3910,6 +3955,19 @@ export function serializeTrackPlayback(writer: SerializationWriter, trackPlaybac
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param TrackVideoOffset The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeTrackVideoOffset(writer: SerializationWriter, trackVideoOffset: Partial<TrackVideoOffset> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!trackVideoOffset || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("offsetMilliseconds", trackVideoOffset.offsetMilliseconds);
+    writer.writeGuidValue("trackId", trackVideoOffset.trackId);
+    writer.writeAdditionalData(trackVideoOffset.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param TrackVideoPlayback The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -3924,6 +3982,7 @@ export function serializeTrackVideoPlayback(writer: SerializationWriter, trackVi
     writer.writeBooleanValue("hasAudio", trackVideoPlayback.hasAudio);
     writer.writeNumberValue("height", trackVideoPlayback.height);
     writer.writeEnumValue<PlaybackMethod>("method", trackVideoPlayback.method);
+    writer.writeNumberValue("offsetMilliseconds", trackVideoPlayback.offsetMilliseconds);
     writer.writeEnumValue<StreamProtocol>("protocol", trackVideoPlayback.protocol);
     writer.writeStringValue("streamUrl", trackVideoPlayback.streamUrl);
     writer.writeGuidValue("trackId", trackVideoPlayback.trackId);
@@ -4088,6 +4147,18 @@ export function serializeUpdateTrackRating(writer: SerializationWriter, updateTr
 /**
  * Serializes information the current object
  * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
+ * @param UpdateTrackVideoOffset The instance to serialize from.
+ * @param writer Serialization writer to use to serialize this model
+ */
+// @ts-ignore
+export function serializeUpdateTrackVideoOffset(writer: SerializationWriter, updateTrackVideoOffset: Partial<UpdateTrackVideoOffset> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
+    if (!updateTrackVideoOffset || isSerializingDerivedType) { return; }
+    writer.writeNumberValue("offsetMilliseconds", updateTrackVideoOffset.offsetMilliseconds);
+    writer.writeAdditionalData(updateTrackVideoOffset.additionalData);
+}
+/**
+ * Serializes information the current object
+ * @param isSerializingDerivedType A boolean indicating whether the serialization is for a derived type.
  * @param UpdateTranscodingSettings The instance to serialize from.
  * @param writer Serialization writer to use to serialize this model
  */
@@ -4125,6 +4196,7 @@ export function serializeUpdateUser(writer: SerializationWriter, updateUser: Par
 export function serializeUpdateUserSettings(writer: SerializationWriter, updateUserSettings: Partial<UpdateUserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!updateUserSettings || isSerializingDerivedType) { return; }
     writer.writeEnumValue<Language>("language", updateUserSettings.language);
+    writer.writeEnumValue<PlayerViewMode>("playerViewMode", updateUserSettings.playerViewMode);
     writer.writeEnumValue<ReplayGainMode>("replayGain", updateUserSettings.replayGain);
     writer.writeAdditionalData(updateUserSettings.additionalData);
 }
@@ -4171,6 +4243,7 @@ export function serializeUserPage(writer: SerializationWriter, userPage: Partial
 export function serializeUserSettings(writer: SerializationWriter, userSettings: Partial<UserSettings> | undefined | null = {}, isSerializingDerivedType: boolean = false) : void {
     if (!userSettings || isSerializingDerivedType) { return; }
     writer.writeEnumValue<Language>("language", userSettings.language);
+    writer.writeEnumValue<PlayerViewMode>("playerViewMode", userSettings.playerViewMode);
     writer.writeEnumValue<ReplayGainMode>("replayGain", userSettings.replayGain);
     writer.writeAdditionalData(userSettings.additionalData);
 }
@@ -4442,6 +4515,19 @@ export interface TrackPlayback extends AdditionalDataHolder, Parsable {
 }
 export type TrackSort = (typeof TrackSortObject)[keyof typeof TrackSortObject];
 /**
+ * The offset of the video against the audio of a track.
+ */
+export interface TrackVideoOffset extends AdditionalDataHolder, Parsable {
+    /**
+     * Offset in milliseconds: position of the video = position of the audio + offset. Positive if the music in the video starts later than in the audio file (for example after an intro), negative if it starts earlier; 0 without offset.
+     */
+    offsetMilliseconds?: number | null;
+    /**
+     * Id of the track.
+     */
+    trackId?: Guid | null;
+}
+/**
  * How the client plays the video of a track, and the signed URL of its stream.
  */
 export interface TrackVideoPlayback extends AdditionalDataHolder, Parsable {
@@ -4477,6 +4563,10 @@ export interface TrackVideoPlayback extends AdditionalDataHolder, Parsable {
      * Direct play or transcoding.
      */
     method?: PlaybackMethod | null;
+    /**
+     * Offset of the video against the audio of the track in milliseconds: position of the video = position of the audio + offset; 0 without offset. Clients that play the audio and show the video muted synchronize the video with it.
+     */
+    offsetMilliseconds?: number | null;
     /**
      * The file as it is (direct play) or an HLS stream (transcoding).
      */
@@ -4726,6 +4816,15 @@ export interface UpdateTrackRating extends AdditionalDataHolder, Parsable {
     rating?: number | null;
 }
 /**
+ * Sets the offset of the video against the audio of a track.
+ */
+export interface UpdateTrackVideoOffset extends AdditionalDataHolder, Parsable {
+    /**
+     * Offset in milliseconds from -600000 to 600000: position of the video = position of the audio + offset. Positive if the music in the video starts later than in the audio file (for example after an intro), negative if it starts earlier; 0 removes the offset.
+     */
+    offsetMilliseconds?: number | null;
+}
+/**
  * Changes the settings of the transcoding. Missing or null values stay unchanged. Running transcodes keep their settings; a change of the hardware acceleration starts a new detection.
  */
 export interface UpdateTranscodingSettings extends AdditionalDataHolder, Parsable {
@@ -4775,6 +4874,10 @@ export interface UpdateUserSettings extends AdditionalDataHolder, Parsable {
      * The language property
      */
     language?: Language | null;
+    /**
+     * The playerViewMode property
+     */
+    playerViewMode?: PlayerViewMode | null;
     /**
      * The replayGain property
      */
@@ -4842,6 +4945,10 @@ export interface UserSettings extends AdditionalDataHolder, Parsable {
      * Language of the user interface.
      */
     language?: Language | null;
+    /**
+     * What the Now Playing view shows; Video by default. Clients keep the choice of the profile with it.
+     */
+    playerViewMode?: PlayerViewMode | null;
     /**
      * Whether the players even out the volume with the ReplayGain tags; Off by default.
      */
@@ -5113,6 +5220,14 @@ export const MediaFileSortObject = {
 export const PlaybackMethodObject = {
     DirectPlay: "DirectPlay",
     Transcode: "Transcode",
+} as const;
+/**
+ * What the Now Playing view shows; Video by default. Clients keep the choice of the profile with it.
+ */
+export const PlayerViewModeObject = {
+    Cover: "Cover",
+    Video: "Video",
+    Visualization: "Visualization",
 } as const;
 /**
  * Where the cover of a playlist comes from.
