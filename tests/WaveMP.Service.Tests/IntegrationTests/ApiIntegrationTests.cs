@@ -255,8 +255,9 @@ public class ApiIntegrationTests
     [TestCase("Users", 5)]
     [TestCase("Scans", 4)]
     [TestCase("Jobs", 4)]
-    [TestCase("Settings", 4)]
+    [TestCase("Settings", 6)]
     [TestCase("Cache", 2)]
+    [TestCase("Transcoding", 3)]
     public async Task GetOpenApiDocument_Always_DescribesUnauthorizedAndForbiddenResponses(string tag, int operations)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
@@ -284,6 +285,7 @@ public class ApiIntegrationTests
     [TestCase("MediaFilePage", "MediaFile")]
     [TestCase("PlayHistoryEntryPage", "PlayHistoryEntry")]
     [TestCase("FavoritePage", "Favorite")]
+    [TestCase("TranscodeJobPage", "TranscodeJob")]
     public async Task GetOpenApiDocument_Always_NamesPagesAfterTheirItems(string pageSchema, string itemSchema)
     {
         JsonNode document = await GetOpenApiDocumentAsync();
