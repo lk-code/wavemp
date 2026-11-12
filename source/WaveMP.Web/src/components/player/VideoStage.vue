@@ -5,10 +5,19 @@ import BaseButton from '@/components/base/BaseButton.vue'
 import { canFullscreen, enterFullscreen, exitFullscreen, isFullscreen } from '@/player/fullscreen'
 
 /**
- * The video of the current track on the Now Playing stage. The element is handed to the player
- * when the stage shows it (attach) and taken back before it closes (detach), so the track then
- * continues as audio. A double click or the button shows the stage in full screen.
+ * The video of the current track on the Now Playing stage, muted: the player plays the audio and
+ * the video follows it. The element is handed to the player when it is shown (attach) and taken
+ * back before it closes (detach); the song simply goes on. While the video view is active, a double
+ * click or the button shows the stage in full screen.
  */
+const props = withDefaults(
+    defineProps<{
+        /** Whether the stage shows the video view. */
+        active?: boolean
+    }>(),
+    { active: true },
+)
+
 const emit = defineEmits<{
     attach: [element: HTMLVideoElement]
     detach: [element: HTMLVideoElement]
@@ -29,6 +38,11 @@ function update(): void {
 
 async function toggleFullscreen(): Promise<void> {
     if (!container.value || !video.value || !fullscreenAvailable.value) {
+        return
+    }
+
+    // A hidden video never enters full screen; one in full screen may always leave it.
+    if (!props.active && !isFullscreen(container.value, video.value)) {
         return
     }
 
@@ -73,7 +87,9 @@ onBeforeUnmount(() => {
         <video
             ref="video"
             data-part="video"
+            muted
             playsinline
+            disablepictureinpicture
             :aria-label="t('nowPlaying.video')"
         ></video>
         <BaseButton
@@ -81,7 +97,7 @@ onBeforeUnmount(() => {
             variant="icon"
             :icon="fullscreen ? 'exit-fullscreen' : 'fullscreen'"
             :label="fullscreen ? t('nowPlaying.exitFullscreen') : t('nowPlaying.fullscreen')"
-            :disabled="!fullscreenAvailable"
+            :disabled="!fullscreenAvailable || (!active && !fullscreen)"
             @click.stop="toggleFullscreen"
             @dblclick.stop
         />

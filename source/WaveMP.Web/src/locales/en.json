@@ -136,7 +136,11 @@
     "clear": "Clear queue",
     "playItem": "Play {title}",
     "stageActions": "Display",
-    "showVideo": "Show video",
+    "viewCover": "Cover",
+    "viewVideo": "Video",
+    "viewVisualization": "Visualization",
+    "visualizationPlaceholder": "Visualizations are not available yet.",
+    "videoFailed": "The video cannot be played. The song goes on.",
     "video": "Video of the current song",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen"

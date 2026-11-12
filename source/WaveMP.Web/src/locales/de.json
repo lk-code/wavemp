@@ -136,7 +136,11 @@
     "clear": "Warteschlange leeren",
     "playItem": "{title} abspielen",
     "stageActions": "Anzeige",
-    "showVideo": "Video zeigen",
+    "viewCover": "Cover",
+    "viewVideo": "Video",
+    "viewVisualization": "Visualisierung",
+    "visualizationPlaceholder": "Visualisierungen sind noch nicht verfügbar.",
+    "videoFailed": "Das Video kann nicht abgespielt werden. Der Titel läuft weiter.",
     "video": "Video des aktuellen Titels",
     "fullscreen": "Vollbild",
     "exitFullscreen": "Vollbild beenden"

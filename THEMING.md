@@ -1,6 +1,6 @@
 # WaveMP Theme API
 
-Version 2
+Version 3
 
 This document describes how themes change the look of the WaveMP web app: the parts of the DOM a theme can address, their states, the CSS variables and the icons. It is meant for theme authors.
 
@@ -13,7 +13,7 @@ The DOM is the same for every theme. Every element a theme can address has a sta
 The root element carries the active theme and the version of this API:
 
 ```html
-<html lang="en" data-theme="midnight" data-theme-api="2">
+<html lang="en" data-theme="midnight" data-theme-api="3">
 ```
 
 A theme can change everything: colors, graphics, fonts, sizes and the desktop layout. Only the mobile layout is fixed (see [Responsive layout](#responsive-layout)).
@@ -114,16 +114,22 @@ Example of a desktop layout with the sidebar on the right:
 | `empty-state-title` | `p` | `empty-state` | Title of the message |
 | `empty-state-text` | `p` | `empty-state` | Text of the message |
 | `link` | `a` | `empty-state`, `view`, `section`, `meta-value` | Text link in the content, for example to an album, an artist, a genre or a year |
-| `stage` | `div` | `view` | Stage of the Now Playing page: the `cover`, or the `video-stage` of a song with a video while the video is switched on, then `stage-info` and, for songs with a video, `stage-actions` |
+| `stage` | `div` | `view` | Stage of the Now Playing page: `stage-views`, `stage-notice` if the video fails, then `stage-info` (or `empty-state` while nothing plays) and `stage-actions` |
+| `stage-views` | `div` | `stage` | The views of the current song on top of each other in a box of a stable size (16:9): one `stage-view` each for the cover, the video (songs with a video only) and the visualization |
+| `stage-view` | `div` (`data-kind`) | `stage-views` | One view of the stage: `cover` (the `cover`), `video` (the `video-stage`) or `visualization` (the `visualization`). Only the shown view is visible (`data-state="active"`); the base fades between them with an opacity transition of `--wmp-stage-transition-duration`. The video view stays in the page while it is not shown, its video waits paused |
+| `stage-notice` | `p` (`role="status"`) | `stage` | Hint that the video of the song cannot be played while the song goes on; only while the video view is chosen and the video failed |
 | `stage-info` | `div` | `stage` | Title, artist and album of the current song |
 | `stage-title` | `p` | `stage-info` | Title of the current song |
 | `stage-subtitle` | `p` | `stage-info` | Artist and album of the current song |
-| `stage-actions` | `div` (`role="group"`) | `stage` | Buttons of the stage; only for songs with a video |
-| `btn-video` | `button` (`aria-pressed`) | `stage-actions` | Shows the video of songs instead of their cover (pressed) or the cover only; the choice applies to all songs with a video, the visualization follows later |
-| `video-stage` | `div` | `stage` | The video of the current song with `video` and `btn-fullscreen`; shown in full screen as a whole (a double click switches as well). When it closes, the song continues as audio at the same position |
-| `video` | `video` (`aria-label`) | `video-stage` | The video element; without native controls, the transport bar controls it |
-| `btn-fullscreen` | `button` | `video-stage` | Shows the `video-stage` in full screen (icon `fullscreen`) or leaves it (icon `exit-fullscreen`); disabled where the browser has no full screen. On the iPhone the video element itself goes full screen with the controls of the system |
-| `cover` | `span` | `stage`, `list-group-info`, `now-playing-mini`, `tile`, `detail-header` | Cover: `cover-image`, or the placeholder icon (`data-state="placeholder"`); on tiles and detail pages of artists, genres and years the `icon` of their kind |
+| `stage-actions` | `div` (`role="group"`) | `stage` | Buttons that choose the view of the stage: `btn-view-cover`, `btn-view-video` and `btn-view-visualization`; while a song is current. The choice is kept per profile; switching never interrupts the music |
+| `btn-view-cover` | `button` (`aria-pressed`) | `stage-actions` | Shows the cover; pressed while it is the chosen view, also for songs without a video while the video is chosen |
+| `btn-view-video` | `button` (`aria-pressed`) | `stage-actions` | Shows the video of songs with one; pressed while it is the chosen view, also while the video still loads; disabled for songs without a video |
+| `btn-view-visualization` | `button` (`aria-pressed`) | `stage-actions` | Shows the visualization; pressed while it is the chosen view |
+| `visualization` | `div` | `stage-view` | The visualization of the music; for now a placeholder (`data-state="placeholder"`) with an `icon` (`view-visualization`) and a `label` |
+| `video-stage` | `div` | `stage-view` | The video of the current song with `video` and `btn-fullscreen`; shown in full screen as a whole (a double click switches as well, only while the video view is shown). When it closes, the song simply goes on |
+| `video` | `video` (`aria-label`) | `video-stage` | The video element, always muted and without native controls: the sound comes from the player, the video follows its position plus the offset of the song; the transport bar controls both |
+| `btn-fullscreen` | `button` | `video-stage` | Shows the `video-stage` in full screen (icon `fullscreen`) or leaves it (icon `exit-fullscreen`); disabled where the browser has no full screen and while the video view is not shown. On the iPhone the video element itself goes full screen with the controls of the system |
+| `cover` | `span` | `stage-view`, `list-group-info`, `now-playing-mini`, `tile`, `detail-header` | Cover: `cover-image`, or the placeholder icon (`data-state="placeholder"`); on tiles and detail pages of artists, genres and years the `icon` of their kind |
 | `cover-image` | `img` (`alt=""`) | `cover` | Picture of the cover, loaded from the server |
 | `list` | `div` (`role="grid"`) | `view` | Table of tracks grouped by album |
 | `list-header` | `div` (`role="row"`) | `list` | Column headers |
@@ -307,7 +313,9 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `rating` | `rated` or `unrated` |
 | `rating-star` | `on` up to the rating, otherwise `off` |
 | `now-playing-actions` | `empty` while nothing plays |
-| `stage` | `video` while it shows the `video-stage`, otherwise `cover` |
+| `stage` | the shown view: `cover`, `video` or `visualization` |
+| `stage-view` | `active` for the shown view; `loading` for the video view while the video loads or moves to the position of the music (the base keeps it invisible but rendered); `failed` for the video view while its video cannot be played |
+| `visualization` | `placeholder` |
 | `video-stage` | `fullscreen` while it is shown in full screen |
 | `queue-item` | `current` for the current song, `played` for the songs before it |
 | `placeholder-notice`, `cover` | `placeholder` |
@@ -342,7 +350,7 @@ The internal component overview (`/dev/components`) uses its own parts starting 
 | `aria-invalid="true"` | `input` and `select` of a field with an error |
 | `aria-checked` | `color-swatch`; `menu-item` with `role="menuitemradio"`, for example the chosen sort key and direction |
 | `aria-selected` | `list-row` |
-| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, `btn-video`, the `button`s of `scope-switch` and other toggle buttons |
+| `aria-pressed` | `btn-shuffle`, `btn-repeat`, `btn-mute`, `btn-favorite`, `rating-star`, `btn-view-cover`, `btn-view-video`, `btn-view-visualization`, the `button`s of `scope-switch` and other toggle buttons |
 | `aria-disabled="true"` | `tree-item`, `slider-thumb` |
 | `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` | `slider-thumb`, `progress` (`aria-valuenow` from 0 to 100, missing while indeterminate), `meter` (`aria-valuenow` from 0 to 100) |
 | `:disabled` | buttons and inputs |
@@ -361,6 +369,7 @@ The base links states to graphics: buttons use the variables `--wmp-image-<varia
 | `data-icon` | `icon` | Icon slot, see [Icons](#icons) |
 | `data-view` | `view` | `library`, `library-search`, `library-album`, `library-artist`, `library-genre`, `library-year`, `library-track`, `home`, `now-playing`, `playlists`, `playlist`, `recently-played`, `settings`, `admin-library`, `admin-jobs`, `admin-cache`, `admin-transcoding`, `admin-users`, `not-found` |
 | `data-kind` | `tile` | `album`, `artist`, `track`, `genre`, `year`, `playlist`, `recently-played` |
+| `data-kind` | `stage-view` | `cover`, `video`, `visualization` |
 | `data-section` | `view` (library) | `recently-added`, `favorites`, `artists`, `albums`, `songs`, `genres`, `years` |
 | `data-value` | `rating` | Stars of the rating, `0` (none) to `5` |
 | `data-column` | `list-column`, `list-cell` | `number`, `title`, `duration`, `artist`, `rating`, `favorite`; in playlists also `handle` (first column, only where entries can be moved), `album` and `detail` (in "Recently played" the time of the last play, in the favorites the time the song was marked) |
@@ -538,6 +547,13 @@ The graphic of each icon slot is a variable as well, see [Icons](#icons).
 | `--wmp-swatch-size` | `2rem` | Size of `color-swatch` |
 | `--wmp-progress-height` | `0.5rem` | Height of `progress-track` and `meter-track` |
 
+### Now Playing
+
+| Variable | Default | Used for |
+|---|---|---|
+| `--wmp-stage-transition-duration` | `0.6s` | Duration of the fade between the views of the stage (`stage-view`); the base leaves it out for `prefers-reduced-motion: reduce` |
+| `--wmp-stage-view-background` | `#000000` | Background of the video and visualization views, and the bars around the `video` |
+
 On mobile, the base sets touch-friendly values for `--wmp-button-height`, `--wmp-round-button-size`, `--wmp-field-height` and `--wmp-swatch-size` on `app`, and its own `--wmp-list-columns` on `list` (in playlists with the handle); the columns `artist`, `album`, `detail` and `rating` are left out there.
 
 ### Runtime variables
@@ -646,9 +662,9 @@ The defaults are icons of [Phosphor Icons](https://phosphoricons.com) (MIT) unde
 | `edit` | `--wmp-icon-edit` | `/icons/phosphor/regular/pencil-simple.svg` | Menus and dialogs |
 | `delete` | `--wmp-icon-delete` | `/icons/phosphor/regular/trash.svg` | Menus and dialogs |
 | `add` | `--wmp-icon-add` | `/icons/phosphor/regular/plus.svg` | Menus and dialogs |
-| `view-video` | `--wmp-icon-view-video` | `/icons/phosphor/regular/film-strip.svg` | Menus and dialogs |
-| `view-visualization` | `--wmp-icon-view-visualization` | `/icons/phosphor/regular/waveform.svg` | Menus and dialogs |
-| `view-cover` | `--wmp-icon-view-cover` | `/icons/phosphor/regular/image.svg` | Menus and dialogs |
+| `view-video` | `--wmp-icon-view-video` | `/icons/phosphor/regular/film-strip.svg` | Content (`btn-view-video`) |
+| `view-visualization` | `--wmp-icon-view-visualization` | `/icons/phosphor/regular/waveform.svg` | Content (`btn-view-visualization`, `visualization`) |
+| `view-cover` | `--wmp-icon-view-cover` | `/icons/phosphor/regular/image.svg` | Content (`btn-view-cover`) |
 | `go-to-album` | `--wmp-icon-go-to-album` | `/icons/phosphor/regular/vinyl-record.svg` | Menus and dialogs |
 | `go-to-artist` | `--wmp-icon-go-to-artist` | `/icons/phosphor/regular/microphone-stage.svg` | Menus and dialogs |
 | `play-now` | `--wmp-icon-play-now` | `/icons/phosphor/regular/play.svg` | Menus and dialogs |
@@ -705,6 +721,7 @@ The version of the theme API is in `data-theme-api` on the root element and at t
 
 ### Changelog
 
+- **Version 3:** cover, video and visualization on the stage, with a fade. Changed: `btn-video` is replaced by `btn-view-video`, one of the three buttons `btn-view-cover`, `btn-view-video` and `btn-view-visualization`, of which the chosen view is pressed; `stage-actions` is shown for every current song, not only for songs with a video; the `cover` and the `video-stage` of the stage no longer lie directly in `stage` but each in a `stage-view` inside `stage-views`, so themes that address `stage > cover`, `stage cover` or `stage > video-stage` have to use `stage-view > cover` and `stage-view > video-stage`; the `video` is muted and follows the music. Added: the state `visualization` of `stage`, the parts `stage-views`, `stage-view` (with `data-kind` and the states `active`, `loading` and `failed`), `stage-notice`, `visualization` (state `placeholder`) and the `btn-view-*` buttons, the variables `--wmp-stage-transition-duration` and `--wmp-stage-view-background`. The icon slots `view-cover`, `view-video` and `view-visualization` now belong to the content.
 - **Version 2:** favorites, ratings and the home page. Changed: the lists of songs have the new columns `rating` (stars) and `favorite` (heart) at their end, so the defaults of `--wmp-list-columns`, `--wmp-list-columns-playlist` and `--wmp-list-columns-recently-played` have two more columns; the new part `now-playing-actions` of `transport` takes the start of the grid area `mode-switch`, which now ends at the end of its cell (`justify-self: end`). Themes that set these variables have to add the new columns; themes that rearrange `transport` have to place `now-playing-actions`. Added: the parts `btn-favorite`, `rating`, `rating-star`, `scope-switch`, `now-playing-actions`, `shelf`, `shelf-header`, `shelf-title` and `shelf-actions`, their states, the attribute `data-value`, the home page (`data-view="home"`, tab and bottom navigation entry `home`), the library section `favorites`, the tile kind `track`, the `meta-item` `rating` on the page of a song, new values of `data-item` (menu entry `favorite`; detail action `favorite`; `all-music`, `my-music`; the rows `playlists`, `recently-played`, `recently-added`, `favorites`, `top-rated` of `shelf`), the sort key `sort-rating`, the variables `--wmp-favorite-color`, `--wmp-rating-color` and `--wmp-shelf-tile-width` and the icon slots `home`, `track`, `favorite`, `favorite-off`, `rating-star`, `rating-star-off`, `add-favorite` and `remove-favorite`; `tree-favorites` is no longer reserved.
     - Additions without a version change: videos. The `stage` shows the video of songs with one (`stage-actions`, `btn-video`, `video-stage`, `video`, `btn-fullscreen`, the states `video` and `cover` of `stage` and `fullscreen` of `video-stage`) and the icon slot `exit-fullscreen`; `fullscreen` is no longer reserved and belongs to the content. The notice `unsupported` of `transport-message` now means that the server cannot transcode the song.
     - Additions without a version change: the transcoding page of the administration (`transcoding-status`, `transcode-list`, `transcode-item`, `transcode-info`, `transcode-title`, `transcode-meta`, `transcode-actions`, `data-view="admin-transcoding"`, the entry `admin-transcoding` of `admin-nav`, further values of `data-item` and the tokens of `badge` and `transcode-item`) with the icon slot `admin-transcoding`.

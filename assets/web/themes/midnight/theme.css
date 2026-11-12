@@ -1,5 +1,5 @@
 /*
- * Theme "Midnight" for WaveMP, theme API version 2 (see THEMING.md).
+ * Theme "Midnight" for WaveMP, theme API version 3 (see THEMING.md).
  *
  * A dark glass look: a glossy black header and transport bar with round glass buttons and a
  * glowing blue play button, a light toolbar, a white sidebar and a white library list grouped by
@@ -427,7 +427,7 @@ a[data-part="breadcrumb-link"]:hover {
     color: #1e2329;
 }
 
-[data-part="stage"] [data-part="cover"] {
+[data-part="stage-view"] > [data-part="cover"] {
     box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 35%);
 }
 
@@ -435,11 +435,89 @@ a[data-part="breadcrumb-link"]:hover {
     color: #1e2329;
 }
 
-/* The video lies in a black glass frame like the cover; its full-screen button glows blue. */
-[data-part="video-stage"] {
+/*
+ * Video and visualization lie in a black glass frame like the cover; the full-screen button of the
+ * video glows blue.
+ */
+[data-part="stage-view"]:is([data-kind="video"], [data-kind="visualization"]) {
     box-shadow:
         0 0.5rem 2rem rgb(0 0 0 / 35%),
         inset 0 0 0 1px rgb(255 255 255 / 12%);
+}
+
+[data-part="video-stage"] {
+    box-shadow: inset 0 1px rgb(255 255 255 / 14%);
+}
+
+/* The placeholder of the visualization: a deep blue glow with a light blue glowing waveform. */
+[data-part="visualization"] {
+    background:
+        radial-gradient(ellipse at 50% 120%, rgb(74 168 255 / 28%), transparent 65%),
+        linear-gradient(#05080d, #10233a);
+    color: #c8e6ff;
+}
+
+[data-part="visualization"] > [data-part="icon"] {
+    --wmp-icon-fill: linear-gradient(#ffffff, #8fd2ff);
+
+    filter: drop-shadow(0 0 6px #4aa8ff);
+}
+
+/*
+ * The buttons of the views form a dark glass capsule like the transport controls; the chosen view
+ * glows light blue like the active tab.
+ */
+[data-part="stage-actions"] {
+    gap: 0.125rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: linear-gradient(#4a4f57 0%, #24272c 46%, #08090b 54%, #1c1f23 100%);
+    box-shadow:
+        inset 0 1px rgb(255 255 255 / 28%),
+        inset 0 -1px rgb(255 255 255 / 6%),
+        0 0 0 1px #000000,
+        0 2px 4px rgb(0 0 0 / 50%);
+}
+
+[data-part="stage-actions"] > [data-variant] {
+    --wmp-icon-fill: #c8ced6;
+
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #c8ced6;
+    text-shadow: 0 1px 0 #000000;
+}
+
+[data-part="stage-actions"] > [data-variant]:hover:not(:disabled) {
+    background: rgb(255 255 255 / 10%);
+    color: #ffffff;
+}
+
+[data-part="stage-actions"] > [data-variant][aria-pressed="true"]:not(:disabled) {
+    --wmp-icon-fill: linear-gradient(#ffffff, #8fd2ff);
+
+    background: linear-gradient(rgb(143 210 255 / 30%), rgb(31 111 214 / 30%));
+    color: #ffffff;
+    text-shadow:
+        0 0 6px rgb(130 205 255 / 90%),
+        0 1px 0 #000000;
+    box-shadow: inset 0 0 0 1px rgb(143 210 255 / 45%);
+}
+
+[data-part="stage-actions"] > [data-variant][aria-pressed="true"]:not(:disabled) > [data-part="icon"] {
+    filter: drop-shadow(0 0 3px #4aa8ff);
+}
+
+[data-part="stage-actions"] > [data-variant]:disabled {
+    --wmp-icon-fill: #5c636c;
+
+    background: transparent;
+    color: #5c636c;
+}
+
+[data-part="stage-notice"] {
+    color: #5f6873;
 }
 
 [data-part="btn-fullscreen"] > [data-part="icon"] {

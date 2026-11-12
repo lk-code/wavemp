@@ -5,6 +5,7 @@ import type { Track } from '@/api/generated/models'
 import { createWaveMpI18n } from '@/i18n'
 import { getPlayback } from '@/player/api'
 import { playerDependencies, usePlayerStore } from '@/stores/player'
+import { useSessionStore } from '@/stores/session'
 import NowPlayingView from '../NowPlayingView.vue'
 
 vi.mock('@/library/api', () => ({ fetchAlbumCover: vi.fn(), fetchTrackCover: vi.fn() }))
@@ -93,6 +94,27 @@ describe('NowPlayingView', () => {
         expect(items[1]!.attributes('aria-current')).toBe('true')
         expect(items[0]!.get('[data-part="queue-item-duration"]').text()).toBe('2:05')
         expect(items[1]!.get('[data-item="remove"]').attributes('disabled')).toBeDefined()
+    })
+
+    it('switches the view of the stage without loading the song again', async () => {
+        const session = useSessionStore()
+        vi.spyOn(session, 'updatePlayerViewMode').mockImplementation((mode) => {
+            session.playerViewMode = mode
+            return Promise.resolve()
+        })
+        const player = usePlayerStore()
+        player.playTracks([track('a')], 0)
+        await flushPromises()
+        engine.load.mockClear()
+        const wrapper = mountView()
+
+        await wrapper.get('[data-part="btn-view-visualization"]').trigger('click')
+        expect(wrapper.get('[data-part="stage"]').attributes('data-state')).toBe('visualization')
+
+        await wrapper.get('[data-part="btn-view-cover"]').trigger('click')
+        expect(wrapper.get('[data-part="stage"]').attributes('data-state')).toBe('cover')
+        expect(session.updatePlayerViewMode).toHaveBeenLastCalledWith('Cover')
+        expect(engine.load).not.toHaveBeenCalled()
     })
 
     it('plays, moves, removes and clears entries', async () => {

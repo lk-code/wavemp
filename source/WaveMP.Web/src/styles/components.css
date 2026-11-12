@@ -1182,8 +1182,12 @@
         inline-size: var(--wmp-cover-size-mini);
     }
 
-    [data-part='stage'] [data-part='cover'] {
-        inline-size: min(60vmin, 18rem);
+    /* The cover of the stage fills the height of its view, at most 18rem. */
+    [data-part='stage-view'] > [data-part='cover'] {
+        inline-size: auto;
+        block-size: min(100%, 18rem);
+        max-inline-size: 100%;
+        aspect-ratio: 1;
     }
 
     [data-part='cover-image'] {
@@ -1666,25 +1670,106 @@
         gap: var(--wmp-space-s);
     }
 
+    /*
+     * The views of the stage (cover, video, visualization) lie on top of each other in a box of a
+     * stable size and fade into each other. A view that is loading stays invisible but rendered, so
+     * the browser decodes the video and moves it to its position before it is shown.
+     */
+    [data-part='stage-views'] {
+        display: grid;
+        place-items: center;
+        inline-size: 100%;
+        max-inline-size: 64rem;
+        max-block-size: 70vh;
+        aspect-ratio: 16 / 9;
+    }
+
+    [data-part='stage-view'] {
+        display: grid;
+        grid-area: 1 / 1;
+        place-items: center;
+        inline-size: 100%;
+        block-size: 100%;
+        min-inline-size: 0;
+        min-block-size: 0;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+            opacity var(--wmp-stage-transition-duration) ease-in-out,
+            visibility 0s linear var(--wmp-stage-transition-duration);
+    }
+
+    [data-part='stage-view'][data-state~='loading'] {
+        visibility: visible;
+    }
+
+    [data-part='stage-view'][data-state~='active'] {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+    }
+
+    [data-part='stage-view']:is([data-kind='video'], [data-kind='visualization']) {
+        overflow: hidden;
+        border-radius: var(--wmp-radius-m);
+        background: var(--wmp-stage-view-background);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        [data-part='stage-view'] {
+            transition: none;
+        }
+    }
+
+    [data-part='stage-notice'] {
+        margin: 0;
+        color: var(--wmp-color-text-muted);
+        font-size: var(--wmp-font-size-s);
+        text-align: center;
+    }
+
+    /* The placeholder of the visualization: its icon in the middle, a short hint below. */
+    [data-part='visualization'] {
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: var(--wmp-space-m);
+        inline-size: 100%;
+        block-size: 100%;
+        padding: var(--wmp-space-l);
+        color: #ffffff;
+        text-align: center;
+    }
+
+    [data-part='visualization'] > [data-part='icon'] {
+        --wmp-icon-size: 4rem;
+    }
+
+    [data-part='visualization'] > [data-part='label'] {
+        opacity: 0.7;
+        font-size: var(--wmp-font-size-s);
+    }
+
     /* The video: black bars around it, the full-screen button in its corner. */
     [data-part='video-stage'] {
         position: relative;
         display: grid;
         place-items: center;
         inline-size: 100%;
-        max-inline-size: 64rem;
+        block-size: 100%;
         overflow: hidden;
         border-radius: var(--wmp-radius-m);
-        background: #000000;
+        background: var(--wmp-stage-view-background);
     }
 
     [data-part='video'] {
         display: block;
         inline-size: 100%;
-        max-block-size: 70vh;
-        aspect-ratio: 16 / 9;
+        block-size: 100%;
         object-fit: contain;
-        background: #000000;
+        background: var(--wmp-stage-view-background);
     }
 
     [data-part='video-stage'][data-state~='fullscreen'] {
@@ -1694,8 +1779,6 @@
 
     [data-part='video-stage'][data-state~='fullscreen'] > [data-part='video'] {
         block-size: 100%;
-        max-block-size: none;
-        aspect-ratio: auto;
     }
 
     [data-part='btn-fullscreen'] {

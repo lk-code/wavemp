@@ -222,6 +222,8 @@
         --wmp-cover-size: 8rem;
         --wmp-cover-size-mini: 2.5rem;
         --wmp-cover-size-l: 12rem;
+        --wmp-stage-transition-duration: 0.6s;
+        --wmp-stage-view-background: #000000;
         --wmp-tile-width: 9rem;
         --wmp-list-row-height: 2rem;
         --wmp-list-columns: 3rem minmax(0, 2fr) 4.5rem minmax(0, 1.5fr) 6.5rem 2rem;

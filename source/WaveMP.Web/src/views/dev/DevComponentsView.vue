@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n'
 import type {
     CacheUsage,
     Job,
+    PlayerViewMode,
     Scan,
     ScanIssue,
     TranscodeJob,
@@ -71,6 +72,7 @@ import { supportedLocales, type SupportedLocale } from '@/i18n/locales'
 import { groupTracksByAlbum } from '@/library/grouping'
 import { sortItemId, sortLabelKey, sortOptions } from '@/library/sorting'
 import { libraryTree, mainNavigation, type NavigationTreeNode } from '@/navigation/libraryTree'
+import { stageViewOf } from '@/player/videoSync'
 import { profileColorOptions } from '@/profiles/presentation'
 import { iconSlotNames, iconSlots } from '@/themes/iconSlots'
 import { parts } from '@/themes/parts'
@@ -125,7 +127,7 @@ const sampleQueue = computed(() =>
         .map((track, index) => ({ key: `sample-${index}`, track })),
 )
 const sampleQueueIndex = ref(1)
-const sampleVideoMode = ref(true)
+const sampleViewMode = ref<PlayerViewMode>('Video')
 const sampleVideoTrack = computed(() => sampleTracks(t).find((track) => track.hasVideo))
 const tiles = computed(() => sampleTiles(t))
 const playlistRows = computed<PlaylistTrackRow[]>(() =>
@@ -991,8 +993,16 @@ const sampleTranscodeJobs = computed<TranscodeJob[]>(() => {
                     <div data-part="view" data-view="now-playing">
                         <NowPlayingStage
                             :track="sampleQueue[sampleQueueIndex]?.track"
-                            :video-mode="sampleVideoMode"
-                            @toggle-video="sampleVideoMode = !sampleVideoMode"
+                            :mode="sampleViewMode"
+                            :view="
+                                stageViewOf(
+                                    sampleViewMode,
+                                    sampleQueue[sampleQueueIndex]?.track.hasVideo === true,
+                                    'ready',
+                                )
+                            "
+                            video-state="ready"
+                            @select-mode="sampleViewMode = $event"
                         />
                         <PlayQueue
                             :items="sampleQueue"
@@ -1010,8 +1020,10 @@ const sampleTranscodeJobs = computed<TranscodeJob[]>(() => {
                     <div data-part="view" data-view="now-playing">
                         <NowPlayingStage
                             :track="sampleVideoTrack"
-                            :video-mode="sampleVideoMode"
-                            @toggle-video="sampleVideoMode = !sampleVideoMode"
+                            :mode="sampleViewMode"
+                            :view="stageViewOf(sampleViewMode, true, 'failed')"
+                            video-state="failed"
+                            @select-mode="sampleViewMode = $event"
                         />
                     </div>
                 </div>
