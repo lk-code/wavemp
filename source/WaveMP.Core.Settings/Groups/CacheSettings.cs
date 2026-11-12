@@ -1,7 +1,7 @@
 namespace WaveMP.Core.Settings.Groups;
 
 /// <summary>
-/// Settings of the cache under <c>/data/cache</c> (scaled covers, later transcoded media). Stored as the settings
+/// Settings of the cache under <c>/data/cache</c> (scaled covers and transcoded media). Stored as the settings
 /// group <see cref="Key"/>; values missing in the stored JSON keep the defaults below.
 /// </summary>
 public sealed class CacheSettings
