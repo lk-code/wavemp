@@ -26,6 +26,7 @@ ARG TARGETARCH
 WORKDIR /src
 COPY .editorconfig global.json Directory.Build.props Directory.Packages.props ./
 COPY source/WaveMP.Core.Caching/WaveMP.Core.Caching.csproj source/WaveMP.Core.Caching/
+COPY source/WaveMP.Core.Collection/WaveMP.Core.Collection.csproj source/WaveMP.Core.Collection/
 COPY source/WaveMP.Core.Jobs/WaveMP.Core.Jobs.csproj source/WaveMP.Core.Jobs/
 COPY source/WaveMP.Core.Library/WaveMP.Core.Library.csproj source/WaveMP.Core.Library/
 COPY source/WaveMP.Core.Metadata/WaveMP.Core.Metadata.csproj source/WaveMP.Core.Metadata/
@@ -38,6 +39,7 @@ COPY source/WaveMP.Data/WaveMP.Data.csproj source/WaveMP.Data/
 COPY source/WaveMP.Service/WaveMP.Service.csproj source/WaveMP.Service/
 RUN dotnet restore source/WaveMP.Service/WaveMP.Service.csproj -a "$TARGETARCH"
 COPY source/WaveMP.Core.Caching/ source/WaveMP.Core.Caching/
+COPY source/WaveMP.Core.Collection/ source/WaveMP.Core.Collection/
 COPY source/WaveMP.Core.Jobs/ source/WaveMP.Core.Jobs/
 COPY source/WaveMP.Core.Library/ source/WaveMP.Core.Library/
 COPY source/WaveMP.Core.Metadata/ source/WaveMP.Core.Metadata/
