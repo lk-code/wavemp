@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref, shallowRef, watch } from 'vue'
 import {
     PlaybackMethodObject,
+    StreamProtocolObject,
     type AudioFormat,
     type Track,
     type TrackPlayback,
@@ -83,9 +84,9 @@ function artistOf(track: Track | undefined): string | undefined {
 
 /**
  * The audio player: the queue, the playback through the audio engine and the state the transport
- * bar shows. The server decides per track whether the browser plays it directly; tracks that need
- * transcoding (roadmap step 12) or fail are skipped with a notice. Plays count for the history once
- * they were listened to long enough.
+ * bar shows. The server decides per track whether the browser plays the file directly or a
+ * transcoded HLS stream; tracks that cannot be played or fail are skipped with a notice. Plays count
+ * for the history once they were listened to long enough.
  */
 export const usePlayerStore = defineStore('player', () => {
     const session = useSessionStore()
@@ -154,9 +155,15 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     function sourceOf(value: TrackPlayback): DeckSource | null {
-        return value.method === PlaybackMethodObject.DirectPlay && value.streamUrl
-            ? { url: value.streamUrl, gain: gainOf(value) }
-            : null
+        if (!value.streamUrl) {
+            return null
+        }
+
+        const source = { url: value.streamUrl, gain: gainOf(value) }
+        const hls =
+            value.method === PlaybackMethodObject.Transcode ||
+            value.protocol === StreamProtocolObject.Hls
+        return hls ? { ...source, hls } : source
     }
 
     async function fetchPlayback(item: QueueItem): Promise<TrackPlayback | PlayerMessage> {

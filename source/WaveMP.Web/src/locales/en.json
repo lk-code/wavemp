@@ -121,7 +121,7 @@
     "showNowPlaying": "Show Now Playing",
     "close": "Close player",
     "messages": {
-      "unsupported": "This song cannot be played in this browser yet; it was skipped.",
+      "unsupported": "This song cannot be played in this browser and the server cannot convert it right now; it was skipped.",
       "unavailable": "This song could not be loaded; it was skipped.",
       "failed": "Playback failed; the song was skipped."
     }

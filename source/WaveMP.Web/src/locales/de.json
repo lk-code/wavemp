@@ -121,7 +121,7 @@
     "showNowPlaying": "Aktuelle Wiedergabe anzeigen",
     "close": "Player schließen",
     "messages": {
-      "unsupported": "Dieser Titel kann in diesem Browser noch nicht abgespielt werden und wurde übersprungen.",
+      "unsupported": "Dieser Titel kann in diesem Browser nicht abgespielt und vom Server gerade nicht umgewandelt werden; er wurde übersprungen.",
       "unavailable": "Dieser Titel konnte nicht geladen werden und wurde übersprungen.",
       "failed": "Die Wiedergabe ist fehlgeschlagen; der Titel wurde übersprungen."
     }

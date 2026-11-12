@@ -267,6 +267,29 @@ describe('player store', () => {
         expect(engine.lastUrl).toBe('/stream/b')
     })
 
+    it('plays transcoded tracks as HLS', async () => {
+        vi.mocked(getPlayback).mockImplementation((id) =>
+            Promise.resolve({
+                trackId: id,
+                method: 'Transcode',
+                transcodeReason: 'format_unsupported',
+                protocol: 'Hls',
+                streamUrl: `/hls/${id}/master.m3u8`,
+            }),
+        )
+        const player = usePlayerStore()
+
+        player.playTracks(abc, 0)
+        await flushPromises()
+
+        expect(player.state.trackId).toBe('a')
+        expect(player.state.message).toBeNull()
+        expect(engine.load).toHaveBeenCalledWith(
+            { url: '/hls/a/master.m3u8', gain: 1, hls: true },
+            0,
+        )
+    })
+
     it('stops when no track of the queue can be played', async () => {
         vi.mocked(getPlayback).mockRejectedValue({ responseStatusCode: 404 })
         const player = usePlayerStore()

@@ -2,13 +2,18 @@
 // loaded while the current one plays and starts the moment it ends (gapless as far as the browser
 // allows). With Web Audio, each deck runs through its own gain (ReplayGain) into a master gain
 // (volume) and an analyser, which later visualizations read; without Web Audio, the volume of the
-// elements does both. The engine knows nothing about the queue: the player store decides what plays.
+// elements does both. Transcoded tracks arrive as HLS and are attached through hls.js. The engine
+// knows nothing about the queue: the player store decides what plays.
+
+import { browserHlsSupport, type HlsAttachment, type HlsSupport } from './hls'
 
 export interface DeckSource {
     /** URL of the stream. */
     readonly url: string
     /** Gain factor of the track (ReplayGain), 1 for none. */
     readonly gain: number
+    /** Whether the URL is an HLS master playlist instead of a file. */
+    readonly hls?: boolean
 }
 
 export interface EngineEvents {
@@ -33,6 +38,8 @@ export interface AudioEnvironment {
     createContext(): AudioContext | null
     setTimeout(callback: () => void, delay: number): number
     clearTimeout(handle: number): void
+    /** HLS playback; the browser's by default. */
+    hls?: HlsSupport
 }
 
 export const browserAudioEnvironment: AudioEnvironment = {
@@ -56,6 +63,7 @@ export const browserAudioEnvironment: AudioEnvironment = {
     },
     setTimeout: (callback, delay) => window.setTimeout(callback, delay),
     clearTimeout: (handle) => window.clearTimeout(handle),
+    hls: browserHlsSupport,
 }
 
 /**
@@ -71,6 +79,10 @@ interface Deck {
     readonly audio: HTMLAudioElement
     gain: GainNode | null
     source: DeckSource | null
+    /** The attached HLS stream, if the source is one. */
+    hls: HlsAttachment | null
+    /** Increases with every new source, so a late HLS attachment of an older one is dropped. */
+    loads: number
 }
 
 function finiteOrZero(value: number): number {
@@ -131,7 +143,7 @@ export class AudioEngine {
         const deck = this.deck
         deck.source = source
         this.applyGain(deck)
-        deck.audio.src = source.url
+        this.attach(deck, source)
         if (position > 0) {
             const audio = deck.audio
             const seek = (): void => {
@@ -139,8 +151,6 @@ export class AudioEngine {
             }
             audio.addEventListener('loadedmetadata', seek, { once: true })
         }
-
-        deck.audio.load()
     }
 
     /** Loads the next track on the other deck, or forgets it with null. */
@@ -154,8 +164,7 @@ export class AudioEngine {
         if (source) {
             other.source = source
             this.applyGain(other)
-            other.audio.src = source.url
-            other.audio.load()
+            this.attach(other, source)
         } else {
             this.unload(other)
         }
@@ -232,7 +241,7 @@ export class AudioEngine {
 
     private createDeck(index: number): Deck {
         const audio = this.environment.createAudio()
-        const deck: Deck = { audio, gain: null, source: null }
+        const deck: Deck = { audio, gain: null, source: null, hls: null, loads: 0 }
         const active = (): boolean => this.decks[this.current] === deck
         audio.addEventListener('timeupdate', () => {
             if (active()) {
@@ -378,8 +387,44 @@ export class AudioEngine {
         this.events.timeupdate?.(finiteOrZero(audio.currentTime), finiteOrZero(audio.duration))
     }
 
+    /** Sets the source of a deck: a file directly, an HLS stream through the HLS support. */
+    private attach(deck: Deck, source: DeckSource): void {
+        this.detachHls(deck)
+        const load = ++deck.loads
+        if (!source.hls) {
+            deck.audio.src = source.url
+            deck.audio.load()
+            return
+        }
+
+        const failed = (error: unknown): void => {
+            if (deck.loads === load && this.decks[this.current] === deck) {
+                this.events.error?.(error)
+            }
+        }
+        const support = this.environment.hls ?? browserHlsSupport
+        support
+            .attach(deck.audio, source.url, failed)
+            .then((attachment) => {
+                if (deck.loads === load) {
+                    deck.hls = attachment
+                } else {
+                    attachment.destroy()
+                }
+            })
+            .catch(failed)
+    }
+
+    private detachHls(deck: Deck): void {
+        deck.loads++
+        const attachment = deck.hls
+        deck.hls = null
+        attachment?.destroy()
+    }
+
     private unload(deck: Deck): void {
         deck.source = null
+        this.detachHls(deck)
         if (deck.audio.getAttribute('src') !== null) {
             deck.audio.pause()
             deck.audio.removeAttribute('src')

@@ -8,8 +8,8 @@ export type PlaybackState = 'idle' | 'playing' | 'paused'
 export type RepeatMode = 'off' | 'all' | 'one'
 
 /**
- * Notice of the player: the track needs transcoding (not available yet), could not be loaded or
- * failed to play. The player skips to the next track.
+ * Notice of the player: the track needs transcoding, which is unavailable on the server, could not
+ * be loaded or failed to play. The player skips to the next track.
  */
 export type PlayerMessage = 'unsupported' | 'unavailable' | 'failed'
 

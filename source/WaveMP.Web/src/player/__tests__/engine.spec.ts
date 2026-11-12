@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AudioEngine, handoverLead, type AudioEnvironment, type EngineEvents } from '../engine'
+import type { HlsAttachment, HlsSupport } from '../hls'
 
 /** An audio element without a browser: the tests drive time and events. */
 class FakeAudio extends EventTarget {
@@ -48,6 +49,47 @@ class FakeAudio extends EventTarget {
     }
 }
 
+/** HLS support that records attachments; the tests resolve or reject them. */
+class FakeHls implements HlsSupport {
+    readonly attached: {
+        media: HTMLMediaElement
+        url: string
+        onFatalError: (error: unknown) => void
+        resolve: (attachment: HlsAttachment) => void
+        reject: (error: unknown) => void
+        destroy: ReturnType<typeof vi.fn<() => void>>
+    }[] = []
+
+    attach(
+        media: HTMLMediaElement,
+        url: string,
+        onFatalError: (error: unknown) => void,
+    ): Promise<HlsAttachment> {
+        return new Promise((resolve, reject) => {
+            this.attached.push({
+                media,
+                url,
+                onFatalError,
+                resolve,
+                reject,
+                destroy: vi.fn<() => void>(),
+            })
+        })
+    }
+
+    /** Completes the attachment with the given index. */
+    async complete(index: number): Promise<void> {
+        const entry = this.attached[index]!
+        entry.resolve({ destroy: entry.destroy })
+        await flush()
+    }
+}
+
+async function flush(): Promise<void> {
+    await Promise.resolve()
+    await Promise.resolve()
+}
+
 class FakeGain {
     readonly gain = { value: 1 }
     readonly connect = vi.fn()
@@ -88,9 +130,11 @@ interface Setup {
     events: Required<EngineEvents>
     timers: (() => void)[]
     context: FakeContext | null
+    hls: FakeHls
 }
 
 function setup(withContext = false): Setup {
+    const hls = new FakeHls()
     const decks: FakeAudio[] = []
     const timers: (() => void)[] = []
     const context = withContext ? new FakeContext() : null
@@ -105,6 +149,7 @@ function setup(withContext = false): Setup {
         clearTimeout: (handle) => {
             timers[handle - 1] = () => undefined
         },
+        hls,
     }
     const events: Required<EngineEvents> = {
         timeupdate: vi.fn(),
@@ -115,7 +160,7 @@ function setup(withContext = false): Setup {
         advanced: vi.fn(),
         error: vi.fn(),
     }
-    return { engine: new AudioEngine(events, environment), decks, events, timers, context }
+    return { engine: new AudioEngine(events, environment), decks, events, timers, context, hls }
 }
 
 describe('AudioEngine', () => {
@@ -252,6 +297,42 @@ describe('AudioEngine', () => {
 
         await s.engine.play()
 
+        expect(s.events.error).toHaveBeenCalledOnce()
+    })
+
+    it('attaches HLS sources through the HLS support instead of the src', async () => {
+        s.engine.load({ url: '/master.m3u8', gain: 1, hls: true })
+
+        expect(s.hls.attached).toHaveLength(1)
+        expect(s.hls.attached[0]!.url).toBe('/master.m3u8')
+        expect(s.hls.attached[0]!.media).toBe(s.decks[0])
+        expect(s.decks[0]!.src).toBe('')
+        expect(s.decks[0]!.load).not.toHaveBeenCalled()
+
+        await s.hls.complete(0)
+        s.engine.stop()
+
+        expect(s.hls.attached[0]!.destroy).toHaveBeenCalledOnce()
+    })
+
+    it('destroys an HLS attachment that completes after another track was loaded', async () => {
+        s.engine.load({ url: '/master.m3u8', gain: 1, hls: true })
+        s.engine.load({ url: '/b', gain: 1 })
+
+        await s.hls.complete(0)
+
+        expect(s.hls.attached[0]!.destroy).toHaveBeenCalledOnce()
+        expect(s.decks[0]!.src).toBe('/b')
+    })
+
+    it('reports HLS errors of the current deck only', async () => {
+        s.engine.load({ url: '/a.m3u8', gain: 1, hls: true })
+        s.engine.prepare({ url: '/b.m3u8', gain: 1, hls: true })
+
+        s.hls.attached[1]!.onFatalError(new Error('fatal'))
+        expect(s.events.error).not.toHaveBeenCalled()
+        s.hls.attached[0]!.reject(new Error('no HLS'))
+        await flush()
         expect(s.events.error).toHaveBeenCalledOnce()
     })
 
