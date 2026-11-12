@@ -18,6 +18,9 @@ namespace WaveMP.Core.Library.Tracks;
 /// <param name="Year">Only tracks of this year.</param>
 /// <param name="HasAudio">Only tracks with or without an audio file.</param>
 /// <param name="HasVideo">Only tracks with or without a video file.</param>
+/// <param name="UserId">The profile whose favorites and ratings the tracks carry and to whom <paramref name="MyMusic"/>
+/// and the sort key <see cref="TrackSortField.Rating"/> refer.</param>
+/// <param name="MyMusic">Only tracks of the "my music" of the profile; ignored without a profile.</param>
 public sealed record TrackListRequest(
     int Offset,
     int Limit,
@@ -29,4 +32,6 @@ public sealed record TrackListRequest(
     string? Genre = null,
     int? Year = null,
     bool? HasAudio = null,
-    bool? HasVideo = null);
+    bool? HasVideo = null,
+    Guid? UserId = null,
+    bool MyMusic = false);

@@ -6,17 +6,25 @@ namespace WaveMP.Core.Library.Queries;
 /// <summary>
 /// The sort keys and directions that apply when a client sends none. With a search text the relevance comes first;
 /// the relevance without a search text falls back to the default key. Keys for which the largest value is the most
-/// interesting (relevance, time found first, number of tracks) sort descending by default, all others ascending.
+/// interesting (relevance, time found first, rating, number of tracks) sort descending by default, all others
+/// ascending.
 /// </summary>
 public static class LibraryQueryDefaults
 {
+    /// <summary>
+    /// The sort key of the tracks. The rating belongs to a profile; without one, it falls back like the relevance
+    /// without a search text.
+    /// </summary>
     public static TrackSortField TrackSort(
         TrackSortField? sort,
         bool hasSearch,
-        TrackSortField fallback = TrackSortField.AlbumArtist)
+        TrackSortField fallback = TrackSortField.AlbumArtist,
+        bool hasUser = true)
     {
         TrackSortField key = sort ?? (hasSearch ? TrackSortField.Relevance : fallback);
-        return key == TrackSortField.Relevance && !hasSearch ? fallback : key;
+        return (key == TrackSortField.Relevance && !hasSearch) || (key == TrackSortField.Rating && !hasUser)
+            ? fallback
+            : key;
     }
 
     public static AlbumSortField AlbumSort(AlbumSortField? sort, bool hasSearch)
@@ -43,7 +51,8 @@ public static class LibraryQueryDefaults
 
     public static SortDirection Direction(TrackSortField sort, SortDirection? direction)
     {
-        return direction ?? Descending(sort is TrackSortField.FirstSeenAt or TrackSortField.Relevance);
+        return direction ?? Descending(
+            sort is TrackSortField.FirstSeenAt or TrackSortField.Relevance or TrackSortField.Rating);
     }
 
     public static SortDirection Direction(AlbumSortField sort, SortDirection? direction)

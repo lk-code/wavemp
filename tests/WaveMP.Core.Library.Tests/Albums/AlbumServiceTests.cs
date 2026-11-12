@@ -36,6 +36,29 @@ public class AlbumServiceTests
     }
 
     [Test]
+    public async Task ListAsync_WithUserAndMyMusic_PassesBoth()
+    {
+        var userId = Guid.NewGuid();
+
+        await _service.ListAsync(new AlbumListRequest(0, 50, UserId: userId, MyMusic: true));
+
+        await _albums.Received(1).ListAsync(
+            new AlbumListQuery(0, 50, AlbumSortField.Artist, SortDirection.Asc, UserId: userId, MyMusic: true),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task GetAsync_WithUser_FindsTheAlbumOfTheUser()
+    {
+        var userId = Guid.NewGuid();
+        var albumId = Guid.NewGuid();
+
+        await _service.GetAsync(albumId, userId);
+
+        await _albums.Received(1).FindAsync(albumId, userId, Arg.Any<CancellationToken>());
+    }
+
+    [Test]
     public async Task ListTracksAsync_UnknownAlbum_ReturnsNull()
     {
         Page<TrackRow>? page = await _service.ListTracksAsync(Guid.NewGuid(), new TrackListRequest(0, 50));

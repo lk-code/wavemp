@@ -58,4 +58,22 @@ public class SearchServiceTests
             new TrackListQuery(5, 20, TrackSortField.Relevance, SortDirection.Desc, "alpa band"),
             Arg.Any<CancellationToken>());
     }
+
+    [Test]
+    public async Task SearchAsync_WithUser_PassesTheUserToAllGroups()
+    {
+        var userId = Guid.NewGuid();
+
+        await _service.SearchAsync("alpha", 0, 10, userId);
+
+        await _artists.Received(1).ListAsync(
+            new ArtistListQuery(0, 10, ArtistSortField.Relevance, SortDirection.Desc, "alpha", userId),
+            Arg.Any<CancellationToken>());
+        await _albums.Received(1).ListAsync(
+            new AlbumListQuery(0, 10, AlbumSortField.Relevance, SortDirection.Desc, "alpha", UserId: userId),
+            Arg.Any<CancellationToken>());
+        await _tracks.Received(1).ListAsync(
+            new TrackListQuery(0, 10, TrackSortField.Relevance, SortDirection.Desc, "alpha", UserId: userId),
+            Arg.Any<CancellationToken>());
+    }
 }

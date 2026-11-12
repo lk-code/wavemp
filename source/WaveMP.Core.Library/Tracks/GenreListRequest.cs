@@ -11,9 +11,13 @@ namespace WaveMP.Core.Library.Tracks;
 /// <param name="Sort">Sort key; by default the name.</param>
 /// <param name="Direction">Sort direction; by default descending for the number of tracks.</param>
 /// <param name="Search">Search text as typed; empty texts search nothing.</param>
+/// <param name="UserId">The profile to whom <paramref name="MyMusic"/> refers.</param>
+/// <param name="MyMusic">Only the tracks of the "my music" of the profile count; ignored without a profile.</param>
 public sealed record GenreListRequest(
     int Offset,
     int Limit,
     GenreSortField? Sort = null,
     SortDirection? Direction = null,
-    string? Search = null);
+    string? Search = null,
+    Guid? UserId = null,
+    bool MyMusic = false);

@@ -13,9 +13,9 @@ internal sealed class TrackService(ITrackRepository tracks) : ITrackService
         return tracks.ListAsync(LibraryQueries.ToQuery(request, TrackSortField.AlbumArtist), cancellationToken);
     }
 
-    public Task<TrackRow?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<TrackRow?> GetAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default)
     {
-        return tracks.FindAsync(id, cancellationToken);
+        return tracks.FindAsync(id, userId, cancellationToken);
     }
 
     public async Task<Page<MediaFile>?> ListFilesAsync(

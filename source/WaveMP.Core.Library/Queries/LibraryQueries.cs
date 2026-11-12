@@ -22,7 +22,9 @@ internal static class LibraryQueries
             request.Limit,
             sort,
             LibraryQueryDefaults.Direction(sort, request.Direction),
-            search);
+            search,
+            request.UserId,
+            IsMyMusic(request.UserId, request.MyMusic));
     }
 
     public static AlbumListQuery ToQuery(AlbumListRequest request)
@@ -37,7 +39,9 @@ internal static class LibraryQueries
             search,
             request.ArtistId,
             MetadataText.Normalize(request.Genre),
-            request.Year);
+            request.Year,
+            request.UserId,
+            IsMyMusic(request.UserId, request.MyMusic));
     }
 
     /// <param name="request">The request of the client.</param>
@@ -45,7 +49,11 @@ internal static class LibraryQueries
     public static TrackListQuery ToQuery(TrackListRequest request, TrackSortField fallback)
     {
         string? search = SearchText.Normalize(request.Search);
-        TrackSortField sort = LibraryQueryDefaults.TrackSort(request.Sort, search is not null, fallback);
+        TrackSortField sort = LibraryQueryDefaults.TrackSort(
+            request.Sort,
+            search is not null,
+            fallback,
+            request.UserId is not null);
         return new TrackListQuery(
             request.Offset,
             request.Limit,
@@ -57,7 +65,9 @@ internal static class LibraryQueries
             MetadataText.Normalize(request.Genre),
             request.Year,
             request.HasAudio,
-            request.HasVideo);
+            request.HasVideo,
+            request.UserId,
+            IsMyMusic(request.UserId, request.MyMusic));
     }
 
     public static GenreListQuery ToQuery(GenreListRequest request)
@@ -68,12 +78,27 @@ internal static class LibraryQueries
             request.Limit,
             sort,
             LibraryQueryDefaults.Direction(sort, request.Direction),
-            SearchText.Normalize(request.Search));
+            SearchText.Normalize(request.Search),
+            request.UserId,
+            IsMyMusic(request.UserId, request.MyMusic));
     }
 
     public static YearListQuery ToQuery(YearListRequest request)
     {
-        return new YearListQuery(request.Offset, request.Limit, LibraryQueryDefaults.YearDirection(request.Direction));
+        return new YearListQuery(
+            request.Offset,
+            request.Limit,
+            LibraryQueryDefaults.YearDirection(request.Direction),
+            request.UserId,
+            IsMyMusic(request.UserId, request.MyMusic));
+    }
+
+    /// <summary>
+    /// "My music" belongs to a profile; without one, the filter does not apply.
+    /// </summary>
+    private static bool IsMyMusic(Guid? userId, bool myMusic)
+    {
+        return myMusic && userId is not null;
     }
 
     public static TrackFileListQuery ToQuery(Guid trackId, TrackFileListRequest request)

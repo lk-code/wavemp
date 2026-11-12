@@ -31,7 +31,7 @@ internal sealed class TrackMetadataEditor(
 
     public async Task<TrackMetadata?> GetAsync(Guid trackId, CancellationToken cancellationToken = default)
     {
-        TrackRow? row = await tracks.FindAsync(trackId, cancellationToken);
+        TrackRow? row = await tracks.FindAsync(trackId, cancellationToken: cancellationToken);
         TrackEditTarget? target = row is null
             ? null
             : await repository.FindEditTargetAsync(trackId, cancellationToken);

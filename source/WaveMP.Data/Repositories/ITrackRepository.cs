@@ -14,15 +14,20 @@ public interface ITrackRepository
     /// </summary>
     Task<Page<TrackRow>> ListAsync(TrackListQuery query, CancellationToken cancellationToken = default);
 
-    Task<TrackRow?> FindAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The track with the favorite and rating of <paramref name="userId"/>.
+    /// </summary>
+    Task<TrackRow?> FindAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// The tracks with these ids, in no particular order; ids of missing tracks are left out.
+    /// The tracks with these ids, in no particular order, with the favorites and ratings of <paramref name="userId"/>;
+    /// ids of missing tracks are left out.
     /// </summary>
     Task<IReadOnlyList<TrackRow>> ListByIdsAsync(
         IReadOnlyCollection<Guid> ids,
+        Guid? userId = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

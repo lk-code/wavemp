@@ -9,4 +9,11 @@ namespace WaveMP.Data.Projections;
 /// </param>
 /// <param name="TrackCount">Tracks of the artist: tracks of the artist or on albums of the artist.</param>
 /// <param name="FirstSeenAt">When the artist was found for the first time.</param>
-public sealed record ArtistRow(Guid Id, string Name, int AlbumCount, int TrackCount, DateTimeOffset FirstSeenAt);
+/// <param name="IsFavorite">Whether the user of the query marked the artist as favorite.</param>
+public sealed record ArtistRow(
+    Guid Id,
+    string Name,
+    int AlbumCount,
+    int TrackCount,
+    DateTimeOffset FirstSeenAt,
+    bool IsFavorite = false);

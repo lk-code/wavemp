@@ -10,9 +10,14 @@ namespace WaveMP.Data.Repositories;
 /// <param name="Sort">Sort key; ties are sorted by name and id.</param>
 /// <param name="Direction">Sort direction of the key.</param>
 /// <param name="Search">Normalized search text: only artists whose name contains it or is similar to it.</param>
+/// <param name="UserId">The user whose favorites the rows carry and to whom <paramref name="MyMusic"/> refers.</param>
+/// <param name="MyMusic">Only artists with at least one track of the "my music" of the user (as artist of the track or
+/// of its album). Needs <paramref name="UserId"/>.</param>
 public sealed record ArtistListQuery(
     int Offset,
     int Limit,
     ArtistSortField Sort,
     SortDirection Direction,
-    string? Search = null);
+    string? Search = null,
+    Guid? UserId = null,
+    bool MyMusic = false);

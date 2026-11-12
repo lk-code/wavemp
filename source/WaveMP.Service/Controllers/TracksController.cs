@@ -98,7 +98,7 @@ public sealed class TracksController(ITrackService tracks, ICoverCacheService co
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<TrackDto>> GetTrackAsync(Guid id, CancellationToken cancellationToken)
     {
-        TrackRow? track = await tracks.GetAsync(id, cancellationToken);
+        TrackRow? track = await tracks.GetAsync(id, User.GetUserId(), cancellationToken);
         return track is null
             ? this.Problem(ProblemCodeDto.TrackNotFound, StatusCodes.Status404NotFound)
             : Ok(track.ToDto());

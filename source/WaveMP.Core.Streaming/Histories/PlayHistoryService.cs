@@ -27,7 +27,7 @@ internal sealed class PlayHistoryService(
             return new PlayHistoryResult(PlayHistoryStatus.InvalidPlayedAt, null);
         }
 
-        TrackRow? track = await tracks.FindAsync(trackId, cancellationToken);
+        TrackRow? track = await tracks.FindAsync(trackId, userId, cancellationToken);
         if (track is null)
         {
             return new PlayHistoryResult(PlayHistoryStatus.TrackNotFound, null);
@@ -55,6 +55,7 @@ internal sealed class PlayHistoryService(
             cancellationToken);
         IReadOnlyList<TrackRow> rows = await tracks.ListByIdsAsync(
             [.. page.Items.Select(entry => entry.TrackId)],
+            userId,
             cancellationToken);
         var byId = rows.ToDictionary(row => row.Id);
 
@@ -73,7 +74,7 @@ internal sealed class PlayHistoryService(
             return null;
         }
 
-        TrackRow? track = await tracks.FindAsync(entry.TrackId, cancellationToken);
+        TrackRow? track = await tracks.FindAsync(entry.TrackId, userId, cancellationToken);
         return track is null ? null : new PlayHistoryItem(entry, track);
     }
 

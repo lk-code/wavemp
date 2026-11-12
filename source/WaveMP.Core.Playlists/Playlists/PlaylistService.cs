@@ -116,7 +116,7 @@ internal sealed class PlaylistService(
             return null;
         }
 
-        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(page.Items, cancellationToken);
+        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(userId, page.Items, cancellationToken);
         return new Page<PlaylistEntryItem>(items, page.Offset, page.Limit, page.Total);
     }
 
@@ -132,7 +132,7 @@ internal sealed class PlaylistService(
             return await NotFoundAsync(userId, playlistId, cancellationToken);
         }
 
-        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync([entry], cancellationToken);
+        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(userId, [entry], cancellationToken);
         return items.Count == 0
             ? PlaylistEntriesResult.Of(PlaylistStatus.EntryNotFound)
             : new PlaylistEntriesResult(PlaylistStatus.Ok, items);
@@ -158,7 +158,7 @@ internal sealed class PlaylistService(
             return PlaylistEntriesResult.Of(ToStatus(change.Status), change.Max);
         }
 
-        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(change.Entries, cancellationToken);
+        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(userId, change.Entries, cancellationToken);
         PlaylistItem? playlist = await GetAsync(userId, playlistId, cancellationToken);
         return new PlaylistEntriesResult(PlaylistStatus.Ok, items, playlist);
     }
@@ -182,7 +182,7 @@ internal sealed class PlaylistService(
             return PlaylistEntriesResult.Of(ToStatus(change.Status), change.Max);
         }
 
-        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(change.Entries, cancellationToken);
+        IReadOnlyList<PlaylistEntryItem> items = await WithTracksAsync(userId, change.Entries, cancellationToken);
         return items.Count == 0
             ? PlaylistEntriesResult.Of(PlaylistStatus.EntryNotFound)
             : new PlaylistEntriesResult(PlaylistStatus.Ok, items);
@@ -238,11 +238,13 @@ internal sealed class PlaylistService(
     /// they are left out.
     /// </summary>
     private async Task<IReadOnlyList<PlaylistEntryItem>> WithTracksAsync(
+        Guid userId,
         IReadOnlyList<PlaylistEntryRow> entries,
         CancellationToken cancellationToken)
     {
         IReadOnlyList<TrackRow> rows = await tracks.ListByIdsAsync(
             [.. entries.Select(entry => entry.TrackId)],
+            userId,
             cancellationToken);
         var byId = rows.ToDictionary(row => row.Id);
         return [.. entries

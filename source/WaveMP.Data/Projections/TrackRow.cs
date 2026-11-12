@@ -22,6 +22,8 @@ namespace WaveMP.Data.Projections;
 /// <param name="HasCover">Whether a cover exists: the track's own, its album's or one of another track of the album.
 /// </param>
 /// <param name="FirstSeenAt">When the track was found for the first time.</param>
+/// <param name="IsFavorite">Whether the user of the query marked the track as favorite.</param>
+/// <param name="Rating">Rating of the user of the query, 1 to 5 stars; 0 if the user did not rate the track.</param>
 public sealed record TrackRow(
     Guid Id,
     string Title,
@@ -40,4 +42,6 @@ public sealed record TrackRow(
     bool HasAudio,
     bool HasVideo,
     bool HasCover,
-    DateTimeOffset FirstSeenAt);
+    DateTimeOffset FirstSeenAt,
+    bool IsFavorite = false,
+    int Rating = 0);

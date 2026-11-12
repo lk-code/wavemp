@@ -13,9 +13,9 @@ internal sealed class AlbumService(IAlbumRepository albums, ITrackRepository tra
         return albums.ListAsync(LibraryQueries.ToQuery(request), cancellationToken);
     }
 
-    public Task<AlbumRow?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<AlbumRow?> GetAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default)
     {
-        return albums.FindAsync(id, cancellationToken);
+        return albums.FindAsync(id, userId, cancellationToken);
     }
 
     public async Task<Page<TrackRow>?> ListTracksAsync(

@@ -17,6 +17,12 @@ namespace WaveMP.Data.Repositories;
 /// <param name="Year">Only tracks of this year.</param>
 /// <param name="HasAudio">Only tracks with (true) or without (false) an audio file.</param>
 /// <param name="HasVideo">Only tracks with (true) or without (false) a video file.</param>
+/// <param name="UserId">The user whose favorites and ratings the rows carry and to whom <paramref name="MyMusic"/>,
+/// <paramref name="MinRating"/> and <see cref="TrackSortField.Rating"/> refer.</param>
+/// <param name="MyMusic">Only tracks of the "my music" of the user: rated, marked as favorite (also through their album
+/// or artist) or in one of the user's playlists. Needs <paramref name="UserId"/>.</param>
+/// <param name="MinRating">Only tracks the user rated with at least this many stars. Needs <paramref name="UserId"/>.
+/// </param>
 public sealed record TrackListQuery(
     int Offset,
     int Limit,
@@ -28,4 +34,7 @@ public sealed record TrackListQuery(
     string? Genre = null,
     int? Year = null,
     bool? HasAudio = null,
-    bool? HasVideo = null);
+    bool? HasVideo = null,
+    Guid? UserId = null,
+    bool MyMusic = false,
+    int? MinRating = null);

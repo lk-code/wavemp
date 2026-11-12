@@ -22,6 +22,7 @@ internal sealed class RecentlyPlayedService(
             cancellationToken);
         IReadOnlyList<TrackRow> rows = await tracks.ListByIdsAsync(
             [.. page.Items.Select(item => item.TrackId)],
+            userId,
             cancellationToken);
         var byId = rows.ToDictionary(row => row.Id);
 

@@ -13,9 +13,9 @@ internal sealed class ArtistService(IArtistRepository artists, IAlbumRepository 
         return artists.ListAsync(LibraryQueries.ToQuery(request), cancellationToken);
     }
 
-    public Task<ArtistRow?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<ArtistRow?> GetAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default)
     {
-        return artists.FindAsync(id, cancellationToken);
+        return artists.FindAsync(id, userId, cancellationToken);
     }
 
     public async Task<Page<AlbumRow>?> ListAlbumsAsync(

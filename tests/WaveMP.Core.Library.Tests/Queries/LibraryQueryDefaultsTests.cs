@@ -30,6 +30,14 @@ public class LibraryQueryDefaultsTests
         LibraryQueryDefaults.TrackSort(null, true, TrackSortField.Album).Should().Be(TrackSortField.Relevance);
     }
 
+    [Test]
+    public void TrackSort_RatingWithoutUser_UsesTheFallback()
+    {
+        LibraryQueryDefaults.TrackSort(TrackSortField.Rating, false).Should().Be(TrackSortField.Rating);
+        LibraryQueryDefaults.TrackSort(TrackSortField.Rating, false, TrackSortField.Album, hasUser: false)
+            .Should().Be(TrackSortField.Album);
+    }
+
     [TestCase(null, false, AlbumSortField.Artist)]
     [TestCase(null, true, AlbumSortField.Relevance)]
     [TestCase(AlbumSortField.Relevance, false, AlbumSortField.Artist)]
@@ -68,6 +76,7 @@ public class LibraryQueryDefaultsTests
     [TestCase(TrackSortField.Duration, SortDirection.Asc)]
     [TestCase(TrackSortField.FirstSeenAt, SortDirection.Desc)]
     [TestCase(TrackSortField.Relevance, SortDirection.Desc)]
+    [TestCase(TrackSortField.Rating, SortDirection.Desc)]
     public void Direction_OfTracksWithoutDirection_DescendsForRecentAndRelevant(
         TrackSortField sort,
         SortDirection expected)

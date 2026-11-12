@@ -13,7 +13,19 @@ public interface IAlbumRepository
     /// </summary>
     Task<Page<AlbumRow>> ListAsync(AlbumListQuery query, CancellationToken cancellationToken = default);
 
-    Task<AlbumRow?> FindAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The album with the favorite of <paramref name="userId"/>.
+    /// </summary>
+    Task<AlbumRow?> FindAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The albums with these ids, in no particular order, with the favorites of <paramref name="userId"/>; ids of
+    /// missing albums are left out.
+    /// </summary>
+    Task<IReadOnlyList<AlbumRow>> ListByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        Guid? userId = null,
+        CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
 }

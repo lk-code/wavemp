@@ -70,7 +70,7 @@ public sealed class ArtistsController(IArtistService artists) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<ArtistDto>> GetArtistAsync(Guid id, CancellationToken cancellationToken)
     {
-        ArtistRow? artist = await artists.GetAsync(id, cancellationToken);
+        ArtistRow? artist = await artists.GetAsync(id, User.GetUserId(), cancellationToken);
         return artist is null
             ? this.Problem(ProblemCodeDto.ArtistNotFound, StatusCodes.Status404NotFound)
             : Ok(artist.ToDto());

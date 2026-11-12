@@ -79,7 +79,7 @@ public sealed class AlbumsController(IAlbumService albums, ICoverCacheService co
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
     public async Task<ActionResult<AlbumDto>> GetAlbumAsync(Guid id, CancellationToken cancellationToken)
     {
-        AlbumRow? album = await albums.GetAsync(id, cancellationToken);
+        AlbumRow? album = await albums.GetAsync(id, User.GetUserId(), cancellationToken);
         return album is null
             ? this.Problem(ProblemCodeDto.AlbumNotFound, StatusCodes.Status404NotFound)
             : Ok(album.ToDto());

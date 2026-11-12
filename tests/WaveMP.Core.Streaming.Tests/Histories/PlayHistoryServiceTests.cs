@@ -25,7 +25,7 @@ public class PlayHistoryServiceTests
     {
         _history = Substitute.For<IPlayHistoryRepository>();
         _tracks = Substitute.For<ITrackRepository>();
-        _tracks.FindAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((TrackRow?)null);
+        _tracks.FindAsync(Arg.Any<Guid>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns((TrackRow?)null);
         TimeProvider timeProvider = Substitute.For<TimeProvider>();
         timeProvider.GetUtcNow().Returns(_now);
         _service = new PlayHistoryService(
@@ -123,7 +123,7 @@ public class PlayHistoryServiceTests
         PlayHistoryEntry gone = Entry(TrackRowOf(Guid.NewGuid(), "Gone"), _now.AddMinutes(-10));
         _history.ListAsync(new PlayHistoryListQuery(_userId, 0, 10), Arg.Any<CancellationToken>())
             .Returns(new Page<PlayHistoryEntry>([newest, older, gone], 0, 10, 3));
-        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
+        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), _userId, Arg.Any<CancellationToken>())
             .Returns([first, second]);
 
         Page<PlayHistoryItem> page = await _service.ListAsync(_userId, 0, 10);
@@ -159,7 +159,7 @@ public class PlayHistoryServiceTests
     private TrackRow Track(string title)
     {
         TrackRow track = TrackRowOf(Guid.NewGuid(), title);
-        _tracks.FindAsync(track.Id, Arg.Any<CancellationToken>()).Returns(track);
+        _tracks.FindAsync(track.Id, _userId, Arg.Any<CancellationToken>()).Returns(track);
         return track;
     }
 

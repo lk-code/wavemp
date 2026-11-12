@@ -38,7 +38,7 @@ public sealed class SearchController(ISearchService search) : ControllerBase
         [FromQuery, Range(1, PageLimits.SearchMaxLimit)] int limit = PageLimits.SearchDefaultLimit,
         CancellationToken cancellationToken = default)
     {
-        SearchResult? result = await search.SearchAsync(q, offset, limit, cancellationToken);
+        SearchResult? result = await search.SearchAsync(q, offset, limit, User.GetUserId(), cancellationToken);
         if (result is null)
         {
             // White space only, or nothing left after normalization.

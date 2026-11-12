@@ -14,6 +14,7 @@ namespace WaveMP.Data.Projections;
 /// <param name="DurationMilliseconds">Sum of the durations of the tracks.</param>
 /// <param name="HasCover">Whether the album or one of its tracks has a cover.</param>
 /// <param name="FirstSeenAt">When the album was found for the first time.</param>
+/// <param name="IsFavorite">Whether the user of the query marked the album as favorite.</param>
 public sealed record AlbumRow(
     Guid Id,
     string Title,
@@ -25,4 +26,5 @@ public sealed record AlbumRow(
     int TrackCount,
     double DurationMilliseconds,
     bool HasCover,
-    DateTimeOffset FirstSeenAt);
+    DateTimeOffset FirstSeenAt,
+    bool IsFavorite = false);

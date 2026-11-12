@@ -67,7 +67,7 @@ public class TrackMetadataEditorTests
         });
 
         _tracks = Substitute.For<ITrackRepository>();
-        _tracks.FindAsync(_trackId, Arg.Any<CancellationToken>()).Returns(Row());
+        _tracks.FindAsync(_trackId, Arg.Any<Guid?>(), Arg.Any<CancellationToken>()).Returns(Row());
         _repository = Substitute.For<ITrackMetadataRepository>();
         _repository.FindEditTargetAsync(_trackId, Arg.Any<CancellationToken>())
             .Returns(_ => new TrackEditTarget(_trackId, Directory, _audio));

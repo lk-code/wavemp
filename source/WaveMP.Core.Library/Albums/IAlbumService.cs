@@ -11,7 +11,10 @@ public interface IAlbumService
 {
     Task<Page<AlbumRow>> ListAsync(AlbumListRequest request, CancellationToken cancellationToken = default);
 
-    Task<AlbumRow?> GetAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The album with the favorite of the profile <paramref name="userId"/>.
+    /// </summary>
+    Task<AlbumRow?> GetAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The tracks of an album, by default in the order of disc and track number. <c>null</c> if the album does not

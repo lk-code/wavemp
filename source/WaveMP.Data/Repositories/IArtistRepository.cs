@@ -13,7 +13,19 @@ public interface IArtistRepository
     /// </summary>
     Task<Page<ArtistRow>> ListAsync(ArtistListQuery query, CancellationToken cancellationToken = default);
 
-    Task<ArtistRow?> FindAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The artist with the favorite of <paramref name="userId"/>.
+    /// </summary>
+    Task<ArtistRow?> FindAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The artists with these ids, in no particular order, with the favorites of <paramref name="userId"/>; ids of
+    /// missing artists are left out.
+    /// </summary>
+    Task<IReadOnlyList<ArtistRow>> ListByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        Guid? userId = null,
+        CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
 }

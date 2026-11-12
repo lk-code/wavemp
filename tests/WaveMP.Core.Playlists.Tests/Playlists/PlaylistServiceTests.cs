@@ -35,7 +35,8 @@ public class PlaylistServiceTests
                 Arg.Any<int>(),
                 Arg.Any<CancellationToken>())
             .Returns([]);
-        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns([]);
+        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), _userId, Arg.Any<CancellationToken>())
+            .Returns([]);
         TimeProvider timeProvider = Substitute.For<TimeProvider>();
         timeProvider.GetUtcNow().Returns(_now);
         _service = new PlaylistService(
@@ -184,7 +185,8 @@ public class PlaylistServiceTests
                 new PlaylistEntryListQuery(_userId, playlistId, 0, 10),
                 Arg.Any<CancellationToken>())
             .Returns(new Page<PlaylistEntryRow>([kept, gone], 0, 10, 2));
-        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns([track]);
+        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), _userId, Arg.Any<CancellationToken>())
+            .Returns([track]);
 
         Page<PlaylistEntryItem>? page = await _service.ListEntriesAsync(_userId, playlistId, 0, 10);
 
@@ -225,7 +227,8 @@ public class PlaylistServiceTests
                 _now,
                 Arg.Any<CancellationToken>())
             .Returns(new PlaylistEntryChange(PlaylistEntryChangeStatus.Done, [entry]));
-        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns([track]);
+        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), _userId, Arg.Any<CancellationToken>())
+            .Returns([track]);
         _playlists.FindAsync(_userId, playlistId, Arg.Any<CancellationToken>()).Returns(Row(playlistId, "Mix"));
 
         PlaylistEntriesResult result = await _service.AddEntriesAsync(_userId, playlistId, [track.Id], 1);
@@ -279,7 +282,8 @@ public class PlaylistServiceTests
         PlaylistEntryRow moved = new(Guid.NewGuid(), track.Id, 0, _now);
         _playlists.MoveEntryAsync(default, default, default, default, default, default)
             .ReturnsForAnyArgs(new PlaylistEntryChange(PlaylistEntryChangeStatus.Done, [moved]));
-        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns([track]);
+        _tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), _userId, Arg.Any<CancellationToken>())
+            .Returns([track]);
 
         PlaylistEntriesResult result = await _service.MoveEntryAsync(_userId, Guid.NewGuid(), moved.Id, 0);
 

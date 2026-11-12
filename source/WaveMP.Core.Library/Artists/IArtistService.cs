@@ -11,7 +11,10 @@ public interface IArtistService
 {
     Task<Page<ArtistRow>> ListAsync(ArtistListRequest request, CancellationToken cancellationToken = default);
 
-    Task<ArtistRow?> GetAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// The artist with the favorite of the profile <paramref name="userId"/>.
+    /// </summary>
+    Task<ArtistRow?> GetAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// The albums of an artist: with the artist as album artist or with tracks of the artist. <c>null</c> if the

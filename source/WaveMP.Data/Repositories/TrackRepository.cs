@@ -18,13 +18,13 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
     public Task<Page<TrackRow>> ListAsync(TrackListQuery query, CancellationToken cancellationToken = default)
     {
         IQueryable<Track> tracks = Filter(dbContext.Tracks.AsNoTracking(), query);
-        return Project(Sort(tracks, query.Sort, query.Direction, query.Search).ThenBy(track => track.Id))
+        return Project(Sort(tracks, query).ThenBy(track => track.Id), query.UserId)
             .ToPageAsync(query.Offset, query.Limit, cancellationToken);
     }
 
-    public Task<TrackRow?> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<TrackRow?> FindAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default)
     {
-        return Project(dbContext.Tracks.AsNoTracking().Where(track => track.Id == id))
+        return Project(dbContext.Tracks.AsNoTracking().Where(track => track.Id == id), userId)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -35,6 +35,7 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
 
     public async Task<IReadOnlyList<TrackRow>> ListByIdsAsync(
         IReadOnlyCollection<Guid> ids,
+        Guid? userId = null,
         CancellationToken cancellationToken = default)
     {
         if (ids.Count == 0)
@@ -43,7 +44,7 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
         }
 
         Guid[] distinct = [.. ids.Distinct()];
-        return await Project(dbContext.Tracks.AsNoTracking().Where(track => distinct.Contains(track.Id)))
+        return await Project(dbContext.Tracks.AsNoTracking().Where(track => distinct.Contains(track.Id)), userId)
             .ToListAsync(cancellationToken);
     }
 
@@ -94,7 +95,8 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
 
     public Task<Page<GenreRow>> ListGenresAsync(GenreListQuery query, CancellationToken cancellationToken = default)
     {
-        IQueryable<Track> tracks = dbContext.Tracks.AsNoTracking().Where(track => track.Genre != null);
+        IQueryable<Track> tracks = MyMusicOf(dbContext.Tracks.AsNoTracking(), query.UserId, query.MyMusic)
+            .Where(track => track.Genre != null);
         if (query.Search is { } search)
         {
             string pattern = LikePatterns.Contains(search);
@@ -129,7 +131,7 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
 
     public Task<Page<YearRow>> ListYearsAsync(YearListQuery query, CancellationToken cancellationToken = default)
     {
-        return dbContext.Tracks.AsNoTracking()
+        return MyMusicOf(dbContext.Tracks.AsNoTracking(), query.UserId, query.MyMusic)
             .Where(track => track.Year != null)
             .GroupBy(track => track.Year!.Value)
             .Select(group => new
@@ -147,7 +149,7 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
             .ToPageAsync(query.Offset, query.Limit, cancellationToken);
     }
 
-    private static IQueryable<Track> Filter(IQueryable<Track> tracks, TrackListQuery query)
+    private IQueryable<Track> Filter(IQueryable<Track> tracks, TrackListQuery query)
     {
         if (query.Search is { } search)
         {
@@ -196,20 +198,52 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
             tracks = tracks.Where(track => track.HasVideo == hasVideo);
         }
 
+        tracks = MyMusicOf(tracks, query.UserId, query.MyMusic);
+        if (query.MinRating is { } minRating)
+        {
+            Guid userId = MyMusicQueries.RequireUser(query.UserId, "The rating filter");
+            tracks = tracks.Where(track => dbContext.TrackRatings.Any(rating =>
+                rating.UserId == userId && rating.TrackId == track.Id && rating.Rating >= minRating));
+        }
+
         return tracks;
+    }
+
+    private IQueryable<Track> MyMusicOf(IQueryable<Track> tracks, Guid? userId, bool myMusic)
+    {
+        return myMusic
+            ? MyMusicQueries.Filter(tracks, dbContext, MyMusicQueries.RequireUser(userId, "My music"))
+            : tracks;
     }
 
     /// <summary>
     /// Sorts by the key in the direction; keys that group by album keep the tracks of an album together in the order
     /// of disc and track number, which always ascends.
     /// </summary>
-    private static IOrderedQueryable<Track> Sort(
-        IQueryable<Track> tracks,
-        TrackSortField sort,
-        SortDirection direction,
-        string? search)
+    private IOrderedQueryable<Track> Sort(IQueryable<Track> tracks, TrackListQuery query)
     {
-        return sort switch
+        SortDirection direction = query.Direction;
+        string? search = query.Search;
+        if (query.Sort == TrackSortField.Rating)
+        {
+            Guid userId = MyMusicQueries.RequireUser(query.UserId, "Sorting by rating");
+            IQueryable<TrackRating> ratings = dbContext.TrackRatings.Where(rating => rating.UserId == userId);
+
+            // Unrated tracks count as 0; ties by the time of the rating, the latest first.
+            return ThenByAlbum(tracks
+                .OrderBy(
+                    track => ratings
+                        .Where(rating => rating.TrackId == track.Id)
+                        .Select(rating => rating.Rating)
+                        .FirstOrDefault(),
+                    direction)
+                .ThenByDescending(track => ratings
+                    .Where(rating => rating.TrackId == track.Id)
+                    .Select(rating => (DateTimeOffset?)rating.UpdatedAt)
+                    .FirstOrDefault()));
+        }
+
+        return query.Sort switch
         {
             TrackSortField.Album => ThenByAlbum(tracks.OrderBy(track => track.Album!.NormalizedTitle, direction)),
             TrackSortField.Title => tracks.OrderBy(track => track.Title, direction),
@@ -256,10 +290,13 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
 
     /// <summary>
     /// A track has a cover if it has its own, its album has one or another track of its album has one, the same
-    /// covers the cover of a track falls back to.
+    /// covers the cover of a track falls back to. Favorite and rating are those of the user; without a user, no track
+    /// is a favorite or rated.
     /// </summary>
-    private IQueryable<TrackRow> Project(IQueryable<Track> tracks)
+    private IQueryable<TrackRow> Project(IQueryable<Track> tracks, Guid? userId)
     {
+        // No user has the empty id, so the subqueries find nothing without a user.
+        Guid user = userId ?? Guid.Empty;
         return tracks.Select(track => new TrackRow(
             track.Id,
             track.Title,
@@ -282,6 +319,11 @@ internal sealed class TrackRepository(WaveMpDbContext dbContext) : ITrackReposit
                     && dbContext.Covers.Any(cover =>
                         cover.AlbumId == track.AlbumId
                         || (cover.Track != null && cover.Track.AlbumId == track.AlbumId))),
-            track.FirstSeenAt));
+            track.FirstSeenAt,
+            dbContext.Favorites.Any(favorite => favorite.UserId == user && favorite.TrackId == track.Id),
+            dbContext.TrackRatings
+                .Where(rating => rating.UserId == user && rating.TrackId == track.Id)
+                .Select(rating => rating.Rating)
+                .FirstOrDefault()));
     }
 }

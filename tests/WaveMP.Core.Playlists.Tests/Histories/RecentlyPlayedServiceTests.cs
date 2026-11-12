@@ -44,7 +44,8 @@ public class RecentlyPlayedServiceTests
                 10,
                 42));
         ITrackRepository tracks = Substitute.For<ITrackRepository>();
-        tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>()).Returns([track]);
+        tracks.ListByIdsAsync(Arg.Any<IReadOnlyCollection<Guid>>(), userId, Arg.Any<CancellationToken>())
+            .Returns([track]);
         RecentlyPlayedService service = new(
             history,
             tracks,

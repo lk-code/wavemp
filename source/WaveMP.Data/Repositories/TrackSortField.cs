@@ -44,4 +44,10 @@ public enum TrackSortField
     /// How well title, artist and album match the search text; only with a search text.
     /// </summary>
     Relevance,
+
+    /// <summary>
+    /// Rating of the user of the query (unrated tracks count as 0), then the time of the rating (the latest first),
+    /// album, disc and track number. Needs a user.
+    /// </summary>
+    Rating,
 }
