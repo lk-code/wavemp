@@ -11,7 +11,7 @@ public enum PlaybackMethod
     DirectPlay,
 
     /// <summary>
-    /// The client cannot play the file; the server has to convert it (roadmap step 12).
+    /// The client cannot play the file; the server converts it to HLS.
     /// </summary>
     Transcode,
 }

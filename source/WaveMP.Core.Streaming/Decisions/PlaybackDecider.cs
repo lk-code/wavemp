@@ -3,8 +3,8 @@ using WaveMP.Core.Streaming.Formats;
 namespace WaveMP.Core.Streaming.Decisions;
 
 /// <summary>
-/// Decides between direct play and transcoding from the format of a file and the formats a client supports. Step 12
-/// adds the capabilities for videos, bitrates and hardware acceleration here.
+/// Decides between direct play and transcoding from the format of an audio file and the formats a client supports.
+/// Videos are decided by <see cref="VideoPlaybackDecider"/>.
 /// </summary>
 public static class PlaybackDecider
 {

@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using WaveMP.Core.Scanning.Writers;
 using WaveMP.Core.Streaming.Decisions;
 using WaveMP.Core.Streaming.Formats;
 using WaveMP.Core.Streaming.Sources;
@@ -13,6 +14,7 @@ public class StreamingMappingExtensionsTests
 {
     private static readonly StreamSource _source = new(
         Guid.Parse("0195f3a0-0000-7000-8000-000000000001"),
+        Guid.Parse("0195f3a0-0000-7000-8000-000000000002"),
         "/media/song.flac",
         AudioFormat.Flac,
         "audio/flac",
@@ -81,5 +83,11 @@ public class StreamingMappingExtensionsTests
             .Should().Equal(Enum.GetValues<PlaybackMethod>().Select(method => method.ToString()));
         Enum.GetValues<TranscodeReason>().Select(reason => reason.ToDto().ToString())
             .Should().Equal(Enum.GetValues<TranscodeReason>().Select(reason => reason.ToString()));
+    }
+
+    [Test]
+    public void VideoMetadataVersion_IsTheVersionOfVideosOfTheScan()
+    {
+        VideoFormats.MetadataVersion.Should().Be(ScannerVersions.VideoMetadata);
     }
 }

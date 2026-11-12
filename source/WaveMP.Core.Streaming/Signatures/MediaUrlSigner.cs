@@ -66,6 +66,8 @@ internal sealed class MediaUrlSigner(MediaUrlKeyStore keys, IOptions<StreamingOp
         return resource switch
         {
             MediaResource.TrackAudio => "track-audio",
+            MediaResource.TrackVideo => "track-video",
+            MediaResource.TrackHls => "track-hls",
             _ => throw new ArgumentOutOfRangeException(nameof(resource), resource, "Unknown media resource."),
         };
     }

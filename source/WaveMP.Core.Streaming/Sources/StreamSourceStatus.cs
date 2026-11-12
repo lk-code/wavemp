@@ -1,7 +1,7 @@
 namespace WaveMP.Core.Streaming.Sources;
 
 /// <summary>
-/// Whether the audio file of a track can be delivered.
+/// Whether the file of a track can be delivered.
 /// </summary>
 public enum StreamSourceStatus
 {
@@ -13,12 +13,18 @@ public enum StreamSourceStatus
     TrackNotFound,
 
     /// <summary>
-    /// The track has no audio file, for example a music video only.
+    /// The track has no audio file (for the audio stream), or neither an audio file nor a video (for the playback of
+    /// its sound).
     /// </summary>
     NoAudio,
 
     /// <summary>
-    /// The audio file of the track is gone since the last scan, or its stored path leaves the media folder.
+    /// The track has no video.
+    /// </summary>
+    NoVideo,
+
+    /// <summary>
+    /// The file of the track is gone since the last scan, or its stored path leaves the media folder.
     /// </summary>
     FileMissing,
 }

@@ -60,6 +60,10 @@ public static class StreamingMappingExtensions
         {
             TranscodeReason.FormatUnsupported => TranscodeReasonDto.FormatUnsupported,
             TranscodeReason.FormatUnknown => TranscodeReasonDto.FormatUnknown,
+            TranscodeReason.ContainerUnsupported => TranscodeReasonDto.ContainerUnsupported,
+            TranscodeReason.VideoCodecUnsupported => TranscodeReasonDto.VideoCodecUnsupported,
+            TranscodeReason.AudioCodecUnsupported => TranscodeReasonDto.AudioCodecUnsupported,
+            TranscodeReason.AudioFromVideo => TranscodeReasonDto.AudioFromVideo,
             _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "Unknown transcode reason."),
         };
     }

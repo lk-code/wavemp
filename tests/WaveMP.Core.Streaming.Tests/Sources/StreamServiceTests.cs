@@ -195,10 +195,209 @@ public class StreamServiceTests
         result.Decision.Should().BeNull();
     }
 
+    [Test]
+    public async Task GetVideoSourceAsync_ExistingVideo_ReturnsItsFormat()
+    {
+        var trackId = Guid.NewGuid();
+        MediaFile file = VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4");
+        file.Width = 1920;
+        file.Height = 1080;
+        file.SampleRate = 48000;
+        file.Duration = TimeSpan.FromMinutes(3);
+        string path = WriteFile("Clip.mp4", 500);
+        Video(trackId, file);
+
+        VideoSourceResult result = await _service.GetVideoSourceAsync(trackId);
+
+        result.Status.Should().Be(StreamSourceStatus.Found);
+        VideoSource source = result.Source!;
+        source.Should().BeEquivalentTo(new
+        {
+            TrackId = trackId,
+            FileId = file.Id,
+            FullPath = path,
+            Container = VideoContainer.Mp4,
+            VideoCodec = VideoCodec.H264,
+            AudioCodec = AudioCodec.Aac,
+            HasAudio = true,
+            PixelFormat = "yuv420p",
+            Width = 1920,
+            Height = 1080,
+            SampleRate = 48000,
+            ContentType = "video/mp4",
+            Length = 500L,
+            MetadataComplete = true,
+        });
+        source.ETag.Should().StartWith(file.Id.ToString("N"));
+    }
+
+    [Test]
+    public async Task GetVideoSourceAsync_VideoWithoutSoundReadByAnOlderScan_IsIncomplete()
+    {
+        var trackId = Guid.NewGuid();
+        MediaFile file = VideoFile("Clip.avi", "avi", "mpeg4", null, "avi");
+        file.MetadataVersion = 1;
+        WriteFile("Clip.avi", 10);
+        Video(trackId, file);
+
+        VideoSource source = (await _service.GetVideoSourceAsync(trackId)).Source!;
+
+        source.Container.Should().BeNull();
+        source.VideoCodec.Should().BeNull();
+        source.HasAudio.Should().BeFalse();
+        source.ContentType.Should().Be("application/octet-stream");
+        source.MetadataComplete.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetVideoSourceAsync_TrackWithoutVideo_ReturnsNoVideo()
+    {
+        var trackId = Guid.NewGuid();
+        Video(trackId, null);
+
+        (await _service.GetVideoSourceAsync(trackId)).Status.Should().Be(StreamSourceStatus.NoVideo);
+    }
+
+    [Test]
+    public async Task GetVideoSourceAsync_FileGone_ReturnsFileMissing()
+    {
+        var trackId = Guid.NewGuid();
+        Video(trackId, VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4"));
+
+        (await _service.GetVideoSourceAsync(trackId)).Status.Should().Be(StreamSourceStatus.FileMissing);
+    }
+
+    [Test]
+    public async Task GetVideoSourceAsync_UnknownTrack_ReturnsTrackNotFound()
+    {
+        _tracks.FindPrimaryFileAsync(Arg.Any<Guid>(), MediaFileKind.Video, Arg.Any<CancellationToken>())
+            .Returns((TrackFileRow?)null);
+
+        (await _service.GetVideoSourceAsync(Guid.NewGuid())).Status.Should().Be(StreamSourceStatus.TrackNotFound);
+    }
+
+    [Test]
+    public async Task DecideVideoAsync_SupportedVideo_PlaysDirectly()
+    {
+        var trackId = Guid.NewGuid();
+        Video(trackId, VideoFile("Clip.webm", "matroska,webm", "vp9", "opus", "webm"));
+        WriteFile("Clip.webm", 10);
+        VideoCapabilities capabilities = new(
+            new HashSet<VideoContainer> { VideoContainer.Webm },
+            new HashSet<VideoCodec> { VideoCodec.Vp9 },
+            new HashSet<AudioCodec> { AudioCodec.Opus });
+
+        VideoPlaybackResult result = await _service.DecideVideoAsync(trackId, capabilities);
+
+        result.IsFound.Should().BeTrue();
+        result.Decision.Should().Be(VideoPlaybackDecision.DirectPlay);
+        result.Source!.ContentType.Should().Be("video/webm");
+    }
+
+    [Test]
+    public async Task DecideVideoAsync_WithoutCapabilities_Transcodes()
+    {
+        var trackId = Guid.NewGuid();
+        Video(trackId, VideoFile("Clip.webm", "matroska,webm", "vp9", "opus", "webm"));
+        WriteFile("Clip.webm", 10);
+
+        VideoPlaybackResult result = await _service.DecideVideoAsync(trackId, VideoCapabilities.None);
+
+        result.Decision!.Method.Should().Be(PlaybackMethod.Transcode);
+    }
+
+    [Test]
+    public async Task DecideVideoAsync_NoVideo_HasNoDecision()
+    {
+        var trackId = Guid.NewGuid();
+        Video(trackId, null);
+
+        VideoPlaybackResult result = await _service.DecideVideoAsync(trackId, VideoCapabilities.None);
+
+        result.IsFound.Should().BeFalse();
+        result.Status.Should().Be(StreamSourceStatus.NoVideo);
+    }
+
+    [Test]
+    public async Task DecideAsync_TrackWithVideoOnly_TranscodesTheSoundOfTheVideo()
+    {
+        var trackId = Guid.NewGuid();
+        Track(trackId, null);
+        MediaFile video = VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4");
+        Video(trackId, video);
+        string path = WriteFile("Clip.mp4", 10);
+
+        PlaybackResult result = await _service.DecideAsync(trackId, new HashSet<AudioFormat> { AudioFormat.Mp4Aac });
+
+        result.IsFound.Should().BeTrue();
+        result.Source!.Origin.Should().Be(MediaFileKind.Video);
+        result.Source.FileId.Should().Be(video.Id);
+        result.Source.FullPath.Should().Be(path);
+        result.Source.Format.Should().BeNull();
+        result.Source.ReplayGain.Should().Be(ReplayGainValues.None);
+        result.Decision.Should().Be(new PlaybackDecision(
+            PlaybackMethod.Transcode,
+            null,
+            TranscodeReason.AudioFromVideo));
+    }
+
+    [Test]
+    public async Task GetSoundSourceAsync_TrackWithoutAudioAndVideo_ReturnsNoAudio()
+    {
+        var trackId = Guid.NewGuid();
+        Track(trackId, null);
+        Video(trackId, null);
+
+        (await _service.GetSoundSourceAsync(trackId)).Status.Should().Be(StreamSourceStatus.NoAudio);
+    }
+
+    [Test]
+    public async Task GetSoundSourceAsync_VideoGone_ReturnsFileMissing()
+    {
+        var trackId = Guid.NewGuid();
+        Track(trackId, null);
+        Video(trackId, VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4"));
+
+        (await _service.GetSoundSourceAsync(trackId)).Status.Should().Be(StreamSourceStatus.FileMissing);
+    }
+
+    [Test]
+    public async Task GetAudioSourceAsync_TrackWithVideoOnly_StillReturnsNoAudio()
+    {
+        var trackId = Guid.NewGuid();
+        Track(trackId, null);
+        Video(trackId, VideoFile("Clip.mp4", "mov,mp4,m4a,3gp,3g2,mj2", "h264", "aac", "mp4"));
+        WriteFile("Clip.mp4", 10);
+
+        (await _service.GetAudioSourceAsync(trackId)).Status.Should().Be(StreamSourceStatus.NoAudio);
+    }
+
     private void Track(Guid trackId, MediaFile? file)
     {
         _tracks.FindPrimaryFileAsync(trackId, MediaFileKind.Audio, Arg.Any<CancellationToken>())
             .Returns(new TrackFileRow(trackId, file));
+    }
+
+    private void Video(Guid trackId, MediaFile? file)
+    {
+        _tracks.FindPrimaryFileAsync(trackId, MediaFileKind.Video, Arg.Any<CancellationToken>())
+            .Returns(new TrackFileRow(trackId, file));
+    }
+
+    private static MediaFile VideoFile(
+        string relativePath,
+        string format,
+        string codec,
+        string? audioCodec,
+        string extension)
+    {
+        MediaFile file = AudioFile(relativePath, format, codec, extension);
+        file.Kind = MediaFileKind.Video;
+        file.AudioCodec = audioCodec;
+        file.PixelFormat = "yuv420p";
+        file.IsWritable = false;
+        file.MetadataVersion = 2;
+        return file;
     }
 
     private string WriteFile(string relativePath, int length)

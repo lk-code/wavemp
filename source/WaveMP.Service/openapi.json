@@ -7892,7 +7892,11 @@
       "TranscodeReason": {
         "enum": [
           "format_unsupported",
-          "format_unknown"
+          "format_unknown",
+          "container_unsupported",
+          "video_codec_unsupported",
+          "audio_codec_unsupported",
+          "audio_from_video"
         ],
         "type": "string"
       },

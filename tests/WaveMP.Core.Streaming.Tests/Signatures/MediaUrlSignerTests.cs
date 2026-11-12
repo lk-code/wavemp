@@ -41,6 +41,23 @@ public class MediaUrlSignerTests
         _signer.Sign(_claims).Should().Be(signature);
     }
 
+    [TestCase(MediaResource.TrackVideo)]
+    [TestCase(MediaResource.TrackHls)]
+    public void Verify_OtherKindOfMedia_IsInvalid(MediaResource resource)
+    {
+        string signature = _signer.Sign(_claims);
+
+        _signer.Verify(_claims with { Resource = resource }, signature, _now)
+            .Should().Be(MediaUrlVerification.Invalid);
+    }
+
+    [Test]
+    public void Sign_EveryKindOfMedia_GetsADifferentSignature()
+    {
+        Enum.GetValues<MediaResource>().Select(resource => _signer.Sign(_claims with { Resource = resource }))
+            .Should().OnlyHaveUniqueItems();
+    }
+
     [Test]
     public void Verify_OtherTrack_IsInvalid()
     {

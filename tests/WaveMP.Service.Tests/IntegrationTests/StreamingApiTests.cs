@@ -248,11 +248,14 @@ public class StreamingApiTests
     }
 
     [Test]
-    public async Task GetTrackPlayback_VideoOnly_ReturnsNoAudio()
+    public async Task GetTrackPlayback_VideoOnly_ReturnsTranscodeFromVideo()
     {
-        HttpResponseMessage response = await _user.GetAsync(PlaybackPath("Video Only", FlacFormats));
+        TrackPlaybackDto playback = await PlaybackAsync("Video Only", FlacFormats);
 
-        await response.ShouldBeProblemAsync(HttpStatusCode.NotFound, "track.no_audio");
+        playback.Method.Should().Be(PlaybackMethodDto.Transcode);
+        playback.TranscodeReason.Should().Be(TranscodeReasonDto.AudioFromVideo);
+        playback.Format.Should().BeNull();
+        playback.ReplayGain.Should().BeEquivalentTo(new ReplayGainDto());
     }
 
     [Test]
