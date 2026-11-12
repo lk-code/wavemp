@@ -322,4 +322,116 @@ describe('session store', () => {
 
         expect(session.isAuthenticated).toBe(false)
     })
+
+    describe('playback settings', () => {
+        const equalizer = {
+            enabled: true,
+            preset: 'Rock',
+            preampDb: -2,
+            gainsDb: [5, 4, 3, 1, -1, -1, 1, 3, 4, 5],
+            customGainsDb: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        }
+
+        it('loads equalizer, crossfade and sleep timer with the profile', async () => {
+            api.createSession.mockResolvedValue(created('a'))
+            api.getSettings.mockResolvedValue({
+                language: 'en',
+                equalizer,
+                crossfade: { seconds: 6, albumsGapless: false },
+                sleepTimer: { fadeSeconds: 30 },
+            })
+            const session = useSessionStore()
+
+            await session.select('a')
+
+            expect(session.equalizer).toEqual(equalizer)
+            expect(session.crossfade).toEqual({ seconds: 6, albumsGapless: false })
+            expect(session.sleepTimer).toEqual({ fadeSeconds: 30 })
+        })
+
+        it('keeps the defaults for incomplete settings', async () => {
+            api.createSession.mockResolvedValue(created('a'))
+            api.getSettings.mockResolvedValue({
+                language: 'en',
+                equalizer: { ...equalizer, preset: 'Loudness' },
+                crossfade: { seconds: 40, albumsGapless: true },
+                sleepTimer: {},
+            })
+            const session = useSessionStore()
+
+            await session.select('a')
+
+            expect(session.equalizer.enabled).toBe(false)
+            expect(session.equalizer.preset).toBe('Flat')
+            expect(session.crossfade).toEqual({ seconds: 0, albumsGapless: true })
+            expect(session.sleepTimer).toEqual({ fadeSeconds: 10 })
+        })
+
+        it('updates the settings on refresh and resets them for another profile', async () => {
+            saveStoredSession(stored('a'))
+            api.getCurrentSession.mockResolvedValue(created('a').session)
+            api.getSettings.mockResolvedValue({
+                language: 'de',
+                crossfade: { seconds: 3, albumsGapless: true },
+            })
+            const session = useSessionStore()
+            session.restore()
+
+            await session.refresh()
+            expect(session.crossfade.seconds).toBe(3)
+
+            session.clear()
+            expect(session.crossfade.seconds).toBe(0)
+        })
+
+        it('saves a change of the equalizer and takes over the answer', async () => {
+            saveStoredSession(stored('a'))
+            api.updateSettings.mockResolvedValue({ equalizer })
+            const session = useSessionStore()
+            session.restore()
+
+            await session.updateEqualizer({ enabled: true, preset: 'Rock' })
+
+            expect(api.updateSettings).toHaveBeenCalledWith({
+                equalizer: { enabled: true, preset: 'Rock' },
+            })
+            expect(session.equalizer).toEqual(equalizer)
+        })
+
+        it('ignores an older answer after a newer change', async () => {
+            saveStoredSession(stored('a'))
+            let answerFirst: (value: unknown) => void = () => undefined
+            api.updateSettings
+                .mockImplementationOnce(
+                    () =>
+                        new Promise((resolve) => {
+                            answerFirst = resolve
+                        }),
+                )
+                .mockResolvedValueOnce({ crossfade: { seconds: 8, albumsGapless: true } })
+            const session = useSessionStore()
+            session.restore()
+
+            const first = session.updateCrossfade({ seconds: 2 })
+            await session.updateCrossfade({ seconds: 8 })
+            answerFirst({ crossfade: { seconds: 2, albumsGapless: true } })
+            await first
+
+            expect(session.crossfade.seconds).toBe(8)
+        })
+
+        it('saves the fade-out of the sleep timer and passes errors on', async () => {
+            saveStoredSession(stored('a'))
+            api.updateSettings.mockResolvedValueOnce({ sleepTimer: { fadeSeconds: 60 } })
+            const session = useSessionStore()
+            session.restore()
+
+            await session.updateSleepTimer({ fadeSeconds: 60 })
+            expect(session.sleepTimer.fadeSeconds).toBe(60)
+
+            api.updateSettings.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+            await expect(session.updateSleepTimer({ fadeSeconds: 5 })).rejects.toThrow()
+            expect(session.sleepTimer.fadeSeconds).toBe(60)
+        })
+    })
 })

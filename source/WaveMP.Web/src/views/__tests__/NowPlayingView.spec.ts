@@ -38,6 +38,10 @@ const engine = {
     seek: vi.fn(),
     setVolume: vi.fn(),
     setTrackGain: vi.fn(),
+    setEqualizer: vi.fn(),
+    fadeOut: vi.fn(),
+    restoreOutput: vi.fn(),
+    equalizerAvailable: true,
 }
 
 function mountView() {

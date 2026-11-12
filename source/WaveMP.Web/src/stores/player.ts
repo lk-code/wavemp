@@ -19,7 +19,13 @@ import {
     type TransportState,
 } from '@/components/shell/transport'
 import { getPlayback, getVideoPlayback, recordPlay } from '@/player/api'
-import { AudioEngine, type DeckSource, type EngineEvents } from '@/player/engine'
+import { crossfadeDuration } from '@/player/crossfade'
+import {
+    AudioEngine,
+    browserAudioEnvironment,
+    type DeckSource,
+    type EngineEvents,
+} from '@/player/engine'
 import { browserAudioFormats } from '@/player/formats'
 import { PlayHistoryTracker } from '@/player/history'
 import { connectMediaSession, updateMediaSession } from '@/player/mediaSession'
@@ -43,6 +49,14 @@ import {
 import { replayGainFactor } from '@/player/replayGain'
 import { shouldPreload, shouldRestart } from '@/player/scheduling'
 import {
+    browserSleepTimerClock,
+    SleepTimer,
+    sleepTimerOff,
+    type SleepTimerClock,
+    type SleepTimerMode,
+    type SleepTimerState,
+} from '@/player/sleepTimer'
+import {
     VideoFollower,
     type FollowerClock,
     type VideoFollowerEvents,
@@ -52,6 +66,7 @@ import { browserVideoFormats, type VideoFormats } from '@/player/videoFormats'
 import { stageViewOf, type StageView, type VideoState } from '@/player/videoSync'
 import { clampVolume, loadVolume, saveVolume, volumeToGain } from '@/player/volume'
 import { useCoversStore } from './covers'
+import { useEqualizerStore } from './equalizer'
 import { useSessionStore } from './session'
 
 /** What the store needs from the engine; tests replace the engine. */
@@ -65,6 +80,10 @@ export type PlayerEngine = Pick<
     | 'seek'
     | 'setVolume'
     | 'setTrackGain'
+    | 'setEqualizer'
+    | 'fadeOut'
+    | 'restoreOutput'
+    | 'equalizerAvailable'
     | 'hasPrepared'
     | 'position'
 >
@@ -87,6 +106,9 @@ export const playerDependencies = {
     videoFormats: (): VideoFormats => browserVideoFormats(),
     random: (): number => Math.random(),
     mediaSession: true,
+    /** Whether the browser has Web Audio, which the equalizer and the crossfade need. */
+    webAudio: (): boolean => browserAudioEnvironment.webAudio !== false,
+    sleepClock: browserSleepTimerClock as SleepTimerClock,
 }
 
 /** Size of the cover shown by the media session (lock screen, notifications). */
@@ -122,10 +144,15 @@ function artistOf(track: Track | undefined): string | undefined {
  * video or the visualization of the current track, and switching between them never touches the
  * audio. The video plays muted and follows the position of the audio plus the offset of the track;
  * it is only loaded while the stage shows it.
+ *
+ * The equalizer and the crossfade of the profile apply through the engine; tracks only fade into
+ * each other when one ends on its own. The sleep timer belongs to this device: it fades out and
+ * pauses after a time, at the end of the track or at the end of the queue.
  */
 export const usePlayerStore = defineStore('player', () => {
     const session = useSessionStore()
     const covers = useCoversStore()
+    const equalizer = useEqualizerStore()
 
     const queue = shallowRef<Queue>(emptyQueue)
     const playback = ref<PlaybackState>('idle')
@@ -146,6 +173,11 @@ export const usePlayerStore = defineStore('player', () => {
     const pageVisible = ref(
         typeof document === 'undefined' || document.visibilityState !== 'hidden',
     )
+    /** Whether the equalizer can shape the sound in this browser. */
+    const equalizerAvailable = ref(playerDependencies.webAudio())
+    /** The sleep timer and the seconds until a timer with a duration ends. */
+    const sleepTimer = ref<SleepTimerState>(sleepTimerOff)
+    const sleepRemaining = ref(0)
 
     const current = computed<QueueItem | undefined>(() => currentItem(queue.value))
     const shuffle = computed(() => queue.value.shuffle)
@@ -215,10 +247,65 @@ export const usePlayerStore = defineStore('player', () => {
         return volumeToGain({ volume: volume.value, muted: muted.value })
     }
 
+    const sleepClock = playerDependencies.sleepClock
+    let sleepTicker: number | null = null
+    const sleep = new SleepTimer(
+        {
+            fadeOut: (seconds) => engine?.fadeOut(seconds),
+            restore: () => engine?.restoreOutput(),
+            pause: () => pause(),
+            changed: (value) => {
+                sleepTimer.value = value
+                updateSleepTicker()
+            },
+        },
+        () => session.sleepTimer.fadeSeconds,
+        sleepClock,
+    )
+
     function getEngine(): PlayerEngine {
-        engine ??= playerDependencies.createEngine(engineEvents)
+        if (!engine) {
+            engine = playerDependencies.createEngine(engineEvents)
+            engine.setEqualizer(equalizer.output, equalizer.layout)
+        }
+
         engine.setVolume(outputGain())
         return engine
+    }
+
+    /** Starts the engine and notes whether its equalizer works. */
+    async function startEngine(player: PlayerEngine): Promise<void> {
+        await player.play()
+        equalizerAvailable.value = player.equalizerAvailable
+    }
+
+    /** Whether the current entry is the last one in the order of the queue, without repeat. */
+    function isLastEntry(): boolean {
+        return nextIndex(queue.value, 'off', false) === null
+    }
+
+    /** Counts down the seconds of a timer with a duration; also checks it while nothing plays. */
+    function updateSleepTicker(): void {
+        const { mode, endsAt } = sleepTimer.value
+        if (mode !== 'duration' || endsAt === null) {
+            if (sleepTicker !== null) {
+                sleepClock.clearTimeout(sleepTicker)
+                sleepTicker = null
+            }
+
+            sleepRemaining.value = 0
+            return
+        }
+
+        sleepRemaining.value = Math.max(0, Math.ceil((endsAt - sleepClock.now()) / 1000))
+        if (sleepTicker === null) {
+            const tick = (): void => {
+                sleepTicker = null
+                sleep.check()
+                updateSleepTicker()
+            }
+            sleepTicker = sleepClock.setTimeout(tick, 1000)
+        }
     }
 
     function gainOf(value: TrackPlayback | null | undefined): number {
@@ -295,7 +382,7 @@ export const usePlayerStore = defineStore('player', () => {
         history.start(item.track.id ?? '', startPosition)
         if (shouldPlay) {
             playback.value = 'playing'
-            await player.play()
+            await startEngine(player)
         } else {
             playback.value = 'paused'
             loading.value = false
@@ -325,16 +412,36 @@ export const usePlayerStore = defineStore('player', () => {
         }
 
         history.progress(time, duration.value)
+        sleep.check()
+        if (duration.value > 0) {
+            sleep.progress(duration.value - time, isLastEntry())
+        }
+
         if (shouldPreload(time, duration.value)) {
             void prepareNext()
         }
     }
 
-    /** Loads the next entry on the other deck, so it starts without a gap. */
+    /** Seconds the current track fades into the entry; 0 plays it gapless. */
+    function crossfadeInto(item: QueueItem): number {
+        const track = current.value?.track
+        return track ? crossfadeDuration(session.crossfade, track, item.track, duration.value) : 0
+    }
+
+    /**
+     * Loads the next entry on the other deck, so it starts without a gap or fades in. Nothing is
+     * prepared when the sleep timer stops after the current track.
+     */
     async function prepareNext(): Promise<void> {
         const index = nextIndex(queue.value, repeat.value, true)
         const item = index === null ? undefined : queue.value.items[index]
-        if (!item || !loaded || prepared?.key === item.key || preparing === item.key) {
+        if (
+            !item ||
+            !loaded ||
+            prepared?.key === item.key ||
+            preparing === item.key ||
+            sleep.stopsAfterCurrent(isLastEntry())
+        ) {
             return
         }
 
@@ -352,7 +459,9 @@ export const usePlayerStore = defineStore('player', () => {
         }
 
         prepared = { key: item.key, playback: result }
-        getEngine().prepare(sourceOf(result))
+        const source = sourceOf(result)
+        const crossfade = crossfadeInto(item)
+        getEngine().prepare(source && crossfade > 0 ? { ...source, crossfade } : source)
     }
 
     function onAdvanced(): void {
@@ -373,7 +482,31 @@ export const usePlayerStore = defineStore('player', () => {
         history.start(queue.value.items[index]?.track.id ?? '')
     }
 
+    /**
+     * The sleep timer stops after the track that ended: at the end of the queue the last track stays,
+     * otherwise the next entry waits paused at its start, so play goes on with it.
+     */
+    function stopForSleep(): void {
+        const index =
+            sleep.state.mode === 'endOfTrack' ? nextIndex(queue.value, repeat.value, true) : null
+        history.stop()
+        if (index === null) {
+            playback.value = 'paused'
+            loading.value = false
+        } else {
+            queue.value = withIndex(queue.value, index)
+            void startCurrent(false)
+        }
+
+        sleep.trackEnded()
+    }
+
     function onEnded(): void {
+        if (sleep.stopsAfterCurrent(isLastEntry())) {
+            stopForSleep()
+            return
+        }
+
         const index = nextIndex(queue.value, repeat.value, true)
         if (index === null) {
             // The end of the queue: the last track stays, play starts it again.
@@ -486,7 +619,13 @@ export const usePlayerStore = defineStore('player', () => {
         }
 
         playback.value = 'playing'
-        void getEngine().play()
+        const player = getEngine()
+        // After a stop of the sleep timer the output is back already; this only covers a fade it left.
+        if (!sleep.state.fading) {
+            player.restoreOutput()
+        }
+
+        void startEngine(player)
     }
 
     function pause(): void {
@@ -696,8 +835,32 @@ export const usePlayerStore = defineStore('player', () => {
         applyVolume()
     }
 
+    /**
+     * Starts the sleep timer, or stops it with off. A timer that stops after the current track
+     * forgets the prepared one, so nothing fades into it.
+     */
+    function startSleepTimer(mode: SleepTimerMode, minutes?: number): void {
+        if (mode === 'off') {
+            cancelSleepTimer()
+            return
+        }
+
+        sleep.start(mode, minutes)
+        forgetPrepared()
+        if (duration.value > 0) {
+            sleep.progress(duration.value - position.value, isLastEntry())
+        }
+    }
+
+    /** Stops the sleep timer; a running fade-out returns smoothly. */
+    function cancelSleepTimer(): void {
+        sleep.cancel()
+        forgetPrepared()
+    }
+
     /** Stops and empties the queue, e.g. when the profile changes. */
     function clear(): void {
+        sleep.cancel()
         stopPlayback()
         queue.value = emptyQueue
         message.value = null
@@ -718,6 +881,19 @@ export const usePlayerStore = defineStore('player', () => {
 
             forgetPrepared()
         },
+    )
+
+    // A new crossfade applies from the next track on.
+    watch(
+        () => session.crossfade,
+        () => forgetPrepared(),
+        { deep: true },
+    )
+
+    // The equalizer follows every change at once, also during playback.
+    watch(
+        () => [equalizer.output, equalizer.layout] as const,
+        ([output, layout]) => engine?.setEqualizer(output, layout),
     )
 
     // A new entry, view mode, stage or visibility: the video follows; the audio is not touched.
@@ -778,6 +954,12 @@ export const usePlayerStore = defineStore('player', () => {
             volume: volume.value,
             muted: muted.value,
             message: message.value,
+            equalizer: equalizer.settings.enabled,
+            sleepTimer: {
+                mode: sleepTimer.value.mode,
+                remaining: sleepRemaining.value,
+                fading: sleepTimer.value.fading,
+            },
         }
     })
 
@@ -826,6 +1008,9 @@ export const usePlayerStore = defineStore('player', () => {
         stageView,
         videoState,
         hasVideo,
+        equalizerAvailable,
+        sleepTimer,
+        sleepRemaining,
         playTracks: playTrackList,
         playNext,
         addToQueue,
@@ -850,5 +1035,7 @@ export const usePlayerStore = defineStore('player', () => {
         attachVideo,
         detachVideo,
         applyVideoOffset,
+        startSleepTimer,
+        cancelSleepTimer,
     }
 })

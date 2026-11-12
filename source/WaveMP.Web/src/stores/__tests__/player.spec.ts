@@ -40,6 +40,10 @@ class FakeEngine implements PlayerEngine {
     readonly seek = vi.fn()
     readonly setVolume = vi.fn()
     readonly setTrackGain = vi.fn()
+    readonly setEqualizer = vi.fn()
+    readonly fadeOut = vi.fn()
+    readonly restoreOutput = vi.fn()
+    equalizerAvailable = true
 
     constructor(readonly events: EngineEvents) {}
 
@@ -724,5 +728,221 @@ describe('player store', () => {
         expect(engine.stop).toHaveBeenCalled()
         expect(player.queue.items).toEqual([])
         expect(player.state.playback).toBe('idle')
+    })
+
+    describe('crossfade', () => {
+        const albums = [
+            track('a', { album: { id: 'one' } }),
+            track('b', { album: { id: 'two' } }),
+            track('c', { album: { id: 'two' } }),
+        ]
+
+        it('lets the current track fade into one of another album', async () => {
+            const session = useSessionStore()
+            session.crossfade = { seconds: 6, albumsGapless: true }
+            const player = usePlayerStore()
+            player.playTracks(albums, 0)
+            await flushPromises()
+
+            engine.events.timeupdate?.(185, 200)
+            await flushPromises()
+
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/b', gain: 1, crossfade: 6 })
+        })
+
+        it('keeps tracks of the same album gapless', async () => {
+            const session = useSessionStore()
+            session.crossfade = { seconds: 6, albumsGapless: true }
+            const player = usePlayerStore()
+            player.playTracks(albums, 1)
+            await flushPromises()
+
+            engine.events.timeupdate?.(185, 200)
+            await flushPromises()
+
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/c', gain: 1 })
+        })
+
+        it('prepares the next track again when the crossfade changes', async () => {
+            const session = useSessionStore()
+            const player = usePlayerStore()
+            player.playTracks(albums, 0)
+            await flushPromises()
+            engine.events.timeupdate?.(185, 200)
+            await flushPromises()
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/b', gain: 1 })
+
+            session.crossfade = { seconds: 4, albumsGapless: true }
+            await flushPromises()
+            expect(engine.prepared.at(-1)).toBeNull()
+
+            engine.events.timeupdate?.(186, 200)
+            await flushPromises()
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/b', gain: 1, crossfade: 4 })
+        })
+    })
+
+    describe('equalizer', () => {
+        it('applies the equalizer of the profile when the engine starts and on every change', async () => {
+            const session = useSessionStore()
+            session.equalizer = {
+                enabled: true,
+                preset: 'Bass',
+                preampDb: -3,
+                gainsDb: [8, 7, 5, 3, 1, 0, 0, 0, 0, 0],
+                customGainsDb: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            }
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+
+            expect(engine.setEqualizer).toHaveBeenCalledWith(
+                { enabled: true, preampDb: -3, gainsDb: [8, 7, 5, 3, 1, 0, 0, 0, 0, 0] },
+                expect.any(Array),
+            )
+
+            session.equalizer = { ...session.equalizer, enabled: false }
+            await flushPromises()
+
+            expect(engine.setEqualizer).toHaveBeenLastCalledWith(
+                expect.objectContaining({ enabled: false }),
+                expect.any(Array),
+            )
+            expect(player.state.equalizer).toBe(false)
+        })
+
+        it('knows whether the equalizer works once the engine played', async () => {
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+            expect(player.equalizerAvailable).toBe(true)
+            engine.equalizerAvailable = false
+
+            player.pause()
+            player.play()
+            await flushPromises()
+
+            expect(player.equalizerAvailable).toBe(false)
+        })
+    })
+
+    describe('sleep timer', () => {
+        beforeEach(() => {
+            vi.useFakeTimers()
+        })
+
+        afterEach(() => {
+            vi.useRealTimers()
+        })
+
+        it('stops at the end of the track and waits paused at the start of the next', async () => {
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+
+            player.startSleepTimer('endOfTrack')
+            engine.events.timeupdate?.(185, 200)
+            await flushPromises()
+            expect(engine.prepared.filter(Boolean)).toEqual([])
+            expect(player.state.sleepTimer).toEqual({
+                mode: 'endOfTrack',
+                remaining: 0,
+                fading: false,
+            })
+
+            engine.events.timeupdate?.(195, 200)
+            expect(engine.fadeOut).toHaveBeenCalledWith(5)
+            expect(player.state.sleepTimer?.fading).toBe(true)
+
+            engine.events.ended?.()
+            await flushPromises()
+
+            expect(player.state.trackId).toBe('b')
+            expect(player.state.playback).toBe('paused')
+            expect(player.state.position).toBe(0)
+            expect(engine.loaded.at(-1)).toEqual({ url: '/stream/b', gain: 1, position: 0 })
+            expect(engine.play).toHaveBeenCalledOnce()
+            expect(engine.restoreOutput).toHaveBeenCalled()
+            expect(player.sleepTimer.mode).toBe('off')
+        })
+
+        it('stops at the end of the queue only after the last entry, also with repeat', async () => {
+            const player = usePlayerStore()
+            player.playTracks(abc, 1)
+            await flushPromises()
+            player.cycleRepeat()
+            player.startSleepTimer('endOfQueue')
+
+            engine.events.timeupdate?.(185, 200)
+            await flushPromises()
+            expect(engine.prepared.at(-1)).toEqual({ url: '/stream/c', gain: 1 })
+            engine.events.advanced?.()
+            await flushPromises()
+
+            engine.events.timeupdate?.(197, 200)
+            await flushPromises()
+            expect(engine.fadeOut).toHaveBeenCalledWith(3)
+            expect(engine.prepared.filter(Boolean)).toHaveLength(1)
+
+            engine.events.ended?.()
+            await flushPromises()
+
+            expect(player.state.trackId).toBe('c')
+            expect(player.state.playback).toBe('paused')
+            expect(player.sleepTimer.mode).toBe('off')
+        })
+
+        it('fades out and pauses after the time and shows the remaining seconds', async () => {
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+
+            player.startSleepTimer('duration', 15)
+            expect(player.state.sleepTimer).toMatchObject({ mode: 'duration', remaining: 900 })
+
+            vi.advanceTimersByTime(60_000)
+            expect(player.state.sleepTimer?.remaining).toBe(840)
+
+            vi.advanceTimersByTime(14 * 60_000 - 10_000)
+            expect(engine.fadeOut).toHaveBeenCalledWith(10)
+
+            vi.advanceTimersByTime(10_000)
+            expect(engine.pause).toHaveBeenCalled()
+            expect(engine.restoreOutput).toHaveBeenCalled()
+            expect(player.state.playback).toBe('paused')
+            expect(player.state.sleepTimer).toEqual({ mode: 'off', remaining: 0, fading: false })
+        })
+
+        it('uses the fade-out of the profile and cancels with off', async () => {
+            const session = useSessionStore()
+            session.sleepTimer = { fadeSeconds: 30 }
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+
+            player.startSleepTimer('duration', 15)
+            vi.advanceTimersByTime(15 * 60_000 - 30_000)
+            expect(engine.fadeOut).toHaveBeenCalledWith(30)
+
+            player.startSleepTimer('off')
+
+            expect(engine.restoreOutput).toHaveBeenCalled()
+            expect(player.sleepTimer.mode).toBe('off')
+            vi.advanceTimersByTime(60_000)
+            expect(engine.pause).not.toHaveBeenCalled()
+        })
+
+        it('is cancelled for another profile', async () => {
+            const session = useSessionStore()
+            const player = usePlayerStore()
+            player.playTracks(abc, 0)
+            await flushPromises()
+            player.startSleepTimer('endOfQueue')
+
+            session.token = 'other'
+            await flushPromises()
+
+            expect(player.sleepTimer.mode).toBe('off')
+        })
     })
 })

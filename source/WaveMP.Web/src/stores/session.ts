@@ -10,10 +10,28 @@ import {
     type PlayerViewMode,
     type ReplayGainMode,
     type Session,
+    type UpdateCrossfadeSettings,
+    type UpdateEqualizerSettings,
+    type UpdateSleepTimerSettings,
     type UserSettings,
 } from '@/api/generated/models'
 import { isUnauthorized } from '@/api/problems'
 import { isSupportedLocale, type SupportedLocale } from '@/i18n/locales'
+import {
+    defaultCrossfadeSettings,
+    toCrossfadeSettings,
+    type CrossfadeSettings,
+} from '@/player/crossfade'
+import {
+    defaultEqualizerSettings,
+    toEqualizerSettings,
+    type EqualizerSettings,
+} from '@/player/equalizer'
+import {
+    defaultSleepTimerSettings,
+    toSleepTimerSettings,
+    type SleepTimerSettings,
+} from '@/player/sleepTimer'
 import {
     clearStoredSession,
     loadStoredSession,
@@ -57,6 +75,14 @@ export const useSessionStore = defineStore('session', () => {
     const replayGain = ref<ReplayGainMode>(ReplayGainModeObject.Off)
     /** What Now Playing shows for the profile; the video until the settings are loaded. */
     const playerViewMode = ref<PlayerViewMode>(PlayerViewModeObject.Video)
+    /** Equalizer of the profile; off until the settings are loaded. */
+    const equalizer = ref<EqualizerSettings>(defaultEqualizerSettings)
+    /** Crossfade of the profile; gapless until the settings are loaded. */
+    const crossfade = ref<CrossfadeSettings>(defaultCrossfadeSettings)
+    /** Sleep timer settings of the profile. */
+    const sleepTimer = ref<SleepTimerSettings>(defaultSleepTimerSettings)
+    /** Increase with every change of a group, so older answers do not overwrite newer changes. */
+    const requests = { equalizer: 0, crossfade: 0, sleepTimer: 0 }
 
     const isAuthenticated = computed(
         () =>
@@ -78,7 +104,24 @@ export const useSessionStore = defineStore('session', () => {
         language.value = session?.language ?? null
         replayGain.value = ReplayGainModeObject.Off
         playerViewMode.value = PlayerViewModeObject.Video
+        resetPlaybackSettings()
         sessionTokens.current = token.value
+    }
+
+    function resetPlaybackSettings(): void {
+        equalizer.value = defaultEqualizerSettings
+        crossfade.value = defaultCrossfadeSettings
+        sleepTimer.value = defaultSleepTimerSettings
+        requests.equalizer++
+        requests.crossfade++
+        requests.sleepTimer++
+    }
+
+    /** Takes over the playback settings of an answer; incomplete groups keep their values. */
+    function applyPlaybackSettings(settings: UserSettings | null | undefined): void {
+        equalizer.value = toEqualizerSettings(settings?.equalizer) ?? equalizer.value
+        crossfade.value = toCrossfadeSettings(settings?.crossfade) ?? crossfade.value
+        sleepTimer.value = toSleepTimerSettings(settings?.sleepTimer) ?? sleepTimer.value
     }
 
     function persist(): void {
@@ -140,6 +183,7 @@ export const useSessionStore = defineStore('session', () => {
         language.value = null
         replayGain.value = ReplayGainModeObject.Off
         playerViewMode.value = PlayerViewModeObject.Video
+        resetPlaybackSettings()
         if (!applySession(created.session)) {
             clear()
             throw new Error('The server returned an incomplete session.')
@@ -150,6 +194,7 @@ export const useSessionStore = defineStore('session', () => {
             language.value = toLocale(settings?.language)
             replayGain.value = toReplayGain(settings) ?? ReplayGainModeObject.Off
             playerViewMode.value = toPlayerViewMode(settings) ?? PlayerViewModeObject.Video
+            applyPlaybackSettings(settings)
         } catch {
             // The language follows with the next refresh; until then the browser language applies.
         }
@@ -177,6 +222,7 @@ export const useSessionStore = defineStore('session', () => {
             language.value = toLocale(settings?.language) ?? language.value
             replayGain.value = toReplayGain(settings) ?? replayGain.value
             playerViewMode.value = toPlayerViewMode(settings) ?? playerViewMode.value
+            applyPlaybackSettings(settings)
             persist()
         } catch (error) {
             if (isUnauthorized(error) && token.value === requestToken) {
@@ -215,6 +261,39 @@ export const useSessionStore = defineStore('session', () => {
         }
     }
 
+    /**
+     * Saves changes of the equalizer for the profile and takes over the answer, unless the profile
+     * changed or a newer change was sent meanwhile. Errors are passed on.
+     */
+    async function updateEqualizer(change: UpdateEqualizerSettings): Promise<void> {
+        const requestToken = token.value
+        const request = ++requests.equalizer
+        const settings = await apiClient.api.v1.me.settings.patch({ equalizer: change })
+        if (token.value === requestToken && request === requests.equalizer) {
+            equalizer.value = toEqualizerSettings(settings?.equalizer) ?? equalizer.value
+        }
+    }
+
+    /** Saves the crossfade of the profile like updateEqualizer. Errors are passed on. */
+    async function updateCrossfade(change: UpdateCrossfadeSettings): Promise<void> {
+        const requestToken = token.value
+        const request = ++requests.crossfade
+        const settings = await apiClient.api.v1.me.settings.patch({ crossfade: change })
+        if (token.value === requestToken && request === requests.crossfade) {
+            crossfade.value = toCrossfadeSettings(settings?.crossfade) ?? crossfade.value
+        }
+    }
+
+    /** Saves the sleep timer settings of the profile like updateEqualizer. Errors are passed on. */
+    async function updateSleepTimer(change: UpdateSleepTimerSettings): Promise<void> {
+        const requestToken = token.value
+        const request = ++requests.sleepTimer
+        const settings = await apiClient.api.v1.me.settings.patch({ sleepTimer: change })
+        if (token.value === requestToken && request === requests.sleepTimer) {
+            sleepTimer.value = toSleepTimerSettings(settings?.sleepTimer) ?? sleepTimer.value
+        }
+    }
+
     /** Ends the session on the server (if reachable) and forgets it. */
     async function signOut(): Promise<void> {
         if (token.value) {
@@ -236,6 +315,9 @@ export const useSessionStore = defineStore('session', () => {
         language,
         replayGain,
         playerViewMode,
+        equalizer,
+        crossfade,
+        sleepTimer,
         isAuthenticated,
         isAdmin,
         isBuiltInAdmin,
@@ -245,6 +327,9 @@ export const useSessionStore = defineStore('session', () => {
         updateLanguage,
         updateReplayGain,
         updatePlayerViewMode,
+        updateEqualizer,
+        updateCrossfade,
+        updateSleepTimer,
         signOut,
         clear,
     }

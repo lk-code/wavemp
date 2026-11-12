@@ -1,6 +1,7 @@
 // State of the transport bar. The bar is controlled through props only; the player store
 // (src/stores/player.ts) provides the state and handles the events.
 
+import type { SleepTimerMode } from '@/player/sleepTimer'
 import type { IconSlotName } from '@/themes/iconSlots'
 
 export type PlaybackState = 'idle' | 'playing' | 'paused'
@@ -35,6 +36,32 @@ export interface TransportState {
     /** Volume between 0 and 1. */
     volume: number
     muted: boolean
+    /** Whether the equalizer of the profile is on. */
+    equalizer?: boolean
+    /** The sleep timer of this device. */
+    sleepTimer?: TransportSleepTimer
+}
+
+export type SleepTimerChoice =
+    | { readonly mode: 'off' }
+    | { readonly mode: 'duration'; readonly minutes: number }
+    | { readonly mode: 'endOfTrack' }
+    | { readonly mode: 'endOfQueue' }
+
+export interface TransportSleepTimer {
+    mode: SleepTimerMode
+    /** Seconds until a timer with a duration ends; 0 otherwise. */
+    remaining: number
+    /** Whether the music fades out right now. */
+    fading: boolean
+}
+
+/** data-state tokens of the sleep timer, e.g. "duration fading". */
+export function sleepTimerStateTokens(timer: TransportSleepTimer | undefined): string {
+    const mode = timer?.mode ?? 'off'
+    const token =
+        mode === 'endOfTrack' ? 'end-of-track' : mode === 'endOfQueue' ? 'end-of-queue' : mode
+    return [token, ...(timer?.fading ? ['fading'] : [])].join(' ')
 }
 
 /** Repeat cycles through off, all and one. */
