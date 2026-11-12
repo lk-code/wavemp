@@ -89,8 +89,13 @@
         grid-area: now-playing-mini;
     }
 
+    /*
+     * Heart and stars of the current song share the area of the mode switch, at its start, so the
+     * transport controls stay in the middle of the bar.
+     */
     [data-part='transport'] > [data-part='now-playing-actions'] {
-        grid-area: now-playing-actions;
+        grid-area: mode-switch;
+        justify-self: start;
     }
 
     [data-part='transport'] > [data-part='transport-controls'] {
@@ -187,13 +192,17 @@
         [data-part='transport'] {
             display: grid;
             grid-template-areas:
-                'seek seek seek seek'
-                'now-playing-mini now-playing-actions transport-controls mode-switch';
-            grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+                'seek seek seek'
+                'now-playing-mini transport-controls mode-switch';
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
             align-items: center;
             column-gap: var(--wmp-space-l);
             min-block-size: var(--wmp-transport-height);
             padding: 0 var(--wmp-space-l) var(--wmp-space-s);
+        }
+
+        [data-part='transport'] > [data-part='mode-switch'] {
+            justify-self: end;
         }
 
         [data-part='list-group'] {
