@@ -34,6 +34,7 @@ COPY source/WaveMP.Core.Playlists/WaveMP.Core.Playlists.csproj source/WaveMP.Cor
 COPY source/WaveMP.Core.Scanning/WaveMP.Core.Scanning.csproj source/WaveMP.Core.Scanning/
 COPY source/WaveMP.Core.Settings/WaveMP.Core.Settings.csproj source/WaveMP.Core.Settings/
 COPY source/WaveMP.Core.Streaming/WaveMP.Core.Streaming.csproj source/WaveMP.Core.Streaming/
+COPY source/WaveMP.Core.Transcoding/WaveMP.Core.Transcoding.csproj source/WaveMP.Core.Transcoding/
 COPY source/WaveMP.Core.Users/WaveMP.Core.Users.csproj source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/WaveMP.Data.csproj source/WaveMP.Data/
 COPY source/WaveMP.Service/WaveMP.Service.csproj source/WaveMP.Service/
@@ -47,6 +48,7 @@ COPY source/WaveMP.Core.Playlists/ source/WaveMP.Core.Playlists/
 COPY source/WaveMP.Core.Scanning/ source/WaveMP.Core.Scanning/
 COPY source/WaveMP.Core.Settings/ source/WaveMP.Core.Settings/
 COPY source/WaveMP.Core.Streaming/ source/WaveMP.Core.Streaming/
+COPY source/WaveMP.Core.Transcoding/ source/WaveMP.Core.Transcoding/
 COPY source/WaveMP.Core.Users/ source/WaveMP.Core.Users/
 COPY source/WaveMP.Data/ source/WaveMP.Data/
 COPY source/WaveMP.Service/ source/WaveMP.Service/
