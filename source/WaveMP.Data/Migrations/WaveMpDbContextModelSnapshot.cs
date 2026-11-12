@@ -184,6 +184,75 @@ namespace WaveMP.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.Favorite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AlbumId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("album_id");
+
+                    b.Property<Guid?>("ArtistId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("artist_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_favorites");
+
+                    b.HasIndex("AlbumId")
+                        .HasDatabaseName("ix_favorites_album_id");
+
+                    b.HasIndex("ArtistId")
+                        .HasDatabaseName("ix_favorites_artist_id");
+
+                    b.HasIndex("TrackId")
+                        .HasDatabaseName("ix_favorites_track_id");
+
+                    b.HasIndex("UserId", "AlbumId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_favorites_user_id_album_id")
+                        .HasFilter("album_id IS NOT NULL");
+
+                    b.HasIndex("UserId", "ArtistId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_favorites_user_id_artist_id")
+                        .HasFilter("artist_id IS NOT NULL");
+
+                    b.HasIndex("UserId", "TrackId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_favorites_user_id_track_id")
+                        .HasFilter("track_id IS NOT NULL");
+
+                    b.HasIndex("UserId", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_favorites_user_id_created_at_id");
+
+                    b.ToTable("favorites", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_favorites_target", "(type = 'Track' AND track_id IS NOT NULL AND album_id IS NULL AND artist_id IS NULL) OR (type = 'Album' AND album_id IS NOT NULL AND track_id IS NULL AND artist_id IS NULL) OR (type = 'Artist' AND artist_id IS NOT NULL AND track_id IS NULL AND album_id IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.JobRun", b =>
                 {
                     b.Property<Guid>("Id")
@@ -868,6 +937,40 @@ namespace WaveMP.Data.Migrations
                     b.ToTable("tracks", (string)null);
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.TrackRating", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId", "TrackId")
+                        .HasName("pk_track_ratings");
+
+                    b.HasIndex("TrackId")
+                        .HasDatabaseName("ix_track_ratings_track_id");
+
+                    b.HasIndex("UserId", "Rating", "UpdatedAt")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_track_ratings_user_id_rating_updated_at");
+
+                    b.ToTable("track_ratings", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_track_ratings_rating", "rating BETWEEN 1 AND 5");
+                        });
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -997,6 +1100,42 @@ namespace WaveMP.Data.Migrations
                     b.Navigation("Track");
                 });
 
+            modelBuilder.Entity("WaveMP.Data.Entities.Favorite", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.Album", "Album")
+                        .WithMany()
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_favorites_albums_album_id");
+
+                    b.HasOne("WaveMP.Data.Entities.Artist", "Artist")
+                        .WithMany()
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_favorites_artists_artist_id");
+
+                    b.HasOne("WaveMP.Data.Entities.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_favorites_tracks_track_id");
+
+                    b.HasOne("WaveMP.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_favorites_users_user_id");
+
+                    b.Navigation("Album");
+
+                    b.Navigation("Artist");
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WaveMP.Data.Entities.MediaFile", b =>
                 {
                     b.HasOne("WaveMP.Data.Entities.Track", "Track")
@@ -1102,6 +1241,27 @@ namespace WaveMP.Data.Migrations
                     b.Navigation("Album");
 
                     b.Navigation("Artist");
+                });
+
+            modelBuilder.Entity("WaveMP.Data.Entities.TrackRating", b =>
+                {
+                    b.HasOne("WaveMP.Data.Entities.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_track_ratings_tracks_track_id");
+
+                    b.HasOne("WaveMP.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_track_ratings_users_user_id");
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WaveMP.Data.Entities.UserSettings", b =>

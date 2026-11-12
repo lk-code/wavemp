@@ -39,6 +39,8 @@ public class ModelTests
     [TestCase(typeof(Cover), "covers")]
     [TestCase(typeof(TagBackup), "tag_backups")]
     [TestCase(typeof(PlayHistoryEntry), "play_history")]
+    [TestCase(typeof(Favorite), "favorites")]
+    [TestCase(typeof(TrackRating), "track_ratings")]
     public void Entity_Always_HasSnakeCaseTable(Type entityType, string expectedTable)
     {
         IEntityType entity = GetEntity(entityType);

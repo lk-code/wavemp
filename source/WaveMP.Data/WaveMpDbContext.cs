@@ -39,6 +39,10 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
 
     public DbSet<PlaylistEntry> PlaylistEntries => Set<PlaylistEntry>();
 
+    public DbSet<Favorite> Favorites => Set<Favorite>();
+
+    public DbSet<TrackRating> TrackRatings => Set<TrackRating>();
+
     /// <summary>
     /// PostgreSQL extension of the fault-tolerant library search (trigrams). It is part of the official image and
     /// trusted since PostgreSQL 13, so the owner of the database can create it.
@@ -67,5 +71,7 @@ public class WaveMpDbContext(DbContextOptions<WaveMpDbContext> options) : DbCont
         modelBuilder.ApplyConfiguration(new PlayHistoryEntryConfiguration());
         modelBuilder.ApplyConfiguration(new PlaylistConfiguration());
         modelBuilder.ApplyConfiguration(new PlaylistEntryConfiguration());
+        modelBuilder.ApplyConfiguration(new FavoriteConfiguration());
+        modelBuilder.ApplyConfiguration(new TrackRatingConfiguration());
     }
 }

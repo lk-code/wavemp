@@ -167,6 +167,81 @@ public sealed class LibrarySeed
     }
 
     /// <summary>
+    /// A profile with a unique name; the tests share the users of a database, so names never repeat.
+    /// </summary>
+    public User User(string? name = null)
+    {
+        string unique = name ?? "Listener " + Guid.NewGuid().ToString("N")[..12];
+        User user = new()
+        {
+            Id = Guid.CreateVersion7(),
+            Name = unique,
+            NormalizedName = unique.ToUpperInvariant(),
+            Initials = "L",
+            Color = "#336699",
+            Role = UserRole.User,
+            IsBuiltIn = false,
+            CreatedAt = DefaultTime,
+        };
+        _entities.Add(user);
+        return user;
+    }
+
+    public Favorite Favorite(User user, Track track, DateTimeOffset? createdAt = null)
+    {
+        return AddFavorite(user, FavoriteType.Track, createdAt, trackId: track.Id);
+    }
+
+    public Favorite Favorite(User user, Album album, DateTimeOffset? createdAt = null)
+    {
+        return AddFavorite(user, FavoriteType.Album, createdAt, albumId: album.Id);
+    }
+
+    public Favorite Favorite(User user, Artist artist, DateTimeOffset? createdAt = null)
+    {
+        return AddFavorite(user, FavoriteType.Artist, createdAt, artistId: artist.Id);
+    }
+
+    public TrackRating Rating(User user, Track track, int rating, DateTimeOffset? updatedAt = null)
+    {
+        TrackRating trackRating = new()
+        {
+            UserId = user.Id,
+            TrackId = track.Id,
+            Rating = rating,
+            UpdatedAt = updatedAt ?? DefaultTime,
+        };
+        _entities.Add(trackRating);
+        return trackRating;
+    }
+
+    /// <summary>
+    /// A playlist of the user with the tracks in the given order.
+    /// </summary>
+    public Playlist Playlist(User user, string name, params Track[] tracks)
+    {
+        Playlist playlist = new()
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = user.Id,
+            Name = name,
+            NormalizedName = name.ToUpperInvariant(),
+            CreatedAt = DefaultTime,
+            UpdatedAt = DefaultTime,
+        };
+        _entities.Add(playlist);
+        _entities.AddRange(tracks.Select((track, index) => new PlaylistEntry
+        {
+            Id = Guid.CreateVersion7(),
+            PlaylistId = playlist.Id,
+            TrackId = track.Id,
+            Position = index,
+            AddedAt = DefaultTime,
+        }));
+        return playlist;
+    }
+
+    /// <summary>
     /// Adds everything built so far to the database.
     /// </summary>
     public async Task SaveAsync(WaveMpDbContext dbContext)
@@ -180,5 +255,27 @@ public sealed class LibrarySeed
     {
         _entities.Add(cover);
         return cover;
+    }
+
+    private Favorite AddFavorite(
+        User user,
+        FavoriteType type,
+        DateTimeOffset? createdAt,
+        Guid? trackId = null,
+        Guid? albumId = null,
+        Guid? artistId = null)
+    {
+        Favorite favorite = new()
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = user.Id,
+            Type = type,
+            TrackId = trackId,
+            AlbumId = albumId,
+            ArtistId = artistId,
+            CreatedAt = createdAt ?? DefaultTime,
+        };
+        _entities.Add(favorite);
+        return favorite;
     }
 }
